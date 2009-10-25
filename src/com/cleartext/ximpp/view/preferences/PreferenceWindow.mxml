@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow
+	width="100%" height="100%"
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	showCloseButton="true"
+	title="User Preferences" 
+	layout="absolute"
+	close="closeHandler()"
+	creationComplete="init()"
+	xmlns:preferences="com.cleartext.ximpp.view.preferences.*">
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.model.valueObjects.UrlShortener;
+			import com.cleartext.ximpp.model.valueObjects.UserAccount;
+			import com.cleartext.ximpp.model.XModel;
+			import mx.utils.ObjectUtil;
+			import mx.controls.Alert;
+			import mx.graphics.codec.JPEGEncoder;
+			import mx.collections.ArrayCollection;
+			
+			private var changesMade:Boolean = false;
+			
+			private var previousAccount:UserAccount;
+			private function get accountCollection():ArrayCollection
+			{
+				return accountList.dataProvider as ArrayCollection;
+			}
+			
+			private function get xModel():XModel
+			{
+				return XModel.getInstance();
+			}
+			
+			private function init():void
+			{
+				// set global values
+				autoConnectCheckBox.selected = xModel.autoConnect;
+				urlShortenComboBox.selectedItem = xModel.urlShortener;
+				sortTimelineCheckBox.selected = xModel.timelineTopDown;
+				sortChatCheckBox.selected = xModel.chatTopDown;
+				
+				// load user accounts
+				accountList.dataProvider = xModel.localDatabase.getAllUserAccounts();
+				
+				// show current account
+				if(xModel.userAccount)
+				{
+					for each(var userAcount:UserAccount in accountCollection)
+					{
+						if(userAcount.userId == xModel.userId)
+						{
+							accountList.selectedItem = userAcount;
+							break;
+						}
+					}
+				}
+				selectedAccountChanged();
+			}
+		
+			private function closeHandler():void
+			{
+				selectedAccountChanged();
+				
+				// set simple values
+				xModel.autoConnect = autoConnectCheckBox.selected;
+				xModel.urlShortener = urlShortenComboBox.selectedItem as String;
+				xModel.timelineTopDown = sortTimelineCheckBox.selected;
+				xModel.chatTopDown = sortChatCheckBox.selected;
+
+				xModel.userAccount = accountList.selectedItem as UserAccount;
+				
+				xModel.localDatabase.saveGlobalSettings();
+			}
+			
+			private function selectedAccountChanged():void
+			{
+				if(previousAccount && changesMade)
+				{
+					previousAccount.accountName = accountName.text;
+					previousAccount.nickname = nickname.text;
+					previousAccount.avatarBitmap = avatar.source as Bitmap;
+					previousAccount.jid = jid.text;
+					previousAccount.password = password.text;
+					previousAccount.server = server.text;
+					
+					xModel.localDatabase.saveUserAccount(previousAccount);
+					changesMade = false;
+				}
+				
+				previousAccount = accountList.selectedItem as UserAccount;
+				
+				if(previousAccount)
+				{
+					accountName.text = previousAccount.accountName;
+					nickname.text = previousAccount.nickname;
+					avatar.source = previousAccount.avatarBitmap; 
+					jid.text = previousAccount.jid;
+					password.text = previousAccount.password;
+					server.text = previousAccount.server;
+				}
+				else
+				{
+					addAccount();
+				}
+				
+				accountCollection.refresh();
+			}
+			
+			private function addAccount():void
+			{
+				var account:UserAccount = new UserAccount();
+				account.avatarBitmap = defaultAvatar.content as Bitmap;
+				account.userId = xModel.localDatabase.saveUserAccount(account, false);
+				accountCollection.addItem(account);
+				accountList.selectedItem = account;
+				selectedAccountChanged();
+			}
+			
+			private function removeAccount():void
+			{
+				if(accountCollection.length == 1)
+				{
+					Alert.show("You must have at least one user account", "Can not delete account");
+					return;
+				}
+					
+				var index: int = accountList.selectedIndex;
+				xModel.log("index to delete: " + index);
+				accountCollection.removeItemAt(index);
+				xModel.localDatabase.removeAccount(previousAccount.userId);
+				previousAccount = null;
+				
+				if(accountCollection.length > 0)
+				{
+					index = Math.max(0, index-1);
+					xModel.log("new index: " + index);
+					accountList.selectedItem = accountCollection.getItemAt(index);
+				}
+				
+				selectedAccountChanged();
+				
+				xModel.log("final index: " + accountList.selectedIndex);
+			}
+			
+			private function changeAvatar():void
+			{
+				try 
+				{
+					var newImage:File = new File();
+					newImage.browseForOpen("Open",  [new FileFilter("Images", "*.jpg;*.gif;*.png")]);
+					newImage.addEventListener(Event.SELECT, 
+						function():void
+						{
+							changesMade = true;
+							var filestream:FileStream=new FileStream();
+							filestream.open(newImage,"read");
+							var bytesRead:ByteArray = new ByteArray();
+							filestream.readBytes(bytesRead, 0, filestream.bytesAvailable);
+							var loader:Loader = new Loader();
+							loader.loadBytes(bytesRead);
+							loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
+								function():void
+								{
+									var loadedBitmap:Bitmap = loader.content as Bitmap;
+									var newBitmapData:BitmapData = new BitmapData(64, 64);
+									var scale:Number = 64 / Math.max(loadedBitmap.width, loadedBitmap.height);
+									var tx:Number = (64 - loadedBitmap.width * scale)/2;
+									var ty:Number = (64 - loadedBitmap.height * scale)/2;
+									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
+									avatar.source = new Bitmap(newBitmapData);
+								});
+						});
+				}
+				catch (error:Error)
+				{
+					xModel.log(error);
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Image id="defaultAvatar" source="@Embed('assets/user.jpg')" visible="false" />
+	
+	<mx:VBox id="listCanvas" width="200" top="10" bottom="10" left="10">
+		<mx:List id="accountList" height="100%" width="100%" horizontalScrollPolicy="off" labelField="accountName" change="selectedAccountChanged()"/>
+		<preferences:AddRemoveButton
+			addButtonClicked="addAccount()"
+			removeButtonClicked="removeAccount()"/>
+		<mx:CheckBox label="auto connect" id="autoConnectCheckBox"/>
+		<mx:Canvas>
+			<mx:Label text="url shorten service:" y="4"/>
+			<mx:ComboBox id="urlShortenComboBox" x="114" dataProvider="{UrlShortener.types}"/>
+		</mx:Canvas>
+		<mx:CheckBox label="sort timeline top to bottom" id="sortTimelineCheckBox"/>
+		<mx:CheckBox label="sort chat top to bottom" id="sortChatCheckBox"/>
+	</mx:VBox>
+
+	<mx:Form x="210">
+		<mx:FormItem label="account name:">
+			<mx:TextInput id="accountName" change="changesMade = true; if(previousAccount) { previousAccount.accountName = accountName.text; accountCollection.refresh(); }"/>
+		</mx:FormItem>
+		<mx:FormItem label="nick name:">
+			<mx:TextInput id="nickname" change="changesMade = true;" />
+		</mx:FormItem>
+		<mx:FormItem label="profile picture:" direction="horizontal">
+			<mx:Canvas borderStyle="solid" borderColor="0x000000" >
+				<mx:Image id="avatar" width="64" height="64"/>
+			</mx:Canvas>
+			<mx:Button label="change..." click="changeAvatar()"/>
+		</mx:FormItem>
+		<mx:FormItem label="jid:">
+			<mx:TextInput id="jid" change="changesMade = true;" />
+		</mx:FormItem>
+		<mx:FormItem label="password:">
+			<mx:TextInput id="password" displayAsPassword="true" change="changesMade = true;" />
+		</mx:FormItem>
+		<mx:FormItem label="server:">
+			<mx:TextInput id="server" change="changesMade = true;" />
+		</mx:FormItem>
+
+		<mx:FormItem label="gateways:" enabled="false" width="100%">
+			<mx:List id="gatewayList" height="70" width="100%">
+				<mx:dataProvider>
+					<mx:String>Gatway selection</mx:String>
+					<mx:String>not currently</mx:String>
+					<mx:String>implemented</mx:String>
+				</mx:dataProvider>
+			</mx:List>
+			<preferences:AddRemoveButton />
+		</mx:FormItem>
+		<mx:FormItem label="gateway name:" enabled="false">
+			<mx:TextInput id="gatewayName"/>
+		</mx:FormItem>
+		<mx:FormItem label="gateway type:" enabled="false">
+			<mx:ComboBox id="gatewayType" />
+		</mx:FormItem>
+		<mx:FormItem label="user name:" enabled="false">
+			<mx:TextInput id="gatewayUsername"/>
+		</mx:FormItem>
+		<mx:FormItem label="password:" enabled="false">
+			<mx:TextInput id="gatewayPassword" displayAsPassword="true"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="100%" height="20" backgroundColor="0xaaaaaa">
+<mx:Script>
+	<![CDATA[
+		public static const NONE:String = "none";
+		public static const GREEN:String = "green";
+		public static const ORANGE:String = "orange";
+		public static const RED:String = "red";
+	
+		public function set status(value:String):void
+		{
+			switch(value)
+			{
+				case NONE :
+					statusIcon.setStyle("backgroundAlpha", 0);
+					break; 
+				case GREEN :
+					statusIcon.setStyle("backgroundColor", 0x009900);
+					statusIcon.setStyle("backgroundAlpha", 1);
+					break; 
+				case ORANGE :
+					statusIcon.setStyle("backgroundColor", 0x884444);
+					statusIcon.setStyle("backgroundAlpha", 1);
+					break; 
+				case RED :
+					statusIcon.setStyle("backgroundColor", 0x990000);
+					statusIcon.setStyle("backgroundAlpha", 1);
+					break; 
+			}
+		}
+		
+		[Bindable]
+		public var heading:String;
+		
+		public function set count(value:String):void
+		{
+			countLabel.text = value;
+		}
+	
+	]]>
+</mx:Script>
+
+	<mx:Canvas id="statusIcon" x="5" width="10" height="10" y="5" />
+	<mx:Button id="toggelButton" width="15" height="15" x="40" />
+	<mx:Label id="headingLabel" x="55" text="{heading}"/>
+	<mx:Label id="countLabel" right="5"/>
+</mx:Canvas>

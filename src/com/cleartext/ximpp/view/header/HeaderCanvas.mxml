@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%" height="40"
+	creationComplete="init()" xmlns:script="flash.html.script.*" xmlns:header="com.cleartext.ximpp.view.header.*">
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.model.XModel;
+			import com.cleartext.ximpp.model.valueObjects.Status;
+			
+			private static const DEFAULT_CUSTOM_STATUS:String = "status...";
+			
+			private function init():void
+			{
+				var xModel:XModel = XModel.getInstance();
+				xModel.addEventListener("serverSideStatusChanged",
+					function():void
+					{
+						statusComboBox.text = xModel.serverSideStatus;
+					});
+				xModel.addEventListener("userAccountChanged",
+					function():void
+					{
+						var statusStr:String = xModel.userAccount.customStatus;
+						customStatusInput.text = (statusStr == "") ? DEFAULT_CUSTOM_STATUS : statusStr;
+					});
+			}
+			
+			private function userPresenceChangeHandler():void
+			{
+				var statusStr:String = customStatusInput.text;
+				if(statusStr == DEFAULT_CUSTOM_STATUS)
+					statusStr = "";
+				
+				XModel.getInstance().setUserPresence(statusComboBox.selectedLabel, statusStr);
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:ComboBox
+		id="statusComboBox"
+		dataProvider="{Status.USER_TYPES}"
+		change="userPresenceChangeHandler()"
+		x="10" y="10" width="110"
+		/>
+		
+	<mx:TextInput
+		id="customStatusInput"
+		valueCommit="userPresenceChangeHandler()"
+		enter="userPresenceChangeHandler()"
+		x="130" y="10" width="350"
+		focusIn="if(customStatusInput.text == DEFAULT_CUSTOM_STATUS) customStatusInput.text = ''"
+		focusOut="if(customStatusInput.text == '') customStatusInput.text = DEFAULT_CUSTOM_STATUS"
+		/>
+	
+	<mx:Button
+		id="userPreferencesButton"
+		label="User Preferences..."
+		click="XModel.getInstance().showPreferencesWindow()"
+		right="165" y="10" width="145"
+		/>
+	<mx:Button
+		id="advancedSearchButton"
+		label="Advanced Search..."
+		click="XModel.getInstance().showAdvancedSearchWindow()"
+		right="10" y="10" width="145"
+		/>
+</mx:Canvas>

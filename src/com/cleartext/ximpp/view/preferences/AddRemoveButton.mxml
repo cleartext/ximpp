@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%">
+	<mx:Script>
+		<![CDATA[
+			public static const ADD:String = "addButtonClicked";
+			public static const REMOVE:String = "removeButtonClicked";
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				add.setActualSize(unscaledWidth/2, add.height);
+				remove.setActualSize(unscaledWidth/2, remove.height);
+				remove.move(add.width, 0);
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Metadata>
+		[Event(name="addButtonClicked", type="flash.events.Event")]
+		[Event(name="removeButtonClicked", type="flash.events.Event")]
+	</mx:Metadata>
+
+	<mx:Button
+		id="add" label="add" 
+		click="dispatchEvent(new Event(ADD));"/>
+	<mx:Button
+		id="remove" label="remove"
+		click="dispatchEvent(new Event(REMOVE));"/>
+</mx:Canvas>
