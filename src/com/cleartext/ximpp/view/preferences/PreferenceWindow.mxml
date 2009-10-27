@@ -180,7 +180,7 @@
 		]]>
 	</mx:Script>
 	
-	<mx:Image id="defaultAvatar" source="@Embed('assets/user.jpg')" visible="false" />
+	<mx:Image id="defaultAvatar" source="@Embed('com/cleartext/ximpp/assets/user.jpg')" visible="false" />
 	
 	<mx:VBox id="listCanvas" width="200" top="10" bottom="10" left="10">
 		<mx:List id="accountList" height="100%" width="100%" horizontalScrollPolicy="off" labelField="accountName" change="selectedAccountChanged()"/>

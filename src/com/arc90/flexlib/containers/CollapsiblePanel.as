@@ -106,18 +106,6 @@ public class CollapsiblePanel extends Panel
 	private static var logger:ILogger = Log.getLogger("com.arc90.flexlib.containers.CollapsiblePanel");
 	
 	private static var classConstructed:Boolean = constructClass();
-	
-	[Embed(source="/assets/Assets.swf", symbol="CollapseButtonDisabled")] 
-	private static var collapseButtonDisabledSkin:Class;
-	
-	[Embed(source="/assets/Assets.swf", symbol="CollapseButtonDown")] 
-	private static var collapseButtonDownSkin:Class;
-	
-	[Embed(source="/assets/Assets.swf", symbol="CollapseButtonOver")] 
-	private static var collapseButtonOverSkin:Class;
-	
-	[Embed(source="/assets/Assets.swf", symbol="CollapseButtonUp")]
-	private static var collapseButtonUpSkin:Class;
 			
 	//--------------------------------------------------------------------------
     //
@@ -132,10 +120,10 @@ public class CollapsiblePanel extends Panel
     		var styleDecl:CSSStyleDeclaration = new CSSStyleDeclaration();
     		styleDecl.defaultFactory = function():void
     		{
-    			this.collapseButtonUpSkin = collapseButtonUpSkin;
-    			this.collapseButtonDownSkin = collapseButtonDownSkin;
-    			this.collapseButtonOverSkin = collapseButtonOverSkin;
-    			this.collapseButtonDisabledSkin = collapseButtonDisabledSkin;
+//    			this.collapseButtonUpSkin = collapseButtonUpSkin;
+//    			this.collapseButtonDownSkin = collapseButtonDownSkin;
+//    			this.collapseButtonOverSkin = collapseButtonOverSkin;
+//    			this.collapseButtonDisabledSkin = collapseButtonDisabledSkin;
     			this.collapseDuration = 250;
     		}
     		StyleManager.setStyleDeclaration("CollapsiblePanel", styleDecl, true);
