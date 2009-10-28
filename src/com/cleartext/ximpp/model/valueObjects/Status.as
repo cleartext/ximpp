@@ -16,8 +16,9 @@ package com.cleartext.ximpp.model.valueObjects
 		// status's the user can choose from
 		public static const USER_TYPES:Array = [OFFLINE, AVAILABLE, BUSY];
 		
-		// temporary status
+		// other status'
 		public static const CONNECTING:String = "connecting...";
+		public static const ERROR:String = "error";
 		
 		// find a status value from what the xmpp libray tells us
 		public static function fromShow(show:String):String

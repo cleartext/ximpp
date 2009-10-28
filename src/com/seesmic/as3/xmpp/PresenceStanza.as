@@ -30,7 +30,6 @@ package com.seesmic.as3.xmpp
 		namespace jc = 'jabber:client';
 		default xml namespace = 'jabber:client';
 		
-		
 		public function PresenceStanza(connection:Object, parent:Stanza=null)
 		{
 			super(connection, parent);

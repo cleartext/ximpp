@@ -21,8 +21,8 @@ package com.cleartext.ximpp.model.valueObjects
 			"emailAddress TEXT, " +
 			"userEnabled BOOLEAN, " +
 			"lastSeen DATE, " +
-			"lastStatus TEXT, " +
-			"lastCustomStatus TEXT, " +
+			"status TEXT, " +
+			"customStatus TEXT, " +
 			"avatar TEXT, " +
 			"broadcast BOOLEAN);";
 		
@@ -34,13 +34,18 @@ package com.cleartext.ximpp.model.valueObjects
 		public var isGateway:Boolean = false;
 		public var firstName:String = "";
 		public var lastName:String = "";
+		[Bindable]
 		public var nickName:String = "";
+		[Bindable]
 		public var groups:Array;
 		public var emailAddress:String = "";
 		public var userEnabled:Boolean = true;
+		[Bindable]
 		public var lastSeen:Date;
-		public var lastStatus:String = "";
-		public var lastCustomStatus:String = "";
+		[Bindable]
+		public var status:String = "";
+		[Bindable]
+		public var customStatus:String = "";
 		public var broadcast:Boolean = false;
 		
 		public function fill(obj:Object):void
@@ -58,8 +63,8 @@ package com.cleartext.ximpp.model.valueObjects
 			emailAddress = obj["emailAddress"];
 			userEnabled = obj["userEnabled"];
 			lastSeen = obj["lastSeen"];
-			lastStatus = obj["lastStatus"];
-			lastCustomStatus = obj["lastCustomStatus"];
+			status = obj["status"];
+			customStatus = obj["customStatus"];
 			broadcast = obj["broadcast"];
 		}
 		
@@ -78,8 +83,8 @@ package com.cleartext.ximpp.model.valueObjects
 				new DatabaseValue("emailAddress", emailAddress),
 				new DatabaseValue("userEnabled", userEnabled),
 				new DatabaseValue("lastSeen", lastSeen),
-				new DatabaseValue("lastStatus", lastStatus),
-				new DatabaseValue("lastCustomStatus", lastCustomStatus),
+				new DatabaseValue("status", status),
+				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("broadcast", broadcast)];
 		}
 		
@@ -100,11 +105,16 @@ package com.cleartext.ximpp.model.valueObjects
 //			newBuddy.emailAddress
 //			newBuddy.userEnabled
 			newBuddy.lastSeen = timeNow;
-			newBuddy.lastStatus = stanza['type'];
-			newBuddy.lastCustomStatus = stanza['status'];
+			newBuddy.status = stanza['type'];
+			newBuddy.customStatus = stanza['status'];
 //			newBuddy.broadcast
 
 			return newBuddy;
+		}
+		
+		public function toString():String
+		{
+			return "jid:" + jid + " nickName:" + nickName + " lastSeen:" + lastSeen + " status:" + status + " customStatus:" + customStatus;
 		}
 	}
 }
