@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:common="com.cleartext.ximpp.view.common.*"
+	horizontalScrollPolicy="off"
+	verticalScrollPolicy="off"
+	height="40"
+	>
+	
+	<mx:Resize id="expand" duration="1000" heightTo="{BIG_HEIGHT}" target="{this}" effectEnd="_buddy.showCustomStatus = true"/>
+	<mx:Resize id="contract" duration="1000" heightTo="{SMALL_HEIGHT}" target="{this}" effectEnd="_buddy.showCustomStatus = false"/>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.view.common.ExpandList;
+			import com.cleartext.ximpp.events.BuddyEvent;
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			
+			static private const PADDING:Number = 2;
+			static private const SMALL_HEIGHT:Number = 40;
+			static private const BIG_HEIGHT:Number = 60;
+			
+			private var renderList:Object;
+			
+			
+			
+			[Bindable]
+			private var _buddy:Buddy
+			override public function get data():Object
+			{
+				return _buddy;
+			}
+			override public function set data(value:Object):void
+			{
+				_buddy = value as Buddy;
+				
+				if(_buddy)
+				{
+					
+//					_buddy.addEventListener(BuddyEvent.CUSTOM_STATUS_CHANGED, customStatusChangeHandler, false, 0, true);
+//					height = (_buddy.customStatus == "") ? SMALL_HEIGHT : BIG_HEIGHT;	
+
+					height = (_buddy.showCustomStatus) ? BIG_HEIGHT : SMALL_HEIGHT;
+					
+					if(_buddy.customStatus != "" && !_buddy.showCustomStatus)
+					{
+						contract.stop();
+						expand.play();
+					}
+					else if(_buddy.customStatus == "" && _buddy.showCustomStatus)
+					{
+						expand.stop();
+						contract.play()
+					}
+				}
+				else
+				{
+					height = SMALL_HEIGHT;
+				}
+			}
+			
+//			private function customStatusChangeHandler(event:Event):void
+//			{
+//				if(_buddy.customStatus == "")
+//				{
+//					if(customStatus.visible)
+//					{
+//						expand.end();
+//						contract.play();
+//	
+//						customStatus.visible = false;
+//					}
+//				}
+//				else if(!customStatus.visible)
+//				{
+//					contract.end();
+//					expand.play();
+//
+//					customStatus.visible = true;
+//				}
+//			}
+
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				avatar.setActualSize(32,32);
+				avatar.move(PADDING,0);
+				
+				nickName.move(avatar.width + 2*PADDING, 0);
+				
+				statusIcon.move(avatar.width + 2*PADDING, PADDING + nickName.height);
+				
+				status.move(avatar.width + 3*PADDING + statusIcon.width, PADDING + nickName.height);
+				
+				customStatus.move(avatar.width + 2*PADDING, 2*PADDING + nickName.height + status.height);
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:Image id="avatar" />
+	<mx:Label id="nickName" text="{_buddy.nickName}" />
+	<common:StatusIcon id="statusIcon" status="{_buddy.status}" />
+	<mx:Label id="status" text="{_buddy.status}" />
+	<mx:Label id="customStatus" text="{_buddy.customStatus}" includeInLayout="false"/>
+	
+</mx:Canvas>
