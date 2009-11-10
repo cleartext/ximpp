@@ -1,59 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 	width="100%" height="40"
-	creationComplete="init()" xmlns:script="flash.html.script.*" xmlns:header="com.cleartext.ximpp.view.header.*" xmlns:common="com.cleartext.ximpp.view.common.*">
+	xmlns:common="com.cleartext.ximpp.view.common.*">
 	<mx:Script>
 		<![CDATA[
-			import com.cleartext.ximpp.model.XModel;
-			import com.cleartext.ximpp.model.valueObjects.Status;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.ApplicationModel;
+			import com.cleartext.ximpp.models.valueObjects.Status;
 			
-			private function init():void
-			{
-				var xModel:XModel = XModel.getInstance();
-				xModel.addEventListener("serverSideStatusChanged",
-					function():void
-					{
-						statusComboBox.text = xModel.serverSideStatus;
-					});
-				xModel.addEventListener("userAccountChanged",
-					function():void
-					{
-						customStatusInput.text = xModel.userAccount.customStatus;
-					});
-			}
+			[Autowire]
+			[Bindable]
+			public var appModel:ApplicationModel;
+			
+			[Autowire]
+			[Bindable]
+			public var settings:SettingsModel;
 			
 			private function userPresenceChangeHandler():void
 			{
-				XModel.getInstance().setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
+				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
 			}
 		]]>
 	</mx:Script>
+	<common:StatusIcon
+		status="{appModel.serverSideStatus}"
+		x="10" y="12"
+		/>
 	
 	<mx:ComboBox
 		id="statusComboBox"
 		dataProvider="{Status.USER_TYPES}"
 		change="userPresenceChangeHandler()"
-		x="10" y="10" width="110"
+		x="32" y="10" width="110"
+		text="{appModel.serverSideStatus}"
+		creationComplete="statusComboBox.text=appModel.serverSideStatus"
 		/>
 		
 	<common:DefaultTextInput
 		id="customStatusInput"
 		valueCommit="userPresenceChangeHandler()"
 		enter="userPresenceChangeHandler()"
-		x="130" y="10" width="350"
+		x="145" y="10" width="350"
 		defaultText="custom status..."
+		text="{settings.userAccount.customStatus}"
 		/>
 	
 	<mx:Button
 		id="userPreferencesButton"
 		label="User Preferences..."
-		click="XModel.getInstance().showPreferencesWindow()"
+		click="appModel.showPreferencesWindow()"
 		right="165" y="10" width="145"
 		/>
 	<mx:Button
 		id="advancedSearchButton"
 		label="Advanced Search..."
-		click="XModel.getInstance().showAdvancedSearchWindow()"
+		click="appModel.showAdvancedSearchWindow()"
 		right="10" y="10" width="145"
 		/>
 </mx:Canvas>

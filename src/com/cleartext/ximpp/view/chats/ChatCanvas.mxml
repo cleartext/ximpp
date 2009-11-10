@@ -8,7 +8,6 @@
 	verticalGap="0">
 	<mx:Script>
 		<![CDATA[
-			import com.cleartext.ximpp.model.XModel;
 			
 		]]>
 	</mx:Script>

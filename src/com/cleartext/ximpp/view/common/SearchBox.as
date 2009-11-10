@@ -1,12 +1,10 @@
 package com.cleartext.ximpp.view.common
 {
 	import com.cleartext.ximpp.events.SearchBoxEvent;
-	import com.cleartext.ximpp.model.XModel;
+	import com.cleartext.ximpp.models.ApplicationModel;
 	
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
-	import flash.events.TimerEvent;
-	import flash.utils.Timer;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Button;
@@ -21,6 +19,10 @@ package com.cleartext.ximpp.view.common
 		private var textInput:DefaultTextInput;
 		private var resetButton:Button;
 		private var searchString:String;
+		
+		[Autowire]
+		[Bindable]
+		public var appModel:ApplicationModel;		
 		
 		public function SearchBox()
 		{
@@ -64,7 +66,7 @@ package com.cleartext.ximpp.view.common
 			{
 				searchString = textInput.text;
 				dispatchEvent(new SearchBoxEvent(searchString));
-				XModel.getInstance().log("Search: " + searchString);
+				appModel.log("Search: " + searchString);
 			}
 		}
 		

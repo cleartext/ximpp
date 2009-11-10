@@ -10,9 +10,12 @@
 	xmlns:preferences="com.cleartext.ximpp.view.preferences.*">
 	<mx:Script>
 		<![CDATA[
-			import com.cleartext.ximpp.model.valueObjects.UrlShortener;
-			import com.cleartext.ximpp.model.valueObjects.UserAccount;
-			import com.cleartext.ximpp.model.XModel;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.models.DatabaseModel;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.ApplicationModel;
+			import com.cleartext.ximpp.models.valueObjects.UrlShortener;
+			import com.cleartext.ximpp.models.valueObjects.UserAccount;
 			import mx.utils.ObjectUtil;
 			import mx.controls.Alert;
 			import mx.graphics.codec.JPEGEncoder;
@@ -25,29 +28,43 @@
 			{
 				return accountList.dataProvider as ArrayCollection;
 			}
+						
+			[Autowire]
+			[Bindable]
+			public var appModel:ApplicationModel;
 			
-			private function get xModel():XModel
+			private function get settings():SettingsModel
 			{
-				return XModel.getInstance();
+				return appModel.settings;
+			}
+			
+			private function get database():DatabaseModel
+			{
+				return appModel.database;
+			}
+			
+			private function get xmpp():XMPPModel
+			{
+				return appModel.xmpp;
 			}
 			
 			private function init():void
 			{
 				// set global values
-				autoConnectCheckBox.selected = xModel.autoConnect;
-				urlShortenComboBox.selectedItem = xModel.urlShortener;
-				sortTimelineCheckBox.selected = xModel.timelineTopDown;
-				sortChatCheckBox.selected = xModel.chatTopDown;
+				autoConnectCheckBox.selected = settings.autoConnect;
+				urlShortenComboBox.selectedItem = settings.urlShortener;
+				sortTimelineCheckBox.selected = settings.timelineTopDown;
+				sortChatCheckBox.selected = settings.chatTopDown;
 				
 				// load user accounts
-				accountList.dataProvider = xModel.localDatabase.getAllUserAccounts();
+				accountList.dataProvider = database.getAllUserAccounts();
 				
 				// show current account
-				if(xModel.userAccount)
+				if(settings.userAccount)
 				{
 					for each(var userAcount:UserAccount in accountCollection)
 					{
-						if(userAcount.userId == xModel.userId)
+						if(userAcount.userId == settings.userAccount.userId)
 						{
 							accountList.selectedItem = userAcount;
 							break;
@@ -62,14 +79,14 @@
 				selectedAccountChanged();
 				
 				// set simple values
-				xModel.autoConnect = autoConnectCheckBox.selected;
-				xModel.urlShortener = urlShortenComboBox.selectedItem as String;
-				xModel.timelineTopDown = sortTimelineCheckBox.selected;
-				xModel.chatTopDown = sortChatCheckBox.selected;
+				settings.autoConnect = autoConnectCheckBox.selected;
+				settings.urlShortener = urlShortenComboBox.selectedItem as String;
+				settings.timelineTopDown = sortTimelineCheckBox.selected;
+				settings.chatTopDown = sortChatCheckBox.selected;
 
-				xModel.userAccount = accountList.selectedItem as UserAccount;
+				settings.userAccount = accountList.selectedItem as UserAccount;
 				
-				xModel.localDatabase.saveGlobalSettings();
+				database.saveGlobalSettings();
 			}
 			
 			private function selectedAccountChanged():void
@@ -83,7 +100,7 @@
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
 					
-					xModel.localDatabase.saveUserAccount(previousAccount);
+					database.saveUserAccount(previousAccount);
 					changesMade = false;
 				}
 				
@@ -110,7 +127,7 @@
 			{
 				var account:UserAccount = new UserAccount();
 				account.avatarBitmap = defaultAvatar.content as Bitmap;
-				account.userId = xModel.localDatabase.saveUserAccount(account, false);
+				account.userId = database.saveUserAccount(account);
 				accountCollection.addItem(account);
 				accountList.selectedItem = account;
 				selectedAccountChanged();
@@ -125,21 +142,21 @@
 				}
 					
 				var index: int = accountList.selectedIndex;
-				xModel.log("index to delete: " + index);
+				appModel.log("index to delete: " + index);
 				accountCollection.removeItemAt(index);
-				xModel.localDatabase.removeAccount(previousAccount.userId);
+				database.removeAccount(previousAccount.userId);
 				previousAccount = null;
 				
 				if(accountCollection.length > 0)
 				{
 					index = Math.max(0, index-1);
-					xModel.log("new index: " + index);
+					appModel.log("new index: " + index);
 					accountList.selectedItem = accountCollection.getItemAt(index);
 				}
 				
 				selectedAccountChanged();
 				
-				xModel.log("final index: " + accountList.selectedIndex);
+				appModel.log("final index: " + accountList.selectedIndex);
 			}
 			
 			private function changeAvatar():void
@@ -173,7 +190,7 @@
 				}
 				catch (error:Error)
 				{
-					xModel.log(error);
+					appModel.log(error);
 				}
 			}
 			

@@ -2,66 +2,19 @@
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	initialize="maximize()"
-	creationComplete="init();"
-	close="XModel.getInstance().shutDown();"
+	close="//do nothing"
 	layout="absolute"
-	xmlns:header="com.cleartext.ximpp.view.header.*"
-	xmlns:buddies="com.cleartext.ximpp.view.buddies.*" 
-	xmlns:timeline="com.cleartext.ximpp.view.timeline.*" 
-	xmlns:chats="com.cleartext.ximpp.view.chats.*">
-
-	<mx:Script>
-		<![CDATA[
-			import mx.events.CloseEvent;
-			import mx.managers.PopUpManager;
-			import mx.controls.Alert;
-
-			import com.cleartext.ximpp.model.XModel;
-			import com.cleartext.ximpp.view.preferences.PreferenceWindow;
-			
-			private function init():void
-			{
-				XModel.getInstance().init();
-				XModel.getInstance().addEventListener(XModel.SHOW_PREFERENCES_WINDOW, showPreferencesWindow);
-				XModel.getInstance().addEventListener(XModel.SHOW_ADVANCED_SEARCH_WINDOW, showAdvancedSearchWindow);
-			}
-			
-			private function showPreferencesWindow(event:Event):void
-			{
-				var window:PreferenceWindow = new PreferenceWindow();
-				window.addEventListener(CloseEvent.CLOSE, 
-					function():void
-					{
-						PopUpManager.removePopUp(window);
-					});
-				PopUpManager.addPopUp(window, this, true);
-				PopUpManager.centerPopUp(window);
-			}
-			
-			private function showAdvancedSearchWindow(event:Event):void
-			{
-				Alert.show("Advanced search is not currently implemented.","Advanced Search");
-			}
-			
-		]]>
-	</mx:Script>
+	xmlns:swiz="http://swiz.swizframework.org"
+	xmlns:view="com.cleartext.ximpp.view.*">
 	
-	<header:HeaderCanvas
-		id="headerCanvas"
-		/>
-	<mx:VDividedBox top="{headerCanvas.height}" bottom="0" width="100%" liveDragging="true">
-		<mx:HDividedBox height="70%" width="100%" liveDragging="true">
-			<buddies:BuddyCanvas
-				id="buddyCanvas"
-				width="20%"/>
-			<timeline:TimelineCanvas
-				id="timelineCanvas"
-				width="40%"/>
-			<chats:ChatCanvas
-				id="chatCanvas"
-				width="40%"/>
-		</mx:HDividedBox>
-		<mx:TextArea id="console" width="100%" height="30%" text="{XModel.getInstance().logText}" editable="false" updateComplete="console.verticalScrollPosition = console.maxVerticalScrollPosition" verticalScrollPolicy="off"/>
-	</mx:VDividedBox>
+	<swiz:SwizConfig
+		strict="false"
+		mediateBubbledEvents="true"
+		eventPackages="com.cleartext.ximpp.events"
+		viewPackages="com.cleartext.ximpp.view"
+		injectionEvent="preinitialize"
+		beanLoaders="{ [ Beans ] }" />
+
+	<view:MainView />
 
 </mx:WindowedApplication>
