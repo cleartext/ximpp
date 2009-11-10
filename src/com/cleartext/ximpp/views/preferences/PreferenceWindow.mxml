@@ -7,7 +7,7 @@
 	layout="absolute"
 	close="closeHandler()"
 	creationComplete="init()"
-	xmlns:preferences="com.cleartext.ximpp.view.preferences.*">
+	xmlns:preferences="com.cleartext.ximpp.views.preferences.*">
 	<mx:Script>
 		<![CDATA[
 			import com.cleartext.ximpp.models.XMPPModel;

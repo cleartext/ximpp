@@ -1,4 +1,4 @@
-package com.cleartext.ximpp.view.common
+package com.cleartext.ximpp.views.common
 {
 	import flash.events.FocusEvent;
 	import flash.events.KeyboardEvent;

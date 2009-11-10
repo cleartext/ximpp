@@ -3,10 +3,10 @@
 	width="100%" height="100%"
 	initialize="init();"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	xmlns:header="com.cleartext.ximpp.view.header.*"
-	xmlns:buddies="com.cleartext.ximpp.view.buddies.*" 
-	xmlns:timeline="com.cleartext.ximpp.view.timeline.*" 
-	xmlns:chats="com.cleartext.ximpp.view.chats.*">
+	xmlns:header="com.cleartext.ximpp.views.header.*"
+	xmlns:buddies="com.cleartext.ximpp.views.buddies.*" 
+	xmlns:timeline="com.cleartext.ximpp.views.timeline.*" 
+	xmlns:chats="com.cleartext.ximpp.views.chats.*">
 
 	<mx:Script>
 		<![CDATA[
@@ -15,7 +15,7 @@
 			import mx.managers.PopUpManager;
 			import mx.controls.Alert;
 
-			import com.cleartext.ximpp.view.preferences.PreferenceWindow;
+			import com.cleartext.ximpp.views.preferences.PreferenceWindow;
 			
 			[Autowire]
 			[Bindable]

@@ -1,4 +1,4 @@
-package com.cleartext.ximpp.view.common
+package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	

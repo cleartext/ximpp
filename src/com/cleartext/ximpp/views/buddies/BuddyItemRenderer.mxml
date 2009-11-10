@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
-	xmlns:common="com.cleartext.ximpp.view.common.*"
+	xmlns:common="com.cleartext.ximpp.views.common.*"
 	horizontalScrollPolicy="off"
 	verticalScrollPolicy="off"
 	height="40"
@@ -11,7 +11,7 @@
 	
 	<mx:Script>
 		<![CDATA[
-			import com.cleartext.ximpp.view.common.ExpandList;
+			import com.cleartext.ximpp.views.common.ExpandList;
 			import com.cleartext.ximpp.events.BuddyEvent;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			

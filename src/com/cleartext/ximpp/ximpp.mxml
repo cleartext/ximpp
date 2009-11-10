@@ -5,7 +5,7 @@
 	close="//do nothing"
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
-	xmlns:view="com.cleartext.ximpp.view.*">
+	xmlns:views="com.cleartext.ximpp.views.*">
 	
 	<swiz:SwizConfig
 		strict="false"
@@ -15,6 +15,6 @@
 		injectionEvent="preinitialize"
 		beanLoaders="{ [ Beans ] }" />
 
-	<view:MainView />
+	<views:MainView />
 
 </mx:WindowedApplication>
