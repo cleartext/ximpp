@@ -12,6 +12,7 @@
 </compiler>
 <applications>
 <application path="com/cleartext/ximpp/ximpp.mxml"/>
+<application path="com/listTest/VariableList.mxml"/>
 </applications>
 <modules/>
 <buildCSSFiles/>

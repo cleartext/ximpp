@@ -348,7 +348,7 @@ package com.cleartext.ximpp.models
 		{
 			appModel.log("Saving user account " + userAccount.accountName + " userId: " + userAccount.userId);
 			
-			var values:Array = userAccount.toDatabaseValues();
+			var values:Array = userAccount.toDatabaseValues(userAccount.userId);
 			var criteria:Array = [new DatabaseValue("userId", userAccount.userId)]
 			
 			var result:int = updateOrInsert("userAccounts", values, criteria);

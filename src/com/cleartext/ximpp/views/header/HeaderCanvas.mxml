@@ -20,6 +20,16 @@
 			{
 				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
 			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				var matr1:Matrix = new Matrix();
+				matr1.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2, 0, 0);
+				graphics.beginGradientFill(GradientType.LINEAR, [0x6ebfeb, 0x4d9ac4], [1, 1], [0x00, 0xFF], matr1);  
+				graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
+			}
 		]]>
 	</mx:Script>
 	<common:StatusIcon

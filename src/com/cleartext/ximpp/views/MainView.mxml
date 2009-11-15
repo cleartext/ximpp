@@ -2,6 +2,7 @@
 <mx:Canvas
 	width="100%" height="100%"
 	initialize="init();"
+	backgroundColor="0xffffff"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:header="com.cleartext.ximpp.views.header.*"
 	xmlns:buddies="com.cleartext.ximpp.views.buddies.*" 
@@ -48,22 +49,23 @@
 		]]>
 	</mx:Script>
 	
-	<header:HeaderCanvas
-		id="headerCanvas"
-		/>
-	<mx:VDividedBox top="{headerCanvas.height}" bottom="0" width="100%" liveDragging="true">
-		<mx:HDividedBox height="70%" width="100%" liveDragging="true">
+	<header:HeaderCanvas id="headerCanvas" />
+	<mx:VDividedBox top="{headerCanvas.height}" bottom="0" width="100%" liveDragging="true" backgroundColor="0xaaaaaa">
+		<mx:HDividedBox height="70%" width="100%" liveDragging="true" backgroundColor="0xd8d9d8" >
 			<buddies:BuddyCanvas
+				backgroundColor="0xffffff"
 				id="buddyCanvas"
 				width="20%"/>
 			<timeline:TimelineCanvas
+				backgroundColor="0xffffff"
 				id="timelineCanvas"
 				width="40%"/>
 			<chats:ChatCanvas
+				backgroundColor="0xffffff"
 				id="chatCanvas"
 				width="40%"/>
 		</mx:HDividedBox>
-		<mx:TextArea id="console" width="100%" height="30%" text="{appModel.logText}" editable="false" updateComplete="console.verticalScrollPosition = console.maxVerticalScrollPosition" verticalScrollPolicy="off"/>
+		<mx:TextArea id="console" backgroundColor="0xffffff" width="100%" height="30%" text="{appModel.logText}" editable="false" updateComplete="console.verticalScrollPosition = console.maxVerticalScrollPosition" verticalScrollPolicy="off"/>
 	</mx:VDividedBox>
 
 </mx:Canvas>

@@ -1,6 +1,8 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	public class Message implements IXimppValueObject
+	import com.universalsprout.flex.components.list.SproutListDataBase;
+	
+	public class Message extends SproutListDataBase implements IXimppValueObject
 	{
 		public static const CREATE_MESSAGES_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS messages (" +
@@ -18,7 +20,7 @@ package com.cleartext.ximpp.models.valueObjects
 			"rawxml TEXT);";
 		
 		public var messageId:int = -1;
-		public var timeStamp:Date;
+		public var timeStamp:Date = new Date();
 		public var publisher:String;
 		public var subscriber:String;
 		public var sender:String;
@@ -31,6 +33,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public function Message()
 		{
+			super();
 		}
 		
 		public function fill(obj:Object):void
@@ -48,14 +51,19 @@ package com.cleartext.ximpp.models.valueObjects
 			rawXML = obj["rawXML"];
 		}
 		
-		public function toDatabaseValues(userId:int=-1):Array
+		public function toDatabaseValues(userId:int):Array
 		{
 			return null;
 		}
 		
-		public function toString():String
+		override public function toString():String
 		{
 			return "";
+		}
+		
+		public function toXML():XML
+		{
+			return null;
 		}
 	}
 }

@@ -7,7 +7,7 @@
 	layout="absolute"
 	close="closeHandler()"
 	creationComplete="init()"
-	xmlns:preferences="com.cleartext.ximpp.views.preferences.*">
+	xmlns:preferences="com.cleartext.ximpp.views.preferences.*" xmlns:common="com.cleartext.ximpp.views.common.*">
 	<mx:Script>
 		<![CDATA[
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -95,7 +95,7 @@
 				{
 					previousAccount.accountName = accountName.text;
 					previousAccount.nickname = nickname.text;
-					previousAccount.avatarBitmap = avatar.source as Bitmap;
+					previousAccount.avatar = avatar.bitmapData;
 					previousAccount.jid = jid.text;
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
@@ -110,7 +110,7 @@
 				{
 					accountName.text = previousAccount.accountName;
 					nickname.text = previousAccount.nickname;
-					avatar.source = previousAccount.avatarBitmap; 
+					avatar.bitmapData = previousAccount.avatar;
 					jid.text = previousAccount.jid;
 					password.text = previousAccount.password;
 					server.text = previousAccount.server;
@@ -126,7 +126,6 @@
 			private function addAccount():void
 			{
 				var account:UserAccount = new UserAccount();
-				account.avatarBitmap = defaultAvatar.content as Bitmap;
 				account.userId = database.saveUserAccount(account);
 				accountCollection.addItem(account);
 				accountList.selectedItem = account;
@@ -184,7 +183,7 @@
 									var tx:Number = (64 - loadedBitmap.width * scale)/2;
 									var ty:Number = (64 - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-									avatar.source = new Bitmap(newBitmapData);
+									avatar.bitmapData = newBitmapData;
 								});
 						});
 				}
@@ -197,7 +196,6 @@
 		]]>
 	</mx:Script>
 	
-	<mx:Image id="defaultAvatar" source="@Embed('com/cleartext/ximpp/assets/user.jpg')" visible="false" />
 	
 	<mx:VBox id="listCanvas" width="200" top="10" bottom="10" left="10">
 		<mx:List id="accountList" height="100%" width="100%" horizontalScrollPolicy="off" labelField="accountName" change="selectedAccountChanged()"/>
@@ -221,9 +219,7 @@
 			<mx:TextInput id="nickname" change="changesMade = true;" />
 		</mx:FormItem>
 		<mx:FormItem label="profile picture:" direction="horizontal">
-			<mx:Canvas borderStyle="solid" borderColor="0x000000" >
-				<mx:Image id="avatar" width="64" height="64"/>
-			</mx:Canvas>
+			<common:Avatar id="avatar" width="64" height="64"/>
 			<mx:Button label="change..." click="changeAvatar()"/>
 		</mx:FormItem>
 		<mx:FormItem label="jid:">

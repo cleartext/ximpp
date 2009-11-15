@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:list="com.universalsprout.flex.components.list.*" creationComplete="init()" xmlns:listTest="listTest.*" backgroundColor="0xffffff">
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Message;
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			import com.cleartext.ximpp.views.timeline.MessageRenderer;
+			import com.cleartext.ximpp.views.buddies.BuddyRenderer;
+			import com.cleartext.ximpp.models.valueObjects.Status;
+			import flash.utils.getTimer;
+			import mx.collections.Sort;
+			import mx.utils.ObjectUtil;
+			import mx.utils.StringUtil;
+			import mx.collections.ArrayCollection;
+
+			private var maxMessages:Number = 50;
+
+			[Bindable]
+			private var buddyData:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var messageData:ArrayCollection = new ArrayCollection();
+		
+			private var timer:Timer = new Timer(3000);
+		
+			private function sortFunction(buddy1:Buddy, buddy2:Buddy, fields:Object=null):int
+			{
+				var nameCompare:int = ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
+				
+				if(buddy1.status == buddy2.status)
+					return nameCompare;
+				
+				else if(buddy1.status == "offline")
+					return 1;
+				else if(buddy2.status == "offline")
+					return -1;
+				
+				return 0;
+			}
+		
+			private function populate():void
+			{
+				for(var i:int=0; i<10; i++)
+				{
+					var b:Buddy = new Buddy();
+					b.nickName = i + " " + randomString(4,8) + "@" + randomString(4,8) + ".com";
+					buddyData.addItem(b);
+					
+					var message:Message = new Message();
+					message.publisher = randomString(4,8) + "@" + randomString(4,8) + ".com";
+					message.htmlBody = randomString(40,140,4);
+					messageData.addItem(message);
+				}
+			}
+			
+			private function trim():void
+			{
+				for(var i:int=0; i<6; i++)
+					if(buddyData.length > 0)
+						buddyData.removeItemAt(Math.floor(buddyData.length/2));
+			}
+		
+		
+			private function init():void
+			{
+				var sort:Sort = new Sort();
+				sort.compareFunction = sortFunction;
+				buddyData.sort = sort;
+				
+				buddyData.refresh();
+
+				populate();		
+
+				timer.addEventListener(TimerEvent.TIMER,
+					function():void
+					{
+						for each(var buddy:Buddy in buddyData)
+						{
+							var index:int = Math.random() * Status.USER_TYPES.length;
+							buddy.status = Status.USER_TYPES[index];
+							buddy.customStatus = (buddy.status == Status.OFFLINE) ? "" : randomString(5, 100, 4);
+						}
+						
+						var message:Message = new Message();
+						message.publisher = randomString(4,8) + "@" + randomString(4,8) + ".com";
+						message.htmlBody = randomString(40,140,4);
+						messageData.addItem(message);
+						
+						
+						if(messageData.length > maxMessages+1)
+						{
+							while(messageData.length > maxMessages)
+								messageData.removeItemAt(0);
+						}
+					});
+				timer.start();
+			}
+
+			public static function randomString(minLength:int, maxLength:int, caseStyle:int=0):String
+			{
+				/*
+				 * 0 lowercase
+				 * 1 uppercase
+				 * 2 title case
+				 * 3 sentence case
+				 * 4 prose
+				 */
+				var upperCaseLetters:Array = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ").split("");
+				var lowerCaseLetters:Array = ("abcdefghijklmnopqrstuvwxyz").split("");
+				var fullStop:String = ". ";
+				var comma:String = ", ";
+				var space:String = " ";
+				var maxWordLength:int = 9;
+	
+				var length:int = Math.round(Math.random() * (maxLength-minLength) + minLength);
+				var result:String = "";
+				var char:String = space;
+				var wordLength:int=0;
+				for(var i:int=0; i<length; i++)
+				{
+					if((char == space && caseStyle==2) || char == fullStop)
+					{
+						char = randomItem(upperCaseLetters) as String;
+						wordLength++;
+					}
+					else
+					{
+						var random:Number = Math.random();
+						if(wordLength <= 2)
+						{
+							random += wordLength*0.04;
+						}
+	
+						if(caseStyle >= 2 &&
+							((wordLength > maxWordLength) || 
+							(random < 0.15 && char != fullStop && char != space && char != comma)))
+						{
+							if(caseStyle == 4 && random < 0.01 && i<length-20 && i>20)
+							{
+								char = fullStop;
+								i++;
+							}
+							else if(caseStyle == 4 && random < 0.02 && i<length-10 && i>10)
+							{
+								char = comma;
+								i++;
+							}
+							else if(char != space && i<length-4)
+							{
+								char = space;
+							}
+							wordLength = 0;
+						}
+						else
+						{
+							var previousChar:String = char;
+							while(previousChar == char)
+							{
+								char = randomItem(lowerCaseLetters) as String;
+							}
+							wordLength++;
+						}
+					}
+					result += char;
+				}
+				
+				if(caseStyle == 1)
+				{
+					result = result.toUpperCase();
+				}
+				else if(caseStyle >= 3)
+				{
+					result = result.slice(1,-1);
+					result = (randomItem(upperCaseLetters) as String) + result + ".";
+				}
+				return result;
+			}
+			
+			public static function randomItem(array:Array):Object
+			{
+				var index:int = Math.floor(Math.random() * array.length+1)-1;
+				if(index == array.length)
+					index --;
+				return array[index];
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Style>
+.lgreyBold
+{
+	color: #888888;
+	font-weight: bold;
+}
+
+.dgreyBold
+{
+	color: #333333;
+	font-weight: bold;
+}
+
+.blackBold
+{
+	color: #000000;
+	font-weight: bold;
+}
+
+.lgreyNormal
+{
+	color: #888888;
+}		
+
+.dgreyNormal
+{
+	color: #333333;
+}
+
+.blackNormal
+{
+	color: #000000;
+}
+
+Application
+{
+	font-family: "Helvetica";
+	font-size: 12px;
+}
+	</mx:Style>
+
+	<mx:HBox>
+		<mx:Button label="populate()" click="populate()" />
+		<mx:Button label="trim()" click="trim()" />
+		<mx:Button label="stop()" click="timer.stop()" />
+		<mx:Button label="play()" click="timer.start()" />
+		<mx:CheckBox id="animateCheckBox" label="animate" selected="true" />
+	</mx:HBox>
+	
+	<mx:HDividedBox
+		liveDragging="true"
+		left="10" right="10" top="30" bottom="10">
+		<list:SproutList
+			id="buddies"
+			animate="{animateCheckBox.selected}"
+			width="100%" height="100%"
+			dataProvider="{buddyData}"
+			itemRenderer="{new ClassFactory(BuddyRenderer)}"/>
+		<list:SproutList
+			id="messages"
+			bottomUp="true"
+			animate="false"
+			width="100%" height="100%"
+			dataProvider="{messageData}"
+			itemRenderer="{new ClassFactory(MessageRenderer)}"/>
+		
+	</mx:HDividedBox>
+
+</mx:WindowedApplication>

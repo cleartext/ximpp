@@ -5,14 +5,23 @@
 	width="100%" height="100%"
 	xmlns:common="com.cleartext.ximpp.views.common.*" 
 	xmlns:containers="com.arc90.flexlib.containers.*"
-	verticalGap="0">
+	verticalGap="0" xmlns:list="com.universalsprout.flex.components.list.*">
 	<mx:Script>
 		<![CDATA[
+			import com.hurlant.crypto.symmetric.NullPad;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			
 			[Autowire]
 			[Bindable]
 			public var appModel:ApplicationModel;
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				buddyList.move(6, buddyList.y);
+				buddyList.setActualSize(unscaledWidth-6, buddyList.height);
+			}
 		
 		]]>
 	</mx:Script>
@@ -67,14 +76,14 @@
 		</mx:ComboBox>
 	</mx:Canvas>
 
-	<mx:List 
+	<list:SproutList 
 		id="buddyList" 
 		dataProvider="{appModel.buddies}"
-		width="100%" height="100%"
-		itemRenderer="{new ClassFactory(BuddyItemRenderer)}"
-		alternatingItemColors="[0xf5f5f5, 0xffffff]"
-		variableRowHeight="true">
-	</mx:List>
-	
-	<mx:Button label="add buddy" />
+		height="100%" 
+		itemRenderer="{new ClassFactory(BuddyRenderer)}">
+	</list:SproutList>
+
+	<mx:Canvas>
+		<mx:Button x="20" label="add buddy" />
+	</mx:Canvas>
 </mx:VBox>

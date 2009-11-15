@@ -1,0 +1,44 @@
+/* CSS file */
+.lgreyBold
+{
+	color: #888888;
+	font-weight: bold;
+}
+
+.dgreyBold
+{
+	color: #555555;
+	font-weight: bold;
+}
+
+.blackBold
+{
+	color: #000000;
+	font-weight: bold;
+}
+
+.lgreyNormal
+{
+	color: #888888;
+}		
+
+.dgreyNormal
+{
+	color: #444444;
+}
+
+.blackNormal
+{
+	color: #000000;
+}
+
+HDividedBox
+{
+	bar-color: #888888;
+}
+
+Application
+{
+	font-family: "Helvetica";
+	font-size: 12px;
+}

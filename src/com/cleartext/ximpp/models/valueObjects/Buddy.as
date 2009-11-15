@@ -1,8 +1,7 @@
 package com.cleartext.ximpp.models.valueObjects
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
-	
-	import flash.events.EventDispatcher;;
+	import com.universalsprout.flex.components.list.SproutListDataBase;;
 	
 	/**
 	 * @inheritDoc
@@ -10,8 +9,13 @@ package com.cleartext.ximpp.models.valueObjects
 	[Event(name="customStatusChanged", type="com.cleartext.ximpp.events.BuddyEvent")]
 	
 	[Bindable]
-	public class Buddy extends EventDispatcher implements IXimppValueObject
+	public class Buddy extends SproutListDataBase implements IXimppValueObject
 	{
+		public function Buddy()
+		{
+			super();
+		}
+		
 		public static const CREATE_BUDDIES_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS buddies (" +
 			"buddyId INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -34,23 +38,8 @@ package com.cleartext.ximpp.models.valueObjects
 		public var groups:Array;
 		public var emailAddress:String = "";
 		public var lastSeen:Date;
-		public var status:String = "";
-		private var _customStatus:String = "";
-		public var showCustomStatus:Boolean = false;
-
-		[Bindable (event="customStatusChanged")]
-		public function get customStatus():String
-		{
-			return _customStatus;
-		}
-		public function set customStatus(value:String):void
-		{
-			if(_customStatus != value)
-			{
-				_customStatus = value;
-				dispatchEvent(new BuddyEvent(BuddyEvent.CUSTOM_STATUS_CHANGED));
-			}
-		}
+		public var status:String = Status.OFFLINE;
+		public var customStatus:String = "";
 		public var broadcast:Boolean = false;
 		
 		public function fill(obj:Object):void
@@ -68,7 +57,7 @@ package com.cleartext.ximpp.models.valueObjects
 			broadcast = obj["broadcast"];
 		}
 		
-		public function toDatabaseValues(userId:int=-1):Array
+		public function toDatabaseValues(userId:int):Array
 		{
 			return [
 				new DatabaseValue("userId", userId),
@@ -103,6 +92,11 @@ package com.cleartext.ximpp.models.valueObjects
 		override public function toString():String
 		{
 			return "jid:" + jid + " nickName:" + nickName + " lastSeen:" + lastSeen + " status:" + status + " customStatus:" + customStatus;
+		}
+		
+		public function toXML():XML
+		{
+			return null;
 		}
 	}
 }

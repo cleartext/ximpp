@@ -5,7 +5,7 @@
 	width="100%" height="100%"
 	xmlns:common="com.cleartext.ximpp.view.common.*" 
 	xmlns:containers="com.arc90.flexlib.containers.*"
-	verticalGap="0">
+	verticalGap="0" xmlns:list="com.universalsprout.flex.components.list.*">
 	<mx:Script>
 		<![CDATA[
 			import com.cleartext.ximpp.models.ApplicationModel;
@@ -48,11 +48,13 @@
 		</mx:ComboBox>
 	</mx:Canvas>
 
-	<mx:List 
-		id="timelineList" 
+	<list:SproutList
+		id="messages"
+		bottomUp="true"
+		animate="false"
+		width="100%" height="100%"
 		dataProvider="{appModel.messages}"
-		width="100%" height="100%">
-	</mx:List>
+		itemRenderer="{new ClassFactory(MessageRenderer)}"/>
 
 	<mx:Canvas width="100%" height="29">
 		<mx:Label text="service"
