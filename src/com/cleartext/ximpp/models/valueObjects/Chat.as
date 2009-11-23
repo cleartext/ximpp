@@ -1,14 +1,18 @@
 package com.cleartext.ximpp.models.valueObjects
 {
+	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 	
 	public class Chat extends EventDispatcher implements IXimppValueObject
 	{
-		public var messages():ArrayCollection();
+		public var buddy:Buddy;
+		public var messages:ArrayCollection = new ArrayCollection();
 
-		public function Chat()
+		public function Chat(buddy:Buddy)
 		{
 			super();
+			this.buddy = buddy;
 		}
 		
 		public function fill(obj:Object):void
@@ -20,7 +24,7 @@ package com.cleartext.ximpp.models.valueObjects
 			return null;
 		}
 		
-		public function toString():String
+		override public function toString():String
 		{
 			return null;
 		}

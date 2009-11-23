@@ -44,6 +44,7 @@
 		x="32" y="10" width="110"
 		text="{appModel.serverSideStatus}"
 		creationComplete="statusComboBox.text=appModel.serverSideStatus"
+		selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus)}"
 		/>
 		
 	<common:DefaultTextInput
@@ -54,6 +55,12 @@
 		defaultText="custom status..."
 		text="{settings.userAccount.customStatus}"
 		/>
+
+	<mx:Button
+		label="{((appModel.showConsole) ? 'hide' : 'show' ) + ' console'}"
+		click="appModel.showConsole = !appModel.showConsole"
+		right="320" y="10" width="145"
+		/>
 	
 	<mx:Button
 		id="userPreferencesButton"
@@ -61,6 +68,7 @@
 		click="appModel.showPreferencesWindow()"
 		right="165" y="10" width="145"
 		/>
+
 	<mx:Button
 		id="advancedSearchButton"
 		label="Advanced Search..."

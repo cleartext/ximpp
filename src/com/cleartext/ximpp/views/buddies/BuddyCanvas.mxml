@@ -8,6 +8,8 @@
 	verticalGap="0" xmlns:list="com.universalsprout.flex.components.list.*">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			import com.universalsprout.flex.components.list.SproutListEvent;
 			import com.hurlant.crypto.symmetric.NullPad;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			
@@ -21,6 +23,11 @@
 				
 				buddyList.move(6, buddyList.y);
 				buddyList.setActualSize(unscaledWidth-6, buddyList.height);
+			}
+			
+			private function itemDoubleClicked(event:SproutListEvent):void
+			{
+				appModel.selectChat(event.data as Buddy);
 			}
 		
 		]]>
@@ -78,7 +85,9 @@
 
 	<list:SproutList 
 		id="buddyList" 
-		dataProvider="{appModel.buddies}"
+		doubleClickEnabled="true"
+		itemDoubleClicked="itemDoubleClicked(event)"
+		dataProvider="{appModel.buddyCollection}"
 		height="100%" 
 		itemRenderer="{new ClassFactory(BuddyRenderer)}">
 	</list:SproutList>

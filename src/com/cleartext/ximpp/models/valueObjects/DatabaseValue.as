@@ -17,7 +17,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public function DatabaseValue(columnName:String, value:Object, match:Boolean=true)
 		{
 			this.columnName = columnName;
-			this.value = (value == null) ? "" : value;
+			this.value = value;
 			this.match = match;
 		}
 

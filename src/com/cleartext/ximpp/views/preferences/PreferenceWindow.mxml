@@ -10,6 +10,7 @@
 	xmlns:preferences="com.cleartext.ximpp.views.preferences.*" xmlns:common="com.cleartext.ximpp.views.common.*">
 	<mx:Script>
 		<![CDATA[
+			import mx.events.CollectionEvent;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.models.DatabaseModel;
 			import com.cleartext.ximpp.models.SettingsModel;
@@ -51,26 +52,26 @@
 			private function init():void
 			{
 				// set global values
-				autoConnectCheckBox.selected = settings.autoConnect;
-				urlShortenComboBox.selectedItem = settings.urlShortener;
-				sortTimelineCheckBox.selected = settings.timelineTopDown;
-				sortChatCheckBox.selected = settings.chatTopDown;
+				autoConnectCheckBox.selected = settings.global.autoConnect;
+				urlShortenComboBox.selectedItem = settings.global.urlShortener;
+				sortTimelineCheckBox.selected = settings.global.timelineTopDown;
+				sortChatCheckBox.selected = settings.global.chatTopDown;
+				animateBuddyListCheckBox.selected = settings.global.animateBuddyList;
+				numTimelineMessages.value = settings.global.numTimelineMessages;
+				numChatMessages.value = settings.global.numChatMessages;
 				
 				// load user accounts
 				accountList.dataProvider = database.getAllUserAccounts();
 				
-				// show current account
-				if(settings.userAccount)
+				for each(var userAcount:UserAccount in accountCollection)
 				{
-					for each(var userAcount:UserAccount in accountCollection)
+					if(userAcount.userId == settings.userAccount.userId)
 					{
-						if(userAcount.userId == settings.userAccount.userId)
-						{
-							accountList.selectedItem = userAcount;
-							break;
-						}
+						accountList.selectedItem = userAcount;
+						break;
 					}
 				}
+
 				selectedAccountChanged();
 			}
 		
@@ -79,10 +80,13 @@
 				selectedAccountChanged();
 				
 				// set simple values
-				settings.autoConnect = autoConnectCheckBox.selected;
-				settings.urlShortener = urlShortenComboBox.selectedItem as String;
-				settings.timelineTopDown = sortTimelineCheckBox.selected;
-				settings.chatTopDown = sortChatCheckBox.selected;
+				settings.global.autoConnect = autoConnectCheckBox.selected;
+				settings.global.urlShortener = urlShortenComboBox.selectedItem as String;
+				settings.global.timelineTopDown = sortTimelineCheckBox.selected;
+				settings.global.chatTopDown = sortChatCheckBox.selected;
+				settings.global.animateBuddyList = animateBuddyListCheckBox.selected;
+				settings.global.numTimelineMessages = numTimelineMessages.value;
+				settings.global.numChatMessages = numChatMessages.value;
 
 				settings.userAccount = accountList.selectedItem as UserAccount;
 				
@@ -197,7 +201,7 @@
 	</mx:Script>
 	
 	
-	<mx:VBox id="listCanvas" width="200" top="10" bottom="10" left="10">
+	<mx:VBox id="listCanvas" width="210" top="10" bottom="10" left="10">
 		<mx:List id="accountList" height="100%" width="100%" horizontalScrollPolicy="off" labelField="accountName" change="selectedAccountChanged()"/>
 		<preferences:AddRemoveButton
 			addButtonClicked="addAccount()"
@@ -209,6 +213,15 @@
 		</mx:Canvas>
 		<mx:CheckBox label="sort timeline top to bottom" id="sortTimelineCheckBox"/>
 		<mx:CheckBox label="sort chat top to bottom" id="sortChatCheckBox"/>
+		<mx:CheckBox label="animate buddy list" id="animateBuddyListCheckBox"/>
+		<mx:Canvas>
+			<mx:NumericStepper maximum="1000" minimum="0" id="numTimelineMessages" />
+			<mx:Label x="78" text="max timeline messages" />
+		</mx:Canvas>
+		<mx:Canvas>
+			<mx:NumericStepper maximum="1000" minimum="0" id="numChatMessages" />
+			<mx:Label x="78" text="max chat messages" />
+		</mx:Canvas>
 	</mx:VBox>
 
 	<mx:Form x="210">

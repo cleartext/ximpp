@@ -1,15 +1,15 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
-	import com.cleartext.ximpp.models.valueObjects.Message;
+	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
-	import mx.collections.Sort;
 	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.events.CloseEvent;
@@ -34,24 +34,39 @@ package com.cleartext.ximpp.models
 		
 		public function ApplicationModel()
 		{
-			var sort:Sort = new Sort();
-			sort.compareFunction = compareBuddies;
-			buddies.sort = sort;
-			
-			buddies.refresh();
+//			var sort:Sort = new Sort();
+//			sort.compareFunction = compareBuddies;
+//			buddies.sort = sort;
+		}
+
+		private var _buddyByJid:Dictionary = new Dictionary();
+		public function get buddyByJid():Dictionary
+		{
+			return _buddyByJid;
+		}
+		
+		private var _buddyCollection:ArrayCollection = new ArrayCollection();
+		public function get buddyCollection():ArrayCollection
+		{
+			return _buddyCollection;
 		}
 
 		[Bindable]
-		public var buddies:ArrayCollection = new ArrayCollection();
+		public var timeLineMessages:ArrayCollection = new ArrayCollection();
+
 		[Bindable]
-		public var messages:ArrayCollection = new ArrayCollection();
-		[Bindable]
+		public var selectedChat:Chat;
+		
 		public var chats:ArrayCollection = new ArrayCollection();
 		
 		[Bindable]
 		public var serverSideStatus:String = Status.OFFLINE;
 		
+		[Bindable]
 		public var localStatus:String = Status.OFFLINE;
+		
+		[Bindable]
+		public var showConsole:Boolean = true;
 
 		[Bindable (event="logTextChanged")]
 		public var logText:String = "";
@@ -102,11 +117,11 @@ package com.cleartext.ximpp.models
 			database.createDatabase();
 			// if this changes the userId, it will reload all the data from the database
 			database.loadGlobalSettings();
-			if(!settings.userAccount)
+			if(!settings.userAccount.valid)
 			{
 				Alert.show(
-					"There are no user settings stored, you need to add at least one account to start using ximpp. Do you want to create a new account now?",
-					 "No User Settings", Alert.YES | Alert.NO, null,
+					"There are no valid user settings stored. Do you want to change your preferences now?",
+					 "Invalid User Settings", Alert.YES | Alert.NO, null,
 					 function(event:CloseEvent):void
 					 {
 					 	if(event.detail == Alert.YES)
@@ -115,18 +130,18 @@ package com.cleartext.ximpp.models
 					 	}
 					 });
 			}
-			else if(settings.autoConnect)
+			else if(settings.global.autoConnect)
 			{
 				setUserPresence(Status.AVAILABLE, settings.userAccount.customStatus);
 			}
 
-			for(var i:int=0; i<10; i++)
-			{
-				var message:Message = new Message();
-				message.publisher = randomString(4,8) + "@" + randomString(4,8) + ".com";
-				message.htmlBody = randomString(40,140,4);
-				messages.addItem(message);
-			}
+//			for(var i:int=0; i<10; i++)
+//			{
+//				var message:Message = new Message();
+//				message.publisher = randomString(4,8) + "@" + randomString(4,8) + ".com";
+//				message.htmlBody = randomString(40,140,4);
+//				messages.addItem(message);
+//			}
 		}
 		
 		public function shutDown():void
@@ -142,6 +157,41 @@ package com.cleartext.ximpp.models
 				{
 					Application.application.exit();
 				});
+		}
+		
+		public function getChat(buddy:Buddy):Chat
+		{
+			if(!buddy)
+				return null;
+			
+			for each(var chat:Chat in chats)
+			{
+				if(chat.buddy == buddy)
+					return chat;
+			}
+			var c:Chat = new Chat(buddy);
+			c.messages = database.loadMessages(buddy);
+			
+			chats.addItem(c);
+			return c;
+		}
+		
+		public function selectChat(buddy:Buddy):Chat
+		{
+			var chat:Chat = getChat(buddy);
+			selectedChat = chat;
+			return chat;
+		}
+		
+		public function getBuddyByJid(jid:String):Buddy
+		{
+			if(!jid || jid=="")
+				return null;
+				
+			if(jid == settings.userAccount.jid)
+				return settings.userAccount.toBuddy();
+			
+			return buddyByJid[jid];
 		}
 		
 		public function showPreferencesWindow():void
@@ -172,26 +222,29 @@ package com.cleartext.ximpp.models
 		public function addBuddy(newBuddy:Buddy):void
 		{
 			var newId:int = database.saveBuddy(newBuddy);
+			var oldBuddy:Buddy = buddyByJid[newBuddy.jid] as Buddy;
 
-			if(newId == -1)
+			if(newId == -1 && oldBuddy != null)
 			{
-				var success:Boolean = false;
-				for each(var testBuddy:Buddy in buddies)
-				{
-					if(testBuddy.buddyId == newBuddy.buddyId)
-					{
-						success = true;
-						testBuddy.fill(newBuddy);
-						break;
-					}
-				}
+				oldBuddy.fill(newBuddy);
+				oldBuddy.used = true;
 			}
 			else
 			{
-				newBuddy.buddyId = newId;
-				buddies.addItem(newBuddy);
+				if(newId != -1)
+					newBuddy.buddyId = newId;
+	
+				buddyByJid[newBuddy.jid] = newBuddy;
+				buddyCollection.addItem(newBuddy);
+				newBuddy.used = true;
 			}
-			buddies.refresh();
+		}
+		
+		public function removeBuddy(buddy:Buddy):void
+		{
+			delete buddyByJid[buddy.jid];
+			buddyCollection.removeItemAt(buddyCollection.getItemIndex(buddy));
+			database.removeBuddy(buddy.buddyId);
 		}
 
 		public static function randomString(minLength:int, maxLength:int, caseStyle:int=0):String
@@ -273,7 +326,7 @@ package com.cleartext.ximpp.models
 			}
 			return result;
 		}
-		
+				
 		public static function randomItem(array:Array):Object
 		{
 			var index:int = Math.floor(Math.random() * array.length+1)-1;

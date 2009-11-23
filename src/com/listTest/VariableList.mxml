@@ -46,8 +46,8 @@
 					buddyData.addItem(b);
 					
 					var message:Message = new Message();
-					message.publisher = randomString(4,8) + "@" + randomString(4,8) + ".com";
-					message.htmlBody = randomString(40,140,4);
+					message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
+					message.body = randomString(40,140,4);
 					messageData.addItem(message);
 				}
 			}
@@ -81,8 +81,8 @@
 						}
 						
 						var message:Message = new Message();
-						message.publisher = randomString(4,8) + "@" + randomString(4,8) + ".com";
-						message.htmlBody = randomString(40,140,4);
+						message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
+						message.body = randomString(40,140,4);
 						messageData.addItem(message);
 						
 						

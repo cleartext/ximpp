@@ -1,6 +1,7 @@
 package com.universalsprout.flex.components.list
 {
 import flash.events.Event;
+import flash.events.MouseEvent;
 import flash.system.System;
 import flash.utils.Dictionary;
 import flash.utils.getTimer;
@@ -17,8 +18,10 @@ import mx.core.UIComponent;
 import mx.events.CollectionEvent;
 import mx.events.ResizeEvent;
 
-public class SproutList extends Container
+[Event(name="collectionChange", type="mx.events.CollectionEvent")]
+[Event(name="itemDoubleClicked", type="com.universalsprout.flex.components.list.SproutListEvent")]
 
+public class SproutList extends Container
 {
 	public function SproutList()
 	{
@@ -87,6 +90,16 @@ public class SproutList extends Container
 		else if (value is XMLList)
 		{
 			collection = new XMLListCollection(value as XMLList);
+		}
+		else if (value is Dictionary)
+		{
+			var colTemp:ArrayCollection = new ArrayCollection();
+			
+			for each(var item:Object in Dictionary)
+			{
+				colTemp.addItem(item);
+			}
+			collection = colTemp;
 		}
 		else if (value is XML)
 		{
@@ -172,6 +185,9 @@ public class SproutList extends Container
 				item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
 				itemRenderersByDataUid[data.uid] = item;
 				addChildAt(item, index);
+
+				if(doubleClickEnabled)
+					item.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
 			}
 			
 			// layout itemRenderer
@@ -193,7 +209,6 @@ public class SproutList extends Container
 				setChildIndex(item, index);
 				index++;
 			}
-			
 		}
 
 		bottomPadding.move(0, yCounter);
@@ -230,6 +245,13 @@ public class SproutList extends Container
 		invalidateDisplayList();
 	}
 	
+	protected function doubleClickHandler(event:MouseEvent):void
+	{
+		var item:ISproutListItem = event.currentTarget as ISproutListItem;
+		if(item)
+		{
+			dispatchEvent(new SproutListEvent(SproutListEvent.ITEM_DOUBLE_CLICKED, item.data as ISproutListData));
+		}
+	}
 }
-
 }

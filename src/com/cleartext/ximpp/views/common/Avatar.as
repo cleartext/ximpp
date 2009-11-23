@@ -44,10 +44,25 @@ package com.cleartext.ximpp.views.common
 		}
 		public function set border(value:Boolean):void
 		{
-			if(_border != border)
+			if(_border != value)
 			{
 				_border = value;
 				invalidateDisplayList();
+			}
+		}
+		
+		private var _borderColour:uint = 0xaaaaaa;
+		public function get borderColour():uint
+		{
+			return _borderColour;
+		}
+		public function set borderColour(value:uint):void
+		{
+			if(_borderColour != value)
+			{
+				_borderColour = value;
+				if(border)
+					invalidateDisplayList();
 			}
 		}
 		
@@ -62,7 +77,7 @@ package com.cleartext.ximpp.views.common
 			g.beginBitmapFill(bmd, new Matrix(scale, 0, 0, scale));
 	
 			if(border)
-				g.lineStyle(1, 0x888888);
+				g.lineStyle(1, borderColour);
 	
 			g.drawRect(0,0,width,height);
 		}

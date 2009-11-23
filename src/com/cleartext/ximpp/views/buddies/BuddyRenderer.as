@@ -1,10 +1,9 @@
 package com.cleartext.ximpp.views.buddies
 {
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
-	
-	import flash.events.Event;
 	
 	import mx.core.IUITextField;
 	import mx.core.UITextField;
@@ -12,28 +11,51 @@ package com.cleartext.ximpp.views.buddies
 
 	public class BuddyRenderer extends SproutListItemBase
 	{
-		private static const SMALL_HEIGHT:Number = 40;
-		private static const BIG_HEIGHT:Number = 54;
+		//---------------------------------------
+		// Constants
+		//---------------------------------------
 		
-		private var NO_HIGHLIGHT:uint = 0xffffff;
-		private var HIGHLIGHT:uint = 0xb6b6dd;
+		private static const SMALL_HEIGHT:Number = 40;
+		private static const BIG_HEIGHT:Number = 56;
 
+		private static const PADDING:Number = 3;
+		private static const AVATAR_SIZE:Number = 32;
+		
+		private static const NO_HIGHLIGHT:uint = 0xffffff;
+		private static const HIGHLIGHT:uint = 0xb6b6dd;
+
+		//---------------------------------------
+		// Constructor
+		//---------------------------------------
+		
 		public function BuddyRenderer()
 		{
 			super();
 			height = SMALL_HEIGHT;
 			wordWrap = false;
-			setStyle("paddingRight", 8);
 			truncateToFit = true;
 		}
-				
-		private var sizeTween:Tween;
+		
+		//---------------------------------------
+		// Buddy Data
+		//---------------------------------------
 		
 		private function get buddy():Buddy
 		{
 			return data as Buddy;
 		}
 		
+		//---------------------------------------
+		// Size Tween
+		//---------------------------------------
+		
+		private var sizeTween:Tween;
+		
+		//---------------------------------------
+		// Display Children
+		//---------------------------------------
+		
+		private var avatar:Avatar;
 		private var statusIcon:StatusIcon;
 		private var nameLabel:UITextField;
 		private var statusLabel:UITextField;
@@ -42,9 +64,19 @@ package com.cleartext.ximpp.views.buddies
 			return textField;
 		}
 		
+		//---------------------------------------
+		// Create Children
+		//---------------------------------------
+		
 		override protected function createChildren():void
 		{
 			super.createChildren();
+			
+			if(!avatar)
+			{
+				avatar = new Avatar();
+				addChild(avatar);
+			}
 			
 			if(!statusIcon)
 			{
@@ -65,41 +97,50 @@ package com.cleartext.ximpp.views.buddies
 			}
 
 			customStatusLabel.visible = false;
-			customStatusLabel.wordWrap = true;
+			customStatusLabel.wordWrap = wordWrap;
 		}
 		
-		override protected function dataChangedHandler(event:Event):void
-		{
-			invalidateProperties();
-		}
+		//---------------------------------------
+		// Commit Properties
+		//---------------------------------------
 		
 		override protected function commitProperties():void
 		{
 			if(!buddy)
 				return;
+			
+			customStatusLabel.wordWrap = false;
 
+			// set values
 			customStatusLabel.text = buddy.customStatus;
-			
-			nameLabel.styleName = "blackBold";
-			statusLabel.styleName = "lgreyNormal";
-			customStatusLabel.styleName = "dgreyNormal";
-
-			super.commitProperties();
-			
 			nameLabel.text = buddy.nickName;
 			statusLabel.text = buddy.status;
 			statusIcon.status = buddy.status;
 			
-			customStatusLabel.truncateToFit();
+			// refresh styles
+			nameLabel.styleName = "blackBold";
+			statusLabel.styleName = "lgreyNormal";
+			customStatusLabel.styleName = "dgreyNormal";
 
-			var h:Number = BIG_HEIGHT;
-
-			if(buddy.customStatus == "")
+			
+			// What height we should be depends if there is a custom
+			// status to show. If there is no custom status, then make
+			// sure the label is not visible and we should be at the 
+			// SMALL_HEIGHT
+			var h:Number;
+			if(!buddy.customStatus || buddy.customStatus == "")
 			{
 				customStatusLabel.visible = false;
 				h = SMALL_HEIGHT;
 			}
-
+			else
+			{
+				h = BIG_HEIGHT;
+			}
+			
+			// If we are at, or currently tweening to the height we
+			// should be, then stop any active tweens and create a
+			// new one (creating a tween automatically plays it)
 			if(h != heightTo)
 			{
 				_heightTo = h;
@@ -107,37 +148,54 @@ package com.cleartext.ximpp.views.buddies
 					sizeTween.stop();
 				
 				sizeTween = new Tween(this, height, h, TWEEN_DURATION, -1, updateHeight,
+					// on complete...
 					function():void
 					{
 						customStatusLabel.visible = true;
+						// when we aren't playing, tweens should be null
 						sizeTween = null;
+						// confirm we are at the right height (removes rounding errors
+						// from the tween)
 						updateHeight(heightTo);
 						_heightTo = NaN;
+						// check everything is ok
 						commitProperties();
 					});
 			}
 		}		
 		
+		//---------------------------------------
+		// Update Display List
+		//---------------------------------------
+		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-			textField.wordWrap = wordWrap;
-			
 			commitProperties();
 			
+			// draw background
 			graphics.clear();
 			graphics.beginFill((highlight) ? HIGHLIGHT : NO_HIGHLIGHT, 0.18);
 			graphics.drawRect(0, 0, unscaledWidth-1, unscaledHeight);
 			
-			nameLabel.setActualSize(unscaledWidth-8, nameLabel.height);
-			nameLabel.move(4, 4);
+			// layout avatar
+			avatar.setActualSize(AVATAR_SIZE, AVATAR_SIZE);
+			avatar.move(PADDING, PADDING)
+			
+			// layout name label
+			nameLabel.setActualSize(unscaledWidth - AVATAR_SIZE - 3*PADDING, nameLabel.height);
+			nameLabel.move(AVATAR_SIZE + 2*PADDING, PADDING);
 
-			statusIcon.move(4, 21);
+			// layout status icon
+			statusIcon.move(AVATAR_SIZE + 2.5*PADDING, 21);
 
-			statusLabel.setActualSize(unscaledWidth-8-StatusIcon.SIZE, statusLabel.height); 
-			statusLabel.move(18, 20);
+			// layout status label
+			statusLabel.setActualSize(unscaledWidth - AVATAR_SIZE - 4*PADDING - StatusIcon.SIZE, statusLabel.height); 
+			statusLabel.move(AVATAR_SIZE + 3*PADDING + StatusIcon.SIZE, 20);
 
-			customStatusLabel.setActualSize(unscaledWidth-8, customStatusLabel.height);
-			customStatusLabel.move(4, 37);
+			// layout custom status label
+			customStatusLabel.setActualSize(unscaledWidth-2*PADDING, customStatusLabel.height);
+			customStatusLabel.move(PADDING, 39);
+			customStatusLabel.truncateToFit();
 		}
 	}
 }

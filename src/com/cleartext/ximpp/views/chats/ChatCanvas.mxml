@@ -3,56 +3,119 @@
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	xmlns:buddies="com.cleartext.ximpp.view.buddies.*"
 	width="100%" height="100%"
-	xmlns:common="com.cleartext.ximpp.view.common.*" 
 	xmlns:containers="com.arc90.flexlib.containers.*"
-	verticalGap="0">
+	verticalGap="0"
+	creationComplete="init()"
+	xmlns:common="com.cleartext.ximpp.views.common.*">
+
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.DatabaseModel;
+			import com.cleartext.ximpp.models.valueObjects.Message;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.models.valueObjects.Chat;
+			import com.cleartext.ximpp.views.common.ChatSproutList;
+			import com.universalsprout.flex.components.list.SproutList;
+			import com.cleartext.ximpp.models.ApplicationModel;
+			import mx.events.CollectionEvent;
+
+			[Autowire]
+			[Bindable]
+			public var appModel:ApplicationModel;
 			
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+			
+			[Autowire]
+			[Bindable]
+			public var settings:SettingsModel;
+			
+			[Autowire]
+			[Bindable]
+			public var database:DatabaseModel;
+			
+			private var sproutListsByChat:Dictionary = new Dictionary();
+			
+			private function init():void
+			{
+				appModel.chats.addEventListener(CollectionEvent.COLLECTION_CHANGE, chatsChangedHandler);
+			}
+			
+			private function chatsChangedHandler(event:Event):void
+			{
+				var sproutList:ChatSproutList;
+				
+				for each(sproutList in viewStack)
+				{
+					sproutList.used = false;
+				}
+				
+				for each(var chat:Chat in appModel.chats)
+				{
+					sproutList = sproutListsByChat[chat];
+					
+					if(!sproutList)
+					{
+						sproutList = new ChatSproutList();
+						sproutList.data = chat;
+						sproutListsByChat[chat] = sproutList;
+						viewStack.addChild(sproutList);
+					}
+					
+					sproutList.used = true;
+				}
+				
+				for each(sproutList in viewStack)
+				{
+					if(!sproutList.used)
+					{
+						viewStack.removeChild(sproutList);
+						delete sproutListsByChat[sproutList.data];
+					}
+				}
+				
+				viewStack.selectedIndex = viewStack.numChildren -1;
+				messageCanvas.enabled = appModel.chats.length != 0;					
+			}
+			
+			private function send(toDefault:Boolean):void
+			{
+				if(messageTextArea.text.length == 0)
+					return;
+				
+				var currentChat:Chat = viewStack.selectedChild.data as Chat;
+				
+				xmpp.sendMessage(currentChat.buddy.fullJid, messageTextArea.text);
+				
+				var message:Message = new Message();
+				message.sender = settings.userAccount.jid;
+				message.recipient = currentChat.buddy.jid;
+				message.body = messageTextArea.text;
+				message.timestamp = new Date();
+				
+				currentChat.messages.addItem(message);
+				database.saveMessage(message);
+
+				messageTextArea.reset(true, toDefault);
+			}
 		]]>
 	</mx:Script>
 	
-	<mx:TabBar>
-		<mx:dataProvider>
-			<mx:String>Friend 1</mx:String>
-			<mx:String>Friend 2</mx:String>
-			<mx:String>Friend 3</mx:String>
-			<mx:String>Friend 4</mx:String>
-		</mx:dataProvider>
-	</mx:TabBar>
-	
-	<containers:CollapsiblePanel
-		id="filterPanel"
-		width="100%"
-		title="Filter" 
-		borderThicknessBottom="0" 
-		borderThicknessLeft="0"
-		borderThicknessRight="0" 
-		collapseDuration="200"
-		collapsed="true"
-		verticalScrollPolicy="off"
-		horizontalScrollPolicy="off"
-		dropShadowEnabled="false"
-		>
-		<mx:Label text="item1"/>
-		<mx:Label text="item2"/>
-		<mx:Label text="item3"/>
-	</containers:CollapsiblePanel> 
+	<mx:TabBar dataProvider="viewStack" />
 
-	<mx:VBox id="chatBox" 
-		width="100%" height="100%">
-		<mx:Label text="message 1"/>
-		<mx:Label text="message 2"/>
-		<mx:Label text="message 3"/>
-		<mx:Label text="message 4"/>
-	</mx:VBox>
+	<mx:ViewStack id="viewStack" width="100%" height="100%" />
 
 	<mx:Canvas width="100%">
 		<mx:Label text="gateway"
 			x="7" y="3"/>
 		<mx:ComboBox id="gatewayComboBox"
+			enabled="false"
 			x="60" y="0">
 			<mx:dataProvider>
+				<mx:String>default</mx:String>
 				<mx:String>gTalk</mx:String>
 				<mx:String>msn</mx:String>
 				<mx:String>cleartext</mx:String>
@@ -60,10 +123,17 @@
 		</mx:ComboBox>
 	</mx:Canvas>
 
-	<mx:TextArea 
-		id="messageTextArea"
-		text="type message here"
-		width="100%" height="45"/>
+	<mx:Canvas width="100%" id="messageCanvas" enabled="false">
+		<common:DefaultTextInput
+			id="messageTextArea"
+			defaultText="type message here..."
+			right="60" left="0" height="45"
+			change="numChars.text = messageTextArea.text.length.toString()"
+			enter="send(false)"
+			/>
+		<mx:Button id="sendButton" label="send" right="0" click="send(true)"/>
+		<mx:Label id="numChars" right="5" y="25" text="0"/>
+	</mx:Canvas>
 
 </mx:VBox>
 

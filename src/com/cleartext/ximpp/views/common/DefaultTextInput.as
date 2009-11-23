@@ -50,13 +50,20 @@ package com.cleartext.ximpp.views.common
 			textSet = true;
 		}
 		
-		public function reset(forceReset:Boolean=false):void
+		public function reset(forceReset:Boolean=false, toDefault:Boolean=true):void
 		{
 			if(super.text == "" || forceReset)
 			{
 				textSet = false;
-				super.text = _defaultText;
-				setStyle("color", 0x555555);
+				if(toDefault)
+				{
+					super.text = _defaultText;
+					setStyle("color", 0x555555);
+				}
+				else
+				{
+					super.text = "";
+				}
 			}
 		}
 		

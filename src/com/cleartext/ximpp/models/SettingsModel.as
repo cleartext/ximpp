@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.models
 {
-	import com.cleartext.ximpp.models.valueObjects.UrlShortener;
+	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
 	import flash.events.EventDispatcher;
@@ -11,12 +11,7 @@ package com.cleartext.ximpp.models
 		{
 		}
 		
-		[Bindable (event="autoConnectChanged")]
-		public var autoConnect:Boolean = false;
-
-		public var urlShortener:String = UrlShortener.types[0];
-		public var timelineTopDown:Boolean = false;
-		public var chatTopDown:Boolean = false;
+		public var global:GlobalSettings = new GlobalSettings();
 
 		[Bindable (event="userAccountChanged")]
 		public var userAccount:UserAccount;

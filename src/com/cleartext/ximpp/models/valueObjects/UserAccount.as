@@ -1,20 +1,16 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import flash.display.Bitmap;
+	import com.cleartext.ximpp.models.XimppUtils;
+	
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
-	import flash.geom.Rectangle;
-	import flash.utils.ByteArray;
-	
-	import mx.utils.Base64Decoder;
-	import mx.utils.Base64Encoder;
 	
 	public class UserAccount extends EventDispatcher implements IXimppValueObject
 	{
 		public static const CREATE_USER_ACCOUNTS_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS userAccounts (" +
 			"userId INTEGER PRIMARY KEY AUTOINCREMENT, " +
-			"accountName TEXT, " +
+			"accountName TEXT DEFAULT 'new account', " +
 			"timestamp DATE, " +
 			"jid TEXT, " +
 			"nickname TEXT, " +
@@ -24,26 +20,15 @@ package com.cleartext.ximpp.models.valueObjects
 			"avatar TEXT);";
 		
 		public var userId:int = -1;
-		public var accountName:String = "new account";
-		public var jid:String = "";
-		public var nickname:String = "";
-		public var password:String = "";
-		public var server:String = "";
+		public var accountName:String;
+		public var jid:String;
+		public var nickname:String;
+		public var password:String;
+		public var server:String;
 		[Bindable]
-		public var customStatus:String = "";
-		
+		public var customStatus:String;
 		[Bindable]
 		public var avatar:BitmapData;
-		
-//		private var _avatarBitmap:Bitmap;
-//		public function get avatarBitmap():Bitmap
-//		{
-//			return new Bitmap(_avatarBitmap.bitmapData);
-//		}
-//		public function set avatarBitmap(value:Bitmap):void
-//		{
-//			_avatarBitmap = (value) ? new Bitmap(value.bitmapData) : null;
-//		}
 		
 		public function fill(obj:Object):void
 		{
@@ -54,35 +39,22 @@ package com.cleartext.ximpp.models.valueObjects
 			password = obj["password"];			
 			server = obj["server"];
 			customStatus = obj["customStatus"];
-			avatar = null;
-
-			var byteString:String = obj["avatar"];
-			if(byteString)
-			{
-				var base64Dec:Base64Decoder = new Base64Decoder();
-				base64Dec.decode(byteString);
-				var byteArray:ByteArray = base64Dec.toByteArray();
-
-				avatar = new BitmapData(64,64);
-				avatar.setPixels(new Rectangle(0,0,64,64), byteArray);
-			}
+			avatar = XimppUtils.stringToAvatar(obj["avatar"]);
 		}
 		
-		public function get avatarStr():String
+		public function get valid():Boolean
 		{
-			if(avatar)
-			{
-				var byteArray:ByteArray = avatar.getPixels(new Rectangle(0,0,64,64));
-				var base64Enc:Base64Encoder = new Base64Encoder();
-				base64Enc.encodeBytes(byteArray);
-				var result:String = base64Enc.flush();
-				//trace(result);
-				return result;
-			}
-			else
-			{
-				return null;
-			}
+			return (jid && password && password);
+		}
+		
+		public function toBuddy():Buddy
+		{
+			var buddy:Buddy = new Buddy();
+			buddy.jid = jid;
+			buddy.nickName = nickname;
+			buddy.avatar = avatar;
+			buddy.customStatus = customStatus;
+			return buddy;
 		}
 		
 		public function toDatabaseValues(userId:int):Array
@@ -96,7 +68,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("password", password),
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),
-				new DatabaseValue("avatar", avatarStr)];			
+				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar))];			
 		}
 		
 		override public function toString():String

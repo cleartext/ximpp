@@ -1,6 +1,8 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	import com.hurlant.crypto.tls.TLSConfig;
@@ -47,16 +49,45 @@ package com.cleartext.ximpp.models
 //			xmpp.addEventListener(XMPPEvent.PRESENCE_UNAVAILABLE, presenceUnavailableHandler);
 //			xmpp.addEventListener(XMPPEvent.PRESENCE_ERROR, presenceErrorHandler);
 //			xmpp.addEventListener(XMPPEvent.PRESENCE_SUBSCRIBE, presenceSubscribeHandler);
-			xmpp.addEventListener(XMPPEvent.ROSTER_ITEM, rosterItemHandler);
+			xmpp.addEventListener(XMPPEvent.ROSTER_COMPLETE, rosterCompleteHandler);
 			xmpp.auto_reconnect = true;
-			xmpp.reconnect_times
 		}
 		
+		//-------------------------------
+		// MESSAGE HANDLER
+		//-------------------------------
+		
+		/**
+		 * receive a message stanza, find the associated sender and
+		 * receiver buddies, save to the database and add to the correct
+		 * chat or timeline
+		 */
 		private function messageHandler(event:XMPPEvent):void
 		{
-			appModel.log(event);
+			var message:Message = Message.createFromStanza(event.stanza);
+			database.saveMessage(message);
+
+			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
+			buddy.lastSeen = message.timestamp;
+			buddy.resource = event.stanza.from.resource;
+			
+			database.saveBuddy(buddy);
+			
+			var chat:Chat = appModel.getChat(buddy);
+			chat.messages.addItem(message);
+
+			appModel.log("message:  " + message.body);
 		}
 		
+		//-------------------------------
+		// SESSION HANDLER
+		//-------------------------------
+		
+		/**
+		 * We have sucessfully initiated a session, now we can
+		 * say the server knows our status and we can get the
+		 * list of buddies and send our presence.
+		 */
 		private function sessionHandler(event:XMPPEvent):void
 		{
 			appModel.log(event);
@@ -65,73 +96,138 @@ package com.cleartext.ximpp.models
 			sendPresence();
 		}
 		
+		//-------------------------------
+		// SECURE HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function secureHandler(event:XMPPEvent):void
 		{
 			appModel.log(event);
-			
 		}
 		
+		//-------------------------------
+		// AUTH SUCCEDED HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function authSucceededHandler(event:XMPPEvent):void
 		{
 			appModel.log(event);
-			
 		}
 		
+		//-------------------------------
+		// AUTH FAILED HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function authFailedHandler(event:XMPPEvent):void
 		{
 			appModel.log(event);
 		}
 		
+		//-------------------------------
+		// PRESENCE HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function presenceHandler(event:XMPPEvent):void
 		{
 			var stanza:Object = event.stanza;
 			
 			var fromJid:JID = stanza["from"];
-			var bareJid:String = fromJid.getBareJID();
+			var buddy:Buddy = appModel.getBuddyByJid(fromJid.getBareJID());
 			
-			var buddy:Buddy;
-			for each (var b:Buddy in appModel.buddies)
-			{
-				if(b.jid == bareJid)
-				{
-					buddy = b;
-					break;
-				}
-			}
-			
-			if(!buddy)
+			if(!buddy || buddy.jid == settings.userAccount.jid)
 				return;
-				
+			
 			buddy.resource = fromJid.resource;
 			buddy.status = Status.fromShow(stanza["type"]);
-			appModel.log(stanza["type"] + " : " + buddy.status);
 			buddy.customStatus = stanza["status"];
 			
 			database.saveBuddy(buddy);
-			
+
 			appModel.log(event);
 		}
 		
+		//-------------------------------
+		// PRESENCE UNAVILABLE HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function presenceUnavailableHandler(event:XMPPEvent):void
 		{
 			appModel.log(event);
 		}
 		
+		//-------------------------------
+		// PRESENCE ERROR HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function presenceErrorHandler(event:XMPPEvent):void
 		{
 			appModel.log(event);
 		}
 		
+		//-------------------------------
+		// PRESENCE SUBSCRIBE HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function presenceSubscribeHandler(event:XMPPEvent):void
 		{
 			appModel.log(event);
 		}
 		
-		private function rosterItemHandler(event:XMPPEvent):void
+		//-------------------------------
+		// ROSTER COMPLETE HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
+		private function rosterCompleteHandler(event:XMPPEvent):void
 		{
-			appModel.addBuddy(Buddy.createFromStanza(event.stanza));
+			for each(var b1:Buddy in appModel.buddyByJid)
+			{
+				b1.used = false;
+			}
+			
+			for each(var item:Object in event.stanza)
+			{
+				var buddy:Buddy = Buddy.createFromStanza(item);
+				appModel.addBuddy(buddy);
+			}
+			
+			for each(var b2:Buddy in appModel.buddyByJid)
+			{
+				if(!b2.used)
+					appModel.removeBuddy(b2);
+			}
 		}
 		
+		//-------------------------------
+		// CONNECT
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		public function connect():void
 		{
 			disconnect();
@@ -156,6 +252,13 @@ package com.cleartext.ximpp.models
 			}
 		}
 		
+		//-------------------------------
+		// DISCONNECT
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		public function disconnect():void
 		{
 			if (connected)
@@ -165,7 +268,7 @@ package com.cleartext.ximpp.models
 				xmpp.send(presenceType);
 		 		xmpp.disconnect();
 		 		appModel.serverSideStatus = Status.OFFLINE;
-		 		for each(var buddy:Buddy in appModel.buddies)
+		 		for each(var buddy:Buddy in appModel.buddyCollection)
 		 		{
 		 			buddy.status = Status.OFFLINE;
 		 			buddy.customStatus = "";
@@ -173,24 +276,52 @@ package com.cleartext.ximpp.models
 		 	}
 		}
 		
+		//-------------------------------
+		// STREAM DISCONNECTED HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function streamDisconnectedHandler(event:StreamEvent):void
 		{
 			appModel.log(event);
 		}
 
+		//-------------------------------
+		// STREAM CONNECT FAILED HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function streamConnectFailedHandler(event:StreamEvent):void
 		{
 			appModel.log(event);
 			appModel.serverSideStatus = Status.OFFLINE;
-			if(!settings.autoConnect)
+			if(!settings.global.autoConnect)
 				appModel.localStatus = Status.OFFLINE;
 		}
 
+		//-------------------------------
+		// STREAM CONNECTED HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
 		private function streamConnectedHandler(event:StreamEvent):void
 		{
 			appModel.log(event);	
 		}
+
+		//-------------------------------
+		// SEND PRESENCE
+		//-------------------------------
 		
+		/**
+		 * ...
+		 */
 		public function sendPresence():void
 		{
 			var status:String = appModel.localStatus;
@@ -215,6 +346,19 @@ package com.cleartext.ximpp.models
 			{
 				connect();
 			}	
+		}
+		
+		//-------------------------------
+		// SEND MESSAGE
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
+		public function sendMessage(toJid:String, msg:String):void
+		{
+			if(connected)
+				xmpp.sendMessage(toJid, msg);
 		}
 
 	}

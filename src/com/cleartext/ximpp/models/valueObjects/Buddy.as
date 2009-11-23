@@ -1,13 +1,10 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.events.BuddyEvent;
-	import com.universalsprout.flex.components.list.SproutListDataBase;;
+	import com.cleartext.ximpp.models.XimppUtils;
+	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
-	/**
-	 * @inheritDoc
-	 */
-	[Event(name="customStatusChanged", type="com.cleartext.ximpp.events.BuddyEvent")]
-	
+	import flash.display.BitmapData;;
+		
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IXimppValueObject
 	{
@@ -21,40 +18,36 @@ package com.cleartext.ximpp.models.valueObjects
 			"buddyId INTEGER PRIMARY KEY AUTOINCREMENT, " +
 			"userId INTEGER, " +
 			"jid TEXT UNIQUE, " +
-			"url TEXT, " +
-			"isGateway BOOLEAN, " +
 			"nickName TEXT, " +
 			"groups TEXT, " +
-			"emailAddress TEXT, " +
+			"lastSeen DATE, " + 
 			"avatar TEXT, " +
-			"broadcast BOOLEAN);";
-		
+			"service BOOLEAN);";
+
+		// storred in database		
 		public var buddyId:int = -1;
-		public var jid:String = "";
-		public var resource:String = "";
-		public var url:String = "";
-		public var isGateway:Boolean = false;
-		public var nickName:String = "";
-		public var groups:Array;
-		public var emailAddress:String = "";
+		public var jid:String;
+		public var nickName:String;
+		public var groups:Array = new Array();
+		public var service:Boolean = false;
 		public var lastSeen:Date;
+		public var avatar:BitmapData;
+
+		// not storred in database 
+		public var used:Boolean = true;
+		public var resource:String = "";
 		public var status:String = Status.OFFLINE;
-		public var customStatus:String = "";
-		public var broadcast:Boolean = false;
+		public var customStatus:String;
 		
 		public function fill(obj:Object):void
 		{
 			buddyId = obj["buddyId"];
 			jid = obj["jid"];
-			resource = obj["resource"];
-			url = obj["url"];
-			isGateway = obj["isGateway"];
 			nickName = obj["nickName"];
-			groups = (obj["groups"] as String).split(",");
-			emailAddress = obj["emailAddress"];
-			lastSeen = obj["lastSeen"];
-			status = Status.OFFLINE;
-			broadcast = obj["broadcast"];
+//			groups = (obj["groups"] as String).split(",");
+			service = obj["service"];
+			lastSeen = new Date(obj["lastSeen"]);
+			avatar = XimppUtils.stringToAvatar(obj["avatar"]);
 		}
 		
 		public function toDatabaseValues(userId:int):Array
@@ -62,31 +55,30 @@ package com.cleartext.ximpp.models.valueObjects
 			return [
 				new DatabaseValue("userId", userId),
 				new DatabaseValue("jid", jid),
-				new DatabaseValue("url", url),
-				new DatabaseValue("isGateway", isGateway),
 				new DatabaseValue("nickName", nickName),
-				new DatabaseValue("groups", (groups as Array).join(",")),
-				new DatabaseValue("emailAddress", emailAddress),
-				new DatabaseValue("broadcast", broadcast)];
+				new DatabaseValue("groups", groups.join(",")),
+				new DatabaseValue("service", service),
+				new DatabaseValue("lastSeen", lastSeen),
+				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar))];
 		}
 		
 		public static function createFromStanza(stanza:Object):Buddy
 		{
-			var timeNow:Date = new Date();
 			var newBuddy:Buddy = new Buddy();
 
 			newBuddy.jid = stanza['jid'];
-//			newBuddy.url 
-			newBuddy.isGateway = (newBuddy.jid.search("@") == 0);
 			newBuddy.nickName = (stanza['nick'] == "") ? newBuddy.jid : stanza['nick'];
 			newBuddy.groups = stanza['groups'];
-//			newBuddy.emailAddress
-			newBuddy.lastSeen = timeNow;
+			newBuddy.lastSeen = new Date();
 			newBuddy.status = stanza['type'];
 			newBuddy.customStatus = stanza['status'];
-//			newBuddy.broadcast
 
 			return newBuddy;
+		}
+		
+		public function get fullJid():String
+		{
+			return jid + "/" + resource;
 		}
 		
 		override public function toString():String

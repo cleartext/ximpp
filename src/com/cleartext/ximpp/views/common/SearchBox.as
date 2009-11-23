@@ -12,7 +12,7 @@ package com.cleartext.ximpp.views.common
 	/**
 	 * @inheritDoc
 	 */
-	[Event(name="search", type="com.events.SearchBoxEvent")]
+	[Event(name="search", type="com.cleartext.ximpp.events.SearchBoxEvent")]
 
 	public class SearchBox extends Canvas
 	{

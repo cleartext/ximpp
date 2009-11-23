@@ -56,16 +56,26 @@
 				backgroundColor="0xffffff"
 				id="buddyCanvas"
 				width="20%"/>
-			<timeline:TimelineCanvas
-				backgroundColor="0xffffff"
-				id="timelineCanvas"
-				width="40%"/>
 			<chats:ChatCanvas
 				backgroundColor="0xffffff"
 				id="chatCanvas"
 				width="40%"/>
+			<timeline:TimelineCanvas
+				backgroundColor="0xffffff"
+				id="timelineCanvas"
+				width="40%"/>
 		</mx:HDividedBox>
-		<mx:TextArea id="console" backgroundColor="0xffffff" width="100%" height="30%" text="{appModel.logText}" editable="false" updateComplete="console.verticalScrollPosition = console.maxVerticalScrollPosition" verticalScrollPolicy="off"/>
+		<mx:TextArea
+			id="console"
+			backgroundColor="0xffffff"
+			width="100%" height="200"
+			text="{appModel.logText}"
+			editable="false"
+			updateComplete="console.verticalScrollPosition = console.maxVerticalScrollPosition"
+			verticalScrollPolicy="on"
+			includeInLayout="{appModel.showConsole}"
+			visible="{appModel.showConsole}"
+			/>
 	</mx:VDividedBox>
-
+	
 </mx:Canvas>
