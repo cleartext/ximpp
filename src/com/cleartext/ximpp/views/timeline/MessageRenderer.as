@@ -102,7 +102,7 @@ package com.cleartext.ximpp.views.timeline
 				addChild(timeLabel);
 			}
 
-			if(!avatar.bitmapData)
+			if(!avatar.bitmapData && appModel)
 			{
 				var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 				if(buddy)

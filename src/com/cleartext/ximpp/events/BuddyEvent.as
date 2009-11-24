@@ -4,11 +4,16 @@ package com.cleartext.ximpp.events
 
 	public class BuddyEvent extends Event
 	{
-		public static const CUSTOM_STATUS_CHANGED:String = "customStatusChanged";
+		public static const EDIT_BUDDY:String = "editBuddy";
 		
 		public function BuddyEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
+		}
+		
+		override public function clone():Event
+		{
+			return new BuddyEvent(type, bubbles, cancelable);
 		}
 		
 	}

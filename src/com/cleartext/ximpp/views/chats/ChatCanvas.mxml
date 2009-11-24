@@ -16,7 +16,6 @@
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.models.valueObjects.Chat;
-			import com.cleartext.ximpp.views.common.ChatSproutList;
 			import com.universalsprout.flex.components.list.SproutList;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import mx.events.CollectionEvent;

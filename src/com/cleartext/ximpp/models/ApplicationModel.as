@@ -60,10 +60,10 @@ package com.cleartext.ximpp.models
 		public var chats:ArrayCollection = new ArrayCollection();
 		
 		[Bindable]
-		public var serverSideStatus:String = Status.OFFLINE;
+		public var serverSideStatus:Status = new Status(Status.OFFLINE);
 		
 		[Bindable]
-		public var localStatus:String = Status.OFFLINE;
+		public var localStatus:Status = new Status(Status.OFFLINE);
 		
 		[Bindable]
 		public var showConsole:Boolean = true;
@@ -94,12 +94,12 @@ package com.cleartext.ximpp.models
 			dispatchEvent(new Event("logTextChanged"));
 		}
 		
-		public function setUserPresence(status:String, customStatus:String):void
+		public function setUserPresence(statusString:String, customStatus:String):void
 		{
-			localStatus = status;
-			
+			localStatus.value = statusString;
+	
 			if(!settings.userAccount ||
-				localStatus == serverSideStatus && 
+				localStatus.value == serverSideStatus.value && 
 				customStatus == settings.userAccount.customStatus)
 				return;
 			
@@ -211,9 +211,9 @@ package com.cleartext.ximpp.models
 			if(buddy1.status == buddy2.status)
 				return nameCompare;
 			
-			else if(buddy1.status == Status.OFFLINE)
+			else if(buddy1.status.value == Status.OFFLINE)
 				return 1;
-			else if(buddy2.status == Status.OFFLINE)
+			else if(buddy2.status.value == Status.OFFLINE)
 				return -1;
 			
 			return 0;

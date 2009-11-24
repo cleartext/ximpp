@@ -1,13 +1,22 @@
 package com.cleartext.ximpp.views.common
 {
+	import com.cleartext.ximpp.events.AvatarEvent;
+	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
+	import flash.events.MouseEvent;
+	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	
 	import mx.core.UIComponent;
 
+	[Event(name="editClicked", type="com.cleartext.ximpp.events.AvatarEvent")]
+
 	public class Avatar extends UIComponent
 	{
+		[Embed (source="../../assets/edit.png")]
+		private var EditIcon:Class;
+
 		[Embed(source="com/cleartext/ximpp/assets/user.jpg")]
 		private var DefaultAvatar:Class;
 		
@@ -66,6 +75,63 @@ package com.cleartext.ximpp.views.common
 			}
 		}
 		
+		private var showEditIcon:Boolean = false;
+		private var _editable:Boolean = false;
+		private var editableChanged:Boolean = false;
+		
+		public function get editable():Boolean
+		{
+			return _editable;
+		}
+		public function set editable(value:Boolean):void
+		{
+			if(_editable != value)
+			{
+				_editable = value;
+				editableChanged = true;
+				invalidateProperties();
+			}
+		}
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if(editableChanged)
+			{
+				if(editable)
+				{
+					addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
+					addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+					addEventListener(MouseEvent.CLICK, clickHandler);
+				}
+				else
+				{
+					removeEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
+					removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+					removeEventListener(MouseEvent.CLICK, clickHandler);
+				}
+				editableChanged = false;
+			}
+		}
+		
+		private function rollOverHandler(event:MouseEvent):void
+		{
+			showEditIcon = true;
+			invalidateDisplayList();
+		}
+		
+		private function rollOutHandler(event:MouseEvent):void
+		{
+			showEditIcon = false;
+			invalidateDisplayList();
+		}
+		
+		private function clickHandler(event:MouseEvent):void
+		{
+			dispatchEvent(new AvatarEvent(AvatarEvent.EDIT_CLICKED));
+		}
+		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			var g:Graphics = graphics;
@@ -79,7 +145,19 @@ package com.cleartext.ximpp.views.common
 			if(border)
 				g.lineStyle(1, borderColour);
 	
-			g.drawRect(0,0,width,height);
+			g.drawRect(0,0,unscaledWidth,unscaledHeight);
+
+			if(showEditIcon)
+			{
+				var editBitmapData:BitmapData = new EditIcon().bitmapData;
+				var transform:ColorTransform = new ColorTransform();
+				transform.alphaMultiplier = 0.85;
+				editBitmapData.colorTransform(editBitmapData.rect, transform);
+				
+				scale = Math.min(unscaledWidth/editBitmapData.width, unscaledHeight/editBitmapData.height);
+				g.beginBitmapFill(editBitmapData, new Matrix(scale, 0, 0, scale));
+				g.drawRect(0,0,unscaledWidth,unscaledHeight);
+			}
 		}
 
 		

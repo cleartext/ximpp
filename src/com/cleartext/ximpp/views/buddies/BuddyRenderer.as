@@ -1,5 +1,7 @@
 package com.cleartext.ximpp.views.buddies
 {
+	import com.cleartext.ximpp.events.AvatarEvent;
+	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
@@ -75,6 +77,8 @@ package com.cleartext.ximpp.views.buddies
 			if(!avatar)
 			{
 				avatar = new Avatar();
+				avatar.editable = true;
+				avatar.addEventListener(AvatarEvent.EDIT_CLICKED, avatarClicked);
 				addChild(avatar);
 			}
 			
@@ -114,8 +118,8 @@ package com.cleartext.ximpp.views.buddies
 			// set values
 			customStatusLabel.text = buddy.customStatus;
 			nameLabel.text = buddy.nickName;
-			statusLabel.text = buddy.status;
-			statusIcon.status = buddy.status;
+			statusLabel.text = buddy.status.value;
+			statusIcon.status.value = buddy.status.value;
 			
 			// refresh styles
 			nameLabel.styleName = "blackBold";
@@ -163,6 +167,12 @@ package com.cleartext.ximpp.views.buddies
 					});
 			}
 		}		
+		
+		private function avatarClicked(event:AvatarEvent):void
+		{
+			trace(event.type + " : " + BuddyEvent.EDIT_BUDDY);
+			dispatchEvent(new BuddyEvent(BuddyEvent.EDIT_BUDDY, true));
+		}
 		
 		//---------------------------------------
 		// Update Display List

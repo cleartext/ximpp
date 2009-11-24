@@ -36,7 +36,11 @@ package com.cleartext.ximpp.models.valueObjects
 		// not storred in database 
 		public var used:Boolean = true;
 		public var resource:String = "";
-		public var status:String = Status.OFFLINE;
+		private var _status:Status = new Status(Status.OFFLINE);
+		public function get status():Status
+		{
+			return _status;
+		}
 		public var customStatus:String;
 		
 		public function fill(obj:Object):void
@@ -70,7 +74,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newBuddy.nickName = (stanza['nick'] == "") ? newBuddy.jid : stanza['nick'];
 			newBuddy.groups = stanza['groups'];
 			newBuddy.lastSeen = new Date();
-			newBuddy.status = stanza['type'];
+			newBuddy.status.value = stanza['type'];
 			newBuddy.customStatus = stanza['status'];
 
 			return newBuddy;

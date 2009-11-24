@@ -232,8 +232,7 @@
 			<mx:TextInput id="nickname" change="changesMade = true;" />
 		</mx:FormItem>
 		<mx:FormItem label="profile picture:" direction="horizontal">
-			<common:Avatar id="avatar" width="64" height="64"/>
-			<mx:Button label="change..." click="changeAvatar()"/>
+			<common:Avatar id="avatar" width="64" height="64" editable="true" editClicked="changeAvatar()" />
 		</mx:FormItem>
 		<mx:FormItem label="jid:">
 			<mx:TextInput id="jid" change="changesMade = true;" />

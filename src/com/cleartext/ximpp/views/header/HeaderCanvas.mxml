@@ -33,7 +33,7 @@
 		]]>
 	</mx:Script>
 	<common:StatusIcon
-		status="{appModel.serverSideStatus}"
+		statusString="{appModel.serverSideStatus.value}"
 		x="10" y="12"
 		/>
 	
@@ -42,9 +42,9 @@
 		dataProvider="{Status.USER_TYPES}"
 		change="userPresenceChangeHandler()"
 		x="32" y="10" width="110"
-		text="{appModel.serverSideStatus}"
-		creationComplete="statusComboBox.text=appModel.serverSideStatus"
-		selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus)}"
+		text="{appModel.serverSideStatus.value}"
+		creationComplete="statusComboBox.text=appModel.serverSideStatus.value"
+		selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus.value)}"
 		/>
 		
 	<common:DefaultTextInput

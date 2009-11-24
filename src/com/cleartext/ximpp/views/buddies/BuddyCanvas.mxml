@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox 
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
-	xmlns:buddies="com.cleartext.ximpp.view.buddies.*"
+	xmlns:buddies="com.cleartext.ximpp.views.buddies.*"
 	width="100%" height="100%"
 	xmlns:common="com.cleartext.ximpp.views.common.*" 
 	xmlns:containers="com.arc90.flexlib.containers.*"
 	verticalGap="0" xmlns:list="com.universalsprout.flex.components.list.*">
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.universalsprout.flex.components.list.SproutListEvent;
 			import com.hurlant.crypto.symmetric.NullPad;
@@ -83,14 +84,15 @@
 		</mx:ComboBox>
 	</mx:Canvas>
 
-	<list:SproutList 
+	<buddies:BuddySproutList
 		id="buddyList" 
 		doubleClickEnabled="true"
 		itemDoubleClicked="itemDoubleClicked(event)"
 		dataProvider="{appModel.buddyCollection}"
 		height="100%" 
-		itemRenderer="{new ClassFactory(BuddyRenderer)}">
-	</list:SproutList>
+		itemRenderer="{new ClassFactory(BuddyRenderer)}"
+		editBuddy="Alert.show('edit me: ' + (event.target.data as Buddy).nickName, 'Edit Buddy')">
+	</buddies:BuddySproutList>
 
 	<mx:Canvas>
 		<mx:Button x="20" label="add buddy" />

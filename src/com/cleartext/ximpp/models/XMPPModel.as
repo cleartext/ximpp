@@ -150,7 +150,7 @@ package com.cleartext.ximpp.models
 				return;
 			
 			buddy.resource = fromJid.resource;
-			buddy.status = Status.fromShow(stanza["type"]);
+			buddy.status.setFromShow((stanza["type"]));
 			buddy.customStatus = stanza["status"];
 			
 			database.saveBuddy(buddy);
@@ -232,7 +232,7 @@ package com.cleartext.ximpp.models
 		{
 			disconnect();
 			
-			appModel.serverSideStatus = Status.CONNECTING;
+			appModel.serverSideStatus.value = Status.CONNECTING;
 
 			var account:UserAccount = settings.userAccount;
 			if(account.jid &&
@@ -267,10 +267,10 @@ package com.cleartext.ximpp.models
 		 		var presenceType:String = "<presence from='" + xmpp.fulljid.toString() + "' type='unavailable' status='Logged out' />";
 				xmpp.send(presenceType);
 		 		xmpp.disconnect();
-		 		appModel.serverSideStatus = Status.OFFLINE;
+		 		appModel.serverSideStatus.value = Status.OFFLINE;
 		 		for each(var buddy:Buddy in appModel.buddyCollection)
 		 		{
-		 			buddy.status = Status.OFFLINE;
+		 			buddy.status.value = Status.OFFLINE;
 		 			buddy.customStatus = "";
 		 		}
 		 	}
@@ -298,9 +298,9 @@ package com.cleartext.ximpp.models
 		private function streamConnectFailedHandler(event:StreamEvent):void
 		{
 			appModel.log(event);
-			appModel.serverSideStatus = Status.OFFLINE;
+			appModel.serverSideStatus.value = Status.OFFLINE;
 			if(!settings.global.autoConnect)
-				appModel.localStatus = Status.OFFLINE;
+				appModel.localStatus.value = Status.OFFLINE;
 		}
 
 		//-------------------------------
@@ -324,11 +324,11 @@ package com.cleartext.ximpp.models
 		 */
 		public function sendPresence():void
 		{
-			var status:String = appModel.localStatus;
+			var status:Status = appModel.localStatus;
 			var customStatus:String = settings.userAccount.customStatus;
 
 			// if we are connected and want to go offline, then disconnect
-			if(connected && status == Status.OFFLINE)
+			if(connected && status.value == Status.OFFLINE)
 			{
 				disconnect();
 			}
@@ -336,13 +336,13 @@ package com.cleartext.ximpp.models
 			// if we are already connected, then send the presence
 			else if(connected)
 			{
-				xmpp.sendPresence(customStatus, Status.toShow(status), "5");
+				xmpp.sendPresence(customStatus, status.toShow(), "5");
 				appModel.serverSideStatus = status;
 			}
 			
 			// if we want to connect, then try to connect, if we are successful, then
 			// we will send the presence once the session is established
-			else if(status != Status.OFFLINE)
+			else if(status.value != Status.OFFLINE)
 			{
 				connect();
 			}	

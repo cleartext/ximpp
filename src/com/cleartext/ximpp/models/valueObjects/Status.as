@@ -1,6 +1,12 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	public class Status
+	import com.cleartext.ximpp.events.StatusEvent;
+	
+	import flash.events.EventDispatcher;
+	
+	[Event(name="statusChanged", type="com.cleartext.ximpp.events.StatusEvent")]
+
+	public class Status extends EventDispatcher
 	{
 		// unavailable
 		public static const OFFLINE:String = "offline";
@@ -17,27 +23,80 @@ package com.cleartext.ximpp.models.valueObjects
 		// other status'
 		public static const CONNECTING:String = "connecting...";
 		public static const ERROR:String = "error";
+		public static const CLOSE:String = "close";
+		
+		public function Status(value:String=UNKNOWN)
+		{
+			this.value = value;
+			edit = false;
+			numUnread = 0;
+		}
+		
+		private var _value:String;
+		[Bindable (event="statusChanged")]
+		public function get value():String
+		{
+			return _value;	
+		}
+		public function set value(value:String):void
+		{
+			if(_value != value)
+			{
+				_value = value;
+				dispatchEvent(new StatusEvent(StatusEvent.STATUS_CHANGED));
+			}
+		}
+
+		private var _edit:Boolean;
+		[Bindable (event="statusChanged")]
+		public function get edit():Boolean
+		{
+			return _edit;	
+		}
+		public function set edit(value:Boolean):void
+		{
+			if(_edit != value)
+			{
+				_edit = value;
+				dispatchEvent(new StatusEvent(StatusEvent.STATUS_CHANGED));
+			}
+		}
+
+		private var _numUnread:int;
+		[Bindable (event="statusChanged")]
+		public function get numUnread():int
+		{
+			return _numUnread;	
+		}
+		public function set numUnread(value:int):void
+		{
+			if(_numUnread != value)
+			{
+				_numUnread = value;
+				dispatchEvent(new StatusEvent(StatusEvent.STATUS_CHANGED));
+			}
+		}
 		
 		// find a status value from what the xmpp libray tells us
-		public static function fromShow(show:String):String
+		public function setFromShow(show:String):void
 		{
 			switch(show)
 			{
-				case "unavailable" : return OFFLINE;
-				case "" : return AVAILABLE;
-				case "available" : return AVAILABLE;
-				case "chat" : return AVAILABLE; 
-				case "away" : return AWAY;
-				case "dnd" : return BUSY;
-				case "xa" : return EXTENDED_AWAY;
-				default : return UNKNOWN;
+				case "unavailable" : value = OFFLINE;
+				case "" : value = AVAILABLE;
+				case "available" : value = AVAILABLE;
+				case "chat" : value = AVAILABLE; 
+				case "away" : value = AWAY;
+				case "dnd" : value = BUSY;
+				case "xa" : value = EXTENDED_AWAY;
+				default : value = UNKNOWN;
 			}
 		}
 		
 		// generate something the xmpp library will understand
-		public static function toShow(status:String):String
+		public function toShow():String
 		{
-			switch(status)
+			switch(value)
 			{
 				case OFFLINE : return "unavailable";
 				case AVAILABLE : return "chat";
