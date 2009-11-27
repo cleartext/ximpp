@@ -82,13 +82,13 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			switch(show)
 			{
-				case "unavailable" : value = OFFLINE;
-				case "" : value = AVAILABLE;
-				case "available" : value = AVAILABLE;
-				case "chat" : value = AVAILABLE; 
-				case "away" : value = AWAY;
-				case "dnd" : value = BUSY;
-				case "xa" : value = EXTENDED_AWAY;
+				case "unavailable" : value = OFFLINE; break;
+				case "" : value = AVAILABLE; break;
+				case "available" : value = AVAILABLE; break;
+				case "chat" : value = AVAILABLE; break;
+				case "away" : value = AWAY; break;
+				case "dnd" : value = BUSY; break;
+				case "xa" : value = EXTENDED_AWAY; break;
 				default : value = UNKNOWN;
 			}
 		}
