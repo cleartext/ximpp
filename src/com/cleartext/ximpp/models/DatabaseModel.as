@@ -232,7 +232,7 @@ package com.cleartext.ximpp.models
 					{
 						var buddy:Buddy = new Buddy();
 						buddy.fill(result.data[i]);
-						appModel.addBuddy(buddy);
+						appModel.addBuddy(buddy, false);
 					}
 				}
 			    // if we've got to this point without errors, commit the transaction 

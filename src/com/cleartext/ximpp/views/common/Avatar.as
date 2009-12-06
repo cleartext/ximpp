@@ -17,7 +17,7 @@ package com.cleartext.ximpp.views.common
 		[Embed (source="../../assets/edit.png")]
 		private var EditIcon:Class;
 
-		[Embed(source="com/cleartext/ximpp/assets/user.jpg")]
+		[Embed(source="../../assets/user.jpg")]
 		private var DefaultAvatar:Class;
 		
 		public function Avatar()
@@ -76,19 +76,18 @@ package com.cleartext.ximpp.views.common
 		}
 		
 		private var showEditIcon:Boolean = false;
-		private var _editable:Boolean = false;
-		private var editableChanged:Boolean = false;
+		private var buttonModeChanged:Boolean = false;
 		
-		public function get editable():Boolean
+		override public function get buttonMode():Boolean
 		{
-			return _editable;
+			return super.buttonMode;
 		}
-		public function set editable(value:Boolean):void
+		override public function set buttonMode(value:Boolean):void
 		{
-			if(_editable != value)
+			if(super.buttonMode != value)
 			{
-				_editable = value;
-				editableChanged = true;
+				super.buttonMode = value;
+				buttonModeChanged = true;
 				invalidateProperties();
 			}
 		}
@@ -97,9 +96,9 @@ package com.cleartext.ximpp.views.common
 		{
 			super.commitProperties();
 			
-			if(editableChanged)
+			if(buttonModeChanged)
 			{
-				if(editable)
+				if(buttonMode)
 				{
 					addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
 					addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
@@ -111,7 +110,7 @@ package com.cleartext.ximpp.views.common
 					removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
 					removeEventListener(MouseEvent.CLICK, clickHandler);
 				}
-				editableChanged = false;
+				buttonModeChanged = false;
 			}
 		}
 		

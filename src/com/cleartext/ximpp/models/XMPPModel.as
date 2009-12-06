@@ -10,9 +10,17 @@ package com.cleartext.ximpp.models
 	import com.hurlant.crypto.tls.TLSEvent;
 	import com.hurlant.crypto.tls.TLSSocket;
 	import com.seesmic.as3.xmpp.JID;
+	import com.seesmic.as3.xmpp.Stanza;
 	import com.seesmic.as3.xmpp.StreamEvent;
 	import com.seesmic.as3.xmpp.XMPP;
 	import com.seesmic.as3.xmpp.XMPPEvent;
+	import com.seesmic.as3.xmpp.XPathHandler;
+	
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
+	import flash.events.Event;
+	
+	import mx.controls.Image;
 	
 	public class XMPPModel
 	{
@@ -21,6 +29,8 @@ package com.cleartext.ximpp.models
 		[Autowire]
 		[Bindable]
 		public var appModel:ApplicationModel;
+		
+		private var firstTime:Boolean = false;
 		
 		private function get settings():SettingsModel
 		{
@@ -49,8 +59,29 @@ package com.cleartext.ximpp.models
 //			xmpp.addEventListener(XMPPEvent.PRESENCE_UNAVAILABLE, presenceUnavailableHandler);
 //			xmpp.addEventListener(XMPPEvent.PRESENCE_ERROR, presenceErrorHandler);
 //			xmpp.addEventListener(XMPPEvent.PRESENCE_SUBSCRIBE, presenceSubscribeHandler);
-			xmpp.addEventListener(XMPPEvent.ROSTER_COMPLETE, rosterCompleteHandler);
-			xmpp.auto_reconnect = true;
+			xmpp.addEventListener(XMPPEvent.ROSTER_LIST_CHANGE, rosterListChangeHandler);
+			xmpp.auto_reconnect = false;
+
+			xmpp.addHandler(new XPathHandler("{jabber:client}iq/{vcard-temp}vCard", vCardHandler));			
+		}
+		
+		private function vCardHandler(stanza:Stanza):void
+		{
+			namespace vCardTemp = "vcard-temp";
+			var xml:XML = stanza.getXML();
+			
+			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
+			var buddyJid:String = xml.@from;
+			
+			var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
+			XimppUtils.stringToAvatar(avatarString,
+				function(event:Event):void
+				{
+					buddy.avatarHash = buddy.tempAvatarHash;
+					buddy.tempAvatarHash = "";
+					buddy.avatar = Bitmap(event.target.content).bitmapData;
+					database.saveBuddy(buddy);
+				});
 		}
 		
 		//-------------------------------
@@ -68,6 +99,12 @@ package com.cleartext.ximpp.models
 			database.saveMessage(message);
 
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
+			if(!buddy)
+			{
+				buddy = new Buddy();
+				buddy.jid = message.sender;
+			}
+			
 			buddy.lastSeen = message.timestamp;
 			buddy.resource = event.stanza.from.resource;
 			
@@ -92,6 +129,7 @@ package com.cleartext.ximpp.models
 		{
 			appModel.log(event);
 			appModel.serverSideStatus = appModel.localStatus;
+			firstTime = true;
 			xmpp.getRoster();
 			sendPresence();
 		}
@@ -141,7 +179,7 @@ package com.cleartext.ximpp.models
 		 */
 		private function presenceHandler(event:XMPPEvent):void
 		{
-			var stanza:Object = event.stanza;
+			var stanza:Stanza = event.stanza as Stanza;
 			
 			var fromJid:JID = stanza["from"];
 			var buddy:Buddy = appModel.getBuddyByJid(fromJid.getBareJID());
@@ -153,8 +191,21 @@ package com.cleartext.ximpp.models
 			buddy.status.setFromShow((stanza["type"]));
 			buddy.customStatus = stanza["status"];
 			
-			database.saveBuddy(buddy);
+			namespace vcard = "vcard-temp:x:update";
+			var xml:XML = stanza.getXML();
+			var avatarHash:String = xml.vcard::x.vcard::photo;
+			
+			if(avatarHash)
+			{
+				appModel.log("ah " + avatarHash);
+				if(buddy.avatarHash != avatarHash)
+				{
+				}
+					buddy.tempAvatarHash = avatarHash;
+					xmpp.send("<iq from='" + settings.userAccount.jid + "' to='" + buddy.jid + "' type='get' id='vc2'><vCard xmlns='vcard-temp'/></iq>");
+			}
 
+			database.saveBuddy(buddy);
 			appModel.log(event);
 		}
 		
@@ -201,11 +252,12 @@ package com.cleartext.ximpp.models
 		/**
 		 * ...
 		 */
-		private function rosterCompleteHandler(event:XMPPEvent):void
+		private function rosterListChangeHandler(event:XMPPEvent):void
 		{
-			for each(var b1:Buddy in appModel.buddyByJid)
+			if(firstTime)
 			{
-				b1.used = false;
+				for each(var b1:Buddy in appModel.buddyByJid)
+					b1.used = false;
 			}
 			
 			for each(var item:Object in event.stanza)
@@ -214,10 +266,12 @@ package com.cleartext.ximpp.models
 				appModel.addBuddy(buddy);
 			}
 			
-			for each(var b2:Buddy in appModel.buddyByJid)
+			if(firstTime)
 			{
-				if(!b2.used)
-					appModel.removeBuddy(b2);
+				firstTime = false;
+				for each(var b2:Buddy in appModel.buddyByJid)
+					if(!b2.used)
+						appModel.removeBuddy(b2);
 			}
 		}
 		

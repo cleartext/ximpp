@@ -47,6 +47,26 @@ package com.cleartext.ximpp.views.buddies
 			return data as Buddy;
 		}
 		
+		override public function set data(value:Object):void
+		{
+			if(buddy)
+				buddy.removeEventListener(BuddyEvent.AVATAR_CHANGED, avatarChangeHandler);
+			
+			super.data = value;
+
+			if(buddy)
+			{
+				avatarChangeHandler(null);
+				buddy.addEventListener(BuddyEvent.AVATAR_CHANGED, avatarChangeHandler);
+			}
+		}
+		
+		private function avatarChangeHandler(event:BuddyEvent):void
+		{
+			if(avatar && buddy)
+				avatar.bitmapData = buddy.avatar;
+		}
+		
 		//---------------------------------------
 		// Size Tween
 		//---------------------------------------
@@ -77,9 +97,10 @@ package com.cleartext.ximpp.views.buddies
 			if(!avatar)
 			{
 				avatar = new Avatar();
-				avatar.editable = true;
+				avatar.buttonMode = true;
 				avatar.addEventListener(AvatarEvent.EDIT_CLICKED, avatarClicked);
 				addChild(avatar);
+				avatarChangeHandler(null);
 			}
 			
 			if(!statusIcon)
@@ -99,7 +120,7 @@ package com.cleartext.ximpp.views.buddies
 				statusLabel = new UITextField();
 				addChild(statusLabel);
 			}
-
+			
 			customStatusLabel.visible = false;
 			customStatusLabel.wordWrap = wordWrap;
 		}
@@ -125,7 +146,6 @@ package com.cleartext.ximpp.views.buddies
 			nameLabel.styleName = "blackBold";
 			statusLabel.styleName = "lgreyNormal";
 			customStatusLabel.styleName = "dgreyNormal";
-
 			
 			// What height we should be depends if there is a custom
 			// status to show. If there is no custom status, then make
@@ -196,6 +216,7 @@ package com.cleartext.ximpp.views.buddies
 			nameLabel.move(AVATAR_SIZE + 2*PADDING, PADDING);
 
 			// layout status icon
+			statusIcon.setActualSize(StatusIcon.SIZE, StatusIcon.SIZE);
 			statusIcon.move(AVATAR_SIZE + 2.5*PADDING, 21);
 
 			// layout status label

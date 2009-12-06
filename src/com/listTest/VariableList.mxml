@@ -77,6 +77,7 @@
 						{
 							var index:int = Math.random() * Status.USER_TYPES.length;
 							buddy.status.value = Status.USER_TYPES[index];
+							buddy.status.numUnread = Math.round(Math.random() * 300);
 							buddy.customStatus = (buddy.status.value == Status.OFFLINE) ? "" : randomString(5, 100, 4);
 						}
 						

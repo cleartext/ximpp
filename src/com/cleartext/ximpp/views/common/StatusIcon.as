@@ -6,6 +6,7 @@ package com.cleartext.ximpp.views.common
 	import flash.display.BitmapData;
 	import flash.display.GradientType;
 	import flash.display.Graphics;
+	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
 	
 	import mx.core.UIComponent;
@@ -14,6 +15,9 @@ package com.cleartext.ximpp.views.common
 	{
 		[Embed (source="../../assets/edit.png")]
 		private var EditIcon:Class;
+		
+		[Embed (source="../../assets/delete.png")]
+		private var CloseIcon:Class;
 		
 		public static const SIZE:Number = 14;
 		
@@ -42,6 +46,8 @@ package com.cleartext.ximpp.views.common
 			super();
 			status.addEventListener(StatusEvent.STATUS_CHANGED, statusChanged);
 		}
+		
+//		private var textArea:UITextField;
 		
 		private var _status:Status = new Status();
 		public function get status():Status
@@ -84,12 +90,99 @@ package com.cleartext.ximpp.views.common
 					baseColour = DEFAULT_B;
 					break;
 			}
+			
+//			if(status.numUnread > 0)
+//			{
+//				textArea.text = status.numUnread.toString();
+//				textArea.visible = true;
+//			}
+//			else
+//			{
+//				textArea.text = "";
+//				textArea.visible = false;
+//			}
+			
 			invalidateDisplayList();
 		}
 		
 		public function set statusString(statusString:String):void
 		{
 			_status.value = statusString;
+		}
+
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+//			if(!textArea)
+//			{
+//				textArea = new UITextField();
+//				textArea.visible = false;
+//				textArea.width = SIZE;
+//				textArea.height = SIZE;
+//				addChild(textArea);
+//			}
+			
+		}
+		
+		private var showCloseIcon:Boolean = false;
+		private var buttonModeChanged:Boolean = false;
+		
+		override public function get buttonMode():Boolean
+		{
+			return super.buttonMode;
+		}
+		override public function set buttonMode(value:Boolean):void
+		{
+			if(super.buttonMode != value)
+			{
+				super.buttonMode = value;
+				buttonModeChanged = true;
+				invalidateProperties();
+			}
+		}
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if(buttonModeChanged)
+			{
+				if(buttonMode)
+				{
+					trace("adding listeners");
+					addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
+					addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+					addEventListener(MouseEvent.CLICK, clickHandler);
+				}
+				else
+				{
+					removeEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
+					removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+					removeEventListener(MouseEvent.CLICK, clickHandler);
+				}
+				buttonModeChanged = false;
+			}
+		}
+		
+		private function rollOverHandler(event:MouseEvent):void
+		{
+			trace("over 1");
+			showCloseIcon = true;
+			invalidateDisplayList();
+		}
+		
+		private function rollOutHandler(event:MouseEvent):void
+		{
+			trace("over 2");
+			showCloseIcon = false;
+			invalidateDisplayList();
+		}
+		
+		private function clickHandler(event:MouseEvent):void
+		{
+			trace("click");
+//			dispatchEvent(new StatusEvent(AvatarEvent.EDIT_CLICKED));
 		}
 
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -110,12 +203,19 @@ package com.cleartext.ximpp.views.common
 			if(status.edit)
 			{
 				var editBitmapData:BitmapData = new EditIcon().bitmapData;
-				var scale:Number = SIZE / Math.max(editBitmapData.width, editBitmapData.height);
-				g.beginBitmapFill(editBitmapData, new Matrix(scale, 0, 0, scale));
+				var scale1:Number = SIZE / Math.max(editBitmapData.width, editBitmapData.height);
+				g.beginBitmapFill(editBitmapData, new Matrix(scale1, 0, 0, scale1));
 				g.drawRect(0,0,SIZE,SIZE);
+			}
+			
+			if(showCloseIcon)
+			{
+				var closeBitmapData:BitmapData = new CloseIcon().bitmapData;
+				var scale2:Number = (SIZE-2) / Math.max(closeBitmapData.width, closeBitmapData.height);
+				g.beginBitmapFill(closeBitmapData, new Matrix(scale2, 0, 0, scale2, 1, 1));
+				g.drawRect(1,1,SIZE-2,SIZE-2);
 			}
 		}
 
-		
 	}
 }

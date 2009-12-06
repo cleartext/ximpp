@@ -1,10 +1,15 @@
 package com.cleartext.ximpp.models.valueObjects
 {
+	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.XimppUtils;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
-	import flash.display.BitmapData;;
-		
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
+	import flash.events.Event;;
+
+	[Event(name="avatarChanged", type="com.cleartext.ximpp.events.BuddyEvent")]		
+
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IXimppValueObject
 	{
@@ -22,7 +27,9 @@ package com.cleartext.ximpp.models.valueObjects
 			"groups TEXT, " +
 			"lastSeen DATE, " + 
 			"avatar TEXT, " +
-			"service BOOLEAN);";
+			"service BOOLEAN, " + 
+			"avatar TEXT, " + 
+			"avatarHash TEXT);";
 
 		// storred in database		
 		public var buddyId:int = -1;
@@ -31,11 +38,27 @@ package com.cleartext.ximpp.models.valueObjects
 		public var groups:Array = new Array();
 		public var service:Boolean = false;
 		public var lastSeen:Date;
-		public var avatar:BitmapData;
+
+		private var _avatar:BitmapData;
+		[Bindable (event="avatarChanged")]
+		public function get avatar():BitmapData
+		{
+			return _avatar;
+		}
+		public function set avatar(value:BitmapData):void
+		{
+			if(_avatar != value)
+			{
+				_avatar = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.AVATAR_CHANGED));
+			}
+		}
+		public var avatarHash:String;
 
 		// not storred in database 
 		public var used:Boolean = true;
 		public var resource:String = "";
+		public var tempAvatarHash:String;
 		private var _status:Status = new Status(Status.OFFLINE);
 		public function get status():Status
 		{
@@ -51,7 +74,21 @@ package com.cleartext.ximpp.models.valueObjects
 //			groups = (obj["groups"] as String).split(",");
 			service = obj["service"];
 			lastSeen = new Date(obj["lastSeen"]);
-			avatar = XimppUtils.stringToAvatar(obj["avatar"]);
+			if(obj["avatar"])
+			{
+				if(obj["avatar"] is String)
+					XimppUtils.stringToAvatar(obj["avatar"],
+						function(event:Event):void
+						{
+							var bmd:BitmapData = Bitmap(event.target.content).bitmapData;
+							if(bmd)
+								avatar = bmd;
+						});
+				else if(obj["avatar"] is BitmapData)
+					avatar = obj["avatar"];
+			}
+			if(obj["avatarHash"])
+				avatarHash = obj["avatarHash"];
 		}
 		
 		public function toDatabaseValues(userId:int):Array
@@ -63,7 +100,8 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("groups", groups.join(",")),
 				new DatabaseValue("service", service),
 				new DatabaseValue("lastSeen", lastSeen),
-				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar))];
+				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar)),
+				new DatabaseValue("avatarHash", avatarHash)];
 		}
 		
 		public static function createFromStanza(stanza:Object):Buddy
@@ -87,7 +125,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		override public function toString():String
 		{
-			return "jid:" + jid + " nickName:" + nickName + " lastSeen:" + lastSeen + " status:" + status + " customStatus:" + customStatus;
+			return "jid:" + jid + " nickName:" + nickName + " lastSeen:" + lastSeen + " status:" + status + " customStatus:" + customStatus + " avatarHash:" + avatarHash;
 		}
 		
 		public function toXML():XML

@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.views.timeline
 {
+	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -55,7 +56,31 @@ package com.cleartext.ximpp.views.timeline
 		override public function set data(value:Object):void
 		{
 			super.data = value;
+
+			if(!appModel || !message)
+				return;
 			
+			var newBuddy:Buddy = appModel.getBuddyByJid(message.sender);
+			
+			if(buddy != newBuddy)
+			{
+				if(buddy)
+					buddy.removeEventListener(BuddyEvent.AVATAR_CHANGED, avatarChangeHandler);
+	
+				buddy = newBuddy;
+				
+				if(buddy)
+				{
+					avatarChangeHandler(null);
+					buddy.addEventListener(BuddyEvent.AVATAR_CHANGED, avatarChangeHandler);
+				}
+			}
+		}
+		
+		private var buddy:Buddy;
+		private function avatarChangeHandler(event:BuddyEvent):void
+		{
+			avatar.bitmapData = buddy.avatar;
 		}
 		
 		//---------------------------------------
@@ -101,13 +126,8 @@ package com.cleartext.ximpp.views.timeline
 				timeLabel = new UITextField();
 				addChild(timeLabel);
 			}
-
-			if(!avatar.bitmapData && appModel)
-			{
-				var buddy:Buddy = appModel.getBuddyByJid(message.sender);
-				if(buddy)
-					avatar.bitmapData = buddy.avatar;
-			}
+			
+			data = data;
 		}
 		
 		//---------------------------------------

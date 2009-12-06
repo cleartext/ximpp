@@ -38,8 +38,8 @@ package com.seesmic.as3.xmpp
 		public static const ROSTER_ERROR:String = "xmpp-roster-error";
 		public static const BOUND:String = "xmpp-jid-bound";
 		
-		// cleartext custom events
-		public static const ROSTER_COMPLETE:String = "xmpp-roster-complete";
+		// extended by andy
+		public static const ROSTER_LIST_CHANGE:String = "xmpp-roster-change";
 
 		public var stanza:Object;
 		public function XMPPEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false, stanza:Object=null)

@@ -1,11 +1,13 @@
 package com.cleartext.ximpp.models.valueObjects
 {
+	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.XimppUtils;
 	
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.events.EventDispatcher;
+	import flash.events.Event;
 	
-	public class UserAccount extends EventDispatcher implements IXimppValueObject
+	public class UserAccount extends Buddy implements IXimppValueObject
 	{
 		public static const CREATE_USER_ACCOUNTS_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS userAccounts (" +
@@ -19,18 +21,19 @@ package com.cleartext.ximpp.models.valueObjects
 			"customStatus TEXT, " +
 			"avatar TEXT);";
 		
+		public function UserAccount()
+		{
+			super();
+			buddyId = -2;
+		}
+		
 		public var userId:int = -1;
 		public var accountName:String;
-		public var jid:String;
 		public var nickname:String;
 		public var password:String;
 		public var server:String;
-		[Bindable]
-		public var customStatus:String;
-		[Bindable]
-		public var avatar:BitmapData;
 		
-		public function fill(obj:Object):void
+		override public function fill(obj:Object):void
 		{
 			userId = obj["userId"];
 			accountName = obj["accountName"];	
@@ -39,7 +42,14 @@ package com.cleartext.ximpp.models.valueObjects
 			password = obj["password"];			
 			server = obj["server"];
 			customStatus = obj["customStatus"];
-			avatar = XimppUtils.stringToAvatar(obj["avatar"]);
+			if(obj["avatar"] is String)
+				XimppUtils.stringToAvatar(obj["avatar"],
+					function(event:Event):void
+					{
+						avatar = Bitmap(event.target.content).bitmapData;
+					});
+			else if(obj["avatar"] is BitmapData)
+				avatar = obj["avatar"];
 		}
 		
 		public function get valid():Boolean
@@ -47,17 +57,7 @@ package com.cleartext.ximpp.models.valueObjects
 			return (jid && password && password);
 		}
 		
-		public function toBuddy():Buddy
-		{
-			var buddy:Buddy = new Buddy();
-			buddy.jid = jid;
-			buddy.nickName = nickname;
-			buddy.avatar = avatar;
-			buddy.customStatus = customStatus;
-			return buddy;
-		}
-		
-		public function toDatabaseValues(userId:int):Array
+		override public function toDatabaseValues(userId:int):Array
 		{
 			return [
 				new DatabaseValue("userId", userId),
@@ -68,7 +68,8 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("password", password),
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),
-				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar))];			
+				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar))
+				];			
 		}
 		
 		override public function toString():String
@@ -76,7 +77,7 @@ package com.cleartext.ximpp.models.valueObjects
 			return "";
 		}
 		
-		public function toXML():XML
+		override public function toXML():XML
 		{
 			return null;
 		}

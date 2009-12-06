@@ -62,7 +62,7 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 
-		private var _numUnread:int;
+		private var _numUnread:int = 0;
 		[Bindable (event="statusChanged")]
 		public function get numUnread():int
 		{

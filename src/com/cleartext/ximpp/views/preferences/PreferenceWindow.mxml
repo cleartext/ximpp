@@ -65,7 +65,7 @@
 				
 				for each(var userAcount:UserAccount in accountCollection)
 				{
-					if(userAcount.userId == settings.userAccount.userId)
+					if(settings.userAccount && userAcount.userId == settings.userAccount.userId)
 					{
 						accountList.selectedItem = userAcount;
 						break;
@@ -114,7 +114,18 @@
 				{
 					accountName.text = previousAccount.accountName;
 					nickname.text = previousAccount.nickname;
-					avatar.bitmapData = previousAccount.avatar;
+					if(previousAccount.avatar)
+					{
+						avatar.bitmapData = previousAccount.avatar;
+					}
+					else
+					{
+						previousAccount.addEventListener("avatarChanged",
+							function(event:Event):void
+							{
+								avatar.bitmapData = event.target.avatar;
+							});
+					}
 					jid.text = previousAccount.jid;
 					password.text = previousAccount.password;
 					server.text = previousAccount.server;
@@ -232,7 +243,7 @@
 			<mx:TextInput id="nickname" change="changesMade = true;" />
 		</mx:FormItem>
 		<mx:FormItem label="profile picture:" direction="horizontal">
-			<common:Avatar id="avatar" width="64" height="64" editable="true" editClicked="changeAvatar()" />
+			<common:Avatar id="avatar" width="64" height="64" buttonMode="true" editClicked="changeAvatar()" />
 		</mx:FormItem>
 		<mx:FormItem label="jid:">
 			<mx:TextInput id="jid" change="changesMade = true;" />

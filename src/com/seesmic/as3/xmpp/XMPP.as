@@ -349,7 +349,8 @@ package com.seesmic.as3.xmpp
 				var groups:Array;
 				var result:Dictionary;
 				
-				var rosterItems:Array = new Array();
+				// extended by andy
+				var newRosterItems:Array = new Array();
 				
 				for each(var item:XML in xml.rosterns::query.rosterns::item) {
 					groups = new Array();
@@ -360,11 +361,12 @@ package com.seesmic.as3.xmpp
 					result = roster.updateItem(jid, item.@subscription, item.@name, groups);
 					dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_ITEM, false, false, result));
 					
-					rosterItems.push(result);
+					// extended by andy
+					newRosterItems.push(result);
 				}
 				
-				// extended
-				dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_COMPLETE, false, false, rosterItems));
+				// extended by andy
+				dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_LIST_CHANGE, false, false, newRosterItems));
 
 			} else {
 				dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_ERROR, false, false, stanza));
