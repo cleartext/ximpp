@@ -10,20 +10,20 @@ package com.cleartext.ximpp.models
 	import flash.data.SQLMode;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.SQLErrorEvent;
+	import flash.events.SQLEvent;
 	import flash.filesystem.File;
 	
 	import mx.collections.ArrayCollection;
 	
-	public class DatabaseModel
+	public class DatabaseModel extends EventDispatcher
 	{
 		/*
-		 * asynchronous and synchronous database connections
+		 * synchronous database connections
 		 */
-		private var asyncConn:SQLConnection = new SQLConnection();
 		private var syncConn:SQLConnection = new SQLConnection();
-		
-		private var numTries:Number = 0;
 		
 		[Autowire]
 		[Bindable]
@@ -36,12 +36,12 @@ package com.cleartext.ximpp.models
 				
 		public function close():void
 		{
-			// link the two connections to the file
-			appModel.log("Closing async database connection")
-			asyncConn.close();
-
 			appModel.log("Closing sync database connection")
 			syncConn.close();
+		}
+		
+		public function onTweenEnd(value:Object):void
+		{
 		}
 		
 		/**
@@ -53,22 +53,36 @@ package com.cleartext.ximpp.models
 			{
 				appModel.log("Creating and opening database");
 				
-				// create the on-disk database
+				// create the local database file
 				var dbName:String = "ximpp.db";
-				//dbName = new Date().time + ".db";
+				dbName = new Date().time + ".db";
 				
 				var dbFile:File = File.applicationStorageDirectory.resolvePath(dbName);
 				appModel.log("DB Location: " + dbFile.nativePath);
 				
-				asyncConn.addEventListener(SQLErrorEvent.ERROR, appModel.log);
-				
-				// link the two connections to the file
 				appModel.log("Openning async database connection")
+				var asyncConn:SQLConnection = new SQLConnection();
+				asyncConn.addEventListener(SQLErrorEvent.ERROR, appModel.log, false, 0, true);
+				asyncConn.addEventListener(SQLEvent.OPEN, createTables, false, 0, true);
 				asyncConn.openAsync(dbFile);
 
+				// link the sync connection to the file
 				appModel.log("Opening sync database connection")
 				syncConn.open(dbFile, SQLMode.UPDATE);
-	
+				syncConn.addEventListener(SQLErrorEvent.ERROR, appModel.log, false, 0, true);
+			}
+			catch(error:Error)
+			{
+				appModel.log(error);
+				appModel.fatalError("Could not create local database file.");
+			}
+		}			
+		private function createTables(event:SQLEvent):void
+		{
+			try
+			{
+				(event.target as SQLConnection).close();
+				
 				// start a transaction
 				syncConn.begin();
 				var stmt:SQLStatement = new SQLStatement();
@@ -80,7 +94,7 @@ package com.cleartext.ximpp.models
 				appModel.log("Creating global settings table.");
 				stmt.text = GlobalSettings.CREATE_GLOBAL_SETTINGS_TABLE;
 				stmt.execute();
-				
+
 				/*
 				 * check there is at least one row in the global settings table
 				 */
@@ -122,24 +136,13 @@ package com.cleartext.ximpp.models
 				
 				syncConn.commit();
 				appModel.log("Database created");
+				
+				dispatchEvent(new Event(Event.COMPLETE));
 			}
-			/**
-			 * If there is an error in the initialisation, then try again up to 5 times
-			 * before exiting the app.
-			 */
 			catch (error:Error)
 			{
-				numTries++;
-				appModel.log("Try number: " + numTries + error);
-				
-				if(numTries < 15)
-				{
-					createDatabase();
-				}
-				else
-				{
-					appModel.fatalError("Could not initialise database.");
-				}
+				appModel.log(error);
+				appModel.fatalError("Could not create database tables.");
 			}
 		}
 
@@ -181,7 +184,7 @@ package com.cleartext.ximpp.models
 		public function loadGlobalSettings():void
 		{
 			// start a transaction 
-			syncConn.begin(); 
+			syncConn.begin();
 			appModel.log("Loading global settings");
 			
 			var stmt:SQLStatement = new SQLStatement();

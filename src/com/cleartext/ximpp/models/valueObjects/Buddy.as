@@ -26,7 +26,6 @@ package com.cleartext.ximpp.models.valueObjects
 			"nickName TEXT, " +
 			"groups TEXT, " +
 			"lastSeen DATE, " + 
-			"avatar TEXT, " +
 			"service BOOLEAN, " + 
 			"avatar TEXT, " + 
 			"avatarHash TEXT);";

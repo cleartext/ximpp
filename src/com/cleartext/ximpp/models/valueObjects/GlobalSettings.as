@@ -7,7 +7,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public static const CREATE_GLOBAL_SETTINGS_TABLE:String =
 				"CREATE TABLE IF NOT EXISTS globalSettings (" +
 				"settingId INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				"autoConnect BOOLEAN DEFAULT True, " +
+				"autoConnect BOOLEAN DEFAULT False, " +
 				"urlShortener TEXT DEFAULT '" + UrlShortener.types[0] + "', " +
 				"timelineTopDown BOOLEAN DEFAULT True, " +
 				"chatTopDown BOOLEAN DEFAULT False, " +

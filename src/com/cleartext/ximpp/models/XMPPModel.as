@@ -17,10 +17,7 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XPathHandler;
 	
 	import flash.display.Bitmap;
-	import flash.display.BitmapData;
 	import flash.events.Event;
-	
-	import mx.controls.Image;
 	
 	public class XMPPModel
 	{
@@ -60,12 +57,16 @@ package com.cleartext.ximpp.models
 //			xmpp.addEventListener(XMPPEvent.PRESENCE_ERROR, presenceErrorHandler);
 //			xmpp.addEventListener(XMPPEvent.PRESENCE_SUBSCRIBE, presenceSubscribeHandler);
 			xmpp.addEventListener(XMPPEvent.ROSTER_LIST_CHANGE, rosterListChangeHandler);
-			xmpp.auto_reconnect = false;
 
 			xmpp.addHandler(new XPathHandler("{jabber:client}iq/{vcard-temp}vCard", vCardHandler));			
 		}
 		
 		private function vCardHandler(stanza:Stanza):void
+		
+		//-------------------------------
+		// VCARD HANDLER
+		//-------------------------------
+		
 		{
 			namespace vCardTemp = "vcard-temp";
 			var xml:XML = stanza.getXML();
@@ -167,7 +168,7 @@ package com.cleartext.ximpp.models
 		 */
 		private function authFailedHandler(event:XMPPEvent):void
 		{
-			appModel.log(event);
+			errorHandler(event);
 		}
 		
 		//-------------------------------
@@ -285,6 +286,7 @@ package com.cleartext.ximpp.models
 		public function connect():void
 		{
 			disconnect();
+			xmpp.auto_reconnect = true;
 			
 			appModel.serverSideStatus.value = Status.CONNECTING;
 
@@ -315,6 +317,8 @@ package com.cleartext.ximpp.models
 		 */
 		public function disconnect():void
 		{
+			xmpp.auto_reconnect = false;
+	
 			if (connected)
 			{
 		 		appModel.log("Disconnecting from XMPP server");
@@ -351,10 +355,7 @@ package com.cleartext.ximpp.models
 		 */
 		private function streamConnectFailedHandler(event:StreamEvent):void
 		{
-			appModel.log(event);
-			appModel.serverSideStatus.value = Status.OFFLINE;
-			if(!settings.global.autoConnect)
-				appModel.localStatus.value = Status.OFFLINE;
+			errorHandler(event);
 		}
 
 		//-------------------------------
@@ -413,6 +414,20 @@ package com.cleartext.ximpp.models
 		{
 			if(connected)
 				xmpp.sendMessage(toJid, msg);
+		}
+
+		//-------------------------------
+		// ERROR HANDLER
+		//-------------------------------
+		
+		/**
+		 * ...
+		 */
+		public function errorHandler(event:Event):void
+		{
+			appModel.log(event);
+			disconnect();
+			appModel.serverSideStatus.value = Status.ERROR;
 		}
 
 	}
