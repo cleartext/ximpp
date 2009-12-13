@@ -46,23 +46,6 @@
 				Alert.show("Advanced search is not currently implemented.","Advanced Search");
 			}
 
-			private function createNativeWindow():void
-			{
-				//create the init options 
-				var options:NativeWindowInitOptions = new NativeWindowInitOptions(); 
-				options.transparent = false; 
-				options.systemChrome = NativeWindowSystemChrome.STANDARD; 
-				options.type = NativeWindowType.NORMAL; 
-				 
-				//create the window 
-				var newWindow:NativeWindow = new NativeWindow(options); 
-				newWindow.title = "A title"; 
-				newWindow.width = 600; 
-				newWindow.height = 400; 
-				 
-				//activate and show the new window 
-				newWindow.activate(); 
-			}
 		]]>
 	</mx:Script>
 	
@@ -94,6 +77,5 @@
 			visible="{appModel.showConsole}"
 			/>
 	</mx:VDividedBox>
-	<mx:Button horizontalCenter="0" click="createNativeWindow()" label="window" />
 	
 </mx:Canvas>

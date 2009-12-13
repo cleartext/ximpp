@@ -285,15 +285,15 @@ package com.cleartext.ximpp.models
 		 */
 		public function connect():void
 		{
-			disconnect();
-			xmpp.auto_reconnect = true;
-			
-			appModel.serverSideStatus.value = Status.CONNECTING;
+			if(connected)
+				return;
 
 			var account:UserAccount = settings.userAccount;
-			if(account.jid &&
-				account.password)
+			if(account.jid && account.password)
 			{
+				xmpp.auto_reconnect = true;
+				appModel.serverSideStatus.value = Status.CONNECTING;
+
 				xmpp.setJID(account.jid);
 				xmpp.setPassword(account.password);
 				xmpp.setServer(account.server);
@@ -317,10 +317,9 @@ package com.cleartext.ximpp.models
 		 */
 		public function disconnect():void
 		{
-			xmpp.auto_reconnect = false;
-	
 			if (connected)
 			{
+				xmpp.auto_reconnect = false;
 				connected = false;
 		 		appModel.log("Disconnecting from XMPP server");
 		 		var presenceType:String = "<presence from='" + xmpp.fulljid.toString() + "' type='unavailable' status='Logged out' />";
