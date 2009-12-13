@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.models
 {
+	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Status;
@@ -59,9 +60,18 @@ package com.cleartext.ximpp.models
 		
 		public var chats:ArrayCollection = new ArrayCollection();
 		
+		/*
+		 * SERVER SIDE STATUS
+		 * This variable stores the state that the server has for us based on
+		 * the last communication with the server.
+		 */
 		[Bindable]
 		public var serverSideStatus:Status = new Status(Status.OFFLINE);
 		
+		/*
+		 * LOCAL STATUS
+		 * This is the status that the user selects.
+		 */
 		[Bindable]
 		public var localStatus:Status = new Status(Status.OFFLINE);
 		
@@ -158,6 +168,22 @@ package com.cleartext.ximpp.models
 				});
 		}
 		
+		public function userAccountChanged():void
+		{
+			xmpp.disconnect();
+			if(settings.global.autoConnect)
+				xmpp.connect();
+			
+			chats.removeAll();
+			selectedChat = null;
+			timeLineMessages.removeAll();
+			_buddyByJid = new Dictionary();
+			buddyCollection.removeAll();
+			
+			database.loadBuddyData();
+			database.loadTimelineData();
+		}
+		
 		public function getChat(buddy:Buddy):Chat
 		{
 			if(!buddy)
@@ -218,35 +244,25 @@ package com.cleartext.ximpp.models
 			return 0;
 		}
 
-		public function addBuddy(newBuddy:Buddy, save:Boolean = true):void
+		public function addBuddy(newBuddy:Buddy):void
 		{
-			var newId:int = -1;
-			if(save)
-				newId = database.saveBuddy(newBuddy);
-
-			var oldBuddy:Buddy = buddyByJid[newBuddy.jid] as Buddy;
-
-			if(newId == -1 && oldBuddy != null)
-			{
-				oldBuddy.fill(newBuddy);
-				oldBuddy.used = true;
-			}
-			else
-			{
-				if(newId != -1)
-					newBuddy.buddyId = newId;
-	
-				buddyByJid[newBuddy.jid] = newBuddy;
-				buddyCollection.addItem(newBuddy);
-				newBuddy.used = true;
-			}
+			database.saveBuddy(newBuddy);
+			buddyByJid[newBuddy.jid] = newBuddy;
+			buddyCollection.addItem(newBuddy);
+			newBuddy.addEventListener(BuddyEvent.AVATAR_CHANGED, buddySaveHandler);
+		}
+		
+		private function buddySaveHandler(event:BuddyEvent):void
+		{
+			database.saveBuddy(event.target as Buddy);
 		}
 		
 		public function removeBuddy(buddy:Buddy):void
 		{
-			delete buddyByJid[buddy.jid];
 			buddyCollection.removeItemAt(buddyCollection.getItemIndex(buddy));
 			database.removeBuddy(buddy.buddyId);
+			buddy.removeEventListener(BuddyEvent.AVATAR_CHANGED, buddySaveHandler);
+			delete buddyByJid[buddy.jid];
 		}
 
 	}

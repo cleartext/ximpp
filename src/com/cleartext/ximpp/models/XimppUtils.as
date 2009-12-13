@@ -1,5 +1,8 @@
 package com.cleartext.ximpp.models
 {
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.utils.ByteArray;
@@ -23,7 +26,7 @@ package com.cleartext.ximpp.models
 			return result;
 		}
 		
-		public static function stringToAvatar(avatarStr:String, completeHandler:Function):void
+		public static function stringToAvatar(avatarStr:String, host:Buddy):void
 		{
 			if(!avatarStr)
 				return;
@@ -34,8 +37,19 @@ package com.cleartext.ximpp.models
 
 			var image:Image = new Image();
 			image.load(byteArray);
-			image.addEventListener(Event.COMPLETE, completeHandler, false, 0, true);
+			image.width = 64;
+			image.height = 64;
+			image.data = host;
+			image.addEventListener(Event.COMPLETE, callCompleteHandler);
 		}
+		
+		public static function callCompleteHandler(event:Event):void
+		{
+			var image:Image = event.target as Image;
+			image.data.avatar = Bitmap(image.content).bitmapData;
+			image.removeEventListener(Event.COMPLETE, callCompleteHandler);
+		}
+		
 
 	}
 }

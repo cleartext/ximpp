@@ -16,7 +16,6 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XMPPEvent;
 	import com.seesmic.as3.xmpp.XPathHandler;
 	
-	import flash.display.Bitmap;
 	import flash.events.Event;
 	
 	public class XMPPModel
@@ -61,12 +60,12 @@ package com.cleartext.ximpp.models
 			xmpp.addHandler(new XPathHandler("{jabber:client}iq/{vcard-temp}vCard", vCardHandler));			
 		}
 		
-		private function vCardHandler(stanza:Stanza):void
 		
 		//-------------------------------
 		// VCARD HANDLER
 		//-------------------------------
 		
+		private function vCardHandler(stanza:Stanza):void
 		{
 			namespace vCardTemp = "vcard-temp";
 			var xml:XML = stanza.getXML();
@@ -75,14 +74,7 @@ package com.cleartext.ximpp.models
 			var buddyJid:String = xml.@from;
 			
 			var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
-			XimppUtils.stringToAvatar(avatarString,
-				function(event:Event):void
-				{
-					buddy.avatarHash = buddy.tempAvatarHash;
-					buddy.tempAvatarHash = "";
-					buddy.avatar = Bitmap(event.target.content).bitmapData;
-					database.saveBuddy(buddy);
-				});
+			XimppUtils.stringToAvatar(avatarString, buddy);
 		}
 		
 		//-------------------------------
@@ -104,6 +96,7 @@ package com.cleartext.ximpp.models
 			{
 				buddy = new Buddy();
 				buddy.jid = message.sender;
+				appModel.addBuddy(buddy);
 			}
 			
 			buddy.lastSeen = message.timestamp;
@@ -113,8 +106,6 @@ package com.cleartext.ximpp.models
 			
 			var chat:Chat = appModel.getChat(buddy);
 			chat.messages.addItem(message);
-
-			appModel.log("message:  " + message.body);
 		}
 		
 		//-------------------------------
@@ -196,14 +187,10 @@ package com.cleartext.ximpp.models
 			var xml:XML = stanza.getXML();
 			var avatarHash:String = xml.vcard::x.vcard::photo;
 			
-			if(avatarHash)
+			if(avatarHash && buddy.avatarHash != avatarHash)
 			{
-				appModel.log("ah " + avatarHash);
-				if(buddy.avatarHash != avatarHash)
-				{
-				}
-					buddy.tempAvatarHash = avatarHash;
-					xmpp.send("<iq from='" + settings.userAccount.jid + "' to='" + buddy.jid + "' type='get' id='vc2'><vCard xmlns='vcard-temp'/></iq>");
+				buddy.tempAvatarHash = avatarHash;
+				xmpp.send("<iq from='" + settings.userAccount.jid + "' to='" + buddy.jid + "' type='get' id='vc2'><vCard xmlns='vcard-temp'/></iq>");
 			}
 
 			database.saveBuddy(buddy);
@@ -263,8 +250,19 @@ package com.cleartext.ximpp.models
 			
 			for each(var item:Object in event.stanza)
 			{
-				var buddy:Buddy = Buddy.createFromStanza(item);
-				appModel.addBuddy(buddy);
+				var jid:String = item["jid"];
+				
+				var existingBuddy:Buddy = appModel.getBuddyByJid(jid);
+				if(existingBuddy)
+				{
+					existingBuddy.used = true;
+				}
+				else
+				{
+					var newBuddy:Buddy = new Buddy();
+					newBuddy.jid = jid;
+					appModel.addBuddy(newBuddy);
+				}
 			}
 			
 			if(firstTime)

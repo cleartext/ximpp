@@ -98,7 +98,7 @@
 				if(previousAccount && changesMade)
 				{
 					previousAccount.accountName = accountName.text;
-					previousAccount.nickname = nickname.text;
+					previousAccount.nickName = nickName.text;
 					previousAccount.avatar = avatar.bitmapData;
 					previousAccount.jid = jid.text;
 					previousAccount.password = password.text;
@@ -113,7 +113,7 @@
 				if(previousAccount)
 				{
 					accountName.text = previousAccount.accountName;
-					nickname.text = previousAccount.nickname;
+					nickName.text = previousAccount.nickName;
 					if(previousAccount.avatar)
 					{
 						avatar.bitmapData = previousAccount.avatar;
@@ -141,7 +141,7 @@
 			private function addAccount():void
 			{
 				var account:UserAccount = new UserAccount();
-				account.userId = database.saveUserAccount(account);
+				database.saveUserAccount(account);
 				accountCollection.addItem(account);
 				accountList.selectedItem = account;
 				selectedAccountChanged();
@@ -240,7 +240,7 @@
 			<mx:TextInput id="accountName" change="changesMade = true; if(previousAccount) { previousAccount.accountName = accountName.text; accountCollection.refresh(); }"/>
 		</mx:FormItem>
 		<mx:FormItem label="nick name:">
-			<mx:TextInput id="nickname" change="changesMade = true;" />
+			<mx:TextInput id="nickName" change="changesMade = true;" />
 		</mx:FormItem>
 		<mx:FormItem label="profile picture:" direction="horizontal">
 			<common:Avatar id="avatar" width="64" height="64" buttonMode="true" editClicked="changeAvatar()" />

@@ -21,9 +21,10 @@ package com.cleartext.ximpp.models
 	public class DatabaseModel extends EventDispatcher
 	{
 		/*
-		 * synchronous database connections
+		 * synchronous and asynchronous database connections
 		 */
-		private var syncConn:SQLConnection = new SQLConnection();
+		private var syncConn:SQLConnection;
+		private var asyncConn:SQLConnection;
 		
 		[Autowire]
 		[Bindable]
@@ -36,12 +37,11 @@ package com.cleartext.ximpp.models
 				
 		public function close():void
 		{
+			appModel.log("Closing async database connection")
+			asyncConn.close();
+
 			appModel.log("Closing sync database connection")
 			syncConn.close();
-		}
-		
-		public function onTweenEnd(value:Object):void
-		{
 		}
 		
 		/**
@@ -55,19 +55,20 @@ package com.cleartext.ximpp.models
 				
 				// create the local database file
 				var dbName:String = "ximpp.db";
-				dbName = new Date().time + ".db";
+				//dbName = new Date().time + ".db";
 				
 				var dbFile:File = File.applicationStorageDirectory.resolvePath(dbName);
 				appModel.log("DB Location: " + dbFile.nativePath);
 				
 				appModel.log("Openning async database connection")
-				var asyncConn:SQLConnection = new SQLConnection();
+				asyncConn = new SQLConnection();
 				asyncConn.addEventListener(SQLErrorEvent.ERROR, appModel.log, false, 0, true);
 				asyncConn.addEventListener(SQLEvent.OPEN, createTables, false, 0, true);
 				asyncConn.openAsync(dbFile);
 
 				// link the sync connection to the file
 				appModel.log("Opening sync database connection")
+				syncConn = new SQLConnection();
 				syncConn.open(dbFile, SQLMode.UPDATE);
 				syncConn.addEventListener(SQLErrorEvent.ERROR, appModel.log, false, 0, true);
 			}
@@ -81,8 +82,6 @@ package com.cleartext.ximpp.models
 		{
 			try
 			{
-				(event.target as SQLConnection).close();
-				
 				// start a transaction
 				syncConn.begin();
 				var stmt:SQLStatement = new SQLStatement();
@@ -164,18 +163,17 @@ package com.cleartext.ximpp.models
 
 			if (result && result.data)
 			{
-				var userAccount:UserAccount = new UserAccount();
-				userAccount.fill(result.data[0]);
-				settings.userAccount = userAccount;
+			    // if we've got to this point without errors, commit the transaction 
+			    syncConn.commit();
+				appModel.log("User settings loaded ");
+	
+				settings.userAccount = UserAccount.createFromDB(result.data[0]) as UserAccount;
 			}
 			else
 			{
-				settings.userAccount = null;
+				appModel.fatalError("no user account with id: " + newUserId);
 			}
 			
-		    // if we've got to this point without errors, commit the transaction 
-		    syncConn.commit(); 
-			appModel.log("User settings loaded ");
 		}
 		
 		/**
@@ -198,7 +196,7 @@ package com.cleartext.ximpp.models
 			if (result && result.data)
 			{
 				newUserId = result.data[0]["userId"];
-				settings.global.fill(result.data[0]);
+				settings.global = GlobalSettings.createFromDB(result.data[0]) as GlobalSettings;
 			}
 			
 		    // if we've got to this point without errors, commit the transaction 
@@ -230,14 +228,9 @@ package com.cleartext.ximpp.models
 				var result:SQLResult = stmt.getResult();
 				
 				if(result && result.data)
-				{
-					for(var i:Number=result.data.length-1; i>=0; i--)
-					{
-						var buddy:Buddy = new Buddy();
-						buddy.fill(result.data[i]);
-						appModel.addBuddy(buddy, false);
-					}
-				}
+					for(var i:int=result.data.length-1; i>=0; i--)
+						appModel.addBuddy(Buddy.createFromDB(result.data[i]) as Buddy);
+
 			    // if we've got to this point without errors, commit the transaction 
 				appModel.log("Buddy list loaded");
 			}
@@ -246,7 +239,7 @@ package com.cleartext.ximpp.models
 				appModel.log(e);
 			}
 		}
-		
+				
 		public function loadTimelineData():void
 		{			
 			syncConn.begin(); 
@@ -267,11 +260,7 @@ package com.cleartext.ximpp.models
 			{
 				var len:int = result.data.length;
 				for(var i:int=0; i<len; i++)
-				{
-					var message:Message = new Message();
-					message.fill(result.data[i]);
-					appModel.timeLineMessages.addItem(message);
-				}
+					appModel.timeLineMessages.addItem(Message.createFromDB(result.data[i]));
 			}
 		    // if we've got to this point without errors, commit the transaction 
 			appModel.log("Message data loaded");
@@ -295,11 +284,7 @@ package com.cleartext.ximpp.models
 			{
 				var len:int = result.data.length;
 				for(var i:int=0; i<len; i++)
-				{
-					var userAccount:UserAccount = new UserAccount();
-					userAccount.fill(result.data[i]);
-					accounts.addItem(userAccount);
-				}
+					accounts.addItem(UserAccount.createFromDB(result.data[i]));
 			}
 			
 		    // if we've got to this point without errors, commit the transaction 
@@ -345,13 +330,19 @@ package com.cleartext.ximpp.models
 			
 			var result:int = updateOrInsert("userAccounts", values, criteria);
 			
-			return (result==0) ? -1 : result;
+			if(result != -1)
+				userAccount.userId = result;
+			
+			return result;
 		}
 		
 		public function saveBuddy(buddy:Buddy):int
 		{
 			var criteria:Array = [new DatabaseValue("jid", buddy.jid)];
-			return updateOrInsert("buddies", buddy.toDatabaseValues(settings.userId), criteria);
+			var id:int = updateOrInsert("buddies", buddy.toDatabaseValues(settings.userId), criteria);
+			if(id != -1)
+				buddy.buddyId = id;
+			return id;
 		}
 
 		public function removeBuddy(buddyId:int):void
@@ -396,11 +387,7 @@ package com.cleartext.ximpp.models
 			{
 				var len:int = result.data.length;
 				for(var i:int=0; i<len; i++)
-				{
-					var message:Message = new Message();
-					message.fill(result.data[i]);
-					messages.addItem(message);
-				}
+					messages.addItem(Message.createFromDB(result.data[i]));
 			}
 		    // if we've got to this point without errors, commit the transaction 
 		    syncConn.commit(); 

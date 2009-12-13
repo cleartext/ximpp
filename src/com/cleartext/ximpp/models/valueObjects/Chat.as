@@ -15,7 +15,7 @@ package com.cleartext.ximpp.models.valueObjects
 			this.buddy = buddy;
 		}
 		
-		public function fill(obj:Object):void
+		public function fillFromDB(obj:Object):void
 		{
 		}
 		

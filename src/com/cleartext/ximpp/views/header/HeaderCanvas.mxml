@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 	width="100%" height="40"
-	xmlns:common="com.cleartext.ximpp.views.common.*">
+	xmlns:common="com.cleartext.ximpp.views.common.*"
+	creationComplete="init()">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.BuddyEvent;
+			import mx.binding.utils.ChangeWatcher;
+			import mx.binding.utils.BindingUtils;
 			import com.cleartext.ximpp.models.SettingsModel;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import com.cleartext.ximpp.models.valueObjects.Status;
@@ -15,6 +19,28 @@
 			[Autowire]
 			[Bindable]
 			public var settings:SettingsModel;
+			
+			private function init():void
+			{
+				settings.addEventListener("userAccountChanged", userAccountChanged);
+				userAccountChanged(null);
+			}
+			
+			private function userAccountChanged(event:Event):void
+			{
+				if(settings.userAccount)
+					settings.userAccount.removeEventListener(BuddyEvent.AVATAR_CHANGED, changeAvatar);
+
+				if(settings.userAccount)
+					settings.userAccount.addEventListener(BuddyEvent.AVATAR_CHANGED, changeAvatar);
+				
+				changeAvatar(null);
+			}
+			
+			private function changeAvatar(event:BuddyEvent):void 
+			{ 
+				avatar.bitmapData = settings.userAccount.avatar; 
+			}
 			
 			private function userPresenceChangeHandler():void
 			{
@@ -30,18 +56,27 @@
 				graphics.beginGradientFill(GradientType.LINEAR, [0x6ebfeb, 0x4d9ac4], [1, 1], [0x00, 0xFF], matr1);  
 				graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			}
+			
 		]]>
 	</mx:Script>
+
+	<common:Avatar
+		id="avatar"
+		width="37"
+		height="37"
+		x="15" y="1"
+		/>
+		
 	<common:StatusIcon
 		statusString="{appModel.serverSideStatus.value}"
-		x="10" y="12"
+		x="45" y="2"
 		/>
 	
 	<mx:ComboBox
 		id="statusComboBox"
 		dataProvider="{Status.USER_TYPES}"
 		change="userPresenceChangeHandler()"
-		x="32" y="10" width="110"
+		x="67" y="10" width="110"
 		text="{appModel.serverSideStatus.value}"
 		creationComplete="statusComboBox.text=appModel.serverSideStatus.value"
 		selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus.value)}"
@@ -51,7 +86,7 @@
 		id="customStatusInput"
 		valueCommit="userPresenceChangeHandler()"
 		enter="userPresenceChangeHandler()"
-		x="145" y="10" width="350"
+		x="180" y="10" width="300"
 		defaultText="custom status..."
 		text="{settings.userAccount.customStatus}"
 		/>

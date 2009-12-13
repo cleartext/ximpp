@@ -1,18 +1,15 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.XimppUtils;
 	
-	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.events.Event;
 	
 	public class UserAccount extends Buddy implements IXimppValueObject
 	{
 		public static const CREATE_USER_ACCOUNTS_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS userAccounts (" +
 			"userId INTEGER PRIMARY KEY AUTOINCREMENT, " +
-			"accountName TEXT DEFAULT 'new account', " +
+			"accountName TEXT DEFAULT 'default account', " +
 			"timestamp DATE, " +
 			"jid TEXT, " +
 			"nickname TEXT, " +
@@ -28,28 +25,26 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		
 		public var userId:int = -1;
-		public var accountName:String;
-		public var nickname:String;
+		public var accountName:String = "new account";
 		public var password:String;
 		public var server:String;
 		
-		override public function fill(obj:Object):void
+		public static function createFromDB(obj:Object):IXimppValueObject
 		{
-			userId = obj["userId"];
-			accountName = obj["accountName"];	
-			jid = obj["jid"];	
-			nickname = obj["nickname"];			
-			password = obj["password"];			
-			server = obj["server"];
-			customStatus = obj["customStatus"];
-			if(obj["avatar"] is String)
-				XimppUtils.stringToAvatar(obj["avatar"],
-					function(event:Event):void
-					{
-						avatar = Bitmap(event.target.content).bitmapData;
-					});
-			else if(obj["avatar"] is BitmapData)
-				avatar = obj["avatar"];
+			var newUserAccount:UserAccount = new UserAccount();
+			
+			newUserAccount.userId = obj["userId"];
+			newUserAccount.accountName = obj["accountName"];	
+			newUserAccount.jid = obj["jid"];	
+			newUserAccount.nickName = obj["nickname"];			
+			newUserAccount.password = obj["password"];			
+			newUserAccount.server = obj["server"];
+			newUserAccount.customStatus = obj["customStatus"];
+			newUserAccount.avatarHash = obj["avatarHash"];
+
+			XimppUtils.stringToAvatar(obj["avatar"], newUserAccount);
+			
+			return newUserAccount;
 		}
 		
 		public function get valid():Boolean
@@ -60,11 +55,10 @@ package com.cleartext.ximpp.models.valueObjects
 		override public function toDatabaseValues(userId:int):Array
 		{
 			return [
-				new DatabaseValue("userId", userId),
 				new DatabaseValue("accountName", accountName),
 				new DatabaseValue("timestamp", new Date()),
 				new DatabaseValue("jid", jid),
-				new DatabaseValue("nickname", nickname),
+				new DatabaseValue("nickname", nickName),
 				new DatabaseValue("password", password),
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),
@@ -75,11 +69,6 @@ package com.cleartext.ximpp.models.valueObjects
 		override public function toString():String
 		{
 			return "";
-		}
-		
-		override public function toXML():XML
-		{
-			return null;
 		}
 	}
 }

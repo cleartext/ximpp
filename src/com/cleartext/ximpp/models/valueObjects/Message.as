@@ -30,16 +30,20 @@ package com.cleartext.ximpp.models.valueObjects
 			super();
 		}
 		
-		public function fill(obj:Object):void
+		public static function createFromDB(obj:Object):Message
 		{
-			messageId = obj["messageId"];
-			timestamp = new Date(obj["timestamp"]);
-			sender = obj["sender"];
-			recipient = obj["recipient"];
-			type = obj["type"];
-			subject = obj["subject"];
-			body = obj["body"];
-			rawXML = obj["rawXML"];
+			var newMessage:Message = new Message();
+			
+			newMessage.messageId = obj["messageId"];
+			newMessage.timestamp = new Date(obj["timestamp"]);
+			newMessage.sender = obj["sender"];
+			newMessage.recipient = obj["recipient"];
+			newMessage.type = obj["type"];
+			newMessage.subject = obj["subject"];
+			newMessage.body = obj["body"];
+			newMessage.rawXML = obj["rawXML"];
+			
+			return newMessage;
 		}
 		
 		public function toDatabaseValues(userId:int):Array
@@ -74,11 +78,6 @@ package com.cleartext.ximpp.models.valueObjects
 		override public function toString():String
 		{
 			return "";
-		}
-		
-		public function toXML():XML
-		{
-			return null;
 		}
 	}
 }

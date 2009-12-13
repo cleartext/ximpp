@@ -15,8 +15,6 @@ package com.cleartext.ximpp.models.valueObjects
 				"numChatMessages INTEGER DEFAULT 150, " +
 				"numTimelineMessages INTEGER DEFAULT 250, " +
 				"openChats TEXT, " + 
-				"buddySortMethod TEXT DEFAULT 'last active', " +
-				"timelineSortMethod TEXT DEFAULT 'received', " +
 				"userId INTEGER DEFAULT 1);";
 		
 		public function GlobalSettings()
@@ -32,15 +30,19 @@ package com.cleartext.ximpp.models.valueObjects
 		public var numChatMessages:uint;
 		public var numTimelineMessages:uint;
 
-		public function fill(obj:Object):void
+		public static function createFromDB(obj:Object):GlobalSettings
 		{
-			this.autoConnect = obj["autoConnect"];
-			this.urlShortener = obj["urlShortener"];
-			this.timelineTopDown = obj["timelineTopDown"];
-			this.chatTopDown = obj["chatTopDown"];
-			this.animateBuddyList = obj["animateBuddyList"];
-			this.numChatMessages = obj["numChatMessages"];
-			this.numTimelineMessages = obj["numTimelineMessages"];
+			var newGlobalSettings:GlobalSettings = new GlobalSettings();
+			
+			newGlobalSettings.autoConnect = obj["autoConnect"];
+			newGlobalSettings.urlShortener = obj["urlShortener"];
+			newGlobalSettings.timelineTopDown = obj["timelineTopDown"];
+			newGlobalSettings.chatTopDown = obj["chatTopDown"];
+			newGlobalSettings.animateBuddyList = obj["animateBuddyList"];
+			newGlobalSettings.numChatMessages = obj["numChatMessages"];
+			newGlobalSettings.numTimelineMessages = obj["numTimelineMessages"];
+			
+			return newGlobalSettings;
 		}
 		
 		public function toDatabaseValues(userId:int):Array
@@ -61,9 +63,5 @@ package com.cleartext.ximpp.models.valueObjects
 			return null;
 		}
 		
-		public function toXML():XML
-		{
-			return null;
-		}
 	}
 }
