@@ -5,6 +5,7 @@ package com.cleartext.ximpp.models
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
+	import flash.geom.Matrix;
 	import flash.utils.ByteArray;
 	
 	import mx.controls.Image;
@@ -14,6 +15,8 @@ package com.cleartext.ximpp.models
 	
 	public class XimppUtils
 	{
+		public static const AVATAR_SIZE:int = 32;
+		
 		public static function avatarToString(avatar:BitmapData):String
 		{
 			if(!avatar)
@@ -37,19 +40,21 @@ package com.cleartext.ximpp.models
 
 			var image:Image = new Image();
 			image.load(byteArray);
-			image.width = 64;
-			image.height = 64;
 			image.data = host;
-			image.addEventListener(Event.COMPLETE, callCompleteHandler);
+			image.addEventListener(Event.COMPLETE, imageCompleteHandler);
 		}
 		
-		public static function callCompleteHandler(event:Event):void
+		public static function imageCompleteHandler(event:Event):void
 		{
 			var image:Image = event.target as Image;
-			image.data.avatar = Bitmap(image.content).bitmapData;
-			image.removeEventListener(Event.COMPLETE, callCompleteHandler);
+			var bitmap:Bitmap = Bitmap(image.content);
+			var scale:Number = AVATAR_SIZE / Math.max(bitmap.width, bitmap.height);
+			var matrix:Matrix = new Matrix(scale, 0, 0, scale);
+			var bmd:BitmapData = new BitmapData(AVATAR_SIZE, AVATAR_SIZE);
+			bmd.draw(bitmap, matrix);
+			
+			image.data.avatar = bmd;
+			image.removeEventListener(Event.COMPLETE, imageCompleteHandler);
 		}
-		
-
 	}
 }

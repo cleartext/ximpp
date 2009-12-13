@@ -38,10 +38,7 @@ package com.cleartext.ximpp.models
 			return appModel.database;
 		}
 				
-		public function get connected():Boolean
-		{
-			return xmpp.state["connected"];
-		}
+		public var connected:Boolean = false;
 		
 		public function XMPPModel()
 		{
@@ -119,6 +116,7 @@ package com.cleartext.ximpp.models
 		 */
 		private function sessionHandler(event:XMPPEvent):void
 		{
+			connected = true;
 			appModel.log(event);
 			appModel.serverSideStatus = appModel.localStatus;
 			firstTime = true;
@@ -159,6 +157,7 @@ package com.cleartext.ximpp.models
 		 */
 		private function authFailedHandler(event:XMPPEvent):void
 		{
+			connected = false;
 			errorHandler(event);
 		}
 		
@@ -256,11 +255,14 @@ package com.cleartext.ximpp.models
 				if(existingBuddy)
 				{
 					existingBuddy.used = true;
+					existingBuddy.groups = item["groups"];
+					database.saveBuddy(existingBuddy);
 				}
 				else
 				{
 					var newBuddy:Buddy = new Buddy();
 					newBuddy.jid = jid;
+					newBuddy.groups = item["groups"];
 					appModel.addBuddy(newBuddy);
 				}
 			}
@@ -319,6 +321,7 @@ package com.cleartext.ximpp.models
 	
 			if (connected)
 			{
+				connected = false;
 		 		appModel.log("Disconnecting from XMPP server");
 		 		var presenceType:String = "<presence from='" + xmpp.fulljid.toString() + "' type='unavailable' status='Logged out' />";
 				xmpp.send(presenceType);
@@ -327,7 +330,6 @@ package com.cleartext.ximpp.models
 		 		for each(var buddy:Buddy in appModel.buddyCollection)
 		 		{
 		 			buddy.status.value = Status.OFFLINE;
-		 			buddy.customStatus = "";
 		 		}
 		 	}
 		}
@@ -341,6 +343,7 @@ package com.cleartext.ximpp.models
 		 */
 		private function streamDisconnectedHandler(event:StreamEvent):void
 		{
+			connected = false;
 			appModel.log(event);
 		}
 
@@ -353,6 +356,7 @@ package com.cleartext.ximpp.models
 		 */
 		private function streamConnectFailedHandler(event:StreamEvent):void
 		{
+			connected = false;
 			errorHandler(event);
 		}
 

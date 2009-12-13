@@ -354,7 +354,7 @@ package com.seesmic.as3.xmpp
 				
 				for each(var item:XML in xml.rosterns::query.rosterns::item) {
 					groups = new Array();
-					for each(var group:XML in item.group) {
+					for each(var group:XML in item.rosterns::group) {
 						groups.push(group.text());
 					}
 					var jid:JID = new JID(item.@jid);

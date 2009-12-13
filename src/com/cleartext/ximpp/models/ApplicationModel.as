@@ -39,7 +39,7 @@ package com.cleartext.ximpp.models
 //			sort.compareFunction = compareBuddies;
 //			buddies.sort = sort;
 		}
-
+		
 		private var _buddyByJid:Dictionary = new Dictionary();
 		public function get buddyByJid():Dictionary
 		{
@@ -124,7 +124,7 @@ package com.cleartext.ximpp.models
 
 		public function init():void
 		{
-			database.addEventListener(Event.COMPLETE, databaseCompleteHandler, false, 0, true);
+			database.addEventListener(Event.COMPLETE, databaseCompleteHandler);
 			database.createDatabase();
 		}
 		
@@ -134,7 +134,7 @@ package com.cleartext.ximpp.models
 
 			// if this changes the userId, it will reload all the data from the database
 			database.loadGlobalSettings();
-			if(!settings.userAccount || !settings.userAccount.valid)
+			if(!settings.userAccount.valid)
 			{
 				Alert.show(
 					"There are no user settings stored. Do you want to change your preferences now?",
@@ -142,9 +142,7 @@ package com.cleartext.ximpp.models
 					 function(event:CloseEvent):void
 					 {
 					 	if(event.detail == Alert.YES)
-					 	{
 					 		showPreferencesWindow();
-					 	}
 					 });
 			}
 			else if(settings.global.autoConnect)

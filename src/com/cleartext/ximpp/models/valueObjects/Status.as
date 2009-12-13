@@ -89,7 +89,7 @@ package com.cleartext.ximpp.models.valueObjects
 				case "away" : value = AWAY; break;
 				case "dnd" : value = BUSY; break;
 				case "xa" : value = EXTENDED_AWAY; break;
-				default : value = UNKNOWN;
+				default : value = UNKNOWN + ": " + show;
 			}
 		}
 		

@@ -207,8 +207,6 @@ package com.cleartext.ximpp.models
 			if(newUserId != settings.userId)
 			{
 				loadUserSettings(newUserId);
-				loadBuddyData();
-				loadTimelineData();
 			}
 		}
 

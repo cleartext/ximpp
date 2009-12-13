@@ -45,11 +45,28 @@
 			{
 				Alert.show("Advanced search is not currently implemented.","Advanced Search");
 			}
-			
+
+			private function createNativeWindow():void
+			{
+				//create the init options 
+				var options:NativeWindowInitOptions = new NativeWindowInitOptions(); 
+				options.transparent = false; 
+				options.systemChrome = NativeWindowSystemChrome.STANDARD; 
+				options.type = NativeWindowType.NORMAL; 
+				 
+				//create the window 
+				var newWindow:NativeWindow = new NativeWindow(options); 
+				newWindow.title = "A title"; 
+				newWindow.width = 600; 
+				newWindow.height = 400; 
+				 
+				//activate and show the new window 
+				newWindow.activate(); 
+			}
 		]]>
 	</mx:Script>
 	
-	<header:HeaderCanvas id="headerCanvas" />
+	<header:HeaderCanvas id="headerCanvas"/>
 	<mx:VDividedBox top="{headerCanvas.height}" bottom="0" width="100%" liveDragging="true" backgroundColor="0xaaaaaa">
 		<mx:HDividedBox height="70%" width="100%" liveDragging="true" backgroundColor="0xd8d9d8" >
 			<buddies:BuddyCanvas
@@ -77,5 +94,6 @@
 			visible="{appModel.showConsole}"
 			/>
 	</mx:VDividedBox>
+	<mx:Button horizontalCenter="0" click="createNativeWindow()" label="window" />
 	
 </mx:Canvas>

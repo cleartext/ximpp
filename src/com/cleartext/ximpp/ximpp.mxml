@@ -2,10 +2,11 @@
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	initialize="maximize()"
-	close="//do nothing"
+	close="mainView.appModel.shutDown()"
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
-	xmlns:views="com.cleartext.ximpp.views.*">
+	xmlns:views="com.cleartext.ximpp.views.*"
+	>
 	
 	<swiz:SwizConfig
 		strict="false"
@@ -15,7 +16,7 @@
 		injectionEvent="preinitialize"
 		beanLoaders="{ [ Beans ] }" />
 
-	<views:MainView/>
+	<views:MainView id="mainView"/>
 	
 	<mx:Style source="css/defaultStyles.css"/>
 

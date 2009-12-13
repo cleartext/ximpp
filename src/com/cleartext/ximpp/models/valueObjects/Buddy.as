@@ -26,7 +26,8 @@ package com.cleartext.ximpp.models.valueObjects
 			"lastSeen DATE, " + 
 			"service BOOLEAN, " + 
 			"avatar TEXT, " + 
-			"avatarHash TEXT);";
+			"avatarHash TEXT, " + 
+			"customStatus TEXT);";
 
 		// storred in database		
 		public var buddyId:int = -1;
@@ -44,6 +45,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public var service:Boolean = false;
 		public var lastSeen:Date;
 		public var avatarHash:String;
+		public var customStatus:String;
 
 		private var _avatar:BitmapData;
 		[Bindable (event="avatarChanged")]
@@ -70,7 +72,6 @@ package com.cleartext.ximpp.models.valueObjects
 		public var used:Boolean = true;
 		public var resource:String;
 		public var tempAvatarHash:String;
-		public var customStatus:String;
 
 		private var _status:Status = new Status(Status.OFFLINE);
 		public function get status():Status
@@ -87,7 +88,9 @@ package com.cleartext.ximpp.models.valueObjects
 			newBuddy.nickName = obj["nickName"];
 			newBuddy.groups = (obj["groups"] as String).split(",");
 			newBuddy.service = obj["service"];
+			newBuddy.lastSeen = obj["lastSeen"];
 			newBuddy.avatarHash = obj["avatarHash"];
+			newBuddy.customStatus = obj["customStatus"];
 
 			if(obj["avatar"])
 				XimppUtils.stringToAvatar(obj["avatar"], newBuddy);
@@ -105,6 +108,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("service", service),
 				new DatabaseValue("lastSeen", lastSeen),
 				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar)),
+				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("avatarHash", avatarHash)];
 		}
 		
