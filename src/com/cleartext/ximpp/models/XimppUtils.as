@@ -29,9 +29,9 @@ package com.cleartext.ximpp.models
 			return result;
 		}
 		
-		public static function stringToAvatar(avatarStr:String, host:Buddy):void
+		public static function stringToAvatar(avatarStr:String, buddy:Buddy):void
 		{
-			if(!avatarStr)
+			if(!avatarStr || !buddy)
 				return;
 			
 			var base64Dec:Base64Decoder = new Base64Decoder();
@@ -40,7 +40,7 @@ package com.cleartext.ximpp.models
 
 			var image:Image = new Image();
 			image.load(byteArray);
-			image.data = host;
+			image.data = buddy;
 			image.addEventListener(Event.COMPLETE, imageCompleteHandler);
 		}
 		
@@ -49,11 +49,13 @@ package com.cleartext.ximpp.models
 			var image:Image = event.target as Image;
 			var bitmap:Bitmap = Bitmap(image.content);
 			var scale:Number = AVATAR_SIZE / Math.max(bitmap.width, bitmap.height);
-			var matrix:Matrix = new Matrix(scale, 0, 0, scale);
+			var tx:Number = (AVATAR_SIZE - bitmap.width * scale) / 2;
+			var ty:Number = (AVATAR_SIZE - bitmap.height * scale) / 2;
+			var matrix:Matrix = new Matrix(scale, 0, 0, scale, tx, ty);
 			var bmd:BitmapData = new BitmapData(AVATAR_SIZE, AVATAR_SIZE);
 			bmd.draw(bitmap, matrix);
 			
-			image.data.avatar = bmd;
+			image.data.setAvatar(bmd);
 			image.removeEventListener(Event.COMPLETE, imageCompleteHandler);
 		}
 	}

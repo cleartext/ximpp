@@ -29,10 +29,10 @@
 			private function userAccountChanged(event:Event):void
 			{
 				if(settings.userAccount)
-					settings.userAccount.removeEventListener(BuddyEvent.AVATAR_CHANGED, changeAvatar);
+					settings.userAccount.removeEventListener(BuddyEvent.CHANGED, changeAvatar);
 
 				if(settings.userAccount)
-					settings.userAccount.addEventListener(BuddyEvent.AVATAR_CHANGED, changeAvatar);
+					settings.userAccount.addEventListener(BuddyEvent.CHANGED, changeAvatar);
 				
 				changeAvatar(null);
 			}
@@ -79,7 +79,6 @@
 		x="67" y="10" width="110"
 		text="{appModel.serverSideStatus.value}"
 		creationComplete="statusComboBox.text=appModel.serverSideStatus.value"
-		selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus.value)}"
 		/>
 		
 	<common:DefaultTextInput

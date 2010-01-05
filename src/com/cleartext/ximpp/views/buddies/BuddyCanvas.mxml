@@ -88,7 +88,7 @@
 		id="buddyList" 
 		doubleClickEnabled="true"
 		itemDoubleClicked="itemDoubleClicked(event)"
-		dataProvider="{appModel.buddyCollection}"
+		dataProvider="{appModel.rosterItems}"
 		height="100%" 
 		itemRenderer="{new ClassFactory(BuddyRenderer)}"
 		editBuddy="Alert.show('edit me: ' + (event.target.data as Buddy).nickName, 'Edit Buddy')">

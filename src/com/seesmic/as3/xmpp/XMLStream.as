@@ -113,6 +113,8 @@ package com.seesmic.as3.xmpp
 		private function connectHandler(event:Event):void {
 			//dispatchEvent(event);
 			socket.send(stream_start);
+			/** modified by astewart@cleartext.com */
+			dispatchEvent(event);
 		}
 		
 		private function incomingHandler(xmlstring:String):void {

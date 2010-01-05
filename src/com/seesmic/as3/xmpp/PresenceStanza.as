@@ -29,6 +29,12 @@ package com.seesmic.as3.xmpp
 		public var category:String = 'available';
 		namespace jc = 'jabber:client';
 		default xml namespace = 'jabber:client';
+
+		/**
+		 * avatarHash added by astewart@cleartext.com
+		 */
+		public var avatarHash:String = '';
+		
 		
 		public function PresenceStanza(connection:Object, parent:Stanza=null)
 		{
@@ -49,6 +55,12 @@ package com.seesmic.as3.xmpp
 			if(!this.type) {
 				this.type = 'available';
 			}
+
+			/**
+			 * avatarHash added by astewart@cleartext.com
+			 */
+			namespace vcard = "vcard-temp:x:update";
+			this.avatarHash = xml.vcard::x.vcard::photo;			
 		}
 		
 		public function getCategory():String {
@@ -87,6 +99,13 @@ package com.seesmic.as3.xmpp
 			this.type = ntype;
 		}
 		
+		/**
+		 * avatarHash added by astewart@cleartext.com
+		 */
+		public function setAvatarHash(nAvatarHash:String): void {
+			this.avatarHash = nAvatarHash;
+		}
+		
 		override public function render():void {
 			xml = <presence />;
 			//xml.setNamespace(jc);
@@ -107,6 +126,14 @@ package com.seesmic.as3.xmpp
 			if(this.status) {
 				var statusx:XML = <status>{status}</status>;
 				xml.appendChild(statusx);
+			}
+
+			/**
+			 * avatarHash added by astewart@cleartext.com
+			 */
+			if(this.avatarHash) {
+				var vcard:XML = <x xmlns='vcard-temp:x:update'><photo>{avatarHash}</photo></x>;
+				xml.appendChild(vcard);
 			}
 		}
 				

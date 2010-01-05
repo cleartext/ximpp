@@ -49,7 +49,7 @@ package com.seesmic.as3.xmpp
 		public var roster:Roster;
 		
 		
-		private var ping_timer:Timer = new Timer(30000);
+		private var ping_timer:Timer = new Timer(90000);
 		private var pinged:Boolean = true;
 		
 		private var session_start_timeout:Timer = new Timer(30000, 1);
@@ -72,7 +72,7 @@ package com.seesmic.as3.xmpp
 			addHandler(new XPathHandler("{urn:ietf:params:xml:ns:xmpp-sasl}failure", authFailureHandler));
 			addHandler(new XPathHandler("{jabber:client}presence", handlePresence));
 			addHandler(new XPathHandler("{jabber:client}iq/{jabber:iq:roster}query", rosterHandler));			
-			ping_timer.addEventListener(TimerEvent.TIMER, pingServer);
+//			ping_timer.addEventListener(TimerEvent.TIMER, pingServer);
 			session_start_timeout.addEventListener(TimerEvent.TIMER, checkSessionTimeout);
 		}
 		
@@ -146,11 +146,15 @@ package com.seesmic.as3.xmpp
 		protected function handleDisconnected(e:StreamEvent):void {
 			state['connected'] = false;
 			tryReconnect(true);
+			/** modified by astewart@cleartext.com */
+			dispatchEvent(e);
 		}
 		
 		protected function handleConnectFailed(e:StreamEvent):void {
 			state['connected'] = false;
 			tryReconnect(false);
+			/** modified by astewart@cleartext.com */
+			dispatchEvent(e);
 		}
 		
 		private function tryReconnect(reset:Boolean=true):void {
@@ -313,7 +317,7 @@ package com.seesmic.as3.xmpp
 			//send("<message type='" + type + "' from='" + fulljid.toString() + "' to='" + tojid + "'><body>" + msg + "</body></message>");
 		}
 		
-		public function sendPresence(status:String=null,show:String=null,priority:String=null,tojid:String=null):void {
+		public function sendPresence(status:String=null,show:String=null,priority:String=null,tojid:String=null,avatarHash:String=null):void {
 			var npres:PresenceStanza = new PresenceStanza(this);
 			if(tojid) {
 				npres.setTo(tojid);
@@ -326,6 +330,13 @@ package com.seesmic.as3.xmpp
 			}
 			if(priority) {
 				npres.setPriority(priority);
+			}
+			
+			/**
+			 * PresenceStanza.avatarHash added by astewart@cleartext.com
+			 */
+			if(avatarHash) {
+				npres.setAvatarHash(avatarHash);
 			}
 			npres.send();
 		}
@@ -348,26 +359,17 @@ package com.seesmic.as3.xmpp
 			if(xml.@type != 'error') {
 				var groups:Array;
 				var result:Dictionary;
-				
-				// extended by andy
-				var newRosterItems:Array = new Array();
-				
 				for each(var item:XML in xml.rosterns::query.rosterns::item) {
 					groups = new Array();
+					// old: for each(var group:XML in item.group) {
+					// edited by astewart@cleartext.com
 					for each(var group:XML in item.rosterns::group) {
 						groups.push(group.text());
 					}
 					var jid:JID = new JID(item.@jid);
 					result = roster.updateItem(jid, item.@subscription, item.@name, groups);
 					dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_ITEM, false, false, result));
-					
-					// extended by andy
-					newRosterItems.push(result);
 				}
-				
-				// extended by andy
-				dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_LIST_CHANGE, false, false, newRosterItems));
-
 			} else {
 				dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_ERROR, false, false, stanza));
 			}

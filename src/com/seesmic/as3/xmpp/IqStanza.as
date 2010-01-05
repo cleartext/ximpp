@@ -18,6 +18,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 package com.seesmic.as3.xmpp
 {
+	import mx.utils.NameUtil;
+	
 	public class IqStanza extends Stanza
 	{
 		public var from:String;
@@ -38,8 +40,12 @@ package com.seesmic.as3.xmpp
 			if(conn.fulljid) this.to = conn.fulljid.toString();
 			this.type = xml.@type;
 			this.id = xml.@id;
-			if(xml.query) {
-				this.query = xml.query[0];
+
+			for each(var sub:XML in xml.children()) {
+				if(sub.localName() == 'query') {
+					this.query = sub;
+					break;
+				}
 			}
 		}
 		

@@ -2,8 +2,6 @@ package com.cleartext.ximpp.models.valueObjects
 {
 	import com.cleartext.ximpp.models.XimppUtils;
 	
-	import flash.display.BitmapData;
-	
 	public class UserAccount extends Buddy implements IXimppValueObject
 	{
 		public static const CREATE_USER_ACCOUNTS_TABLE:String =
@@ -20,8 +18,9 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public function UserAccount()
 		{
-			super();
-			buddyId = -2;
+			// Buddy() requires a jid in the constructor
+			super("");
+			setBuddyId(-2);
 		}
 		
 		public var userId:int = -1;
@@ -35,13 +34,12 @@ package com.cleartext.ximpp.models.valueObjects
 			
 			newUserAccount.userId = obj["userId"];
 			newUserAccount.accountName = obj["accountName"];	
-			newUserAccount.jid = obj["jid"];	
-			newUserAccount.nickName = obj["nickname"];			
+			newUserAccount.setJid(obj["jid"]);	
+			newUserAccount.setNickName(obj["nickname"]);			
 			newUserAccount.password = obj["password"];			
 			newUserAccount.server = obj["server"];
-			newUserAccount.customStatus = obj["customStatus"];
+			newUserAccount.setCustomStatus(obj["customStatus"]);
 			newUserAccount.avatarHash = obj["avatarHash"];
-
 			XimppUtils.stringToAvatar(obj["avatar"], newUserAccount);
 			
 			return newUserAccount;

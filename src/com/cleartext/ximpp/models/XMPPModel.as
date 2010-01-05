@@ -9,24 +9,21 @@ package com.cleartext.ximpp.models
 	import com.hurlant.crypto.tls.TLSEngine;
 	import com.hurlant.crypto.tls.TLSEvent;
 	import com.hurlant.crypto.tls.TLSSocket;
-	import com.seesmic.as3.xmpp.JID;
-	import com.seesmic.as3.xmpp.Stanza;
+	import com.seesmic.as3.xmpp.IdHandler;
+	import com.seesmic.as3.xmpp.IqStanza;
+	import com.seesmic.as3.xmpp.PresenceStanza;
 	import com.seesmic.as3.xmpp.StreamEvent;
 	import com.seesmic.as3.xmpp.XMPP;
 	import com.seesmic.as3.xmpp.XMPPEvent;
-	import com.seesmic.as3.xmpp.XPathHandler;
 	
-	import flash.events.Event;
+	import mx.controls.Alert;
+	import mx.events.CloseEvent;
 	
 	public class XMPPModel
 	{
-		private var xmpp:XMPP = new XMPP();
-		
-		[Autowire]
+		[Autowire(bean="appModel")]
 		[Bindable]
 		public var appModel:ApplicationModel;
-		
-		private var firstTime:Boolean = false;
 		
 		private function get settings():SettingsModel
 		{
@@ -39,41 +36,125 @@ package com.cleartext.ximpp.models
 		}
 				
 		public var connected:Boolean = false;
+		private var xmpp:XMPP;
+		private var gotRosterList:Boolean = false;
+				
+		//-------------------------------
+		// CONSTRUCTOR
+		//-------------------------------
 		
 		public function XMPPModel()
 		{
-			// set up event listeners
-			xmpp.addEventListener(XMPPEvent.MESSAGE, messageHandler);
+			xmpp = new XMPP();
+			
+			// event listeners for starting session (this is the order in which
+			// the events are dispatched
+			xmpp.addEventListener(StreamEvent.CONNECTED, logHandler);
+			xmpp.addEventListener(XMPPEvent.SECURE, logHandler);
+			xmpp.addEventListener(XMPPEvent.AUTH_SUCCEEDED, logHandler);
 			xmpp.addEventListener(XMPPEvent.SESSION, sessionHandler);
-			xmpp.addEventListener(XMPPEvent.SECURE, secureHandler);
-			xmpp.addEventListener(XMPPEvent.AUTH_SUCCEEDED, authSucceededHandler);
-			xmpp.addEventListener(XMPPEvent.AUTH_FAILED, authFailedHandler);
-			xmpp.addEventListener(XMPPEvent.PRESENCE, presenceHandler);
-//			xmpp.addEventListener(XMPPEvent.PRESENCE_UNAVAILABLE, presenceUnavailableHandler);
-//			xmpp.addEventListener(XMPPEvent.PRESENCE_ERROR, presenceErrorHandler);
-//			xmpp.addEventListener(XMPPEvent.PRESENCE_SUBSCRIBE, presenceSubscribeHandler);
-			xmpp.addEventListener(XMPPEvent.ROSTER_LIST_CHANGE, rosterListChangeHandler);
 
-			xmpp.addHandler(new XPathHandler("{jabber:client}iq/{vcard-temp}vCard", vCardHandler));			
+			// fail handlers
+			xmpp.addEventListener(StreamEvent.CONNECT_FAILED, failHandler);
+			xmpp.addEventListener(XMPPEvent.AUTH_FAILED, failHandler);
+			xmpp.addEventListener(StreamEvent.DISCONNECTED, failHandler);
+
+			// event listeners for messages, presance and changes to the roster
+			xmpp.addEventListener(XMPPEvent.MESSAGE, messageHandler);
+			xmpp.addEventListener(XMPPEvent.PRESENCE, presenceHandler);
+			xmpp.addEventListener(XMPPEvent.ROSTER_ITEM, rosterListChangeHandler);
 		}
 		
-		
 		//-------------------------------
-		// VCARD HANDLER
+		// CONNECT
 		//-------------------------------
 		
-		private function vCardHandler(stanza:Stanza):void
+		public function connect():void
 		{
-			namespace vCardTemp = "vcard-temp";
-			var xml:XML = stanza.getXML();
-			
-			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-			var buddyJid:String = xml.@from;
-			
-			var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
-			XimppUtils.stringToAvatar(avatarString, buddy);
+			if(connected || appModel.serverSideStatus.value == Status.CONNECTING)
+				return;
+
+			var account:UserAccount = settings.userAccount;
+			if(account.jid && account.password)
+			{
+				xmpp.auto_reconnect = true;
+				appModel.serverSideStatus.value = Status.CONNECTING;
+
+				xmpp.setJID(account.jid + "/cleartext");
+				xmpp.setPassword(account.password);
+				xmpp.setServer(account.server);
+				xmpp.setupTLS(TLSEvent, TLSConfig, TLSEngine, TLSSocket, true, true, true);
+				xmpp.connect();
+			}
 		}
 		
+		//-------------------------------
+		// DISCONNECT
+		//-------------------------------
+		
+		public function disconnect():void
+		{
+			if (connected)
+			{
+				connected = false;
+				xmpp.auto_reconnect = false;
+		 		appModel.log("Disconnecting from XMPP server");
+				xmpp.send("<presence from='" + xmpp.fulljid.toString() + "' type='unavailable' status='Logged out' />");
+		 		xmpp.disconnect();
+		 	}
+		 	
+		 	appModel.serverSideStatus.value = 
+		 		(appModel.localStatus.value == Status.OFFLINE) ? 
+		 		Status.OFFLINE : Status.ERROR;
+
+	 		for each(var buddy:Buddy in appModel.rosterItems)
+	 			buddy.status.value = Status.OFFLINE;
+		}
+
+		//-------------------------------
+		// SESSION HANDLER
+		//-------------------------------
+		
+		/**
+		 * We have sucessfully initiated a session, now we can
+		 * say the server knows our status and we can get the
+		 * list of buddies and send our presence.
+		 */
+		private function sessionHandler(event:XMPPEvent):void
+		{
+			appModel.log(event);
+			appModel.serverSideStatus.value = appModel.localStatus.value;
+			connected = true;
+
+			// get the roster list
+			gotRosterList = false;
+			sendIq(settings.userAccount.jid, 'get', <query xmlns='jabber:iq:roster'/>, getRosterHandler);
+
+			// get the vCard stored on the server
+			sendIq(settings.userAccount.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
+			sendPresence();
+		}
+		
+		//-------------------------------
+		// LOG HANDLER
+		//-------------------------------
+		
+		public function logHandler(event:Event):void
+		{
+			appModel.log(event);
+		}
+		
+		//-------------------------------
+		// FAIL HANDLER
+		//-------------------------------
+		
+		public function failHandler(event:Event):void
+		{
+			appModel.log(event);
+			connected = false;
+			disconnect();
+		}
+
 		//-------------------------------
 		// MESSAGE HANDLER
 		//-------------------------------
@@ -91,12 +172,11 @@ package com.cleartext.ximpp.models
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			if(!buddy)
 			{
-				buddy = new Buddy();
-				buddy.jid = message.sender;
+				buddy = new Buddy(message.sender);
 				appModel.addBuddy(buddy);
 			}
 			
-			buddy.lastSeen = message.timestamp;
+			buddy.setLastSeen(message.timestamp);
 			buddy.resource = event.stanza.from.resource;
 			
 			database.saveBuddy(buddy);
@@ -106,278 +186,195 @@ package com.cleartext.ximpp.models
 		}
 		
 		//-------------------------------
-		// SESSION HANDLER
-		//-------------------------------
-		
-		/**
-		 * We have sucessfully initiated a session, now we can
-		 * say the server knows our status and we can get the
-		 * list of buddies and send our presence.
-		 */
-		private function sessionHandler(event:XMPPEvent):void
-		{
-			connected = true;
-			appModel.log(event);
-			appModel.serverSideStatus = appModel.localStatus;
-			firstTime = true;
-			xmpp.getRoster();
-			sendPresence();
-		}
-		
-		//-------------------------------
-		// SECURE HANDLER
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
-		private function secureHandler(event:XMPPEvent):void
-		{
-			appModel.log(event);
-		}
-		
-		//-------------------------------
-		// AUTH SUCCEDED HANDLER
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
-		private function authSucceededHandler(event:XMPPEvent):void
-		{
-			appModel.log(event);
-		}
-		
-		//-------------------------------
-		// AUTH FAILED HANDLER
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
-		private function authFailedHandler(event:XMPPEvent):void
-		{
-			connected = false;
-			errorHandler(event);
-		}
-		
-		//-------------------------------
 		// PRESENCE HANDLER
 		//-------------------------------
 		
-		/**
-		 * ...
-		 */
 		private function presenceHandler(event:XMPPEvent):void
 		{
-			var stanza:Stanza = event.stanza as Stanza;
-			
-			var fromJid:JID = stanza["from"];
-			var buddy:Buddy = appModel.getBuddyByJid(fromJid.getBareJID());
-			
-			if(!buddy || buddy.jid == settings.userAccount.jid)
-				return;
-			
-			buddy.resource = fromJid.resource;
-			buddy.status.setFromShow((stanza["type"]));
-			buddy.customStatus = stanza["status"];
-			
-			namespace vcard = "vcard-temp:x:update";
-			var xml:XML = stanza.getXML();
-			var avatarHash:String = xml.vcard::x.vcard::photo;
-			
-			if(avatarHash && buddy.avatarHash != avatarHash)
-			{
-				buddy.tempAvatarHash = avatarHash;
-				xmpp.send("<iq from='" + settings.userAccount.jid + "' to='" + buddy.jid + "' type='get' id='vc2'><vCard xmlns='vcard-temp'/></iq>");
-			}
+			appModel.log(event);
 
-			database.saveBuddy(buddy);
-			appModel.log(event);
+			var stanza:PresenceStanza = event.stanza as PresenceStanza;
+			var fromJid:String = stanza.from.getBareJID();
+			
+			if(fromJid == settings.userAccount.jid)
+			{
+				return;
+			}
+			// note this is just for type "subscribe" - "unsubscribed" and
+			// "subscribed" are handled below
+			else if(stanza.type == "subscribe")
+			{
+				// ask user if they want approve fromJid's subscription request
+				Alert.show(fromJid + " wants to add you to their buddy list. Do you want to let them know when you are online?",
+					"Subscription Request",
+					(Alert.YES | Alert.NO),
+					null,
+					function(event:CloseEvent):void
+					{
+						if(event.detail == Alert.YES)
+							xmpp.send('<presence to="' + fromJid + '" type="subscribed" />');
+						else
+							xmpp.send('<presence to="' + fromJid + '" type="unsubscribed" />');
+					});
+			}
+			else
+			{
+				var buddy:Buddy = appModel.getBuddyByJid(fromJid);
+				
+				if(!buddy)
+				{
+					appModel.log("Received presence of type " + stanza.type + " from " + fromJid + " but buddy does not exist.");	
+					return;
+				}
+				
+				buddy.resource = stanza.from.resource;
+				// setFromStanzaType also handles "unsubscribe" and "subscribed"
+				buddy.status.setFromStanzaType(stanza.type);
+				buddy.setCustomStatus(stanza.status);
+				
+				var avatarHash:String = stanza.avatarHash;
+				if(avatarHash && buddy.avatarHash != avatarHash)
+				{
+					buddy.tempAvatarHash = avatarHash;
+					sendIq(buddy.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
+				}
+
+				database.saveBuddy(buddy);
+			}
 		}
 		
 		//-------------------------------
-		// PRESENCE UNAVILABLE HANDLER
+		// ROSTER CHANGED HANDLER
 		//-------------------------------
 		
-		/**
-		 * ...
-		 */
-		private function presenceUnavailableHandler(event:XMPPEvent):void
-		{
-			appModel.log(event);
-		}
-		
-		//-------------------------------
-		// PRESENCE ERROR HANDLER
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
-		private function presenceErrorHandler(event:XMPPEvent):void
-		{
-			appModel.log(event);
-		}
-		
-		//-------------------------------
-		// PRESENCE SUBSCRIBE HANDLER
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
-		private function presenceSubscribeHandler(event:XMPPEvent):void
-		{
-			appModel.log(event);
-		}
-		
-		//-------------------------------
-		// ROSTER COMPLETE HANDLER
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
 		private function rosterListChangeHandler(event:XMPPEvent):void
 		{
-			if(firstTime)
-			{
-				for each(var b1:Buddy in appModel.buddyByJid)
-					b1.used = false;
-			}
-			
-			for each(var item:Object in event.stanza)
-			{
-				var jid:String = item["jid"];
-				
-				var existingBuddy:Buddy = appModel.getBuddyByJid(jid);
-				if(existingBuddy)
-				{
-					existingBuddy.used = true;
-					existingBuddy.groups = item["groups"];
-					database.saveBuddy(existingBuddy);
-				}
-				else
-				{
-					var newBuddy:Buddy = new Buddy();
-					newBuddy.jid = jid;
-					newBuddy.groups = item["groups"];
-					appModel.addBuddy(newBuddy);
-				}
-			}
-			
-			if(firstTime)
-			{
-				firstTime = false;
-				for each(var b2:Buddy in appModel.buddyByJid)
-					if(!b2.used)
-						appModel.removeBuddy(b2);
-			}
-		}
-		
-		//-------------------------------
-		// CONNECT
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
-		public function connect():void
-		{
-			if(connected)
+			if(connected && !gotRosterList)
 				return;
+			
+			appModel.log("rosterListChangedHandler");
+			
+			var jid:String = event.stanza["jid"];
 
-			var account:UserAccount = settings.userAccount;
-			if(account.jid && account.password)
+			// if we already have the buddy, then we just want to
+			// update the values, otherwise create a new buddy
+			var buddy:Buddy = appModel.getBuddyByJid(jid);
+			if(!buddy)
+				buddy = new Buddy(jid);
+
+			var subscription:String = event.stanza["subscription"];
+			if(subscription == "remove")
 			{
-				xmpp.auto_reconnect = true;
-				appModel.serverSideStatus.value = Status.CONNECTING;
+				appModel.removeBuddy(buddy);
+			}
+			else
+			{
+				buddy.groups = event.stanza["groups"];
+				buddy.subscription = subscription;
+				appModel.addBuddy(buddy);
+			}
+		}
 
-				xmpp.setJID(account.jid);
-				xmpp.setPassword(account.password);
-				xmpp.setServer(account.server);
+		//-------------------------------
+		// GET ROSTER HANDLER
+		//-------------------------------
+		
+		private function getRosterHandler(stanza:IqStanza):void
+		{
+			appModel.log("getRosterHandler");
+			
+			for each(var b1:Buddy in appModel.rosterItems)
+				b1.used = false;
+
+			namespace rosterns = "jabber:iq:roster";
+			for each(var item:XML in stanza.query.rosterns::item)
+			{
+				var jid:String = item.@jid;
 				
-				xmpp.socket.addEventListener(StreamEvent.DISCONNECTED, streamDisconnectedHandler);
-				xmpp.socket.addEventListener(StreamEvent.CONNECT_FAILED, streamConnectFailedHandler);
-				xmpp.socket.addEventListener(StreamEvent.CONNECTED, streamConnectedHandler);
+				// if we already have the buddy, then we just want to
+				// update the values, otherwise create a new buddy
+				var buddy:Buddy = appModel.getBuddyByJid(jid);
+				if(!buddy)
+					buddy = new Buddy(jid);
 				
-				// do the tls bit now
-				xmpp.setupTLS(TLSEvent, TLSConfig, TLSEngine, TLSSocket, true, true, true);
-				xmpp.connect();
+				var groups:Array = new Array();
+				for each(var group:XML in item.rosterns::group)
+					groups.push(group.text());
+				buddy.groups = groups;
+				
+				buddy.subscription = item.@subscription;
+				
+				// flag used to delete buddies that are no longer in
+				// the roster list
+				buddy.used = true;
+				
+				// this adds, saves and adds an event listener to the buddy
+				appModel.addBuddy(buddy);
+			}
+			
+			for each(var b2:Buddy in appModel.rosterItems)
+				if(!b2.used)
+					appModel.removeBuddy(b2);
+
+			gotRosterList = true;
+		}
+		
+		//-------------------------------
+		// VCARD HANDLER
+		//-------------------------------
+		
+		private function vCardHandler(stanza:IqStanza):void
+		{
+			namespace vCardTemp = "vcard-temp";
+			var xml:XML = stanza.getXML();
+			
+			var buddyJid:String = stanza.from;
+			
+			if(buddyJid == settings.userAccount.jid)
+			{
+				var vCard:XMLList = xml.vCardTemp::vCard;
+				var serverAvatar:String = vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
+				var localAvatar:String = XimppUtils.avatarToString(settings.userAccount.avatar);
+				
+				if(serverAvatar != localAvatar && localAvatar != "")
+				{
+					vCard.vCardTemp::PHOTO.vCardTemp::BINVAL = localAvatar;
+					sendIq(settings.userAccount.jid, 'set', vCard[0]);
+				}
+			}
+			else
+			{
+				var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
+				var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
+				XimppUtils.stringToAvatar(avatarString, buddy);
 			}
 		}
 		
 		//-------------------------------
-		// DISCONNECT
+		// SEND IQ
 		//-------------------------------
 		
 		/**
-		 * ...
+		 * This function should really be in the seesmic library
 		 */
-		public function disconnect():void
+		public function sendIq(tojid:String, type:String, payload:XML, responseHandler:Function=null):void
 		{
-			if (connected)
-			{
-				xmpp.auto_reconnect = false;
-				connected = false;
-		 		appModel.log("Disconnecting from XMPP server");
-		 		var presenceType:String = "<presence from='" + xmpp.fulljid.toString() + "' type='unavailable' status='Logged out' />";
-				xmpp.send(presenceType);
-		 		xmpp.disconnect();
-		 		appModel.serverSideStatus.value = Status.OFFLINE;
-		 		for each(var buddy:Buddy in appModel.buddyCollection)
-		 		{
-		 			buddy.status.value = Status.OFFLINE;
-		 		}
-		 	}
-		}
-		
-		//-------------------------------
-		// STREAM DISCONNECTED HANDLER
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
-		private function streamDisconnectedHandler(event:StreamEvent):void
-		{
-			connected = false;
-			appModel.log(event);
-		}
+			var iqStanza:IqStanza = new IqStanza(xmpp);
+			var id:String = iqStanza.setID();
 
-		//-------------------------------
-		// STREAM CONNECT FAILED HANDLER
-		//-------------------------------
+			if(responseHandler != null)
+				xmpp.addHandler(new IdHandler(id, responseHandler));
+			
+			iqStanza.setTo(tojid);
+			iqStanza.setType(type);
+			iqStanza.setQuery(payload);
+			iqStanza.send();
+		}		
 		
-		/**
-		 * ...
-		 */
-		private function streamConnectFailedHandler(event:StreamEvent):void
-		{
-			connected = false;
-			errorHandler(event);
-		}
-
-		//-------------------------------
-		// STREAM CONNECTED HANDLER
-		//-------------------------------
-		
-		/**
-		 * ...
-		 */
-		private function streamConnectedHandler(event:StreamEvent):void
-		{
-			appModel.log(event);	
-		}
-
 		//-------------------------------
 		// SEND PRESENCE
 		//-------------------------------
 		
-		/**
-		 * ...
-		 */
 		public function sendPresence():void
 		{
 			var status:Status = appModel.localStatus;
@@ -392,8 +389,8 @@ package com.cleartext.ximpp.models
 			// if we are already connected, then send the presence
 			else if(connected)
 			{
-				xmpp.sendPresence(customStatus, status.toShow(), "5");
-				appModel.serverSideStatus = status;
+				xmpp.sendPresence(customStatus, status.toShow(), "5", "", settings.userAccount.avatarHash);
+				appModel.serverSideStatus.value = status.value;
 			}
 			
 			// if we want to connect, then try to connect, if we are successful, then
@@ -408,28 +405,50 @@ package com.cleartext.ximpp.models
 		// SEND MESSAGE
 		//-------------------------------
 		
-		/**
-		 * ...
-		 */
-		public function sendMessage(toJid:String, msg:String):void
+		public function sendMessage(toJid:String, body:String, subject:String=null, type:String='chat'):void
 		{
-			if(connected)
-				xmpp.sendMessage(toJid, msg);
+			xmpp.sendMessage(toJid, body, subject, type);
 		}
-
+		
 		//-------------------------------
-		// ERROR HANDLER
+		// ADD TO ROSTER 
 		//-------------------------------
 		
-		/**
-		 * ...
-		 */
-		public function errorHandler(event:Event):void
+		public function addToRoster(toJid:String, subscribe:Boolean):void
 		{
-			appModel.log(event);
-			disconnect();
-			appModel.serverSideStatus.value = Status.ERROR;
+			sendIq(settings.userAccount.jid, "set", <query xmlns="jabber:iq:roster"><item jid="{toJid}"/></query>, modifyRosterHandler);
+			if(subscribe)
+				subscribeTo(toJid);
+		}
+		
+		//-------------------------------
+		// MODIFY ROSTER HANDLER
+		//-------------------------------
+		
+		private function modifyRosterHandler(stanza:IqStanza):void
+		{
+			/**
+			 * TO DO:
+			 */
+			appModel.log("addToRosterHandler");
 		}
 
+		//-------------------------------
+		// SUBSCRIBE TO 
+		//-------------------------------
+		
+		public function subscribeTo(toJid:String):void
+		{
+			xmpp.sendPresence(null, "subscribe", null, toJid);
+		}
+		
+		//-------------------------------
+		// REMOVE FROM ROSTER
+		//-------------------------------
+		
+		public function removeFromRoster(toJid:String):void
+		{
+			sendIq(settings.userAccount.jid, "set", <query xmlns='jabber:iq:roster'><item jid='{toJid}' subscription='remove'/></query>, modifyRosterHandler);
+		}
 	}
 }

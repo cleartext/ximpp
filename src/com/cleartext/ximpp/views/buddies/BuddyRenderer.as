@@ -50,21 +50,19 @@ package com.cleartext.ximpp.views.buddies
 		override public function set data(value:Object):void
 		{
 			if(buddy)
-				buddy.removeEventListener(BuddyEvent.AVATAR_CHANGED, avatarChangeHandler);
+				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
 			
 			super.data = value;
 
 			if(buddy)
-			{
-				avatarChangeHandler(null);
-				buddy.addEventListener(BuddyEvent.AVATAR_CHANGED, avatarChangeHandler);
-			}
+				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+
+			invalidateProperties();
 		}
 		
-		private function avatarChangeHandler(event:BuddyEvent):void
+		private function buddyChangedHandler(event:BuddyEvent):void
 		{
-			if(avatar && buddy)
-				avatar.bitmapData = buddy.avatar;
+			invalidateProperties();
 		}
 		
 		//---------------------------------------
@@ -100,7 +98,6 @@ package com.cleartext.ximpp.views.buddies
 				avatar.buttonMode = true;
 				avatar.addEventListener(AvatarEvent.EDIT_CLICKED, avatarClicked);
 				addChild(avatar);
-				avatarChangeHandler(null);
 			}
 			
 			if(!statusIcon)
@@ -141,6 +138,8 @@ package com.cleartext.ximpp.views.buddies
 			nameLabel.text = buddy.nickName;
 			statusLabel.text = buddy.status.value;
 			statusIcon.status.value = buddy.status.value;
+			if(avatar && buddy)
+				avatar.bitmapData = buddy.avatar;
 			
 			// refresh styles
 			nameLabel.styleName = "blackBold";
@@ -190,7 +189,6 @@ package com.cleartext.ximpp.views.buddies
 		
 		private function avatarClicked(event:AvatarEvent):void
 		{
-			trace(event.type + " : " + BuddyEvent.EDIT_BUDDY);
 			dispatchEvent(new BuddyEvent(BuddyEvent.EDIT_BUDDY, true));
 		}
 		

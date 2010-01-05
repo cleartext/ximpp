@@ -65,14 +65,14 @@ package com.cleartext.ximpp.views.timeline
 			if(buddy != newBuddy)
 			{
 				if(buddy)
-					buddy.removeEventListener(BuddyEvent.AVATAR_CHANGED, avatarChangeHandler);
+					buddy.removeEventListener(BuddyEvent.CHANGED, avatarChangeHandler);
 	
 				buddy = newBuddy;
 				
 				if(buddy)
 				{
 					avatarChangeHandler(null);
-					buddy.addEventListener(BuddyEvent.AVATAR_CHANGED, avatarChangeHandler);
+					buddy.addEventListener(BuddyEvent.CHANGED, avatarChangeHandler);
 				}
 			}
 		}

@@ -98,9 +98,9 @@
 				if(previousAccount && changesMade)
 				{
 					previousAccount.accountName = accountName.text;
-					previousAccount.nickName = nickName.text;
-					previousAccount.avatar = avatar.bitmapData;
-					previousAccount.jid = jid.text;
+					previousAccount.setNickName(nickName.text);
+					previousAccount.setAvatar(avatar.bitmapData);
+					previousAccount.setJid(jid.text);
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
 					

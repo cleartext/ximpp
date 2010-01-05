@@ -2,12 +2,12 @@ package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.BuddyGroup;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
@@ -38,20 +38,22 @@ package com.cleartext.ximpp.models
 //			var sort:Sort = new Sort();
 //			sort.compareFunction = compareBuddies;
 //			buddies.sort = sort;
+//			_allBuddies = new BuddyGroup("all buddies");
+			_rosterItems = new BuddyGroup("roster items");
 		}
 		
-		private var _buddyByJid:Dictionary = new Dictionary();
-		public function get buddyByJid():Dictionary
-		{
-			return _buddyByJid;
-		}
-		
-		private var _buddyCollection:ArrayCollection = new ArrayCollection();
-		public function get buddyCollection():ArrayCollection
-		{
-			return _buddyCollection;
-		}
+//		private var _allBuddies:BuddyGroup;
+//		public function get allBuddies():BuddyGroup
+//		{
+//			return _allBuddies;
+//		}
 
+		private var _rosterItems:BuddyGroup;
+		public function get rosterItems():BuddyGroup
+		{
+			return _rosterItems;
+		}
+		
 		[Bindable]
 		public var timeLineMessages:ArrayCollection = new ArrayCollection();
 
@@ -72,8 +74,11 @@ package com.cleartext.ximpp.models
 		 * LOCAL STATUS
 		 * This is the status that the user selects.
 		 */
-		[Bindable]
-		public var localStatus:Status = new Status(Status.OFFLINE);
+		private var _localStatus:Status = new Status(Status.OFFLINE);
+		public function get localStatus():Status
+		{
+			return _localStatus;
+		}
 		
 		[Bindable]
 		public var showConsole:Boolean = true;
@@ -115,7 +120,7 @@ package com.cleartext.ximpp.models
 			
 			if(customStatus != settings.userAccount.customStatus)
 			{
-				settings.userAccount.customStatus = customStatus;
+				settings.userAccount.setCustomStatus(customStatus);
 				database.saveUserAccount(settings.userAccount);
 			}
 
@@ -175,8 +180,7 @@ package com.cleartext.ximpp.models
 			chats.removeAll();
 			selectedChat = null;
 			timeLineMessages.removeAll();
-			_buddyByJid = new Dictionary();
-			buddyCollection.removeAll();
+//			allBuddies.removeAll();
 			
 			database.loadBuddyData();
 			database.loadTimelineData();
@@ -214,7 +218,7 @@ package com.cleartext.ximpp.models
 			if(jid == settings.userAccount.jid)
 				return settings.userAccount;
 			
-			return buddyByJid[jid];
+			return rosterItems.getBuddy(jid);
 		}
 		
 		public function showPreferencesWindow():void
@@ -245,9 +249,10 @@ package com.cleartext.ximpp.models
 		public function addBuddy(newBuddy:Buddy):void
 		{
 			database.saveBuddy(newBuddy);
-			buddyByJid[newBuddy.jid] = newBuddy;
-			buddyCollection.addItem(newBuddy);
-			newBuddy.addEventListener(BuddyEvent.AVATAR_CHANGED, buddySaveHandler);
+			rosterItems.addBuddy(newBuddy);
+			
+			if(!newBuddy.hasEventListener(BuddyEvent.CHANGED))
+				newBuddy.addEventListener(BuddyEvent.CHANGED, buddySaveHandler);
 		}
 		
 		private function buddySaveHandler(event:BuddyEvent):void
@@ -257,10 +262,9 @@ package com.cleartext.ximpp.models
 		
 		public function removeBuddy(buddy:Buddy):void
 		{
-			buddyCollection.removeItemAt(buddyCollection.getItemIndex(buddy));
+			rosterItems.removeBuddy(buddy);
 			database.removeBuddy(buddy.buddyId);
-			buddy.removeEventListener(BuddyEvent.AVATAR_CHANGED, buddySaveHandler);
-			delete buddyByJid[buddy.jid];
+			buddy.removeEventListener(BuddyEvent.CHANGED, buddySaveHandler);
 		}
 
 	}

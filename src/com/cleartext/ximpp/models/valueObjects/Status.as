@@ -10,6 +10,7 @@ package com.cleartext.ximpp.models.valueObjects
 	{
 		// unavailable
 		public static const OFFLINE:String = "offline";
+		public static const UNSUBSCRIBED:String = "unsubscribed";
 		// available
 		public static const AVAILABLE:String = "available";
 		public static const AWAY:String = "away";
@@ -28,7 +29,6 @@ package com.cleartext.ximpp.models.valueObjects
 		public function Status(value:String=UNKNOWN)
 		{
 			this.value = value;
-			edit = false;
 			numUnread = 0;
 		}
 		
@@ -40,6 +40,11 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function set value(value:String):void
 		{
+			// when setting a buddy's status to OFFLINE, we don't want
+			// to overwrite the UNSUBSCIRBED value
+			if(value == OFFLINE && this.value == UNSUBSCRIBED)
+				return;
+			
 			if(_value != value)
 			{
 				_value = value;
@@ -47,7 +52,7 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 
-		private var _edit:Boolean;
+		private var _edit:Boolean = false;
 		[Bindable (event="statusChanged")]
 		public function get edit():Boolean
 		{
@@ -78,18 +83,21 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		
 		// find a status value from what the xmpp libray tells us
-		public function setFromShow(show:String):void
+		public function setFromStanzaType(type:String):void
 		{
-			switch(show)
+			switch(type)
 			{
-				case "unavailable" : value = OFFLINE; break;
-				case "" : value = AVAILABLE; break;
-				case "available" : value = AVAILABLE; break;
-				case "chat" : value = AVAILABLE; break;
-				case "away" : value = AWAY; break;
-				case "dnd" : value = BUSY; break;
-				case "xa" : value = EXTENDED_AWAY; break;
-				default : value = UNKNOWN + ": " + show;
+				case "unavailable": 	value = OFFLINE; break;
+				case "subscribed":		value = OFFLINE; break;
+				case "unsubscribed": 	value = UNSUBSCRIBED; break;
+				case "":				value = AVAILABLE; break;
+				case "available":		value = AVAILABLE; break;
+				case "chat":			value = AVAILABLE; break;
+				case "away":			value = AWAY; break;
+				case "dnd":				value = BUSY; break;
+				case "xa":				value = EXTENDED_AWAY; break;
+				case "error":			value = ERROR; break;
+				default:				value = UNKNOWN + ": " + type;
 			}
 		}
 		

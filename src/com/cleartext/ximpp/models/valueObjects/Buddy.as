@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.models.valueObjects
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.StatusEvent;
 	import com.cleartext.ximpp.models.XimppUtils;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
@@ -11,9 +12,18 @@ package com.cleartext.ximpp.models.valueObjects
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IXimppValueObject
 	{
-		public function Buddy()
+		
+		/** TODO: subscription property */
+		
+		public function Buddy(jid:String)
 		{
 			super();
+			setJid(jid);
+			status.addEventListener(StatusEvent.STATUS_CHANGED,
+				function():void
+				{
+					dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+				});
 		}
 		
 		public static const CREATE_BUDDIES_TABLE:String =
@@ -24,36 +34,85 @@ package com.cleartext.ximpp.models.valueObjects
 			"nickName TEXT, " +
 			"groups TEXT, " +
 			"lastSeen DATE, " + 
-			"service BOOLEAN, " + 
+			"subscription TEXT," +
 			"avatar TEXT, " + 
 			"avatarHash TEXT, " + 
 			"customStatus TEXT);";
+			
+		public static const NONE:String = "none";
+		public static const TO:String = "to";
+		public static const FROM:String = "from";
+		public static const BOTH:String = "both";
 
 		// storred in database		
-		public var buddyId:int = -1;
-		public var jid:String;
+		private var _buddyId:int = -1;
+		public function get buddyId():int
+		{
+			return _buddyId;
+		}
+		public function setBuddyId(value:int):void
+		{
+			if(_buddyId == -1)
+				_buddyId = value;
+			else
+				throw new Error();
+		}
+		
+		private var _jid:String;
+		public function get jid():String
+		{
+			return _jid;
+		}
+		public function setJid(value:String):void
+		{
+			_jid = value;
+		}
+		
 		private var _nickName:String;
 		public function get nickName():String
 		{
 			return (_nickName) ? _nickName : jid;
 		}
-		public function set nickName(value:String):void
+		public function setNickName(value:String):void
 		{
 			_nickName = value;
+			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 		}
-		public var groups:Array = new Array();
-		public var service:Boolean = false;
-		public var lastSeen:Date;
+		
 		public var avatarHash:String;
-		public var customStatus:String;
+		public var groups:Array = new Array();
+		public var subscription:String = NONE;
+		
+		private var _lastSeen:Date;
+		public function get lastSeen():Date
+		{
+			return _lastSeen;
+		}
+		public function setLastSeen(value:Date):void
+		{
+			_lastSeen = value;
+			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+		}
+		
+		
+		private var _customStatus:String;
+		public function get customStatus():String
+		{
+			return _customStatus;
+		}
+		public function setCustomStatus(value:String):void
+		{
+			_customStatus = value;
+			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+		}
 
 		private var _avatar:BitmapData;
-		[Bindable (event="avatarChanged")]
+		[Bindable (event="changed")]
 		public function get avatar():BitmapData
 		{
 			return _avatar;
 		}
-		public function set avatar(value:BitmapData):void
+		public function setAvatar(value:BitmapData):void
 		{
 			if(_avatar != value)
 			{
@@ -64,7 +123,7 @@ package com.cleartext.ximpp.models.valueObjects
 				}
 				
 				_avatar = value;
-				dispatchEvent(new BuddyEvent(BuddyEvent.AVATAR_CHANGED));
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
 		}
 
@@ -81,19 +140,18 @@ package com.cleartext.ximpp.models.valueObjects
 				
 		public static function createFromDB(obj:Object):IXimppValueObject
 		{
-			var newBuddy:Buddy = new Buddy();
+			var jid:String = obj["jid"];
+			var newBuddy:Buddy = new Buddy(jid);
 			
-			newBuddy.buddyId = obj["buddyId"];
-			newBuddy.jid = obj["jid"];
-			newBuddy.nickName = obj["nickName"];
-			newBuddy.groups = (obj["groups"] as String).split(",");
-			newBuddy.service = obj["service"];
-			newBuddy.lastSeen = obj["lastSeen"];
-			newBuddy.avatarHash = obj["avatarHash"];
-			newBuddy.customStatus = obj["customStatus"];
+			newBuddy.setBuddyId(obj["buddyId"]);
+			newBuddy.setNickName(obj["nickName"]);
+			newBuddy.setLastSeen(obj["lastSeen"]);
+			newBuddy.setCustomStatus(obj["customStatus"]);
 
-			if(obj["avatar"])
-				XimppUtils.stringToAvatar(obj["avatar"], newBuddy);
+			newBuddy.groups = (obj["groups"] as String).split(",");
+			newBuddy.avatarHash = obj["avatarHash"];
+			newBuddy.subscription = obj["subscription"];
+			XimppUtils.stringToAvatar(obj["avatar"], newBuddy);
 
 			return newBuddy;
 		}
@@ -105,8 +163,8 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("jid", jid),
 				new DatabaseValue("nickName", _nickName),
 				new DatabaseValue("groups", groups.join(",")),
-				new DatabaseValue("service", service),
 				new DatabaseValue("lastSeen", lastSeen),
+				new DatabaseValue("subscription", subscription),
 				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar)),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("avatarHash", avatarHash)];

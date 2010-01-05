@@ -339,7 +339,7 @@ package com.cleartext.ximpp.models
 			var criteria:Array = [new DatabaseValue("jid", buddy.jid)];
 			var id:int = updateOrInsert("buddies", buddy.toDatabaseValues(settings.userId), criteria);
 			if(id != -1)
-				buddy.buddyId = id;
+				buddy.setBuddyId(id);
 			return id;
 		}
 
