@@ -111,7 +111,8 @@ package com.cleartext.ximpp.models
 		
 		public function setUserPresence(statusString:String, customStatus:String):void
 		{
-			localStatus.value = statusString;
+			if(Status.USER_TYPES.indexOf(statusString) != -1)
+				localStatus.value = statusString;
 	
 			if(!settings.userAccount ||
 				localStatus.value == serverSideStatus.value && 
