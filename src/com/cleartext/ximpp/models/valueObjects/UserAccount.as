@@ -14,7 +14,8 @@ package com.cleartext.ximpp.models.valueObjects
 			"password TEXT, " +
 			"server TEXT, " +
 			"customStatus TEXT, " +
-			"avatar TEXT);";
+			"avatar TEXT, " + 
+			"avatarHash TEXT);";
 		
 		public function UserAccount()
 		{
@@ -47,7 +48,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public function get valid():Boolean
 		{
-			return (jid && password && password);
+			return (jid && password && server);
 		}
 		
 		override public function toDatabaseValues(userId:int):Array
@@ -60,6 +61,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("password", password),
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),
+				new DatabaseValue("avatarHash", avatarHash),
 				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar))
 				];			
 		}
