@@ -5,6 +5,9 @@
 	creationComplete="init()">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.PopUpEvent;
+			import org.swizframework.Swiz;
+			import com.cleartext.ximpp.events.UserAccountEvent;
 			import com.cleartext.ximpp.events.BuddyEvent;
 			import mx.binding.utils.ChangeWatcher;
 			import mx.binding.utils.BindingUtils;
@@ -22,14 +25,14 @@
 			
 			private function init():void
 			{
-				settings.addEventListener("userAccountChanged", userAccountChanged);
+				settings.addEventListener(UserAccountEvent.CHANGED, userAccountChanged);
 				userAccountChanged(null);
 			}
 			
-			private function userAccountChanged(event:Event):void
+			private function userAccountChanged(event:UserAccountEvent):void
 			{
-				if(settings.userAccount)
-					settings.userAccount.removeEventListener(BuddyEvent.CHANGED, changeAvatar);
+				if(event && event.previousUserAccount)
+					event.previousUserAccount.removeEventListener(BuddyEvent.CHANGED, changeAvatar);
 
 				if(settings.userAccount)
 					settings.userAccount.addEventListener(BuddyEvent.CHANGED, changeAvatar);
@@ -62,9 +65,9 @@
 
 	<common:Avatar
 		id="avatar"
-		width="37"
-		height="37"
-		x="15" y="1"
+		width="33"
+		height="33"
+		x="15" y="4"
 		/>
 		
 	<common:StatusIcon
@@ -75,6 +78,7 @@
 	<mx:ComboBox
 		id="statusComboBox"
 		dataProvider="{Status.USER_TYPES}"
+		selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus.value)}"
 		change="userPresenceChangeHandler()"
 		x="67" y="10" width="110"
 		text="{appModel.serverSideStatus.value}"
@@ -99,14 +103,14 @@
 	<mx:Button
 		id="userPreferencesButton"
 		label="User Preferences..."
-		click="appModel.showPreferencesWindow()"
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));"
 		right="165" y="10" width="145"
 		/>
 
 	<mx:Button
 		id="advancedSearchButton"
 		label="Advanced Search..."
-		click="appModel.showAdvancedSearchWindow()"
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADVANCED_SEARCH_WINDOW));"
 		right="10" y="10" width="145"
 		/>
 </mx:Canvas>

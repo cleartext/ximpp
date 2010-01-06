@@ -66,5 +66,15 @@ package com.cleartext.ximpp.models.valueObjects
 				delete _buddiesByJid[buddy.jid];
 			}
 		}
+		
+		public function containsJid(jid:String):Boolean
+		{
+			for each(var buddy:Buddy in this)
+			{
+				if(buddy.jid == jid)
+					return true;
+			}
+			return false;
+		}
 	}
 }

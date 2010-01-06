@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.BuddyGroup;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
@@ -16,11 +17,10 @@ package com.cleartext.ximpp.models
 	import mx.events.CloseEvent;
 	import mx.utils.ObjectUtil;
 	
+	import org.swizframework.Swiz;
+	
 	public class ApplicationModel extends EventDispatcher
 	{
-		public static const SHOW_PREFERENCES_WINDOW:String = "showPreferencesWindow";
-		public static const SHOW_ADVANCED_SEARCH_WINDOW:String = "showAdvancedSearchWindow";
-
 		[Autowire]
 		[Bindable]
 		public var settings:SettingsModel;
@@ -142,12 +142,12 @@ package com.cleartext.ximpp.models
 			if(!settings.userAccount.valid)
 			{
 				Alert.show(
-					"There are no user settings stored. Do you want to change your preferences now?",
+					"There are no valid settings selected. Do you want to change your preferences now?",
 					 "Invalid User Settings", Alert.YES | Alert.NO, null,
 					 function(event:CloseEvent):void
 					 {
 					 	if(event.detail == Alert.YES)
-					 		showPreferencesWindow();
+					 		Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));
 					 });
 			}
 			else if(settings.global.autoConnect)
@@ -171,16 +171,12 @@ package com.cleartext.ximpp.models
 				});
 		}
 		
-		public function userAccountChanged():void
+		public function userIdChanged():void
 		{
-			xmpp.disconnect();
-			if(settings.global.autoConnect)
-				xmpp.connect();
-			
 			chats.removeAll();
 			selectedChat = null;
 			timeLineMessages.removeAll();
-//			allBuddies.removeAll();
+			rosterItems.removeAll();
 			
 			database.loadBuddyData();
 			database.loadTimelineData();
@@ -219,16 +215,6 @@ package com.cleartext.ximpp.models
 				return settings.userAccount;
 			
 			return rosterItems.getBuddy(jid);
-		}
-		
-		public function showPreferencesWindow():void
-		{
-	 		dispatchEvent(new Event(SHOW_PREFERENCES_WINDOW));
-		}
-		
-		public function showAdvancedSearchWindow():void
-		{
-			dispatchEvent(new Event(SHOW_ADVANCED_SEARCH_WINDOW));
 		}
 		
 		private function compareBuddies(buddy1:Buddy, buddy2:Buddy, fields:Object=null):int

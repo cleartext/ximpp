@@ -11,13 +11,17 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.PreferenceWindow;
+			import mx.core.IFlexDisplayObject;
+			import com.cleartext.ximpp.views.popup.EditBuddyWindow;
+			import com.cleartext.ximpp.views.popup.SubscriptionRequestWindow;
+			import com.cleartext.ximpp.events.PopUpEvent;
+			import com.cleartext.ximpp.views.popup.AddBuddyWindow;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			import mx.controls.Alert;
 
-			import com.cleartext.ximpp.views.preferences.PreferenceWindow;
-			
 			[Autowire]
 			[Bindable]
 			public var appModel:ApplicationModel;		
@@ -25,13 +29,47 @@
 			private function init():void
 			{
 				appModel.init();
-				appModel.addEventListener(ApplicationModel.SHOW_PREFERENCES_WINDOW, showPreferencesWindow);
-				appModel.addEventListener(ApplicationModel.SHOW_ADVANCED_SEARCH_WINDOW, showAdvancedSearchWindow);
 			}
 			
-			private function showPreferencesWindow(event:Event):void
+			[Mediate(event="PopUpEvent.PREFERENCES_WINDOW")]
+			public function showPreferencesWindow(event:PopUpEvent):void
 			{
-				var window:PreferenceWindow = new PreferenceWindow();
+				initializePopUp(new PreferenceWindow());
+			}
+			
+			[Mediate(event="PopUpEvent.ADVANCED_SEARCH_WINDOW")]
+			public function showAdvancedSearchWindow(event:PopUpEvent):void
+			{
+				Alert.show("Advanced search is not currently implemented.","Advanced Search");
+			}
+			
+			[Mediate(event="PopUpEvent.ADD_NEW_BUDDY_WINDOW")]
+			public function showAddBuddyWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddBuddyWindow());
+			}
+
+			[Mediate(event="PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW")]
+			public function showSubscriptionRequest(event:PopUpEvent):void
+			{
+				var buddyExists:Boolean = appModel.rosterItems.containsJid(event.jid);
+
+				var window:SubscriptionRequestWindow = new SubscriptionRequestWindow();
+				window.fromJid = event.jid;
+				window.addToRoster = !buddyExists;
+				initializePopUp(window);
+			}
+
+			[Mediate(event="PopUpEvent.EDIT_BUDDY_WINDOW")]
+			public function showEditBuddyWindow(event:PopUpEvent):void
+			{
+				var window:EditBuddyWindow = new EditBuddyWindow();
+				initializePopUp(window);
+				window.buddy = event.buddy;
+			}
+			
+			private function initializePopUp(window:IFlexDisplayObject):void
+			{
 				window.addEventListener(CloseEvent.CLOSE, 
 					function():void
 					{
@@ -39,11 +77,6 @@
 					});
 				PopUpManager.addPopUp(window, this, true);
 				PopUpManager.centerPopUp(window);
-			}
-			
-			private function showAdvancedSearchWindow(event:Event):void
-			{
-				Alert.show("Advanced search is not currently implemented.","Advanced Search");
 			}
 
 		]]>
@@ -55,15 +88,11 @@
 			<buddies:BuddyCanvas
 				backgroundColor="0xffffff"
 				id="buddyCanvas"
-				width="20%"/>
+				width="25%"/>
 			<chats:ChatCanvas
 				backgroundColor="0xffffff"
 				id="chatCanvas"
-				width="40%"/>
-			<timeline:TimelineCanvas
-				backgroundColor="0xffffff"
-				id="timelineCanvas"
-				width="40%"/>
+				width="75%"/>
 		</mx:HDividedBox>
 		<mx:TextArea
 			id="console"

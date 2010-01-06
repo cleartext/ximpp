@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	layout="absolute"
+	title="Add Buddy"
+	xmlns:common="com.cleartext.ximpp.views.common.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.models.DatabaseModel;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.ApplicationModel;
+
+			[Autowire]
+			[Bindable]
+			public var settings:SettingsModel;
+			
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+			
+			private function addBuddyHandler():void
+			{
+				xmpp.addToRoster(newJid.text, subscribe.selected);
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Form>
+		<mx:FormItem label="gateway:">
+			<mx:ComboBox dataProvider="{[settings.userAccount.server]}" />
+		</mx:FormItem>
+		
+		<mx:FormItem label="buddy id:">
+			<common:DefaultTextInput id="newJid" defaultText="eg. test@cleartext.com" />
+		</mx:FormItem>
+		
+		<mx:FormItem>
+			<mx:CheckBox id="subscribe" selected="true" label="ask to see when buddy is online" labelPlacement="right"/>
+		</mx:FormItem>
+		
+		<mx:HBox>
+			<mx:Button label="add" click="addBuddyHandler()"/>
+			<mx:Button label="cancel" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
+		</mx:HBox>
+	</mx:Form>
+
+</mx:TitleWindow>

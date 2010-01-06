@@ -2,7 +2,6 @@ package com.cleartext.ximpp.views.chats
 {
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.views.common.StatusIcon;
-	import com.cleartext.ximpp.views.timeline.MessageRenderer;
 	import com.universalsprout.flex.components.list.SproutList;
 	
 	import mx.core.ClassFactory;

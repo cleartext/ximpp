@@ -1,9 +1,11 @@
 package com.cleartext.ximpp.models
 {
+	import adobe.utils.CustomActions;
+	
+	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
-	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
 	public class SettingsModel extends EventDispatcher
@@ -25,14 +27,17 @@ package com.cleartext.ximpp.models
 		{
 			return _userAccount;
 		}
-		public function set userAccount(value:UserAccount):void
+		public function set userAccount(newUserAccount:UserAccount):void
 		{
-			if(value != _userAccount)
+			var previousUserAccount:UserAccount = userAccount;
+			
+			_userAccount = newUserAccount;
+			
+			if(!previousUserAccount || newUserAccount.userId != previousUserAccount.userId)
 			{
-				_userAccount = value;
-				appModel.userAccountChanged();
-				dispatchEvent(new Event("userAccountChanged"));
+				appModel.userIdChanged();
 			}
+			dispatchEvent(new UserAccountEvent(previousUserAccount));
 		}
 		
 		public function get userId():int

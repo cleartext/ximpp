@@ -9,10 +9,10 @@
 	>
 	
 	<swiz:SwizConfig
-		strict="false"
+		strict="true"
 		mediateBubbledEvents="true"
 		eventPackages="com.cleartext.ximpp.events"
-		viewPackages="com.cleartext.ximpp.view"
+		viewPackages="com.cleartext.ximpp.views"
 		injectionEvent="preinitialize"
 		beanLoaders="{ [ Beans ] }" />
 

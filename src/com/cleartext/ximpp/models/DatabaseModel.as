@@ -17,6 +17,7 @@ package com.cleartext.ximpp.models
 	import flash.filesystem.File;
 	
 	import mx.collections.ArrayCollection;
+	import mx.managers.CursorManager;
 	
 	public class DatabaseModel extends EventDispatcher
 	{
@@ -166,7 +167,7 @@ package com.cleartext.ximpp.models
 			    // if we've got to this point without errors, commit the transaction 
 			    syncConn.commit();
 				appModel.log("User settings loaded ");
-	
+
 				settings.userAccount = UserAccount.createFromDB(result.data[0]) as UserAccount;
 			}
 			else
@@ -314,9 +315,6 @@ package com.cleartext.ximpp.models
 			var criteria:Array = [new DatabaseValue("settingId", 1)];
 			
 			updateStmt("globalSettings", values, criteria);
-			
-			if(settings.global.autoConnect && !appModel.xmpp.connected)
-				appModel.xmpp.connect();
 		}
 		
 		public function saveUserAccount(userAccount:UserAccount):int

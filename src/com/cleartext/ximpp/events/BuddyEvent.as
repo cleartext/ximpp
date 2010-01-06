@@ -5,7 +5,7 @@ package com.cleartext.ximpp.events
 	public class BuddyEvent extends Event
 	{
 		public static const EDIT_BUDDY:String = "editBuddy";
-		public static const CHANGED:String = "changed";
+		public static const CHANGED:String = "buddyChanged";
 		
 		public function BuddyEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

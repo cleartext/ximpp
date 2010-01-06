@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	layout="absolute"
+	title="Edit Buddy"
+	xmlns:common="com.cleartext.ximpp.views.common.*">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import com.cleartext.ximpp.models.XimppUtils;
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			import com.cleartext.ximpp.models.types.SubscriptionTypes;
+			import mx.events.CloseEvent;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.models.DatabaseModel;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.ApplicationModel;
+
+			[Autowire]
+			[Bindable]
+			public var appModel:ApplicationModel;
+			
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+			
+			private function okHandler():void
+			{
+				if(remove.selected)
+				{
+					Alert.show("are you sure you want to delete " + buddy.jid + "?",
+						"Confirm Delete", 
+						(Alert.YES | Alert.NO), 
+						null,
+						function(event:CloseEvent):void
+						{
+							if(event.detail == Alert.YES)
+							{
+								xmpp.removeFromRoster(buddy.jid);
+							}
+						});
+				}
+				else
+				{
+					buddy.setNickName(nickname.text);
+					appModel.addBuddy(buddy);
+				}
+				
+				
+				
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+			}
+			
+			private var _buddy:Buddy;
+			public function get buddy():Buddy
+			{
+				return _buddy;
+			}
+			public function set buddy(value:Buddy):void
+			{
+				_buddy = value;
+				jid.text = buddy.jid;
+				avatar.bitmapData = buddy.avatar;
+				subscription.text = buddy.subscription;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Form>
+		
+		<mx:FormItem label="jid:">
+			<mx:Label id="jid" />
+		</mx:FormItem>
+		
+		<mx:FormItem label="avatar:">
+			<common:Avatar id="avatar" width="{XimppUtils.AVATAR_SIZE}" height="{XimppUtils.AVATAR_SIZE}"/>
+		</mx:FormItem>
+
+		<mx:FormItem label="subscription:">
+			<mx:Label id="subscription" />
+		</mx:FormItem>
+
+		<mx:FormItem label="nickname:">
+			<mx:TextInput id="nickname" />
+		</mx:FormItem>
+		
+		<mx:FormItem>
+			<mx:CheckBox id="remove" label="remove buddy" />
+		</mx:FormItem>
+		
+		<mx:Button label="ok" click="okHandler()"/>
+	</mx:Form>
+
+</mx:TitleWindow>

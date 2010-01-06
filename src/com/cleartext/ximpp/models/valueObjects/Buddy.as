@@ -3,6 +3,7 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.StatusEvent;
 	import com.cleartext.ximpp.models.XimppUtils;
+	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
 	import flash.display.BitmapData;;
@@ -39,11 +40,6 @@ package com.cleartext.ximpp.models.valueObjects
 			"avatarHash TEXT, " + 
 			"customStatus TEXT);";
 			
-		public static const NONE:String = "none";
-		public static const TO:String = "to";
-		public static const FROM:String = "from";
-		public static const BOTH:String = "both";
-
 		// storred in database		
 		private var _buddyId:int = -1;
 		public function get buddyId():int
@@ -75,13 +71,12 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function setNickName(value:String):void
 		{
-			_nickName = value;
-			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			if(_nickName != value)
+			{
+				_nickName = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
 		}
-		
-		public var avatarHash:String;
-		public var groups:Array = new Array();
-		public var subscription:String = NONE;
 		
 		private var _lastSeen:Date;
 		public function get lastSeen():Date
@@ -90,24 +85,30 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function setLastSeen(value:Date):void
 		{
-			_lastSeen = value;
-			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			if(_lastSeen != value)
+			{
+				_lastSeen = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
 		}
 		
-		
 		private var _customStatus:String;
+		[Bindable (event="buddyChanged")]
 		public function get customStatus():String
 		{
 			return _customStatus;
 		}
 		public function setCustomStatus(value:String):void
 		{
-			_customStatus = value;
-			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			if(_customStatus != value)
+			{
+				_customStatus = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
 		}
 
 		private var _avatar:BitmapData;
-		[Bindable (event="changed")]
+		[Bindable (event="buddyChanged")]
 		public function get avatar():BitmapData
 		{
 			return _avatar;
@@ -127,6 +128,10 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 
+		public var avatarHash:String;
+		public var groups:Array = new Array();
+		public var subscription:String = SubscriptionTypes.NONE;
+		
 		// not storred in database 
 		public var used:Boolean = true;
 		public var resource:String;

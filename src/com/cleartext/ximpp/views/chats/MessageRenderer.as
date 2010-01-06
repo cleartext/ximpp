@@ -1,4 +1,4 @@
-package com.cleartext.ximpp.views.timeline
+package com.cleartext.ximpp.views.chats
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;

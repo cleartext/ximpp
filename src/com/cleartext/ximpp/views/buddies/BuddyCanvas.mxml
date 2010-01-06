@@ -8,6 +8,8 @@
 	verticalGap="0" xmlns:list="com.universalsprout.flex.components.list.*">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.PopUpEvent;
+			import org.swizframework.Swiz;
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.universalsprout.flex.components.list.SproutListEvent;
@@ -33,42 +35,6 @@
 		
 		]]>
 	</mx:Script>
-	<containers:CollapsiblePanel
-		id="gatewayStatusPanel"
-		width="100%"
-		title="Gateways" 
-		borderThicknessBottom="0" 
-		borderThicknessLeft="0" 
-		borderThicknessRight="0" 
-		collapseDuration="200"
-		collapsed="true"
-		verticalScrollPolicy="off"
-		horizontalScrollPolicy="off"
-		dropShadowEnabled="false"
-		>
-		<mx:Label text="item1"/>
-		<mx:Label text="item2"/>
-		<mx:Label text="item3"/>
-	</containers:CollapsiblePanel>
-	
-	<containers:CollapsiblePanel
-		id="filterPanel"
-		width="100%"
-		title="Filter" 
-		borderThicknessBottom="0" 
-		borderThicknessLeft="0" 
-		borderThicknessRight="0" 
-		collapseDuration="200"
-		collapsed="true"
-		verticalScrollPolicy="off"
-		horizontalScrollPolicy="off"
-		dropShadowEnabled="false"
-		>
-		<common:SearchBox width="100%" />
-		<mx:CheckBox label="real people" />
-		<mx:CheckBox label="feeds" />
-		<mx:CheckBox label="twitter" />
-	</containers:CollapsiblePanel> 
 
 	<mx:Canvas width="100%">
 		<mx:Label text="sort by"
@@ -91,10 +57,10 @@
 		dataProvider="{appModel.rosterItems}"
 		height="100%" 
 		itemRenderer="{new ClassFactory(BuddyRenderer)}"
-		editBuddy="Alert.show('edit me: ' + (event.target.data as Buddy).nickName, 'Edit Buddy')">
+		editBuddy="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW,'',(event.target.data as Buddy)))">
 	</buddies:BuddySproutList>
 
 	<mx:Canvas>
-		<mx:Button x="20" label="add buddy" />
+		<mx:Button x="20" label="add buddy" click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_NEW_BUDDY_WINDOW))"/>
 	</mx:Canvas>
 </mx:VBox>

@@ -1,5 +1,7 @@
 package com.cleartext.ximpp.models
 {
+	import com.cleartext.ximpp.events.PopUpEvent;
+	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -16,8 +18,7 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XMPP;
 	import com.seesmic.as3.xmpp.XMPPEvent;
 	
-	import mx.controls.Alert;
-	import mx.events.CloseEvent;
+	import org.swizframework.Swiz;
 	
 	public class XMPPModel
 	{
@@ -34,10 +35,13 @@ package com.cleartext.ximpp.models
 		{
 			return appModel.database;
 		}
-				
+		
+		[Bindable]
 		public var connected:Boolean = false;
-		private var xmpp:XMPP;
+
+		private var gotAvatar:Boolean = false;
 		private var gotRosterList:Boolean = false;
+		private var xmpp:XMPP;
 				
 		//-------------------------------
 		// CONSTRUCTOR
@@ -77,6 +81,7 @@ package com.cleartext.ximpp.models
 			var account:UserAccount = settings.userAccount;
 			if(account.jid && account.password)
 			{
+				gotAvatar = false;
 				xmpp.auto_reconnect = true;
 				appModel.serverSideStatus.value = Status.CONNECTING;
 
@@ -202,20 +207,9 @@ package com.cleartext.ximpp.models
 			}
 			// note this is just for type "subscribe" - "unsubscribed" and
 			// "subscribed" are handled below
-			else if(stanza.type == "subscribe")
+			else if(stanza.type == SubscriptionTypes.SUBSCRIBE)
 			{
-				// ask user if they want approve fromJid's subscription request
-				Alert.show(fromJid + " wants to add you to their buddy list. Do you want to let them know when you are online?",
-					"Subscription Request",
-					(Alert.YES | Alert.NO),
-					null,
-					function(event:CloseEvent):void
-					{
-						if(event.detail == Alert.YES)
-							xmpp.send('<presence to="' + fromJid + '" type="subscribed" />');
-						else
-							xmpp.send('<presence to="' + fromJid + '" type="unsubscribed" />');
-					});
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW, fromJid));
 			}
 			else
 			{
@@ -263,13 +257,14 @@ package com.cleartext.ximpp.models
 				buddy = new Buddy(jid);
 
 			var subscription:String = event.stanza["subscription"];
-			if(subscription == "remove")
+			if(subscription == SubscriptionTypes.REMOVE)
 			{
 				appModel.removeBuddy(buddy);
 			}
 			else
 			{
 				buddy.groups = event.stanza["groups"];
+				buddy.setNickName(event.stanza["name"]);
 				buddy.subscription = subscription;
 				appModel.addBuddy(buddy);
 			}
@@ -302,6 +297,7 @@ package com.cleartext.ximpp.models
 					groups.push(group.text());
 				buddy.groups = groups;
 				
+				buddy.setNickName(item.@name);
 				buddy.subscription = item.@subscription;
 				
 				// flag used to delete buddies that are no longer in
@@ -332,6 +328,7 @@ package com.cleartext.ximpp.models
 			
 			if(buddyJid == settings.userAccount.jid)
 			{
+				gotAvatar = true;
 				var vCard:XMLList = xml.vCardTemp::vCard;
 				var serverAvatar:String = vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
 				var localAvatar:String = XimppUtils.avatarToString(settings.userAccount.avatar);
@@ -340,6 +337,7 @@ package com.cleartext.ximpp.models
 				{
 					vCard.vCardTemp::PHOTO.vCardTemp::BINVAL = localAvatar;
 					sendIq(settings.userAccount.jid, 'set', vCard[0]);
+					sendPresence();
 				}
 			}
 			else
@@ -389,7 +387,7 @@ package com.cleartext.ximpp.models
 			// if we are already connected, then send the presence
 			else if(connected)
 			{
-				xmpp.sendPresence(customStatus, status.toShow(), "5", "", settings.userAccount.avatarHash);
+				xmpp.sendPresence(customStatus, status.toShow(), "5", "", (gotAvatar) ? settings.userAccount.avatarHash : "");
 				appModel.serverSideStatus.value = status.value;
 			}
 			
@@ -416,9 +414,9 @@ package com.cleartext.ximpp.models
 		
 		public function addToRoster(toJid:String, subscribe:Boolean):void
 		{
-			sendIq(settings.userAccount.jid, "set", <query xmlns="jabber:iq:roster"><item jid="{toJid}"/></query>, modifyRosterHandler);
+			sendIq(settings.userAccount.jid, "set", <query xmlns="jabber:iq:roster"><item jid={toJid}/></query>, modifyRosterHandler);
 			if(subscribe)
-				subscribeTo(toJid);
+				sendSubscribe(toJid, SubscriptionTypes.SUBSCRIBE);
 		}
 		
 		//-------------------------------
@@ -430,16 +428,16 @@ package com.cleartext.ximpp.models
 			/**
 			 * TO DO:
 			 */
-			appModel.log("addToRosterHandler");
+			appModel.log("modifyRosterHandler");
 		}
 
 		//-------------------------------
-		// SUBSCRIBE TO 
+		// SEND SUBSCRIBE
 		//-------------------------------
 		
-		public function subscribeTo(toJid:String):void
+		public function sendSubscribe(toJid:String, type:String):void
 		{
-			xmpp.sendPresence(null, "subscribe", null, toJid);
+			xmpp.send('<presence to="' + toJid + '" type="' + type + '" />');
 		}
 		
 		//-------------------------------
@@ -448,7 +446,7 @@ package com.cleartext.ximpp.models
 		
 		public function removeFromRoster(toJid:String):void
 		{
-			sendIq(settings.userAccount.jid, "set", <query xmlns='jabber:iq:roster'><item jid='{toJid}' subscription='remove'/></query>, modifyRosterHandler);
+			sendIq(settings.userAccount.jid, "set", <query xmlns="jabber:iq:roster"><item jid={toJid} subscription="remove"/></query>, modifyRosterHandler);
 		}
 	}
 }

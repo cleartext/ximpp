@@ -2,9 +2,9 @@
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:list="com.universalsprout.flex.components.list.*" creationComplete="init()" xmlns:listTest="listTest.*" backgroundColor="0xffffff">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.chats.MessageRenderer;
 			import com.cleartext.ximpp.models.valueObjects.Message;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
-			import com.cleartext.ximpp.views.timeline.MessageRenderer;
 			import com.cleartext.ximpp.views.buddies.BuddyRenderer;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import flash.utils.getTimer;

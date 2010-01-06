@@ -3,13 +3,18 @@
 	width="100%" height="100%"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	showCloseButton="true"
-	title="User Preferences" 
 	layout="absolute"
+	title="User Preferences"
 	close="closeHandler()"
 	creationComplete="init()"
-	xmlns:preferences="com.cleartext.ximpp.views.preferences.*" xmlns:common="com.cleartext.ximpp.views.common.*">
+	xmlns:preferences="com.cleartext.ximpp.views.preferences.*" 
+	xmlns:common="com.cleartext.ximpp.views.common.*" xmlns:popup="com.cleartext.ximpp.views.popup.*">
 	<mx:Script>
 		<![CDATA[
+			import com.adobe.crypto.SHA1;
+			import com.cleartext.ximpp.models.valueObjects.Status;
+			import com.cleartext.ximpp.models.XimppUtils;
+			import com.cleartext.ximpp.events.BuddyEvent;
 			import mx.events.CollectionEvent;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.models.DatabaseModel;
@@ -29,25 +34,22 @@
 			{
 				return accountList.dataProvider as ArrayCollection;
 			}
-						
+			
 			[Autowire]
 			[Bindable]
 			public var appModel:ApplicationModel;
 			
-			private function get settings():SettingsModel
-			{
-				return appModel.settings;
-			}
+			[Autowire]
+			[Bindable]
+			public var settings:SettingsModel;
 			
-			private function get database():DatabaseModel
-			{
-				return appModel.database;
-			}
+			[Autowire]
+			[Bindable]
+			public var database:DatabaseModel;
 			
-			private function get xmpp():XMPPModel
-			{
-				return appModel.xmpp;
-			}
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
 			
 			private function init():void
 			{
@@ -71,7 +73,12 @@
 						break;
 					}
 				}
-
+				
+				if(appModel.serverSideStatus.value == Status.CONNECTING)
+				{
+					accountVBox.enabled = false;
+				}
+	
 				selectedAccountChanged();
 			}
 		
@@ -120,7 +127,8 @@
 					}
 					else
 					{
-						previousAccount.addEventListener("avatarChanged",
+						avatar.bitmapData = null;
+						previousAccount.addEventListener(BuddyEvent.CHANGED,
 							function(event:Event):void
 							{
 								avatar.bitmapData = event.target.avatar;
@@ -193,12 +201,16 @@
 								function():void
 								{
 									var loadedBitmap:Bitmap = loader.content as Bitmap;
-									var newBitmapData:BitmapData = new BitmapData(64, 64);
-									var scale:Number = 64 / Math.max(loadedBitmap.width, loadedBitmap.height);
-									var tx:Number = (64 - loadedBitmap.width * scale)/2;
-									var ty:Number = (64 - loadedBitmap.height * scale)/2;
+									var newBitmapData:BitmapData = new BitmapData(XimppUtils.AVATAR_SIZE, XimppUtils.AVATAR_SIZE);
+									var scale:Number = XimppUtils.AVATAR_SIZE / Math.max(loadedBitmap.width, loadedBitmap.height);
+									var tx:Number = (XimppUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
+									var ty:Number = (XimppUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-									avatar.bitmapData = newBitmapData;
+									if(previousAccount)
+									{
+										previousAccount.setAvatar(newBitmapData);
+										previousAccount.avatarHash = SHA1.hashBytes(newBitmapData.getPixels(newBitmapData.rect));
+									}
 								});
 						});
 				}
@@ -213,10 +225,6 @@
 	
 	
 	<mx:VBox id="listCanvas" width="210" top="10" bottom="10" left="10">
-		<mx:List id="accountList" height="100%" width="100%" horizontalScrollPolicy="off" labelField="accountName" change="selectedAccountChanged()"/>
-		<preferences:AddRemoveButton
-			addButtonClicked="addAccount()"
-			removeButtonClicked="removeAccount()"/>
 		<mx:CheckBox label="auto connect" id="autoConnectCheckBox"/>
 		<mx:Canvas>
 			<mx:Label text="url shorten service:" y="4"/>
@@ -235,47 +243,37 @@
 		</mx:Canvas>
 	</mx:VBox>
 
-	<mx:Form x="210">
-		<mx:FormItem label="account name:">
-			<mx:TextInput id="accountName" change="changesMade = true; if(previousAccount) { previousAccount.accountName = accountName.text; accountCollection.refresh(); }"/>
-		</mx:FormItem>
-		<mx:FormItem label="nick name:">
-			<mx:TextInput id="nickName" change="changesMade = true;" />
-		</mx:FormItem>
-		<mx:FormItem label="profile picture:" direction="horizontal">
-			<common:Avatar id="avatar" width="64" height="64" buttonMode="true" editClicked="changeAvatar()" />
-		</mx:FormItem>
-		<mx:FormItem label="jid:">
-			<mx:TextInput id="jid" change="changesMade = true;" />
-		</mx:FormItem>
-		<mx:FormItem label="password:">
-			<mx:TextInput id="password" displayAsPassword="true" change="changesMade = true;" />
-		</mx:FormItem>
-		<mx:FormItem label="server:">
-			<mx:TextInput id="server" change="changesMade = true;" />
-		</mx:FormItem>
+	<mx:VBox id="accountVBox" y="6" x="230" verticalGap="0" enabled="{!xmpp.connected}">
+		<mx:List id="accountList" height="80" width="265" horizontalScrollPolicy="off" labelField="accountName" change="selectedAccountChanged()"/>
+		<popup:AddRemoveButton
+			width="265"
+			addButtonClicked="addAccount()"
+			removeButtonClicked="removeAccount()"/>
+		
+		<mx:Form>
+			<mx:FormItem label="account name:">
+				<mx:TextInput id="accountName" change="changesMade = true; if(previousAccount) { previousAccount.accountName = accountName.text; accountCollection.refresh(); }"/>
+			</mx:FormItem>
+			<mx:FormItem label="nick name:">
+				<mx:TextInput id="nickName" change="changesMade = true;" />
+			</mx:FormItem>
+			<mx:FormItem label="profile picture:" direction="horizontal">
+				<common:Avatar id="avatar" width="{XimppUtils.AVATAR_SIZE}" height="{XimppUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
+			</mx:FormItem>
+			<mx:FormItem label="jid:">
+				<mx:TextInput id="jid" change="changesMade = true;" />
+			</mx:FormItem>
+			<mx:FormItem label="password:">
+				<mx:TextInput id="password" displayAsPassword="true" change="changesMade = true;" />
+			</mx:FormItem>
+			<mx:FormItem label="server:">
+				<mx:TextInput id="server" change="changesMade = true;" />
+			</mx:FormItem>
+		</mx:Form>
+	</mx:VBox>
+	
+	<mx:Canvas visible="{!accountVBox.enabled}" width="210" x="255" y="30" height="26" backgroundColor="0xffffff" borderStyle="solid" borderColor="0x444444">
+		<mx:Text text="please log off to edit account settings" textAlign="center" horizontalCenter="0" verticalCenter="0"/>
+	</mx:Canvas>
 
-		<mx:FormItem label="gateways:" enabled="false" width="100%">
-			<mx:List id="gatewayList" height="70" width="100%">
-				<mx:dataProvider>
-					<mx:String>Gatway selection</mx:String>
-					<mx:String>not currently</mx:String>
-					<mx:String>implemented</mx:String>
-				</mx:dataProvider>
-			</mx:List>
-			<preferences:AddRemoveButton />
-		</mx:FormItem>
-		<mx:FormItem label="gateway name:" enabled="false">
-			<mx:TextInput id="gatewayName"/>
-		</mx:FormItem>
-		<mx:FormItem label="gateway type:" enabled="false">
-			<mx:ComboBox id="gatewayType" />
-		</mx:FormItem>
-		<mx:FormItem label="user name:" enabled="false">
-			<mx:TextInput id="gatewayUsername"/>
-		</mx:FormItem>
-		<mx:FormItem label="password:" enabled="false">
-			<mx:TextInput id="gatewayPassword" displayAsPassword="true"/>
-		</mx:FormItem>
-	</mx:Form>
 </mx:TitleWindow>
