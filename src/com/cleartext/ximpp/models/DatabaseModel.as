@@ -372,7 +372,8 @@ package com.cleartext.ximpp.models
 			stmt.text = "Select * from messages WHERE userid=" + settings.userId
 				+ " AND (sender='" + buddy.jid + "'"
 				+ " OR recipient='" + buddy.jid + "')"
-				+ " ORDER BY timestamp LIMIT 0," + settings.global.numChatMessages;
+				+ " ORDER BY timestamp DESC "
+				+ "LIMIT 0," + settings.global.numChatMessages;
 			stmt.execute();
 			
 			var result:SQLResult = stmt.getResult();
