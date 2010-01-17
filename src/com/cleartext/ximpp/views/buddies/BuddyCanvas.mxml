@@ -30,7 +30,7 @@
 			
 			private function itemDoubleClicked(event:SproutListEvent):void
 			{
-				appModel.selectChat(event.data as Buddy);
+				appModel.getChat(event.data as Buddy);
 			}
 		
 		]]>

@@ -15,7 +15,7 @@ package com.cleartext.ximpp.models
 	
 	public class XimppUtils
 	{
-		public static const AVATAR_SIZE:int = 32;
+		public static const AVATAR_SIZE:int = 48;
 		
 		public static function avatarToString(avatar:BitmapData):String
 		{

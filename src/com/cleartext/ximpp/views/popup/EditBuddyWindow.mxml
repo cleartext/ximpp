@@ -62,7 +62,7 @@
 				_buddy = value;
 				jid.text = buddy.jid;
 				nickname.text = buddy.nickName;
-				avatar.bitmapData = buddy.avatar;
+				avatar.data = buddy;
 				subscription.text = buddy.subscription;
 			}
 			

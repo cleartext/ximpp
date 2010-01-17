@@ -2,6 +2,7 @@ package com.cleartext.ximpp.views.buddies
 {
 	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.models.XimppUtils;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
@@ -21,7 +22,6 @@ package com.cleartext.ximpp.views.buddies
 		private static const BIG_HEIGHT:Number = 56;
 
 		private static const PADDING:Number = 3;
-		private static const AVATAR_SIZE:Number = 32;
 		
 		private static const NO_HIGHLIGHT:uint = 0xffffff;
 		private static const HIGHLIGHT:uint = 0xb6b6dd;
@@ -55,7 +55,15 @@ package com.cleartext.ximpp.views.buddies
 			super.data = value;
 
 			if(buddy)
+			{
 				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				if(avatar)
+					avatar.data = buddy;
+			}
+			else
+			{
+				avatar.data = null;
+			}
 
 			invalidateProperties();
 		}
@@ -97,6 +105,7 @@ package com.cleartext.ximpp.views.buddies
 				avatar = new Avatar();
 				avatar.buttonMode = true;
 				avatar.addEventListener(AvatarEvent.EDIT_CLICKED, avatarClicked);
+				avatar.data = buddy;
 				addChild(avatar);
 			}
 			
@@ -138,8 +147,6 @@ package com.cleartext.ximpp.views.buddies
 			nameLabel.text = buddy.nickName;
 			statusLabel.text = buddy.status.value;
 			statusIcon.status.value = buddy.status.value;
-			if(avatar && buddy)
-				avatar.bitmapData = buddy.avatar;
 			
 			// refresh styles
 			nameLabel.styleName = "blackBold";
@@ -200,26 +207,28 @@ package com.cleartext.ximpp.views.buddies
 		{
 			commitProperties();
 			
+			var avatarSize:Number = 32;
+			
 			// draw background
 			graphics.clear();
 			graphics.beginFill((highlight) ? HIGHLIGHT : NO_HIGHLIGHT, 0.18);
 			graphics.drawRect(0, 0, unscaledWidth-1, unscaledHeight);
 			
 			// layout avatar
-			avatar.setActualSize(AVATAR_SIZE, AVATAR_SIZE);
+			avatar.setActualSize(avatarSize, avatarSize);
 			avatar.move(PADDING, PADDING)
 			
 			// layout name label
-			nameLabel.setActualSize(unscaledWidth - AVATAR_SIZE - 3*PADDING, nameLabel.height);
-			nameLabel.move(AVATAR_SIZE + 2*PADDING, PADDING);
+			nameLabel.setActualSize(unscaledWidth - avatarSize - 3*PADDING, nameLabel.height);
+			nameLabel.move(avatarSize + 2*PADDING, PADDING);
 
 			// layout status icon
 			statusIcon.setActualSize(StatusIcon.SIZE, StatusIcon.SIZE);
-			statusIcon.move(AVATAR_SIZE + 2.5*PADDING, 21);
+			statusIcon.move(avatarSize + 2.5*PADDING, 21);
 
 			// layout status label
-			statusLabel.setActualSize(unscaledWidth - AVATAR_SIZE - 4*PADDING - StatusIcon.SIZE, statusLabel.height); 
-			statusLabel.move(AVATAR_SIZE + 3*PADDING + StatusIcon.SIZE, 20);
+			statusLabel.setActualSize(unscaledWidth - avatarSize - 4*PADDING - StatusIcon.SIZE, statusLabel.height); 
+			statusLabel.move(avatarSize + 3*PADDING + StatusIcon.SIZE, 20);
 
 			// layout custom status label
 			customStatusLabel.setActualSize(unscaledWidth-2*PADDING, customStatusLabel.height);

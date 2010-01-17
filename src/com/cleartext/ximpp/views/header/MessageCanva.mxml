@@ -45,7 +45,7 @@
 			
 			private function chatsChangedHandler(event:Event):void
 			{
-				var sproutList:ChatSproutList;
+				var sproutList:MessageSproutList;
 				
 				for each(sproutList in viewStack)
 				{
@@ -58,7 +58,7 @@
 					
 					if(!sproutList)
 					{
-						sproutList = new ChatSproutList();
+						sproutList = new MessageSproutList();
 						sproutList.data = chat;
 						sproutListsByChat[chat] = sproutList;
 						viewStack.addChild(sproutList);

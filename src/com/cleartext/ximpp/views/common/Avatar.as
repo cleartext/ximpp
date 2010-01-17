@@ -1,6 +1,9 @@
 package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.events.AvatarEvent;
+	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.Chat;
 	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
@@ -25,25 +28,64 @@ package com.cleartext.ximpp.views.common
 			super();
 		}
 		
-		private var _bitmapData:BitmapData;
-		public function get bitmapData():BitmapData
+		private var _data:Object;
+		public function get data():Object
 		{
-			return _bitmapData;
+			return _data;
 		}
-		public function set bitmapData(value:BitmapData):void
+		public function set data(value:Object):void
 		{
-			if(_bitmapData != value)
+			if(_data != value)
 			{
-				if(value)
+				if(buddy)
+					buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				
+				_data = value;
+				
+				if(buddy)
+					buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler, false, 0, true);
+			}
+			buddyChangedHandler(null);
+		}
+		
+		public function get buddy():Buddy
+		{
+			if(data is Buddy)
+				return data as Buddy;
+			
+			if(data is Chat)
+				return (data as Chat).buddy;
+			
+			return null;
+		}
+		
+		public function get chat():Chat
+		{
+			return data as Chat;
+		}
+		
+		private function buddyChangedHandler(event:BuddyEvent):void
+		{
+			var bmd:BitmapData = (buddy) ? buddy.avatar : null;
+			
+			if(bmd != bitmapData)
+			{
+				if(bmd)
 				{
-					_bitmapData = new BitmapData(value.width, value.height, value.transparent);
-					_bitmapData.draw(value);
+					bitmapData = new BitmapData(bmd.width, bmd.height, bmd.transparent);
+					bitmapData.draw(bmd);
 				}
 				else
-					_bitmapData = null;
+					bitmapData = null;
 
 				invalidateDisplayList();
 			}
+		}
+		
+		private var bitmapData:BitmapData;
+		public function getBitmapData():BitmapData
+		{
+			return bitmapData;
 		}
 		
 		private var _border:Boolean = true;
@@ -70,6 +112,21 @@ package com.cleartext.ximpp.views.common
 			if(_borderColour != value)
 			{
 				_borderColour = value;
+				if(border)
+					invalidateDisplayList();
+			}
+		}
+		
+		private var _borderThickness:int = 1;
+		public function get borderThickness():uint
+		{
+			return _borderThickness;
+		}
+		public function set borderThickness(value:uint):void
+		{
+			if(_borderThickness != value)
+			{
+				_borderThickness = value;
 				if(border)
 					invalidateDisplayList();
 			}
@@ -142,7 +199,7 @@ package com.cleartext.ximpp.views.common
 			g.beginBitmapFill(bmd, new Matrix(scale, 0, 0, scale));
 	
 			if(border)
-				g.lineStyle(1, borderColour);
+				g.lineStyle(borderThickness, borderColour);
 	
 			g.drawRect(0,0,unscaledWidth,unscaledHeight);
 

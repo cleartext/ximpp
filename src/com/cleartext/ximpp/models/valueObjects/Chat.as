@@ -7,6 +7,7 @@ package com.cleartext.ximpp.models.valueObjects
 	public class Chat extends EventDispatcher implements IXimppValueObject
 	{
 		public var buddy:Buddy;
+		public var used:Boolean = true;
 		public var messages:ArrayCollection = new ArrayCollection();
 
 		public function Chat(buddy:Buddy)

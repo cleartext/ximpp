@@ -8,7 +8,7 @@ package com.cleartext.ximpp.models.valueObjects
 	
 	import flash.display.BitmapData;;
 
-	[Event(name="avatarChanged", type="com.cleartext.ximpp.events.BuddyEvent")]		
+	[Event(name="changed", type="com.cleartext.ximpp.events.BuddyEvent")]		
 
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IXimppValueObject

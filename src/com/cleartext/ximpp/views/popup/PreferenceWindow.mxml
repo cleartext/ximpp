@@ -106,7 +106,7 @@
 				{
 					previousAccount.accountName = accountName.text;
 					previousAccount.setNickName(nickName.text);
-					previousAccount.setAvatar(avatar.bitmapData);
+					previousAccount.setAvatar(avatar.getBitmapData());
 					previousAccount.setJid(jid.text);
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
@@ -121,19 +121,7 @@
 				{
 					accountName.text = previousAccount.accountName;
 					nickName.text = previousAccount.nickName;
-					if(previousAccount.avatar)
-					{
-						avatar.bitmapData = previousAccount.avatar;
-					}
-					else
-					{
-						avatar.bitmapData = null;
-						previousAccount.addEventListener(BuddyEvent.CHANGED,
-							function(event:Event):void
-							{
-								avatar.bitmapData = event.target.avatar;
-							});
-					}
+					avatar.data = previousAccount;
 					jid.text = previousAccount.jid;
 					password.text = previousAccount.password;
 					server.text = previousAccount.server;

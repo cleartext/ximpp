@@ -1,4 +1,4 @@
-package com.cleartext.ximpp.views.chats
+package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.views.common.StatusIcon;
@@ -6,10 +6,8 @@ package com.cleartext.ximpp.views.chats
 	
 	import mx.core.ClassFactory;
 
-	public class ChatSproutList extends SproutList
+	public class MessageSproutList extends SproutList
 	{
-		public var used:Boolean = false;
-		
 		[Bindable]
 		public var statusIcon:StatusIcon = new StatusIcon();
 		
@@ -22,13 +20,11 @@ package com.cleartext.ximpp.views.chats
 			dataProvider = chat.messages;
 		}
 		
-		public function ChatSproutList()
+		public function MessageSproutList()
 		{
 			super();
 			itemRenderer = new ClassFactory(MessageRenderer);
 			animate = false;
-			bottomUp = true;
 		}
-		
 	}
 }

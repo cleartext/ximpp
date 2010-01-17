@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.BuddyGroup;
@@ -35,19 +36,9 @@ package com.cleartext.ximpp.models
 		
 		public function ApplicationModel()
 		{
-//			var sort:Sort = new Sort();
-//			sort.compareFunction = compareBuddies;
-//			buddies.sort = sort;
-//			_allBuddies = new BuddyGroup("all buddies");
 			_rosterItems = new BuddyGroup("roster items");
 		}
 		
-//		private var _allBuddies:BuddyGroup;
-//		public function get allBuddies():BuddyGroup
-//		{
-//			return _allBuddies;
-//		}
-
 		private var _rosterItems:BuddyGroup;
 		public function get rosterItems():BuddyGroup
 		{
@@ -58,8 +49,6 @@ package com.cleartext.ximpp.models
 		public var timeLineMessages:ArrayCollection = new ArrayCollection();
 
 		[Bindable]
-		public var selectedChat:Chat;
-		
 		public var chats:ArrayCollection = new ArrayCollection();
 		
 		/*
@@ -175,7 +164,6 @@ package com.cleartext.ximpp.models
 		public function userIdChanged():void
 		{
 			chats.removeAll();
-			selectedChat = null;
 			timeLineMessages.removeAll();
 			rosterItems.removeAll();
 			
@@ -183,27 +171,24 @@ package com.cleartext.ximpp.models
 			database.loadTimelineData();
 		}
 		
-		public function getChat(buddy:Buddy):Chat
+		public function getChat(buddy:Buddy, select:Boolean=true):Chat
 		{
 			if(!buddy)
 				return null;
 			
-			for each(var chat:Chat in chats)
+			for each(var c:Chat in chats)
 			{
-				if(chat.buddy == buddy)
-					return chat;
+				if(c.buddy == buddy)
+				{
+					if(select)
+						Swiz.dispatchEvent(new ChatEvent(ChatEvent.SELECT_CHAT, c));
+					return c;
+				}
 			}
-			var c:Chat = new Chat(buddy);
-			c.messages = database.loadMessages(buddy);
-			
-			chats.addItem(c);
-			return c;
-		}
-		
-		public function selectChat(buddy:Buddy):Chat
-		{
-			var chat:Chat = getChat(buddy);
-			selectedChat = chat;
+
+			var chat:Chat = new Chat(buddy);
+			chat.messages = database.loadMessages(buddy);
+			chats.addItem(chat);
 			return chat;
 		}
 		

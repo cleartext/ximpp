@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
-	width="100%" height="40"
+	width="100%" height="44"
 	xmlns:common="com.cleartext.ximpp.views.common.*"
 	creationComplete="init()">
 	<mx:Script>
@@ -31,18 +31,7 @@
 			
 			private function userAccountChanged(event:UserAccountEvent):void
 			{
-				if(event && event.previousUserAccount)
-					event.previousUserAccount.removeEventListener(BuddyEvent.CHANGED, changeAvatar);
-
-				if(settings.userAccount)
-					settings.userAccount.addEventListener(BuddyEvent.CHANGED, changeAvatar);
-				
-				changeAvatar(null);
-			}
-			
-			private function changeAvatar(event:BuddyEvent):void 
-			{ 
-				avatar.bitmapData = settings.userAccount.avatar; 
+				avatar.data = settings.userAccount;
 			}
 			
 			private function userPresenceChangeHandler():void
@@ -56,7 +45,7 @@
 				
 				var matr1:Matrix = new Matrix();
 				matr1.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2, 0, 0);
-				graphics.beginGradientFill(GradientType.LINEAR, [0x6ebfeb, 0x4d9ac4], [1, 1], [0x00, 0xFF], matr1);  
+				graphics.beginGradientFill(GradientType.LINEAR, [0x4d4d4d, 0x080808], [1, 1], [0x00, 0xFF], matr1);  
 				graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			}
 			

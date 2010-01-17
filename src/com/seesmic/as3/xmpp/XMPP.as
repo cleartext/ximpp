@@ -72,7 +72,7 @@ package com.seesmic.as3.xmpp
 			addHandler(new XPathHandler("{urn:ietf:params:xml:ns:xmpp-sasl}failure", authFailureHandler));
 			addHandler(new XPathHandler("{jabber:client}presence", handlePresence));
 			addHandler(new XPathHandler("{jabber:client}iq/{jabber:iq:roster}query", rosterHandler));			
-//			ping_timer.addEventListener(TimerEvent.TIMER, pingServer);
+			ping_timer.addEventListener(TimerEvent.TIMER, pingServer);
 			session_start_timeout.addEventListener(TimerEvent.TIMER, checkSessionTimeout);
 		}
 		

@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.PopUpEvent;
+	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
@@ -102,12 +103,13 @@ package com.cleartext.ximpp.models
 			if (connected)
 			{
 				connected = false;
-				xmpp.auto_reconnect = false;
 		 		appModel.log("Disconnecting from XMPP server");
 				xmpp.send("<presence from='" + xmpp.fulljid.toString() + "' type='unavailable' status='Logged out' />");
 		 		xmpp.disconnect();
 		 	}
 		 	
+			xmpp.auto_reconnect = false;
+
 		 	appModel.serverSideStatus.value = 
 		 		(appModel.localStatus.value == Status.OFFLINE) ? 
 		 		Status.OFFLINE : Status.ERROR;
@@ -133,10 +135,14 @@ package com.cleartext.ximpp.models
 
 			// get the roster list
 			gotRosterList = false;
-			sendIq(settings.userAccount.jid, 'get', <query xmlns='jabber:iq:roster'/>, getRosterHandler);
+			sendIq(settings.userAccount.jid,
+					IQTypes.GET,
+					IQTypes.GET_ROSTER,
+					getRosterHandler);
 
 			// get the vCard stored on the server
-			sendIq(settings.userAccount.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
+			getVCard(settings.userAccount.jid);
+
 			sendPresence();
 		}
 		
@@ -186,8 +192,8 @@ package com.cleartext.ximpp.models
 			
 			database.saveBuddy(buddy);
 			
-			var chat:Chat = appModel.getChat(buddy);
-			chat.messages.addItem(message);
+			var chat:Chat = appModel.getChat(buddy, false);
+			chat.messages.addItemAt(message,0);
 		}
 		
 		//-------------------------------
@@ -316,6 +322,18 @@ package com.cleartext.ximpp.models
 		}
 		
 		//-------------------------------
+		// GET VCARD
+		//-------------------------------
+		
+		private function getVCard(jid:String):void
+		{
+			sendIq(jid,
+					IQTypes.GET,
+					IQTypes.GET_USERS_VCARD,
+					vCardHandler);			
+		}
+		
+		//-------------------------------
 		// VCARD HANDLER
 		//-------------------------------
 		
@@ -333,12 +351,17 @@ package com.cleartext.ximpp.models
 				var serverAvatar:String = vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
 				var localAvatar:String = XimppUtils.avatarToString(settings.userAccount.avatar);
 				
+				// if we have a different avatar to the one on the server, then send a
+				// vcard back to the server
 				if(serverAvatar != localAvatar && localAvatar != "")
 				{
 					vCard.vCardTemp::PHOTO.vCardTemp::BINVAL = localAvatar;
-					sendIq(settings.userAccount.jid, 'set', vCard[0]);
-					sendPresence();
+					sendIq(settings.userAccount.jid, IQTypes.SET, vCard[0]);
 				}
+				
+				// now we have the avatar, resend the presence to make sure the 
+				// avatar hash is sent to our buddies
+				sendPresence();
 			}
 			else
 			{
@@ -414,11 +437,27 @@ package com.cleartext.ximpp.models
 		
 		public function addToRoster(toJid:String, subscribe:Boolean):void
 		{
-			sendIq(settings.userAccount.jid, "set", <query xmlns="jabber:iq:roster"><item jid={toJid}/></query>, modifyRosterHandler);
+			sendIq(settings.userAccount.jid,
+					IQTypes.SET,
+					IQTypes.modifyRoster(toJid),
+					modifyRosterHandler);
+
 			if(subscribe)
 				sendSubscribe(toJid, SubscriptionTypes.SUBSCRIBE);
 		}
 		
+		//-------------------------------
+		// REMOVE FROM ROSTER
+		//-------------------------------
+		
+		public function removeFromRoster(toJid:String):void
+		{
+			sendIq(settings.userAccount.jid, 
+					IQTypes.SET,
+					IQTypes.modifyRoster(toJid, true),
+					modifyRosterHandler);
+		}
+
 		//-------------------------------
 		// MODIFY ROSTER HANDLER
 		//-------------------------------
@@ -440,13 +479,5 @@ package com.cleartext.ximpp.models
 			xmpp.send('<presence to="' + toJid + '" type="' + type + '" />');
 		}
 		
-		//-------------------------------
-		// REMOVE FROM ROSTER
-		//-------------------------------
-		
-		public function removeFromRoster(toJid:String):void
-		{
-			sendIq(settings.userAccount.jid, "set", <query xmlns="jabber:iq:roster"><item jid={toJid} subscription="remove"/></query>, modifyRosterHandler);
-		}
 	}
 }

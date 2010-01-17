@@ -1,8 +1,7 @@
-package com.cleartext.ximpp.views.chats
+package com.cleartext.ximpp.views.messages
 {
-	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.XimppUtils;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
@@ -26,10 +25,11 @@ package com.cleartext.ximpp.views.chats
 
 		private static const TOP_BAR_HEIGHT:Number = 16;
 		private static const PADDING:Number = 3;
-		private static const AVATAR_SIZE:Number = 32;
 		
 		private static const NO_HIGHLIGHT:uint = 0xffffff;
 		private static const HIGHLIGHT:uint = 0xb6b6dd;
+
+		private static const AVATAR_SIZE:Number = 32;
 
 		//---------------------------------------
 		// Constructor
@@ -57,30 +57,8 @@ package com.cleartext.ximpp.views.chats
 		{
 			super.data = value;
 
-			if(!appModel || !message)
-				return;
-			
-			var newBuddy:Buddy = appModel.getBuddyByJid(message.sender);
-			
-			if(buddy != newBuddy)
-			{
-				if(buddy)
-					buddy.removeEventListener(BuddyEvent.CHANGED, avatarChangeHandler);
-	
-				buddy = newBuddy;
-				
-				if(buddy)
-				{
-					avatarChangeHandler(null);
-					buddy.addEventListener(BuddyEvent.CHANGED, avatarChangeHandler);
-				}
-			}
-		}
-		
-		private var buddy:Buddy;
-		private function avatarChangeHandler(event:BuddyEvent):void
-		{
-			avatar.bitmapData = buddy.avatar;
+			if(appModel && message)
+				avatar.data = appModel.getBuddyByJid(message.sender);
 		}
 		
 		//---------------------------------------

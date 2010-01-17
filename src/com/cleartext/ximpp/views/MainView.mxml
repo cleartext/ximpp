@@ -2,12 +2,11 @@
 <mx:Canvas
 	width="100%" height="100%"
 	initialize="init();"
-	backgroundColor="0xffffff"
+	backgroundColor="0x000000"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:header="com.cleartext.ximpp.views.header.*"
 	xmlns:buddies="com.cleartext.ximpp.views.buddies.*" 
-	xmlns:timeline="com.cleartext.ximpp.views.timeline.*" 
-	xmlns:chats="com.cleartext.ximpp.views.chats.*">
+	xmlns:messages="com.cleartext.ximpp.views.messages.*">
 
 	<mx:Script>
 		<![CDATA[
@@ -83,13 +82,13 @@
 	</mx:Script>
 	
 	<header:HeaderCanvas id="headerCanvas"/>
-	<mx:VDividedBox top="{headerCanvas.height}" bottom="0" width="100%" liveDragging="true" backgroundColor="0xaaaaaa">
-		<mx:HDividedBox height="70%" width="100%" liveDragging="true" backgroundColor="0xd8d9d8" >
+	<mx:VDividedBox top="{headerCanvas.height}" bottom="0" liveDragging="true" right="50" left="50" >
+		<mx:HDividedBox height="70%" width="100%" liveDragging="true" >
 			<buddies:BuddyCanvas
 				backgroundColor="0xffffff"
 				id="buddyCanvas"
 				width="25%"/>
-			<chats:ChatCanvas
+			<messages:MessageCanvas
 				backgroundColor="0xffffff"
 				id="chatCanvas"
 				width="75%"/>

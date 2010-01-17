@@ -3,7 +3,8 @@
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	layout="absolute"
 	title="Add Buddy"
-	xmlns:common="com.cleartext.ximpp.views.common.*">
+	xmlns:common="com.cleartext.ximpp.views.common.*"
+	creationComplete="gatewayComboBox.dataProvider = [settings.userAccount.server]">
 	
 	<mx:Script>
 		<![CDATA[
@@ -31,8 +32,8 @@
 	</mx:Script>
 	
 	<mx:Form>
-		<mx:FormItem label="gateway:">
-			<mx:ComboBox dataProvider="{[settings.userAccount.server]}" />
+		<mx:FormItem label="gateway:" >
+			<mx:ComboBox id="gatewayComboBox" />
 		</mx:FormItem>
 		
 		<mx:FormItem label="buddy id:">

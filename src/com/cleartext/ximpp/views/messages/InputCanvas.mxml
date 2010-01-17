@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Status;
+			import com.cleartext.ximpp.models.valueObjects.Message;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			
+			public var messageCanvas:MessageCanvas;
+			
+			private static const CORNER_RADIUS:Number = 5;
+			private static const TOP_BAR_HEIGHT:Number = 25;
+			
+			[Bindable]
+			public var buddy:Buddy;
+			
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+			
+			private function send():void
+			{
+				if(inputTextArea.text.length != 0 && buddy && xmpp.connected)
+					messageCanvas.sendMessage(inputTextArea.text);
+
+				inputTextArea.text = "";
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				var g:Graphics = graphics;
+				
+				g.clear();
+				
+				g.beginFill(0xffffff);
+				g.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, CORNER_RADIUS, CORNER_RADIUS);
+				
+				g.beginFill(0xebebeb);
+				g.drawRoundRect(0, 0, unscaledWidth, TOP_BAR_HEIGHT, CORNER_RADIUS, CORNER_RADIUS);
+				
+				g.beginFill(0xffffff);
+				g.drawRect(0, TOP_BAR_HEIGHT/2, unscaledWidth, TOP_BAR_HEIGHT/2);
+				
+				g.endFill();
+
+				g.lineStyle(1, 0xefebe8);
+				g.moveTo(0, TOP_BAR_HEIGHT);
+				g.lineTo(unscaledWidth, TOP_BAR_HEIGHT);
+				
+				g.lineStyle(1, 0xffffff);
+				g.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, CORNER_RADIUS, CORNER_RADIUS);
+			}
+
+		]]>
+	</mx:Script>
+	
+	<mx:Label text="{'Type message to ' + buddy.nickName}" x="10" y="6"/>
+	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6"/>
+	<mx:TextInput
+		id="inputTextArea" 
+		width="100%" bottom="0" top="{TOP_BAR_HEIGHT}" 
+		enter="send()" 
+		enabled="{!(!buddy || !xmpp.connected)}"
+		focusRoundedCorners="bl br" 
+		cornerRadius="{CORNER_RADIUS}"
+		backgroundAlpha="0"
+		borderStyle="none"
+		/>
+	<mx:Button label="send" right="0" top="35" click="send()"/>
+
+</mx:Canvas>
