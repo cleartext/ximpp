@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox 
+	clipContent="false"
+	creationComplete="init()"
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	xmlns:buddies="com.cleartext.ximpp.views.buddies.*"
 	width="100%" height="100%"
 	xmlns:common="com.cleartext.ximpp.views.common.*" 
 	xmlns:containers="com.arc90.flexlib.containers.*"
-	verticalGap="0" xmlns:list="com.universalsprout.flex.components.list.*">
+	verticalGap="0" 
+	xmlns:list="com.universalsprout.flex.components.list.*"
+	>
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.UserAccountEvent;
+			import de.polygonal.ds.NullIterator;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.Constants;
+			import com.cleartext.ximpp.models.valueObjects.Status;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
 			import mx.controls.Alert;
@@ -20,34 +29,117 @@
 			[Bindable]
 			public var appModel:ApplicationModel;
 			
+			[Autowire]
+			[Bindable]
+			public var settings:SettingsModel;
+			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
 				
 				buddyList.move(6, buddyList.y);
-				buddyList.setActualSize(unscaledWidth-6, buddyList.height);
+				buddyList.setActualSize(unscaledWidth-5, buddyList.height);
+				
+				var g:Graphics = statusCanvas.graphics;
+				var w:Number = statusCanvas.width;
+				var h:Number = statusCanvas.height;
+				
+				g.clear();
+
+				var m:Matrix = new Matrix();
+				m.createGradientBox(w, h, Math.PI/2, 0, 0);
+				g.beginGradientFill(GradientType.LINEAR, [0x9b9b9b, 0xf3f3f3], [1, 1], [0x00, 0xFF], m);  
+				g.drawRect(0, 0, w, h);
+				
+				g.beginFill(0x909090);
+				g.drawRect(0,0,w,Constants.TOP_ROW_HEIGHT/2);
+				g.endFill();
+				
+				g.lineStyle(1, 0xffffff);
+				g.drawRect(0,0,w,h);
+				
+				g.lineStyle(1, 0xc1c1c1);
+				g.moveTo(0,h);
+				g.lineTo(w,h);
 			}
 			
 			private function itemDoubleClicked(event:SproutListEvent):void
 			{
-				appModel.getChat(event.data as Buddy);
+				appModel.getChat(event.data as Buddy, true);
 			}
-		
+
+			private function userPresenceChangeHandler():void
+			{
+				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
+			}
+			
+			private function init():void
+			{
+				settings.addEventListener(UserAccountEvent.CHANGED, userAccountChanged);
+				userAccountChanged(null);
+			}
+			
+			private function userAccountChanged(event:UserAccountEvent):void
+			{
+				avatar.data = settings.userAccount;
+			}
+			
 		]]>
 	</mx:Script>
 
-	<mx:Canvas width="100%">
-		<mx:Label text="sort by"
-			x="7" y="3"/>
-		<mx:ComboBox id="sortComboBox"
-			x="60" y="0">
-			<mx:dataProvider>
-				<mx:String>last active</mx:String>
-				<mx:String>name</mx:String>
-				<mx:String>status</mx:String>
-				<mx:String>group</mx:String>
-			</mx:dataProvider>
-		</mx:ComboBox>
+	<mx:Canvas id="statusCanvas" 
+		width="100%" height="{Constants.TOP_BAR_HEIGHT}"
+		clipContent="false">
+
+		<mx:Label y="5" x="5" text="Status" color="0xffffff" fontWeight="bold"/>
+
+		<common:StatusIcon
+			statusString="{appModel.serverSideStatus.value}"
+			right="135" y="5"
+			/>
+		
+		<mx:ComboBox
+			id="statusComboBox"
+			dataProvider="{Status.USER_TYPES}"
+			selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus.value)}"
+			change="userPresenceChangeHandler()"
+			right="5" y="3" width="110"
+			text="{appModel.serverSideStatus.value}"
+			creationComplete="statusComboBox.text=appModel.serverSideStatus.value"
+			alpha="0.9"
+			/>
+			
+		<common:DefaultTextInput
+			id="customStatusInput"
+			valueCommit="userPresenceChangeHandler()"
+			defaultText="custom status..."
+			keyDown="if(event.keyCode==Keyboard.ENTER) userPresenceChangeHandler()"
+			top="27" height="48"
+			right="5" left="15"
+			text="{settings.userAccount.customStatus}"
+			borderStyle="none"
+			backgroundAlpha="0"
+			focusAlpha="0.1"
+			/>
+		
+		<mx:CheckBox
+			id="bloggingCheckBox"
+			bottom="5" right="5"
+			labelPlacement="right"
+			label="send status to micro-blogging networks?"
+			/>
+
+		<common:Avatar
+			id="avatar"
+			width="48"
+			height="48"
+			x="-40" y="27"
+			border="false">
+			<common:filters>
+				<mx:DropShadowFilter distance="0" blurX="4" blurY="4" />
+			</common:filters>
+		</common:Avatar>
+
 	</mx:Canvas>
 
 	<buddies:BuddySproutList

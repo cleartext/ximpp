@@ -3,9 +3,9 @@ package com.cleartext.ximpp.views.common
 	import flash.events.FocusEvent;
 	import flash.events.KeyboardEvent;
 	
-	import mx.controls.TextInput;
+	import mx.controls.TextArea;
 
-	public class DefaultTextInput extends TextInput
+	public class DefaultTextInput extends TextArea
 	{
 		private var textSet:Boolean = false;
 		private var _defaultText:String;
@@ -23,6 +23,7 @@ package com.cleartext.ximpp.views.common
 			}
 		}
 		
+		[Bindable]
 		override public function get text():String
 		{
 			return (textSet) ? super.text : "";

@@ -2,6 +2,7 @@ package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
+	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.DatabaseModel;
 	import com.cleartext.ximpp.models.SettingsModel;
 	import com.cleartext.ximpp.models.XMPPModel;
@@ -48,7 +49,6 @@ package com.cleartext.ximpp.views.messages
 		private static const SELECTOR_WIDTH:Number = 5;
 		private static const TRIANGLE_HEIGHT:Number = 11;
 		private static const TRIANGLE_WIDTH:Number = 16;
-		private static const INPUT_HEIGHT:Number = 105;
 		private static const SPACER_HEIGHT:Number = 30;
 		
 		private static const SELECTED_ALPHA:Number = 1.0;
@@ -272,18 +272,18 @@ package com.cleartext.ximpp.views.messages
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
 			inputCanvas.move(0, 0);
-			inputCanvas.setActualSize(unscaledWidth, INPUT_HEIGHT);
+			inputCanvas.setActualSize(unscaledWidth, Constants.TOP_BAR_HEIGHT);
 			
-			avatarCanvas.move(0, INPUT_HEIGHT);
+			avatarCanvas.move(0, Constants.TOP_BAR_HEIGHT);
 			avatarCanvas.setActualSize(unscaledWidth, XimppUtils.AVATAR_SIZE + SELECTOR_WIDTH + TRIANGLE_HEIGHT);
 			
-			selectorCanvas.move(0, INPUT_HEIGHT);
+			selectorCanvas.move(0, Constants.TOP_BAR_HEIGHT);
 			selectorCanvas.setActualSize(unscaledWidth, avatarCanvas.height + SPACER_HEIGHT);
 			
 			closeButton.move(unscaledWidth - 50, TRIANGLE_HEIGHT + SELECTOR_WIDTH + XimppUtils.AVATAR_SIZE + 4);
 
-			messageStack.move(0, INPUT_HEIGHT + SPACER_HEIGHT + avatarCanvas.height);
-			messageStack.setActualSize(unscaledWidth, unscaledHeight - INPUT_HEIGHT - avatarCanvas.height - SPACER_HEIGHT);
+			messageStack.move(0, Constants.TOP_BAR_HEIGHT + SPACER_HEIGHT + avatarCanvas.height);
+			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - avatarCanvas.height - SPACER_HEIGHT);
 			
 			var g:Graphics = selectorCanvas.graphics;
 			g.clear();

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 	width="100%" height="44"
-	xmlns:common="com.cleartext.ximpp.views.common.*"
-	creationComplete="init()">
+	xmlns:common="com.cleartext.ximpp.views.common.*">
 	<mx:Script>
 		<![CDATA[
 			import com.cleartext.ximpp.events.PopUpEvent;
@@ -19,26 +18,6 @@
 			[Bindable]
 			public var appModel:ApplicationModel;
 			
-			[Autowire]
-			[Bindable]
-			public var settings:SettingsModel;
-			
-			private function init():void
-			{
-				settings.addEventListener(UserAccountEvent.CHANGED, userAccountChanged);
-				userAccountChanged(null);
-			}
-			
-			private function userAccountChanged(event:UserAccountEvent):void
-			{
-				avatar.data = settings.userAccount;
-			}
-			
-			private function userPresenceChangeHandler():void
-			{
-				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
-			}
-			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
@@ -51,37 +30,6 @@
 			
 		]]>
 	</mx:Script>
-
-	<common:Avatar
-		id="avatar"
-		width="33"
-		height="33"
-		x="15" y="4"
-		/>
-		
-	<common:StatusIcon
-		statusString="{appModel.serverSideStatus.value}"
-		x="45" y="2"
-		/>
-	
-	<mx:ComboBox
-		id="statusComboBox"
-		dataProvider="{Status.USER_TYPES}"
-		selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus.value)}"
-		change="userPresenceChangeHandler()"
-		x="67" y="10" width="110"
-		text="{appModel.serverSideStatus.value}"
-		creationComplete="statusComboBox.text=appModel.serverSideStatus.value"
-		/>
-		
-	<common:DefaultTextInput
-		id="customStatusInput"
-		valueCommit="userPresenceChangeHandler()"
-		enter="userPresenceChangeHandler()"
-		x="180" y="10" width="300"
-		defaultText="custom status..."
-		text="{settings.userAccount.customStatus}"
-		/>
 
 	<mx:Button
 		label="{((appModel.showConsole) ? 'hide' : 'show' ) + ' console'}"

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:common="com.cleartext.ximpp.views.common.*">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import com.cleartext.ximpp.models.valueObjects.Message;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -10,7 +11,6 @@
 			public var messageCanvas:MessageCanvas;
 			
 			private static const CORNER_RADIUS:Number = 5;
-			private static const TOP_BAR_HEIGHT:Number = 25;
 			
 			[Bindable]
 			public var buddy:Buddy;
@@ -39,16 +39,16 @@
 				g.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, CORNER_RADIUS, CORNER_RADIUS);
 				
 				g.beginFill(0xebebeb);
-				g.drawRoundRect(0, 0, unscaledWidth, TOP_BAR_HEIGHT, CORNER_RADIUS, CORNER_RADIUS);
+				g.drawRoundRect(0, 0, unscaledWidth, Constants.TOP_ROW_HEIGHT, CORNER_RADIUS, CORNER_RADIUS);
 				
 				g.beginFill(0xffffff);
-				g.drawRect(0, TOP_BAR_HEIGHT/2, unscaledWidth, TOP_BAR_HEIGHT/2);
+				g.drawRect(0, Constants.TOP_ROW_HEIGHT/2, unscaledWidth, Constants.TOP_ROW_HEIGHT/2);
 				
 				g.endFill();
 
 				g.lineStyle(1, 0xefebe8);
-				g.moveTo(0, TOP_BAR_HEIGHT);
-				g.lineTo(unscaledWidth, TOP_BAR_HEIGHT);
+				g.moveTo(0, Constants.TOP_ROW_HEIGHT);
+				g.lineTo(unscaledWidth, Constants.TOP_ROW_HEIGHT);
 				
 				g.lineStyle(1, 0xffffff);
 				g.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, CORNER_RADIUS, CORNER_RADIUS);
@@ -59,10 +59,10 @@
 	
 	<mx:Label text="{'Type message to ' + buddy.nickName}" x="10" y="6"/>
 	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6"/>
-	<mx:TextInput
+	<common:DefaultTextInput
 		id="inputTextArea" 
-		width="100%" bottom="0" top="{TOP_BAR_HEIGHT}" 
-		enter="send()" 
+		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
+		keyDown="if(event.keyCode==Keyboard.ENTER) send()"
 		enabled="{!(!buddy || !xmpp.connected)}"
 		focusRoundedCorners="bl br" 
 		cornerRadius="{CORNER_RADIUS}"
