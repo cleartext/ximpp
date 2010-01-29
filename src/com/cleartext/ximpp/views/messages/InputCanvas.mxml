@@ -25,6 +25,7 @@
 					messageCanvas.sendMessage(inputTextArea.text);
 
 				inputTextArea.text = "";
+
 			}
 			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -53,12 +54,18 @@
 				g.lineStyle(1, 0xffffff);
 				g.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, CORNER_RADIUS, CORNER_RADIUS);
 			}
+			
+			
+			private function updateCharCount():void
+			{
+				charCountDisplay.text = inputTextArea.text.length + ' Characters';
+			}
 
 		]]>
 	</mx:Script>
 	
-	<mx:Label text="{'Type message to ' + buddy.nickName}" x="10" y="6"/>
-	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6"/>
+	<mx:Label text="{'Type message to ' + buddy.nickName}" y="6" color="#999898" fontSize="11" kerning="true" letterSpacing="0.2" left="10"/>
+	<mx:Label text="{inputTextArea.text.length + ' Characters'}" y="6" color="#999898" fontSize="10" letterSpacing="0.2" right="10" id="charCountDisplay"/>
 	<common:DefaultTextInput
 		id="inputTextArea" 
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
@@ -68,7 +75,7 @@
 		cornerRadius="{CORNER_RADIUS}"
 		backgroundAlpha="0"
 		borderStyle="none"
-		/>
-	<mx:Button label="send" right="0" top="35" click="send()"/>
+		  keyUp="updateCharCount();"/>
+	<mx:Button label="Send" right="14" top="40" click="send()" height="50" width="55"/>
 
 </mx:Canvas>

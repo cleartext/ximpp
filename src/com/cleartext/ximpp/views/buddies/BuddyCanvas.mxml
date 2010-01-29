@@ -127,7 +127,7 @@
 			bottom="5" right="5"
 			labelPlacement="right"
 			label="send status to micro-blogging networks?"
-			/>
+			 fontSize="9.5" borderColor="#DFE0E1" color="#B0B0B0" cornerRadius="4"/>
 
 		<common:Avatar
 			id="avatar"

@@ -1,0 +1,67 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>X509CertificateCollection.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * X509CertificateCollection
+ * 
+ * A class to store and index X509 Certificates by Subject.
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">cert</span> <span class="ActionScriptBracket/Brace">{</span>
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">X509CertificateCollection</span> <span class="ActionScriptBracket/Brace">{</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">X509CertificateCollection</span><span class="ActionScriptBracket/Brace">()</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_map</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">{}</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Mostly meant for built-in CA loading.
+         * This entry-point allows to index CAs without parsing them.
+         * 
+         * @param name        A friendly name. not currently used
+         * @param subject    base64 DER encoded Subject principal for the Cert
+         * @param pem        PEM encoded certificate data
+         * 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addPEMCertificate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>, <span class="ActionScriptDefault_Text">subject</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>, <span class="ActionScriptDefault_Text">pem</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">subject</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">X509Certificate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pem</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Adds a X509 certificate to the collection.
+         * This call will force the certificate to be parsed.
+         * 
+         * @param cert        A X509 certificate
+         * 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addCertificate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cert</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">X509Certificate</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">subject</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">cert</span>.<span class="ActionScriptDefault_Text">getSubjectPrincipal</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">subject</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">cert</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Returns a X509 Certificate present in the collection, given
+         * a base64 DER encoded X500 Subject principal
+         * 
+         * @param subject    A Base64 DER-encoded Subject principal
+         * @return             A matching certificate, or null.
+         * 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getCertificate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">subject</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">X509Certificate</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_map</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">subject</span><span class="ActionScriptBracket/Brace">]</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

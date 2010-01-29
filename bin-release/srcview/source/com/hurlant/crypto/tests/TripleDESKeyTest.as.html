@@ -1,0 +1,69 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>TripleDESKeyTest.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * TripleDESKeyTest
+ * 
+ * A test class for TripleDESKey
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">tests</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">symmetric</span>.<span class="ActionScriptDefault_Text">TripleDESKey</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Hex</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">symmetric</span>.<span class="ActionScriptDefault_Text">ICipher</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">symmetric</span>.<span class="ActionScriptDefault_Text">ECBMode</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">TripleDESKeyTest</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">TestCase</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">TripleDESKeyTest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ITestHarness</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">h</span>, <span class="ActionScriptString">&quot;Triped Des Test&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">runTest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">testECB</span>,<span class="ActionScriptString">&quot;Triple DES ECB Test Vectors&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">h</span>.<span class="ActionScriptDefault_Text">endTestCase</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Lots of vectors at http://csrc.nist.gov/publications/nistpubs/800-20/800-20.pdf
+         * XXX move them in here.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">testECB</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">keys</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span>
+            <span class="ActionScriptString">&quot;010101010101010101010101010101010101010101010101&quot;</span>,
+            <span class="ActionScriptString">&quot;dd24b3aafcc69278d650dad234956b01e371384619492ac4&quot;</span>,
+            <span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pts</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span>
+            <span class="ActionScriptString">&quot;8000000000000000&quot;</span>,
+            <span class="ActionScriptString">&quot;F36B21045A030303&quot;</span>,
+            <span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cts</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span>
+            <span class="ActionScriptString">&quot;95F8A5E5DD31D900&quot;</span>,
+            <span class="ActionScriptString">&quot;E823A43DEEA4D0A4&quot;</span>,
+            <span class="ActionScriptBracket/Brace">]</span>;
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">keys</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">toArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">keys</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pt</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">toArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pts</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ede</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TripleDESKey</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">TripleDESKey</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">ede</span>.<span class="ActionScriptDefault_Text">encrypt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pt</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">out</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pt</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">toUpperCase</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">assert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;comparing &quot;</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">cts</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">+</span><span class="ActionScriptString">&quot; to &quot;</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">out</span>, <span class="ActionScriptDefault_Text">cts</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">out</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">// now go back to plaintext
+</span>                <span class="ActionScriptDefault_Text">ede</span>.<span class="ActionScriptDefault_Text">decrypt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pt</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">out</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pt</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">toUpperCase</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">assert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;comparing &quot;</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">pts</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">+</span><span class="ActionScriptString">&quot; to &quot;</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">out</span>, <span class="ActionScriptDefault_Text">pts</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">==</span><span class="ActionScriptDefault_Text">out</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

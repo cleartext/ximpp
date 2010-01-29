@@ -1,0 +1,72 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>PublishSubscribe.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/*
+This file is part of seesmic-as3-xmpp.
+Copyright (c)2009 Seesmic, Inc
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">seesmic</span>.<span class="ActionScriptDefault_Text">as3</span>.<span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">xep</span>.<span class="ActionScriptDefault_Text">publish_subscribe</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">seesmic</span>.<span class="ActionScriptDefault_Text">as3</span>.<span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">IdHandler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">seesmic</span>.<span class="ActionScriptDefault_Text">as3</span>.<span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">MessageStanza</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">seesmic</span>.<span class="ActionScriptDefault_Text">as3</span>.<span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">XPathHandler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">seesmic</span>.<span class="ActionScriptDefault_Text">as3</span>.<span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">xep</span>.<span class="ActionScriptDefault_Text">Plugin</span>;
+    
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">PublishSubscribe</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">Plugin</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">PublishSubscribe</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;Publish-Subscribe (XEP-0060)&quot;</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">shortcut</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;pubsub&quot;</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">init</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScripttrace">trace</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;Loaded Publish-Subscribe Plugin&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">addHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">XPathHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;{jabber:client}message/{http://jabber.org/protocol/pubsub#event}event/{http://jabber.org/protocol/pubsub#event}items/{http://jabber.org/protocol/pubsub#event}item&quot;</span>, <span class="ActionScriptDefault_Text">itemEventHandler</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">addHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">XPathHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;{jabber:client}message/{http://jabber.org/protocol/pubsub#event}event/{http://jabber.org/protocol/pubsub#event}items/{http://jabber.org/protocol/pubsub#event}retract&quot;</span>, <span class="ActionScriptDefault_Text">retractEventHandler</span><span class="ActionScriptBracket/Brace">))</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">itemEventHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">message</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MessageStanza</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">PubSubEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">PubSubEvent</span>.<span class="ActionScriptDefault_Text">ITEM</span>, <span class="ActionScriptReserved">false</span>, <span class="ActionScriptReserved">false</span>, <span class="ActionScriptDefault_Text">message</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScripttrace">trace</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;Publish-Subscribe Item Event&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">retractEventHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">message</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MessageStanza</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">PubSubEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">PubSubEvent</span>.<span class="ActionScriptDefault_Text">RETRACT</span>, <span class="ActionScriptReserved">false</span>, <span class="ActionScriptReserved">false</span>, <span class="ActionScriptDefault_Text">message</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScripttrace">trace</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;Publish-Subscribe Retract Event&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getItems</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">jid</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>, <span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>, <span class="ActionScriptDefault_Text">callback</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Function</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">newId</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">out</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">XML</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">iq</span> <span class="ActionScriptDefault_Text">type</span><span class="ActionScriptOperator">=</span>&apos;<span class="ActionScriptReserved">get</span>&apos; <span class="ActionScriptDefault_Text">xmlns</span><span class="ActionScriptOperator">=</span>&apos;<span class="ActionScriptDefault_Text">jabber</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">client</span>&apos; <span class="ActionScriptReserved">to</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">{</span><span class="ActionScriptDefault_Text">jid</span><span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptDefault_Text">id</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">{</span><span class="ActionScriptDefault_Text">id</span><span class="ActionScriptBracket/Brace">}</span><span class="ActionScriptOperator">&gt;&lt;</span><span class="ActionScriptDefault_Text">pubsub</span> <span class="ActionScriptDefault_Text">xmlns</span><span class="ActionScriptOperator">=</span>&apos;<span class="ActionScriptDefault_Text">http</span><span class="ActionScriptOperator">://</span><span class="ActionScriptDefault_Text">jabber</span>.<span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">protocol</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">pubsub</span>&apos;<span class="ActionScriptOperator">&gt;&lt;</span><span class="ActionScriptDefault_Text">items</span> <span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">=</span><span class="ActionScriptBracket/Brace">{</span><span class="ActionScriptDefault_Text">node</span><span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptOperator">/&gt;&lt;/</span><span class="ActionScriptDefault_Text">pubsub</span><span class="ActionScriptOperator">&gt;&lt;/</span><span class="ActionScriptDefault_Text">iq</span><span class="ActionScriptOperator">&gt;</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">addHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">IdHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">id</span>, <span class="ActionScriptDefault_Text">callback</span><span class="ActionScriptBracket/Brace">))</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">send</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">out</span>.<span class="ActionScriptDefault_Text">toXMLString</span><span class="ActionScriptBracket/Brace">())</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

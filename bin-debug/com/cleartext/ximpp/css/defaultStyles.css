@@ -1,8 +1,10 @@
 /* CSS file */
+
 .lgreyBold
 {
 	color: #888888;
 	font-weight: bold;
+	font-size: 10px;
 }
 
 .dgreyBold
@@ -20,6 +22,7 @@
 .lgreyNormal
 {
 	color: #888888;
+	font-size: 10px;
 }		
 
 .dgreyNormal

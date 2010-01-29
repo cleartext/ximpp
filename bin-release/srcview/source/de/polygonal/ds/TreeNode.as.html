@@ -1,0 +1,269 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>TreeNode.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * DATA STRUCTURES FOR GAME PROGRAMMERS
+ * Copyright (c) 2007 Michael Baczynski, http://www.polygonal.de
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * &quot;Software&quot;), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">de</span>.<span class="ActionScriptDefault_Text">polygonal</span>.<span class="ActionScriptDefault_Text">ds</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptASDoc">/**
+     * A tree node for building a tree data structure.
+     * 
+     * Every tree node has a linked list of child nodes and a pointer to its
+     * parent node. Note that a tree data structure is build of TreeNode
+     * objects, so there is no class that manages a tree structure. 
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">TreeNode</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">Collection</span>
+    <span class="ActionScriptBracket/Brace">{</span>    
+        <span class="ActionScriptASDoc">/**
+         * The parent node being referenced.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">parent</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TreeNode</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * A list of child nodes being referenced.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">children</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DLinkedList</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * The data being referened.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptOperator">:*</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Creates a tree node.
+         * 
+         * @param obj The data to store inside the node.
+         * @param parent The node&apos;s parent.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">TreeNode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptOperator">:*</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>, <span class="ActionScriptDefault_Text">parent</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TreeNode</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span>;
+            <span class="ActionScriptDefault_Text">children</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DLinkedList</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">parent</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">parent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">parent</span>;
+                <span class="ActionScriptDefault_Text">parent</span>.<span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">append</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Counts the total number of tree nodes starting from the current
+         * tree node.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DListNode</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">head</span>;
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">node</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">c</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">TreeNode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">node</span>.<span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">size</span>;
+                <span class="ActionScriptDefault_Text">node</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">node</span>.<span class="ActionScriptDefault_Text">next</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">c</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Checks if the tree node is a root node.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">isRoot</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptOperator">!</span><span class="ActionScriptDefault_Text">Boolean</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">parent</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Checks if the tree node is a leaf node.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">isLeaf</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">==</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Checks if the tree node has child nodes.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">hasChildren</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">&gt;</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Checks if the tree node has siblings.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">hasSiblings</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">parent</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">parent</span>.<span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">&gt;</span> 1;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Checks is the tree node is empty (has no children).
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">isEmpty</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">==</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Computes the depth of the tree, starting from this node.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">depth</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">parent</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptReserved">return</span> 0;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TreeNode</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span>, <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">node</span>.<span class="ActionScriptDefault_Text">parent</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptDefault_Text">node</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">node</span>.<span class="ActionScriptDefault_Text">parent</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">c</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * The total number of children.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">numChildren</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">size</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * The total number of siblings.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">numSiblings</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">parent</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">parent</span>.<span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">size</span>;
+            <span class="ActionScriptReserved">return</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">contains</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptOperator">:*</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">found</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptDefault_Text">TreeIterator</span>.<span class="ActionScriptDefault_Text">preorder</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>, <span class="ActionScriptfunction">function</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TreeNode</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">node</span>.<span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptDefault_Text">found</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptBracket/Brace">})</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">found</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">head</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TreeNode</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">head</span>.<span class="ActionScriptDefault_Text">data</span>;
+                <span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">removeHead</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">node</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getIterator</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Iterator</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">TreeIterator</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Creates a tree iterator pointing at this tree node.
+         * 
+         * @returns A TreeIterator object.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getTreeIterator</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TreeIterator</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">TreeIterator</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toArray</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">a</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[]</span>;
+            <span class="ActionScriptDefault_Text">TreeIterator</span>.<span class="ActionScriptDefault_Text">preorder</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>, <span class="ActionScriptfunction">function</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TreeNode</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">a</span>.<span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">node</span>.<span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">})</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">a</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Prints out a string representing the current object.
+         * 
+         * @return A string representing the current object.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;[TreeNode &gt; &quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">parent</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptReserved">null</span> <span class="ActionScriptOperator">?</span> <span class="ActionScriptString">&quot;(root)&quot;</span> <span class="ActionScriptOperator">:</span> <span class="ActionScriptString">&quot;&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">==</span> 0<span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">&quot;(leaf)&quot;</span>;
+            <span class="ActionScriptReserved">else</span>
+                <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">&quot; has &quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">children</span>.<span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot; child node&quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">&gt;</span> 1 <span class="ActionScriptOperator">||</span> <span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">==</span> 0 <span class="ActionScriptOperator">?</span> <span class="ActionScriptString">&quot;s&quot;</span> <span class="ActionScriptOperator">:</span> <span class="ActionScriptString">&quot;&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">&quot;, data=&quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;]&quot;</span>;    
+            
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">s</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Prints out all elements (for debug/demo purposes).
+         * 
+         * @return A human-readable representation of the structure.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dump</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;&quot;</span>;
+            <span class="ActionScriptDefault_Text">TreeIterator</span>.<span class="ActionScriptDefault_Text">preorder</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>, <span class="ActionScriptfunction">function</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TreeNode</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">node</span>.<span class="ActionScriptDefault_Text">depth</span>;
+                
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">d</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">d</span> <span class="ActionScriptOperator">-</span> 1<span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">&quot;+---&quot;</span>;
+                    <span class="ActionScriptReserved">else</span>
+                        <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">&quot;|    &quot;</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">node</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;\n&quot;</span>;
+            <span class="ActionScriptBracket/Brace">})</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">s</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

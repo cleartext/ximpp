@@ -1,0 +1,176 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ResourceCache.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/*
+  Copyright (c) 2009, Adobe Systems Incorporated
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without 
+  modification, are permitted provided that the following conditions are
+  met:
+
+  * Redistributions of source code must retain the above copyright notice, 
+    this list of conditions and the following disclaimer.
+  
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the 
+    documentation and/or other materials provided with the distribution.
+  
+  * Neither the name of Adobe Systems Incorporated nor the names of its 
+    contributors may be used to endorse or promote products derived from 
+    this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS
+  IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">adobe</span>.<span class="ActionScriptDefault_Text">air</span>.<span class="ActionScriptDefault_Text">net</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">adobe</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">MD5</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">adobe</span>.<span class="ActionScriptDefault_Text">net</span>.<span class="ActionScriptDefault_Text">DynamicURLLoader</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">Event</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">EventDispatcher</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">IOErrorEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">filesystem</span>.<span class="ActionScriptDefault_Text">File</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">filesystem</span>.<span class="ActionScriptDefault_Text">FileMode</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">filesystem</span>.<span class="ActionScriptDefault_Text">FileStream</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">net</span>.<span class="ActionScriptDefault_Text">URLLoaderDataFormat</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">net</span>.<span class="ActionScriptDefault_Text">URLRequest</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">adobe</span>.<span class="ActionScriptDefault_Text">air</span>.<span class="ActionScriptDefault_Text">net</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">ResourceCacheEvent</span>;
+
+    <span class="ActionScriptComment">//todo: add event metadata
+</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ResourceCache</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">EventDispatcher</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_cacheName</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptComment">//maybe rename to make it clearer it loads data
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ResourceCache</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cacheName</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_cacheName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">cacheName</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">cacheName</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_cacheName</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getStorageDir</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">File</span>.<span class="ActionScriptDefault_Text">applicationStorageDirectory</span>.<span class="ActionScriptDefault_Text">resolvePath</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_cacheName</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">itemExists</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">getItemFile</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">exists</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">clearCache</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cacheDir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">getStorageDir</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">try</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">cacheDir</span>.<span class="ActionScriptDefault_Text">deleteDirectory</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">catch</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IOErrorEvent</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// we tried!
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getItemFile</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">dir</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">getStorageDir</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">fName</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">generateKeyHash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">file</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dir</span>.<span class="ActionScriptDefault_Text">resolvePath</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">fName</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">file</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">retrieve</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">url</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">generateKeyHash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">url</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">file</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">getItemFile</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">//todo: do we need to check if the dir exists?
+</span>            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">file</span>.<span class="ActionScriptDefault_Text">exists</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ResourceCacheEvent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ResourceCacheEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ResourceCacheEvent</span>.<span class="ActionScriptDefault_Text">ITEM_READY</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">e</span>.<span class="ActionScriptDefault_Text">key</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">key</span>;
+                    <span class="ActionScriptDefault_Text">e</span>.<span class="ActionScriptDefault_Text">file</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">file</span>;
+                    
+                <span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span><span class="ActionScriptBracket/Brace">)</span>;    
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">loader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DynamicURLLoader</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DynamicURLLoader</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">file</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">file</span>;
+                <span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">key</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">key</span>;
+                
+                <span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Event</span>.<span class="ActionScriptDefault_Text">COMPLETE</span>, <span class="ActionScriptDefault_Text">onDataLoad</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">IOErrorEvent</span>.<span class="ActionScriptDefault_Text">IO_ERROR</span>, <span class="ActionScriptDefault_Text">onLoadError</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">dataFormat</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">URLLoaderDataFormat</span>.<span class="ActionScriptDefault_Text">BINARY</span>;
+                
+                <span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">load</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">URLRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">url</span><span class="ActionScriptBracket/Brace">))</span>;
+            
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">onLoadError</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IOErrorEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScripttrace">trace</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;onLoadError : could not cache item&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">onDataLoad</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Event</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">loader</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DynamicURLLoader</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">DynamicURLLoader</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>.<span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">f</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">File</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">file</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">fileStream</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FileStream</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FileStream</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">fileStream</span>.<span class="ActionScriptDefault_Text">open</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">f</span>, <span class="ActionScriptDefault_Text">FileMode</span>.<span class="ActionScriptDefault_Text">WRITE</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">fileStream</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">loader</span>.<span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">fileStream</span>.<span class="ActionScriptDefault_Text">close</span><span class="ActionScriptBracket/Brace">()</span>;
+                
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">g</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ResourceCacheEvent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ResourceCacheEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ResourceCacheEvent</span>.<span class="ActionScriptDefault_Text">ITEM_CACHED</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">g</span>.<span class="ActionScriptDefault_Text">key</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">key</span>;
+                    <span class="ActionScriptDefault_Text">g</span>.<span class="ActionScriptDefault_Text">file</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">f</span>;
+                    
+                <span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">g</span><span class="ActionScriptBracket/Brace">)</span>;    
+                
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ResourceCacheEvent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ResourceCacheEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ResourceCacheEvent</span>.<span class="ActionScriptDefault_Text">ITEM_READY</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">e</span>.<span class="ActionScriptDefault_Text">key</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">key</span>;
+                    <span class="ActionScriptDefault_Text">e</span>.<span class="ActionScriptDefault_Text">file</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">f</span>;
+                    
+                <span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span><span class="ActionScriptBracket/Brace">)</span>;    
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">generateKeyHash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">MD5</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

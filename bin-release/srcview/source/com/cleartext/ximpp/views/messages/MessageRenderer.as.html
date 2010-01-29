@@ -1,0 +1,187 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>MessageRenderer.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">views</span>.<span class="ActionScriptDefault_Text">messages</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">ApplicationModel</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">XimppUtils</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">valueObjects</span>.<span class="ActionScriptDefault_Text">Message</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">views</span>.<span class="ActionScriptDefault_Text">common</span>.<span class="ActionScriptDefault_Text">Avatar</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">universalsprout</span>.<span class="ActionScriptDefault_Text">flex</span>.<span class="ActionScriptDefault_Text">components</span>.<span class="ActionScriptDefault_Text">list</span>.<span class="ActionScriptDefault_Text">SproutListItemBase</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">IUITextField</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">UITextField</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">effects</span>.<span class="ActionScriptDefault_Text">Tween</span>;
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">MessageRenderer</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">SproutListItemBase</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">Autowire</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">appModel</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ApplicationModel</span>;
+        
+        <span class="ActionScriptComment">//---------------------------------------
+</span>        <span class="ActionScriptComment">// Constants
+</span>        <span class="ActionScriptComment">//---------------------------------------
+</span>        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">UITEXTFIELD_WIDTH_PADDING</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 5;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">UITEXTFIELD_HEIGHT_PADDING</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 4;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">TOP_BAR_HEIGHT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 16;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">PADDING</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 3;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">NO_HIGHLIGHT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0<span class="ActionScriptDefault_Text">xffffff</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">HIGHLIGHT</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0<span class="ActionScriptDefault_Text">xb6b6dd</span>;
+
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">AVATAR_SIZE</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 32;
+
+        <span class="ActionScriptComment">//---------------------------------------
+</span>        <span class="ActionScriptComment">// Constructor
+</span>        <span class="ActionScriptComment">//---------------------------------------
+</span>        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">MessageRenderer</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">alpha</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptComment">// hack to force the textField to render slightly
+</span>            <span class="ActionScriptComment">// smaller than the width of this container
+</span>            <span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;paddingRight&quot;</span>, 3<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">PADDING</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">AVATAR_SIZE</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">//---------------------------------------
+</span>        <span class="ActionScriptComment">// Message Data
+</span>        <span class="ActionScriptComment">//---------------------------------------
+</span>        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">message</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Message</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">Message</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">appModel</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">message</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">avatar</span>.<span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">appModel</span>.<span class="ActionScriptDefault_Text">getBuddyByJid</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">message</span>.<span class="ActionScriptDefault_Text">sender</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">//---------------------------------------
+</span>        <span class="ActionScriptComment">// Alpha Tween
+</span>        <span class="ActionScriptComment">//---------------------------------------
+</span>        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">alphaTween</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Tween</span>;
+        
+        <span class="ActionScriptComment">//---------------------------------------
+</span>        <span class="ActionScriptComment">// Display Children
+</span>        <span class="ActionScriptComment">//---------------------------------------
+</span>        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">avatar</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Avatar</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">fromLabel</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">UITextField</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">timeLabel</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">UITextField</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">messageLabel</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IUITextField</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">textField</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptComment">//---------------------------------------
+</span>        <span class="ActionScriptComment">// Create Children
+</span>        <span class="ActionScriptComment">//---------------------------------------
+</span>        
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createChildren</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">createChildren</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">avatar</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">avatar</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Avatar</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">addChild</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">avatar</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">fromLabel</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">fromLabel</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">UITextField</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">addChild</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">fromLabel</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">timeLabel</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">timeLabel</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">UITextField</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">addChild</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">timeLabel</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">data</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">//---------------------------------------
+</span>        <span class="ActionScriptComment">// Commit Properties
+</span>        <span class="ActionScriptComment">//---------------------------------------
+</span>        
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">commitProperties</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">message</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span>;
+            
+            <span class="ActionScriptComment">// set values
+</span>            <span class="ActionScriptDefault_Text">messageLabel</span>.<span class="ActionScriptDefault_Text">htmlText</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">message</span>.<span class="ActionScriptDefault_Text">body</span>;
+            <span class="ActionScriptDefault_Text">fromLabel</span>.<span class="ActionScriptDefault_Text">text</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">message</span>.<span class="ActionScriptDefault_Text">sender</span>;
+            <span class="ActionScriptDefault_Text">timeLabel</span>.<span class="ActionScriptDefault_Text">text</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">message</span>.<span class="ActionScriptDefault_Text">timestamp</span>.<span class="ActionScriptDefault_Text">toTimeString</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptComment">// refresh styles
+</span>            <span class="ActionScriptDefault_Text">fromLabel</span>.<span class="ActionScriptDefault_Text">styleName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;lgreyNormal&quot;</span>;
+            <span class="ActionScriptDefault_Text">timeLabel</span>.<span class="ActionScriptDefault_Text">styleName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;lgreyNormal&quot;</span>;
+            <span class="ActionScriptDefault_Text">messageLabel</span>.<span class="ActionScriptDefault_Text">styleName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;dgreyNormal&quot;</span>;
+            
+            <span class="ActionScriptComment">// check layout of super.textField
+</span>            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">commitProperties</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptComment">// if this is the first time we run then create a tween to fade in
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">alphaTween</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">alphaTween</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Tween</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>, 0, 1, <span class="ActionScriptDefault_Text">TWEEN_DURATION</span>, <span class="ActionScriptOperator">-</span>1, <span class="ActionScriptDefault_Text">updateAlpha</span>, <span class="ActionScriptDefault_Text">updateAlpha</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">// set height
+</span>            <span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">textFieldHeight</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">TOP_BAR_HEIGHT</span> <span class="ActionScriptOperator">+</span> 3<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">PADDING</span>;
+            <span class="ActionScriptComment">//trace(&quot;calculating &quot; + height + &quot; : &quot; + messageLabel.numLines);
+</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptComment">//---------------------------------------
+</span>        <span class="ActionScriptComment">// Update Display List
+</span>        <span class="ActionScriptComment">//---------------------------------------
+</span>        
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">updateDisplayList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">unscaledWidth</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>, <span class="ActionScriptDefault_Text">unscaledHeight</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//trace(unscaledWidth + &quot; : &quot; + unscaledHeight); 
+</span>
+            <span class="ActionScriptDefault_Text">commitProperties</span><span class="ActionScriptBracket/Brace">()</span>;
+
+            <span class="ActionScriptComment">// draw background    
+</span>            <span class="ActionScriptDefault_Text">graphics</span>.<span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">graphics</span>.<span class="ActionScriptDefault_Text">beginFill</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptDefault_Text">highlight</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">?</span> <span class="ActionScriptDefault_Text">HIGHLIGHT</span> <span class="ActionScriptOperator">:</span> <span class="ActionScriptDefault_Text">NO_HIGHLIGHT</span>, 0.18<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">graphics</span>.<span class="ActionScriptDefault_Text">drawRect</span><span class="ActionScriptBracket/Brace">(</span>0, 0, <span class="ActionScriptDefault_Text">unscaledWidth</span><span class="ActionScriptOperator">-</span>1, <span class="ActionScriptDefault_Text">unscaledHeight</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">// draw line at base
+</span>            <span class="ActionScriptDefault_Text">graphics</span>.<span class="ActionScriptDefault_Text">beginFill</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">xdddddd</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">graphics</span>.<span class="ActionScriptDefault_Text">drawRect</span><span class="ActionScriptBracket/Brace">(</span>0, <span class="ActionScriptDefault_Text">unscaledHeight</span><span class="ActionScriptOperator">-</span>1, <span class="ActionScriptDefault_Text">unscaledWidth</span><span class="ActionScriptOperator">-</span>1, 1<span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">// layout avatar
+</span>            <span class="ActionScriptDefault_Text">avatar</span>.<span class="ActionScriptDefault_Text">setActualSize</span><span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">VATAR_SIZE</span>, <span class="ActionScriptDefault_Text">AVATAR_SIZE</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">avatar</span>.<span class="ActionScriptDefault_Text">move</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">PADDING</span>, <span class="ActionScriptDefault_Text">PADDING</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">// layout from label
+</span>            <span class="ActionScriptDefault_Text">fromLabel</span>.<span class="ActionScriptDefault_Text">setActualSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">unscaledWidth</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">timeLabel</span>.<span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">-</span> 3<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">PADDING</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">AVATAR_SIZE</span>, <span class="ActionScriptDefault_Text">fromLabel</span>.<span class="ActionScriptDefault_Text">height</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptDefault_Text">fromLabel</span>.<span class="ActionScriptDefault_Text">move</span><span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">VATAR_SIZE</span> <span class="ActionScriptOperator">+</span> 2<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">PADDING</span>, <span class="ActionScriptDefault_Text">PADDING</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">// layout time label
+</span>            <span class="ActionScriptDefault_Text">timeLabel</span>.<span class="ActionScriptDefault_Text">move</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">unscaledWidth</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">PADDING</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">timeLabel</span>.<span class="ActionScriptDefault_Text">width</span>, <span class="ActionScriptDefault_Text">PADDING</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">// layout message label
+</span>            <span class="ActionScriptDefault_Text">messageLabel</span>.<span class="ActionScriptDefault_Text">move</span><span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">VATAR_SIZE</span> <span class="ActionScriptOperator">+</span> 2<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">PADDING</span>, 2<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">PADDING</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">TOP_BAR_HEIGHT</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

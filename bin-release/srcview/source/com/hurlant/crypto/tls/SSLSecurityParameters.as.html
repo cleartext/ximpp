@@ -1,0 +1,350 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>SSLSecurityParameters.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * TLSSecurityParameters
+ * 
+ * This class encapsulates all the security parameters that get negotiated
+ * during the TLS handshake. It also holds all the key derivation methods.
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">tls</span> <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">MD5</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">SHA1</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Hex</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">SSLSecurityParameters</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">ISecurityParameters</span> <span class="ActionScriptBracket/Brace">{</span>
+        
+        <span class="ActionScriptComment">// COMPRESSION
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">COMPRESSION_NULL</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">entity</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>; <span class="ActionScriptComment">// SERVER | CLIENT
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">bulkCipher</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>; <span class="ActionScriptComment">// BULK_CIPHER_*
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cipherType</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>; <span class="ActionScriptComment">// STREAM_CIPHER | BLOCK_CIPHER
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">keySize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">keyMaterialLength</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">keyBlock</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">IVSize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">MAC_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">macAlgorithm</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>; <span class="ActionScriptComment">// MAC_*
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">hashSize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">compression</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>; <span class="ActionScriptComment">// COMPRESSION_NULL
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">masterSecret</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>; <span class="ActionScriptComment">// 48 bytes
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">clientRandom</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>; <span class="ActionScriptComment">// 32 bytes
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">serverRandom</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>; <span class="ActionScriptComment">// 32 bytes
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pad_1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>; <span class="ActionScriptComment">// varies
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pad_2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>; <span class="ActionScriptComment">// varies
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ignoreCNMismatch</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">trustAllCerts</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">trustSelfSigned</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">PROTOCOL_VERSION</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0<span class="ActionScriptDefault_Text">x0300</span>;
+        
+        <span class="ActionScriptComment">// not strictly speaking part of this, but yeah.
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">keyExchange</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">version</span><span class="ActionScriptBracket/Brace">()</span> <span class="ActionScriptOperator">:</span> <span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptBracket/Brace">{</span> 
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">PROTOCOL_VERSION</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">SSLSecurityParameters</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">entity</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>, <span class="ActionScriptDefault_Text">localCert</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>, <span class="ActionScriptDefault_Text">localKey</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">entity</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">entity</span>;
+            <span class="ActionScriptDefault_Text">reset</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">reset</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">bulkCipher</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">BulkCiphers</span>.<span class="ActionScriptDefault_Text">NULL</span>;
+            <span class="ActionScriptDefault_Text">cipherType</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">BulkCiphers</span>.<span class="ActionScriptDefault_Text">BLOCK_CIPHER</span>;
+            <span class="ActionScriptDefault_Text">macAlgorithm</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">MACs</span>.<span class="ActionScriptDefault_Text">NULL</span>;
+            <span class="ActionScriptDefault_Text">compression</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">COMPRESSION_NULL</span>;
+            <span class="ActionScriptDefault_Text">masterSecret</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getBulkCipher</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">bulkCipher</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getCipherType</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">cipherType</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getMacAlgorithm</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">macAlgorithm</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setCipher</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cipher</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">bulkCipher</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">CipherSuites</span>.<span class="ActionScriptDefault_Text">getBulkCipher</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cipher</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">cipherType</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">BulkCiphers</span>.<span class="ActionScriptDefault_Text">getType</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bulkCipher</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">keySize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">BulkCiphers</span>.<span class="ActionScriptDefault_Text">getExpandedKeyBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bulkCipher</span><span class="ActionScriptBracket/Brace">)</span>;   <span class="ActionScriptComment">// 8
+</span>            <span class="ActionScriptDefault_Text">keyMaterialLength</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">BulkCiphers</span>.<span class="ActionScriptDefault_Text">getKeyBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bulkCipher</span><span class="ActionScriptBracket/Brace">)</span>; <span class="ActionScriptComment">// 5
+</span>            <span class="ActionScriptDefault_Text">IVSize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">BulkCiphers</span>.<span class="ActionScriptDefault_Text">getIVSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bulkCipher</span><span class="ActionScriptBracket/Brace">)</span>;
+
+
+            <span class="ActionScriptDefault_Text">keyExchange</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">CipherSuites</span>.<span class="ActionScriptDefault_Text">getKeyExchange</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cipher</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptDefault_Text">macAlgorithm</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">CipherSuites</span>.<span class="ActionScriptDefault_Text">getMac</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cipher</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">hashSize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">MACs</span>.<span class="ActionScriptDefault_Text">getHashSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">macAlgorithm</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">pad_1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">pad_2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">&lt;</span> 48; <span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">pad_1</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x36</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">pad_2</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x5c</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>            
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setCompression</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">algo</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">compression</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">algo</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPreMasterSecret</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">/* Warning! Following code may cause madness
+                 Tread not here, unless ye be men of valor.
+            
+            ***** Official Prophylactic Comment ******
+                (to protect the unwary...this code actually works, that&apos;s all you need to know)
+            
+            This does two things, computes the master secret, and generates the keyBlock
+            
+            
+            To compute the master_secret, the following algorithm is used.
+             for SSL 3, this means
+             master = MD5( premaster + SHA1(&apos;A&apos; + premaster + client_random + server_random ) ) +
+                        MD5( premaster + SHA1(&apos;BB&apos; + premaster + client_random + server_random ) ) +
+                        MD5( premaster + SHA1(&apos;CCC&apos; + premaster + client_random + server_random ) )
+            */</span>        
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tempHashA</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>; <span class="ActionScriptComment">// temporary hash, gets reused a lot
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tempHashB</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>; <span class="ActionScriptComment">// temporary hash, gets reused a lot
+</span>            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">shaHash</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mdHash</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sha</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SHA1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SHA1</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">md</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MD5</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MD5</span><span class="ActionScriptBracket/Brace">()</span>;
+                    
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">k</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">clientRandom</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">serverRandom</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptDefault_Text">masterSecret</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pad_char</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0<span class="ActionScriptDefault_Text">x41</span>;
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> 3; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// SHA portion
+</span>                <span class="ActionScriptDefault_Text">tempHashA</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0;
+                                
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">+</span> 1; <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">tempHashA</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_char</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">pad_char</span><span class="ActionScriptOperator">++</span>;
+                
+                <span class="ActionScriptDefault_Text">tempHashA</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">shaHash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sha</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tempHashA</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptComment">// MD5 portion
+</span>                <span class="ActionScriptDefault_Text">tempHashB</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0;
+                <span class="ActionScriptDefault_Text">tempHashB</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span><span class="ActionScriptBracket/Brace">)</span>; 
+                <span class="ActionScriptDefault_Text">tempHashB</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">shaHash</span><span class="ActionScriptBracket/Brace">)</span>; 
+                <span class="ActionScriptDefault_Text">mdHash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">md</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tempHashB</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptComment">// copy into my key
+</span>                <span class="ActionScriptDefault_Text">masterSecret</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mdHash</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptComment">// *************** END MASTER SECRET **************
+</span>            
+            <span class="ActionScriptComment">// More prophylactic comments
+</span>            <span class="ActionScriptComment">// *************** START KEY BLOCK ****************
+</span>            
+            <span class="ActionScriptComment">// So here, I&apos;m setting up the keyBlock array that I will derive MACs, keys, and IVs from.
+</span>            <span class="ActionScriptComment">// Rebuild k (hash seed)
+</span>             
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0; 
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">masterSecret</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">serverRandom</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">clientRandom</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptDefault_Text">keyBlock</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>; 
+            
+            <span class="ActionScriptDefault_Text">tempHashA</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">tempHashB</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptComment">// now for 16 iterations to get 256 bytes (16 * 16), better to have more than not enough
+</span>            <span class="ActionScriptDefault_Text">pad_char</span> <span class="ActionScriptOperator">=</span> 0<span class="ActionScriptDefault_Text">x41</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> 16; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">tempHashA</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0; 
+                
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">+</span> 1; <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">tempHashA</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_char</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">pad_char</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptDefault_Text">tempHashA</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">shaHash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sha</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tempHashA</span><span class="ActionScriptBracket/Brace">)</span>;    
+                
+                <span class="ActionScriptDefault_Text">tempHashB</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0; 
+                <span class="ActionScriptDefault_Text">tempHashB</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">masterSecret</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">tempHashB</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">shaHash</span>, 0<span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">mdHash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">md</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tempHashB</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mdHash</span><span class="ActionScriptBracket/Brace">)</span>; 
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setClientRandom</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">clientRandom</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">secret</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setServerRandom</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">serverRandom</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">secret</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">useRSA</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">KeyExchanges</span>.<span class="ActionScriptDefault_Text">useRSA</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">keyExchange</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">// This is the Finished message
+</span>        <span class="ActionScriptComment">// if you value your sanity, stay away...far away
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">computeVerifyData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">side</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>, <span class="ActionScriptDefault_Text">handshakeMessages</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// for SSL 3.0, this consists of
+</span>            <span class="ActionScriptComment">//     finished = md5( masterSecret + pad2 + md5( handshake + sender + masterSecret + pad1 ) ) +
+</span>            <span class="ActionScriptComment">//               sha1( masterSecret + pad2 + sha1( handshake + sender + masterSecret + pad1 ) )
+</span>            
+            <span class="ActionScriptComment">// trace(&quot;Handshake messages: &quot; + Hex.fromArray(handshakeMessages));
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sha</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SHA1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SHA1</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">md</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MD5</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MD5</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">k</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>; <span class="ActionScriptComment">// handshake + sender + masterSecret + pad1
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>; <span class="ActionScriptComment">// masterSecret + pad2 + k
+</span>            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">innerKey</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">outerKey</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">hashSha</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">hashMD</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sideBytes</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">side</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">TLSEngine</span>.<span class="ActionScriptDefault_Text">CLIENT</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                 <span class="ActionScriptDefault_Text">sideBytes</span>.<span class="ActionScriptDefault_Text">writeUnsignedInt</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x434C4E54</span><span class="ActionScriptBracket/Brace">)</span>;
+             <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">sideBytes</span>.<span class="ActionScriptDefault_Text">writeUnsignedInt</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x53525652</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptComment">// Do the SHA1 part of the routine first
+</span>            <span class="ActionScriptDefault_Text">masterSecret</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">handshakeMessages</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sideBytes</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">masterSecret</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_1</span>, 0, 40<span class="ActionScriptBracket/Brace">)</span>; <span class="ActionScriptComment">// limited to 40 chars for SHA1
+</span>                
+            <span class="ActionScriptDefault_Text">innerKey</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sha</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">// trace(&quot;Inner SHA Key: &quot; + Hex.fromArray(innerKey));
+</span>            
+            <span class="ActionScriptDefault_Text">j</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">masterSecret</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">j</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_2</span>, 0, 40<span class="ActionScriptBracket/Brace">)</span>; <span class="ActionScriptComment">// limited to 40 chars for SHA1
+</span>            <span class="ActionScriptDefault_Text">j</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">innerKey</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptDefault_Text">hashSha</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sha</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">j</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">// trace(&quot;Outer SHA Key: &quot; + Hex.fromArray(hashSha));
+</span>            
+            <span class="ActionScriptComment">// Rebuild k for MD5
+</span>            <span class="ActionScriptDefault_Text">k</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">handshakeMessages</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sideBytes</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">masterSecret</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">k</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_1</span><span class="ActionScriptBracket/Brace">)</span>; <span class="ActionScriptComment">// Take the whole length of pad_1 &amp; pad_2 for MD5
+</span>            
+            <span class="ActionScriptDefault_Text">innerKey</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">md</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">// trace(&quot;Inner MD5 Key: &quot; + Hex.fromArray(innerKey));
+</span>            
+            <span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">j</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">masterSecret</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">j</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_2</span><span class="ActionScriptBracket/Brace">)</span>; <span class="ActionScriptComment">// see above re: 48 byte pad
+</span>            <span class="ActionScriptDefault_Text">j</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">innerKey</span><span class="ActionScriptBracket/Brace">)</span>; 
+            
+            <span class="ActionScriptDefault_Text">hashMD</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">md</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">j</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">// trace(&quot;Outer MD5 Key: &quot; + Hex.fromArray(hashMD));
+</span>            
+            <span class="ActionScriptDefault_Text">outerKey</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">hashMD</span>, 0, <span class="ActionScriptDefault_Text">hashMD</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">outerKey</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">hashSha</span>, 0, <span class="ActionScriptDefault_Text">hashSha</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">out</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">outerKey</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">// trace(&quot;Finished Message: &quot; + out);
+</span>            <span class="ActionScriptDefault_Text">outerKey</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0;
+            
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">outerKey</span>;
+        
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">computeCertificateVerify</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">side</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>, <span class="ActionScriptDefault_Text">handshakeMessages</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// TODO: Implement this, but I don&apos;t forsee it being necessary at this point in time, since for purposes
+</span>            <span class="ActionScriptComment">// of the override, I&apos;m only going to use TLS
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;  
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getConnectionStates</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span> <span class="ActionScriptBracket/Brace">{</span>
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">masterSecret</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// so now, I have to derive the actual keys from the keyblock that I generated in setPremasterSecret.
+</span>                <span class="ActionScriptComment">// for MY purposes, I need RSA-AES 128/256 + SHA
+</span>                <span class="ActionScriptComment">// so I&apos;m gonna have keylen = 32, minlen = 32, mac_length = 20, iv_length = 16
+</span>                <span class="ActionScriptComment">// but...I can get this data from the settings returned in the constructor when this object is 
+</span>                <span class="ActionScriptComment">// It strikes me that TLS does this more elegantly...
+</span>                
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mac_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hashSize</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">Number</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">key_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">keySize</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">Number</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">iv_length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">IVSize</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">Number</span>;
+                
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">client_write_MAC</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">server_write_MAC</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">client_write_key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">server_write_key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">client_write_IV</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">server_write_IV</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+        
+                <span class="ActionScriptComment">// Derive the keys from the keyblock
+</span>                <span class="ActionScriptComment">// Get the MACs first
+</span>                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0;
+                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">readBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">client_write_MAC</span>, 0, <span class="ActionScriptDefault_Text">mac_length</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">readBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">server_write_MAC</span>, 0, <span class="ActionScriptDefault_Text">mac_length</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptComment">// keyBlock.position is now at MAC_length * 2
+</span>                <span class="ActionScriptComment">// then get the keys
+</span>                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">readBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">client_write_key</span>, 0, <span class="ActionScriptDefault_Text">key_length</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">readBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">server_write_key</span>, 0, <span class="ActionScriptDefault_Text">key_length</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptComment">// keyBlock.position is now at (MAC_length * 2) + (keySize * 2) 
+</span>                <span class="ActionScriptComment">// and then the IVs
+</span>                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">readBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">client_write_IV</span>, 0, <span class="ActionScriptDefault_Text">iv_length</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">readBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">server_write_IV</span>, 0, <span class="ActionScriptDefault_Text">iv_length</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptComment">// reset this in case it&apos;s needed, for some reason or another, but I doubt it
+</span>                <span class="ActionScriptDefault_Text">keyBlock</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> 0;
+                
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">client_write</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SSLConnectionState</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SSLConnectionState</span><span class="ActionScriptBracket/Brace">(</span>
+                        <span class="ActionScriptDefault_Text">bulkCipher</span>, <span class="ActionScriptDefault_Text">cipherType</span>, <span class="ActionScriptDefault_Text">macAlgorithm</span>,
+                        <span class="ActionScriptDefault_Text">client_write_MAC</span>, <span class="ActionScriptDefault_Text">client_write_key</span>, <span class="ActionScriptDefault_Text">client_write_IV</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">server_write</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SSLConnectionState</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SSLConnectionState</span><span class="ActionScriptBracket/Brace">(</span>
+                        <span class="ActionScriptDefault_Text">bulkCipher</span>, <span class="ActionScriptDefault_Text">cipherType</span>, <span class="ActionScriptDefault_Text">macAlgorithm</span>,
+                        <span class="ActionScriptDefault_Text">server_write_MAC</span>, <span class="ActionScriptDefault_Text">server_write_key</span>, <span class="ActionScriptDefault_Text">server_write_IV</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">entity</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">TLSEngine</span>.<span class="ActionScriptDefault_Text">CLIENT</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">{</span><span class="ActionScriptDefault_Text">read</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">server_write</span>, <span class="ActionScriptDefault_Text">write</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">client_write</span><span class="ActionScriptBracket/Brace">}</span>;
+                <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">{</span><span class="ActionScriptDefault_Text">read</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">client_write</span>, <span class="ActionScriptDefault_Text">write</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">server_write</span><span class="ActionScriptBracket/Brace">}</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+
+
+            <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">{</span><span class="ActionScriptDefault_Text">read</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SSLConnectionState</span>, <span class="ActionScriptDefault_Text">write</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SSLConnectionState</span><span class="ActionScriptBracket/Brace">}</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

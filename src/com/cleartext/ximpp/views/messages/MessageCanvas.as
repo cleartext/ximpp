@@ -53,7 +53,7 @@ package com.cleartext.ximpp.views.messages
 		
 		private static const SELECTED_ALPHA:Number = 1.0;
 		private static const OVER_ALPHA:Number = 0.8;
-		private static const OUT_ALPHA:Number = 0.3;
+		private static const OUT_ALPHA:Number = 0.5;
 		
 		private var avatars:ArrayCollection = new ArrayCollection();
 

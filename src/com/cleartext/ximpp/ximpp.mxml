@@ -6,7 +6,7 @@
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
 	xmlns:views="com.cleartext.ximpp.views.*"
-	>
+	 themeColor="#FFCC00">
 	
 	<swiz:SwizConfig
 		strict="true"

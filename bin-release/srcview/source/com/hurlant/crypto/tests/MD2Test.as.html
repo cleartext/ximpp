@@ -1,0 +1,66 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>MD2Test.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * MD2Test
+ * 
+ * A test class for MD2
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">tests</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">MD2</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Hex</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">MD2Test</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">TestCase</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">MD2Test</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ITestHarness</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">h</span>, <span class="ActionScriptString">&quot;MD2 Test&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">runTest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">testMd2</span>, <span class="ActionScriptString">&quot;MD2 Test Vectors&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">h</span>.<span class="ActionScriptDefault_Text">endTestCase</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Test Vectors grabbed from
+         * http://www.faqs.org/rfcs/rfc1319.html
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">testMd2</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">srcs</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span>
+            <span class="ActionScriptString">&quot;&quot;</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;a&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;abc&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;message digest&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;12345678901234567890123456789012345678901234567890123456789012345678901234567890&quot;</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">hashes</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span>
+            <span class="ActionScriptString">&quot;8350e5a3e24c153df2275c9f80692773&quot;</span>,
+            <span class="ActionScriptString">&quot;32ec01ec4a6dac72c0ab96fb34c0b5d1&quot;</span>,
+            <span class="ActionScriptString">&quot;da853b0d3f88d99b30283a69e6ded6bb&quot;</span>,
+            <span class="ActionScriptString">&quot;ab4f496bfb2a530b219ff33031fe06b0&quot;</span>,
+            <span class="ActionScriptString">&quot;4e8ddff3650292ab5a4108c3aa47940b&quot;</span>,
+            <span class="ActionScriptString">&quot;da33def2a42df13975352846c30338cd&quot;</span>,
+            <span class="ActionScriptString">&quot;d5976f79d83d3a0dc9806c3c66f3efd8&quot;</span>
+            <span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">md2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MD2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MD2</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">srcs</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">toArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">srcs</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">digest</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">md2</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">assert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;MD2 Test &quot;</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i</span>, <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">digest</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">hashes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

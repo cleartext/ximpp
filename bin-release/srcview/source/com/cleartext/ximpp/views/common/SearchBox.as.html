@@ -1,0 +1,102 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>SearchBox.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">views</span>.<span class="ActionScriptDefault_Text">common</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">SearchBoxEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">ApplicationModel</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">KeyboardEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">MouseEvent</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">containers</span>.<span class="ActionScriptDefault_Text">Canvas</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">controls</span>.<span class="ActionScriptDefault_Text">Button</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * @inheritDoc
+     */</span>
+    <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Event</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;search&quot;</span>, <span class="ActionScriptDefault_Text">type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;com.cleartext.ximpp.events.SearchBoxEvent&quot;</span><span class="ActionScriptBracket/Brace">)]</span>
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">SearchBox</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">Canvas</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">textInput</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DefaultTextInput</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">resetButton</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Button</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">searchString</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>;
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">Autowire</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">appModel</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ApplicationModel</span>;        
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">SearchBox</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createChildren</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">createChildren</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">textInput</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">textInput</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DefaultTextInput</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">textInput</span>.<span class="ActionScriptDefault_Text">defaultText</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;Search...&quot;</span>;
+                <span class="ActionScriptDefault_Text">textInput</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">KeyboardEvent</span>.<span class="ActionScriptDefault_Text">KEY_UP</span>, <span class="ActionScriptDefault_Text">textInputHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">addChild</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">textInput</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">resetButton</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">resetButton</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Button</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">resetButton</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MouseEvent</span>.<span class="ActionScriptDefault_Text">CLICK</span>, <span class="ActionScriptDefault_Text">resetButtonHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">addChild</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">resetButton</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">textInputHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">KeyboardEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">setSearchString</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">resetButtonHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">textInput</span>.<span class="ActionScriptDefault_Text">reset</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">setSearchString</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setSearchString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">textInput</span>.<span class="ActionScriptDefault_Text">text</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptDefault_Text">searchString</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">searchString</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">textInput</span>.<span class="ActionScriptDefault_Text">text</span>;
+                <span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SearchBoxEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">searchString</span><span class="ActionScriptBracket/Brace">))</span>;
+                <span class="ActionScriptDefault_Text">appModel</span>.<span class="ActionScriptDefault_Text">log</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;Search: &quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">searchString</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">updateDisplayList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">unscaledWidth</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>, <span class="ActionScriptDefault_Text">unscaledHeight</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">updateDisplayList</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">unscaledWidth</span>, <span class="ActionScriptDefault_Text">unscaledHeight</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">top</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">viewMetricsAndPadding</span>.<span class="ActionScriptDefault_Text">top</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">right</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">viewMetricsAndPadding</span>.<span class="ActionScriptDefault_Text">right</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">bottom</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">viewMetricsAndPadding</span>.<span class="ActionScriptDefault_Text">bottom</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">left</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">viewMetricsAndPadding</span>.<span class="ActionScriptDefault_Text">left</span>;
+            
+            <span class="ActionScriptDefault_Text">textInput</span>.<span class="ActionScriptDefault_Text">setActualSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">unscaledWidth</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">left</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">right</span>, <span class="ActionScriptDefault_Text">unscaledHeight</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">top</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">bottom</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">textInput</span>.<span class="ActionScriptDefault_Text">move</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">left</span>, <span class="ActionScriptDefault_Text">top</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">buttonDims</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">textInput</span>.<span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">-</span> 6;
+            
+            <span class="ActionScriptDefault_Text">resetButton</span>.<span class="ActionScriptDefault_Text">setActualSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buttonDims</span>, <span class="ActionScriptDefault_Text">buttonDims</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">resetButton</span>. <span class="ActionScriptDefault_Text">move</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">unscaledWidth</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">right</span> <span class="ActionScriptOperator">-</span> 3 <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">buttonDims</span>, <span class="ActionScriptDefault_Text">top</span> <span class="ActionScriptOperator">+</span> 3<span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

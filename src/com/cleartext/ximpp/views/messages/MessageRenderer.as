@@ -120,11 +120,11 @@ package com.cleartext.ximpp.views.messages
 			// set values
 			messageLabel.htmlText = message.body;
 			fromLabel.text = message.sender;
-			timeLabel.text = message.timestamp.toDateString();
+			timeLabel.text = message.timestamp.toTimeString();
 			
 			// refresh styles
-			fromLabel.styleName = "blackBold";
-			timeLabel.styleName = "lgreyBold";
+			fromLabel.styleName = "lgreyNormal";
+			timeLabel.styleName = "lgreyNormal";
 			messageLabel.styleName = "dgreyNormal";
 			
 			// check layout of super.textField

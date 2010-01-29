@@ -1,0 +1,256 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>FileMonitor.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/*
+  Copyright (c) 2009, Adobe Systems Incorporated
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without 
+  modification, are permitted provided that the following conditions are
+  met:
+
+  * Redistributions of source code must retain the above copyright notice, 
+    this list of conditions and the following disclaimer.
+  
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the 
+    documentation and/or other materials provided with the distribution.
+  
+  * Neither the name of Adobe Systems Incorporated nor the names of its 
+    contributors may be used to endorse or promote products derived from 
+    this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS
+  IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR 
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">adobe</span>.<span class="ActionScriptDefault_Text">air</span>.<span class="ActionScriptDefault_Text">filesystem</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">filesystem</span>.<span class="ActionScriptDefault_Text">File</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">Timer</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">TimerEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">Event</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">EventDispatcher</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">adobe</span>.<span class="ActionScriptDefault_Text">air</span>.<span class="ActionScriptDefault_Text">filesystem</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">FileMonitorEvent</span>;
+
+    <span class="ActionScriptComment">/*
+        Todo:
+        
+        -Cmonitor changes in multiple attributes
+        -add support for monitoring multiple files
+    */</span>
+    
+    <span class="ActionScriptASDoc">/**
+    * Dispatched when the modified date of the file being modified changes.
+    *
+    * @eventType com.adobe.air.filesystem.events.FileMonitor.CHANGE
+    */</span>
+    <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Event</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;CHANGE&quot;</span>, <span class="ActionScriptDefault_Text">type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;com.adobe.air.filesystem.events.FileMonitor&quot;</span><span class="ActionScriptBracket/Brace">)]</span>        
+
+    <span class="ActionScriptASDoc">/**
+    * Dispatched when the file being monitored is moved or deleted. The file 
+    * will be unwatched.
+    *
+    * @eventType com.adobe.air.filesystem.events.FileMonitor.MOVE
+    */</span>
+    <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Event</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;MOVE&quot;</span>, <span class="ActionScriptDefault_Text">type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;com.adobe.air.filesystem.events.FileMonitor&quot;</span><span class="ActionScriptBracket/Brace">)]</span>    
+    
+    <span class="ActionScriptASDoc">/**
+    * Dispatched when the file being monitored is created.
+    *
+    * @eventType com.adobe.air.filesystem.events.FileMonitor.CREATE
+    */</span>
+    <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Event</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">name</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;CREATE&quot;</span>, <span class="ActionScriptDefault_Text">type</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;com.adobe.air.filesystem.events.FileMonitor&quot;</span><span class="ActionScriptBracket/Brace">)]</span>            
+    
+    <span class="ActionScriptASDoc">/**
+    * Class that monitors files for changes.
+    */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">FileMonitor</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">EventDispatcher</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_file</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">timer</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Timer</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">DEFAULT_MONITOR_INTERVAL</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 1000;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_interval</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">fileExists</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">lastModifiedTime</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         *  Constructor
+         * 
+         *     @parameter file The File that will be monitored for changes.
+         * 
+         *     @param interval How often in milliseconds the file is polled for
+         *     change events. Default value is 1000, minimum value is 1000
+         */</span> 
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">FileMonitor</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">file</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>, <span class="ActionScriptDefault_Text">interval</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">file</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">file</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">interval</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">interval</span> <span class="ActionScriptOperator">&lt;</span> 1000<span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">_interval</span> <span class="ActionScriptOperator">=</span> 1000;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">else</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">_interval</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">interval</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_interval</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">DEFAULT_MONITOR_INTERVAL</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+    
+        <span class="ActionScriptASDoc">/**
+         * File being monitored for changes.
+         * 
+         * Setting the property will result in unwatch() being called.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">file</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_file</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">file</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">file</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">File</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">timer</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">timer</span>.<span class="ActionScriptDefault_Text">running</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">unwatch</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptDefault_Text">_file</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">file</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">_file</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">fileExists</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+
+            <span class="ActionScriptComment">//note : this will throw an error if new File() is passed in.
+</span>            <span class="ActionScriptDefault_Text">fileExists</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_file</span>.<span class="ActionScriptDefault_Text">exists</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">fileExists</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">lastModifiedTime</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_file</span>.<span class="ActionScriptDefault_Text">modificationDate</span>.<span class="ActionScriptDefault_Text">getTime</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>    
+
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         *     How often the system is polled for Volume change events.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">interval</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_interval</span>;
+        <span class="ActionScriptBracket/Brace">}</span>        
+        
+        <span class="ActionScriptASDoc">/**
+         * Begins monitoring the specified file for changes.
+         * 
+         * Broadcasts Event.CHANGE event when the file&apos;s modification date has changed.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">watch</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">file</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//should we throw an error?
+</span>                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">timer</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">timer</span>.<span class="ActionScriptDefault_Text">running</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptComment">//check and see if timer is active. if it is, return
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">timer</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">timer</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Timer</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_interval</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">timer</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(T</span><span class="ActionScriptDefault_Text">imerEvent</span>.<span class="ActionScriptDefault_Text">TIMER</span>, <span class="ActionScriptDefault_Text">onTimerEvent</span>, <span class="ActionScriptReserved">false</span>, 0, <span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptDefault_Text">timer</span>.<span class="ActionScriptDefault_Text">start</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Stops watching the specified file for changes.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unwatch</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">timer</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptDefault_Text">timer</span>.<span class="ActionScriptDefault_Text">stop</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">timer</span>.<span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(T</span><span class="ActionScriptDefault_Text">imerEvent</span>.<span class="ActionScriptDefault_Text">TIMER</span>, <span class="ActionScriptDefault_Text">onTimerEvent</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">onTimerEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">TimerEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">outEvent</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">FileMonitorEvent</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">fileExists</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptDefault_Text">_file</span>.<span class="ActionScriptDefault_Text">exists</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_file</span>.<span class="ActionScriptDefault_Text">exists</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">//file was created
+</span>                    <span class="ActionScriptDefault_Text">outEvent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FileMonitorEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FileMonitorEvent</span>.<span class="ActionScriptDefault_Text">CREATE</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">lastModifiedTime</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_file</span>.<span class="ActionScriptDefault_Text">modificationDate</span>.<span class="ActionScriptDefault_Text">getTime</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">else</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptComment">//file was moved / deleted
+</span>                    <span class="ActionScriptDefault_Text">outEvent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FileMonitorEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FileMonitorEvent</span>.<span class="ActionScriptDefault_Text">MOVE</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">unwatch</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">fileExists</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_file</span>.<span class="ActionScriptDefault_Text">exists</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>    
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">_file</span>.<span class="ActionScriptDefault_Text">exists</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">return</span>;
+                <span class="ActionScriptBracket/Brace">}</span>                
+                    
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">modifiedTime</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_file</span>.<span class="ActionScriptDefault_Text">modificationDate</span>.<span class="ActionScriptDefault_Text">getTime</span><span class="ActionScriptBracket/Brace">()</span>;
+                
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">modifiedTime</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">lastModifiedTime</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">return</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptDefault_Text">lastModifiedTime</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">modifiedTime</span>;
+                
+                <span class="ActionScriptComment">//file modified
+</span>                <span class="ActionScriptDefault_Text">outEvent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">FileMonitorEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">FileMonitorEvent</span>.<span class="ActionScriptDefault_Text">CHANGE</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">outEvent</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">outEvent</span>.<span class="ActionScriptDefault_Text">file</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_file</span>;
+                <span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">outEvent</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

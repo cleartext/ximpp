@@ -1,0 +1,40 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ISproutCollectionItem.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">universalSprout</span>.<span class="ActionScriptDefault_Text">sproutCollection</span>.<span class="ActionScriptDefault_Text">model</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    
+    <span class="ActionScriptASDoc">/**
+     * Interface to control the type of objects that can be added to a
+     * SproutCollection. Each item should have a name property
+     * 
+     * All ISproutCollectionItem Constructors should be able to accept
+     * an ISproutCollectionItem of the same type and clone that object.
+     * For example:
+     * 
+     * var obj1:SproutCollectionItem = new SproutCollectionItem();
+     * var obj2:SproutCollectionItem = new SproutCollectionItem(obj1);
+     * 
+     * obj2 is now a DEEP copy of obj1
+     * 
+     * To allow this, all properties of an ISproutCollectionItem must
+     * be either primitives or SproutCollections.
+     */</span>
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptinterface">interface</span> <span class="ActionScriptDefault_Text">ISproutCollectionItem</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">name</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">name</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>;
+        
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toXML</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">XML</span>;
+        
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">compare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ISproutCollectionItem</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

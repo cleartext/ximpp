@@ -1,0 +1,147 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>MAC.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * MAC
+ * 
+ * An ActionScript 3 implementation of MAC, Message Authentication Code
+ * for use with SSL 3.0.
+ * Loosely copyrighted by Bobby Parker.
+ * As3crypto copyrighted by Henri Torgemane.
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Hex</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">MAC</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IHMAC</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IHash</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">bits</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pad_1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pad_2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">innerHash</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">outerHash</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">outerKey</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">innerKey</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptASDoc">/**
+         * Create a MAC object (for SSL 3.0 ) and 
+         * optionally a number of bits to return. 
+         * The MAC will be truncated to that size if needed.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">MAC</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IHash</span>, <span class="ActionScriptDefault_Text">bits</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">hash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hash</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">bits</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">bits</span>;
+            <span class="ActionScriptDefault_Text">innerHash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">outerHash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">innerKey</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">outerKey</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+
+
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">hash</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span> 
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pad_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">getPadSize</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">pad_1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">pad_2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">pad_size</span>; <span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">pad_1</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x36</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">pad_2</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x5c</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPadSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">:</span> <span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>    <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getHashSize</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bits</span><span class="ActionScriptOperator">!=</span>0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">bits</span><span class="ActionScriptOperator">/</span>8;
+            <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">getHashSize</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        
+        <span class="ActionScriptASDoc">/**
+         * Compute a MAC using a key and some data.
+         * 
+         */</span> 
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">compute</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>, <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// take that incoming key and do hash(key + pad_2 + hash(key + pad_1 + sequence + length + record)
+</span>            <span class="ActionScriptComment">// note that data =  (sequence + type + length + record)
+</span>
+             <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_1</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                 <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pad_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">getPadSize</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">pad_1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">pad_2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">pad_size</span>; <span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">pad_1</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x36</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">pad_2</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptDefault_Text">x5c</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+             <span class="ActionScriptBracket/Brace">}</span>
+             
+             <span class="ActionScriptComment">// Do some preliminary checking on stuff
+</span>             <span class="ActionScriptComment">/* 
+             if (key.length &gt; hash.getInputSize()) {
+                 hashKey = hash.hash(key); 
+             } else {
+                 hashKey = new ByteArray;
+                 hashKey.writeBytes(key); 
+             }
+             
+             while (hashKey.length &lt; hash.getInputSize() ) {
+                 hashKey[hashKey.length] = 0;
+             } */</span>
+             <span class="ActionScriptComment">// Henri&apos;s conventions work just fine here..
+</span>             
+             <span class="ActionScriptDefault_Text">innerKey</span>.<span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptDefault_Text">outerKey</span>.<span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">=</span> 0;
+             <span class="ActionScriptComment">// trace(&quot;MAC Key: &quot; + Hex.fromArray(key));
+</span>            <span class="ActionScriptComment">// trace(&quot;Key Length: &quot; + key.length);
+</span>            <span class="ActionScriptComment">// trace(&quot;Pad_1 : &quot; + Hex.fromArray(pad_1));
+</span>             <span class="ActionScriptComment">// inner hash calc
+</span>             <span class="ActionScriptDefault_Text">innerKey</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+             <span class="ActionScriptDefault_Text">innerKey</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_1</span><span class="ActionScriptBracket/Brace">)</span>;
+             <span class="ActionScriptDefault_Text">innerKey</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">)</span>;
+             <span class="ActionScriptComment">// trace(&quot;MAC Inner Key: &quot; + Hex.fromArray(innerKey));
+</span>            
+             <span class="ActionScriptDefault_Text">innerHash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">innerKey</span><span class="ActionScriptBracket/Brace">)</span>;
+             <span class="ActionScriptComment">// trace(&quot;MAC Inner Hash: &quot; + Hex.fromArray(innerHash));
+</span>            
+            <span class="ActionScriptComment">// outer hash calc             
+</span>             <span class="ActionScriptDefault_Text">outerKey</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+             <span class="ActionScriptDefault_Text">outerKey</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pad_2</span><span class="ActionScriptBracket/Brace">)</span>;
+             <span class="ActionScriptDefault_Text">outerKey</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">innerHash</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+             <span class="ActionScriptComment">// trace(&quot;MAC Outer Key: &quot; + Hex.fromArray(outerKey));
+</span>             <span class="ActionScriptDefault_Text">outerHash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">outerKey</span><span class="ActionScriptBracket/Brace">)</span>;
+             
+             
+             <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bits</span> <span class="ActionScriptOperator">&gt;</span> 0 <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">bits</span> <span class="ActionScriptOperator">&lt;</span> 8<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">outerHash</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                 <span class="ActionScriptDefault_Text">outerHash</span>.<span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">bits</span><span class="ActionScriptOperator">/</span>8;
+             <span class="ActionScriptBracket/Brace">}</span>
+             
+             <span class="ActionScriptComment">// trace(&quot;MAC for record: &quot; + Hex.fromArray(outerHash));             
+</span>             <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">outerHash</span>;
+
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">hash</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptDefault_Text">bits</span> <span class="ActionScriptOperator">=</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptString">&quot;mac-&quot;</span><span class="ActionScriptOperator">+</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bits</span><span class="ActionScriptOperator">&gt;</span>0<span class="ActionScriptOperator">?</span><span class="ActionScriptDefault_Text">bits</span><span class="ActionScriptOperator">+</span><span class="ActionScriptString">&quot;-&quot;</span><span class="ActionScriptOperator">:</span><span class="ActionScriptString">&quot;&quot;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

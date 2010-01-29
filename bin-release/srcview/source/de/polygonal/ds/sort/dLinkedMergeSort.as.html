@@ -1,0 +1,170 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>dLinkedMergeSort.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * DATA STRUCTURES FOR GAME PROGRAMMERS
+ * Copyright (c) 2007 Michael Baczynski, http://www.polygonal.de
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * &quot;Software&quot;), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">de</span>.<span class="ActionScriptDefault_Text">polygonal</span>.<span class="ActionScriptDefault_Text">ds</span>.<span class="ActionScriptDefault_Text">sort</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">de</span>.<span class="ActionScriptDefault_Text">polygonal</span>.<span class="ActionScriptDefault_Text">ds</span>.<span class="ActionScriptDefault_Text">DListNode</span>;    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dLinkedMergeSort</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">node</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DListNode</span>, <span class="ActionScriptDefault_Text">descending</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DListNode</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">node</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+        
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DListNode</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">node</span>, <span class="ActionScriptDefault_Text">p</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DListNode</span>, <span class="ActionScriptDefault_Text">q</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DListNode</span>, <span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DListNode</span>, <span class="ActionScriptDefault_Text">tail</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DListNode</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">insize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1, <span class="ActionScriptDefault_Text">nmerges</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">qsize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>, <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        
+        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">descending</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">p</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">h</span>;
+                <span class="ActionScriptDefault_Text">h</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">tail</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+                <span class="ActionScriptDefault_Text">nmerges</span> <span class="ActionScriptOperator">=</span> 0;
+                
+                <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">nmerges</span><span class="ActionScriptOperator">++</span>;
+                    
+                    <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> 0, <span class="ActionScriptDefault_Text">psize</span> <span class="ActionScriptOperator">=</span> 0, <span class="ActionScriptDefault_Text">q</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">insize</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">++</span>;
+                        <span class="ActionScriptDefault_Text">q</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>.<span class="ActionScriptDefault_Text">next</span>;
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">q</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptReserved">break</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    
+                    <span class="ActionScriptDefault_Text">qsize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">insize</span>;
+                    
+                    <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">psize</span> <span class="ActionScriptOperator">&gt;</span> 0 <span class="ActionScriptOperator">||</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">qsize</span> <span class="ActionScriptOperator">&gt;</span> 0 <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">q</span><span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">psize</span> <span class="ActionScriptOperator">==</span> 0<span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">e</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>; <span class="ActionScriptDefault_Text">q</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>.<span class="ActionScriptDefault_Text">next</span>; <span class="ActionScriptDefault_Text">qsize</span><span class="ActionScriptOperator">--</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                        <span class="ActionScriptReserved">else</span>
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">qsize</span> <span class="ActionScriptOperator">==</span> 0 <span class="ActionScriptOperator">||</span> <span class="ActionScriptOperator">!</span><span class="ActionScriptDefault_Text">q</span><span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">e</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>; <span class="ActionScriptDefault_Text">p</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">next</span>; <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">--</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                        <span class="ActionScriptReserved">else</span>
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">q</span>.<span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">&gt;=</span> 0<span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">e</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>; <span class="ActionScriptDefault_Text">p</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">next</span>; <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">--</span>;
+                        <span class="ActionScriptBracket/Brace">}</span> 
+                        <span class="ActionScriptReserved">else</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">e</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>; <span class="ActionScriptDefault_Text">q</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>.<span class="ActionScriptDefault_Text">next</span>; <span class="ActionScriptDefault_Text">qsize</span><span class="ActionScriptOperator">--</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                        
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tail</span><span class="ActionScriptBracket/Brace">)</span>
+                            <span class="ActionScriptDefault_Text">tail</span>.<span class="ActionScriptDefault_Text">next</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">e</span>;
+                        <span class="ActionScriptReserved">else</span>
+                            <span class="ActionScriptDefault_Text">h</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">e</span>;
+                        
+                        <span class="ActionScriptDefault_Text">e</span>.<span class="ActionScriptDefault_Text">prev</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">tail</span>;
+                        <span class="ActionScriptDefault_Text">tail</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">e</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptDefault_Text">p</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptDefault_Text">tail</span>.<span class="ActionScriptDefault_Text">next</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nmerges</span> <span class="ActionScriptOperator">&lt;=</span> 1<span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">h</span>;
+                    <span class="ActionScriptReserved">break</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">insize</span> <span class="ActionScriptOperator">&lt;&lt;=</span> 1;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">else</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">p</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">h</span>;
+                <span class="ActionScriptDefault_Text">h</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">tail</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+                <span class="ActionScriptDefault_Text">nmerges</span> <span class="ActionScriptOperator">=</span> 0;
+                
+                <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">nmerges</span><span class="ActionScriptOperator">++</span>;
+                    
+                    <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> 0, <span class="ActionScriptDefault_Text">psize</span> <span class="ActionScriptOperator">=</span> 0, <span class="ActionScriptDefault_Text">q</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">insize</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">++</span>;
+                        <span class="ActionScriptDefault_Text">q</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>.<span class="ActionScriptDefault_Text">next</span>;
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">q</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptReserved">break</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    
+                    <span class="ActionScriptDefault_Text">qsize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">insize</span>;
+                    
+                    <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">psize</span> <span class="ActionScriptOperator">&gt;</span> 0 <span class="ActionScriptOperator">||</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">qsize</span> <span class="ActionScriptOperator">&gt;</span> 0 <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">q</span><span class="ActionScriptBracket/Brace">))</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">psize</span> <span class="ActionScriptOperator">==</span> 0<span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">e</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>; <span class="ActionScriptDefault_Text">q</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>.<span class="ActionScriptDefault_Text">next</span>; <span class="ActionScriptDefault_Text">qsize</span><span class="ActionScriptOperator">--</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                        <span class="ActionScriptReserved">else</span>
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">qsize</span> <span class="ActionScriptOperator">==</span> 0 <span class="ActionScriptOperator">||</span> <span class="ActionScriptOperator">!</span><span class="ActionScriptDefault_Text">q</span><span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">e</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>; <span class="ActionScriptDefault_Text">p</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">next</span>; <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">--</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                        <span class="ActionScriptReserved">else</span>
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">q</span>.<span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">&lt;=</span> 0<span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">e</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>; <span class="ActionScriptDefault_Text">p</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p</span>.<span class="ActionScriptDefault_Text">next</span>; <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">--</span>;
+                        <span class="ActionScriptBracket/Brace">}</span> 
+                        <span class="ActionScriptReserved">else</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">e</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>; <span class="ActionScriptDefault_Text">q</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>.<span class="ActionScriptDefault_Text">next</span>; <span class="ActionScriptDefault_Text">qsize</span><span class="ActionScriptOperator">--</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                        
+                        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tail</span><span class="ActionScriptBracket/Brace">)</span>
+                            <span class="ActionScriptDefault_Text">tail</span>.<span class="ActionScriptDefault_Text">next</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">e</span>;
+                        <span class="ActionScriptReserved">else</span>
+                            <span class="ActionScriptDefault_Text">h</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">e</span>;
+                        
+                        <span class="ActionScriptDefault_Text">e</span>.<span class="ActionScriptDefault_Text">prev</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">tail</span>;
+                        <span class="ActionScriptDefault_Text">tail</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">e</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptDefault_Text">p</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">q</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptDefault_Text">tail</span>.<span class="ActionScriptDefault_Text">next</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nmerges</span> <span class="ActionScriptOperator">&lt;=</span> 1<span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">h</span>;
+                    <span class="ActionScriptReserved">break</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">insize</span> <span class="ActionScriptOperator">&lt;&lt;=</span> 1;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>
