@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" height="64" width="100%">
+	<mx:Image id="avatar" width="48" height="48"/>
+	<mx:Label id="nameLabel" text="{data.sender}" x="70"/>
+	<mx:Label id="timestampLabel" text="{data.timestamp}" right="0"/>
+	<mx:TextArea id="body" text="{data.body}" y="26" height="100%" width="100%" x="70"/>
+</mx:Canvas>

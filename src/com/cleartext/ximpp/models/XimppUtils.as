@@ -48,11 +48,13 @@ package com.cleartext.ximpp.models
 		{
 			var image:Image = event.target as Image;
 			var bitmap:Bitmap = Bitmap(image.content);
-			var scale:Number = AVATAR_SIZE / Math.max(bitmap.width, bitmap.height);
-			var tx:Number = (AVATAR_SIZE - bitmap.width * scale) / 2;
-			var ty:Number = (AVATAR_SIZE - bitmap.height * scale) / 2;
-			var matrix:Matrix = new Matrix(scale, 0, 0, scale, tx, ty);
-			var bmd:BitmapData = new BitmapData(AVATAR_SIZE, AVATAR_SIZE);
+			
+			// if the bitmap is smaller than the AVATAR_SIZE, then scale it down
+			// otherwise, just draw at the size we got it
+			var scale:Number = AVATAR_SIZE / Math.max(bitmap.width, bitmap.height, AVATAR_SIZE);
+			var matrix:Matrix = new Matrix(scale, 0, 0, scale);
+
+			var bmd:BitmapData = new BitmapData(Math.min(bitmap.width*scale, AVATAR_SIZE), Math.min(bitmap.height*scale, AVATAR_SIZE));
 			bmd.draw(bitmap, matrix);
 			
 			image.data.setAvatar(bmd);

@@ -83,7 +83,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		
 		// find a status value from what the xmpp libray tells us
-		public function setFromStanzaType(type:String):void
+		public function setFromStanzaType(type:String):Boolean
 		{
 			switch(type)
 			{
@@ -96,9 +96,10 @@ package com.cleartext.ximpp.models.valueObjects
 				case "away":			value = AWAY; break;
 				case "dnd":				value = BUSY; break;
 				case "xa":				value = EXTENDED_AWAY; break;
-				case "error":			value = ERROR; break;
+				case "error":			value = ERROR; return true;
 				default:				value = UNKNOWN + ": " + type;
 			}
+			return false;
 		}
 		
 		// generate something the xmpp library will understand

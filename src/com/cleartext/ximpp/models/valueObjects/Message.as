@@ -17,11 +17,14 @@ package com.cleartext.ximpp.models.valueObjects
 			"rawxml TEXT);";
 		
 		public var messageId:int = -1;
+		[Bindable]
 		public var timestamp:Date = new Date();
+		[Bindable]
 		public var sender:String;
 		public var recipient:String;
 		public var type:String;
 		public var subject:String;
+		[Bindable]
 		public var body:String;
 		public var rawXML:String;
 		
@@ -58,7 +61,6 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("body", body),
 				new DatabaseValue("rawxml", rawXML),
 				];
-			
 		}
 		
 		public static function createFromStanza(stanza:Object):Message
@@ -70,7 +72,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newMessage.recipient = stanza.to.getBareJID();
 			newMessage.type = stanza.type;
 			newMessage.subject = stanza.subject;
-			newMessage.body = stanza.body;
+			newMessage.body = (stanza.html) ? stanza.html : stanza.body;
 			
 			return newMessage;
 		}

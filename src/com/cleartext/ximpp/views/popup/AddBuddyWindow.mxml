@@ -37,7 +37,7 @@
 		</mx:FormItem>
 		
 		<mx:FormItem label="buddy id:">
-			<common:DefaultTextInput id="newJid" defaultText="eg. test@cleartext.com" />
+			<mx:TextInput id="newJid"  />
 		</mx:FormItem>
 		
 		<mx:FormItem>

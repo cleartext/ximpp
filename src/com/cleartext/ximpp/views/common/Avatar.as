@@ -48,7 +48,7 @@ package com.cleartext.ximpp.views.common
 			buddyChangedHandler(null);
 		}
 		
-		public function get buddy():Buddy
+		private function get buddy():Buddy
 		{
 			if(data is Buddy)
 				return data as Buddy;
@@ -192,17 +192,29 @@ package com.cleartext.ximpp.views.common
 		{
 			var g:Graphics = graphics;
 			g.clear();
-			
 			var bmd:BitmapData = (bitmapData) ? bitmapData : new DefaultAvatar().bitmapData;
 			
-			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height); 
-			g.beginBitmapFill(bmd, new Matrix(scale, 0, 0, scale));
+			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 
+			var w:Number = bmd.width * scale;
+			var h:Number = bmd.height * scale;
+			var tx:Number = (unscaledWidth - w)/2;
+			var ty:Number = (unscaledHeight - h)/2;
+			
+			g.beginFill(0xffffff);
+			g.drawRect(0, 0, unscaledWidth, unscaledHeight);
+			g.drawRect(tx,ty,w,h);
+			
+			g.beginBitmapFill(bmd, new Matrix(scale, 0, 0, scale, tx, ty), false, true);
 	
-			if(border)
-				g.lineStyle(borderThickness, borderColour);
-	
-			g.drawRect(0,0,unscaledWidth,unscaledHeight);
+			g.drawRect(tx,ty,w,h);
+			g.endFill();
 
+			if(border)
+			{
+				g.lineStyle(borderThickness, borderColour);
+				g.drawRect(0, 0, unscaledWidth, unscaledHeight);
+			}
+	
 			if(showEditIcon)
 			{
 				var editBitmapData:BitmapData = new EditIcon().bitmapData;

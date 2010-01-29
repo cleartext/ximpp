@@ -29,6 +29,9 @@ package com.seesmic.as3.xmpp
 		namespace jc = 'jabber:client';
 		default xml namespace = 'jabber:client';
 		
+		// astewart@cleartext.com
+		public var html:String;
+		
 		public function MessageStanza(connection:Object, parent:Stanza=null)
 		{
 			super(connection, parent);
@@ -42,6 +45,8 @@ package com.seesmic.as3.xmpp
 			this.type = xml.@type;
 			this.subject = xml.@subject;
 			this.body = xml.body.text();
+			// astewart@cleartext.com
+			this.html = xml.html.text();
 		}
 		
 		public function setTo(nto:String):void {
@@ -54,6 +59,11 @@ package com.seesmic.as3.xmpp
 		
 		public function setBody(nbody:String):void {
 			this.body = nbody;
+		}
+		
+		// astewart@cleartext.com
+		public function setHtml(nhtml:String):void {
+			this.html = nhtml;
 		}
 		
 		public function setSubject(nsubject:String):void {
@@ -79,13 +89,20 @@ package com.seesmic.as3.xmpp
 			var bodyx:XML = new XML();
 			bodyx = <body>{body}</body>;
 			xml.appendChild(bodyx);
+
+			// astewart@cleartext.com
+			var htmlx:XML = new XML();
+			htmlx = <html>{html}</html>;
+			xml.appendChild(htmlx);
 		}
 		
-		public function reply(newbody:String = null):void {
+		// html added by astewart@cleartext.com
+		public function reply(newbody:String = null, newhtml:String = null):void {
 			// switch from and to, update body, re-render, send
 			to = from;
 			from = conn.fulljid;
 			setBody(newbody);
+			setHtml(newhtml);
 			send();
 		}
 	}

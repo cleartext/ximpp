@@ -7,20 +7,23 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.models.SettingsModel;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.XimppUtils;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.views.common.Avatar;
 	
 	import flash.display.Graphics;
+	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.containers.ViewStack;
-	import mx.controls.Button;
+	import mx.core.Container;
 	import mx.core.ScrollPolicy;
 	import mx.effects.Fade;
 	import mx.effects.Move;
+	import mx.events.CloseEvent;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	import mx.events.FlexEvent;
@@ -49,18 +52,18 @@ package com.cleartext.ximpp.views.messages
 		private static const SELECTOR_WIDTH:Number = 5;
 		private static const TRIANGLE_HEIGHT:Number = 11;
 		private static const TRIANGLE_WIDTH:Number = 16;
-		private static const SPACER_HEIGHT:Number = 30;
+		private static const SPACER_HEIGHT:Number = 32;
 		
 		private static const SELECTED_ALPHA:Number = 1.0;
-		private static const OVER_ALPHA:Number = 0.8;
-		private static const OUT_ALPHA:Number = 0.3;
+		private static const OVER_ALPHA:Number = 1.0;
+		private static const OUT_ALPHA:Number = 0.7;
 		
 		private var avatars:ArrayCollection = new ArrayCollection();
 
 		private var inputCanvas:InputCanvas;
 		private var avatarCanvas:Canvas;
-		private var selectorCanvas:Canvas;
-		private var closeButton:Button;
+		private var selector:Sprite;
+		private var spacerCanvas:SpacerCanvas;
 		private var messageStack:ViewStack;
 
 		private var _index:int = 0;
@@ -95,11 +98,11 @@ package com.cleartext.ximpp.views.messages
 			percentHeight = 100;
 			percentWidth = 100;
 			
-			setStyle("backgroundColor", 0x000000);
-			
 			addEventListener(FlexEvent.CREATION_COMPLETE, 
 				function():void
 				{
+					for each(var chat:Chat in appModel.chats)
+						setCurrentChat(chat);
 					appModel.chats.addEventListener(CollectionEvent.COLLECTION_CHANGE, chatsChangedHandler);
 				});
 		}
@@ -141,7 +144,7 @@ package com.cleartext.ximpp.views.messages
 			return (avatars.length > 0) ? avatars.getItemAt(i) as Avatar : null;
 		}
 		
-		public function setCurrentChat(chat:Chat):void
+		private function setCurrentChat(chat:Chat):void
 		{
 			if(!chat)
 				return;
@@ -159,7 +162,7 @@ package com.cleartext.ximpp.views.messages
 					moveAvatar(index, 1, SELECTED_ALPHA);
 					exists = true;
 					
-					for each(var s:MessageSproutList in messageStack.getChildren())
+					for each(var s:Container in messageStack.getChildren())
 					{
 						if(s.data == chat)
 						{
@@ -183,11 +186,11 @@ package com.cleartext.ximpp.views.messages
 				avatar.addEventListener(MouseEvent.ROLL_OVER, avatar_rollOver);
 				avatar.addEventListener(MouseEvent.ROLL_OUT, avatar_rollOut); 
 				avatar.alpha = 0;
-
+	
 				avatars.addItemAt(avatar, index);
 				moveAvatar(index, 1, SELECTED_ALPHA, false);
 				avatarCanvas.addChildAt(avatar, 0);
-
+					
 				var sproutList:MessageSproutList = new MessageSproutList();
 				sproutList.data = chat;
 				messageStack.addChild(sproutList);
@@ -239,24 +242,17 @@ package com.cleartext.ximpp.views.messages
 				addChild(avatarCanvas);
 			}
 			
-			if(!selectorCanvas)
+			if(!spacerCanvas)
 			{
-				selectorCanvas = new Canvas();
-				addChild(selectorCanvas);
-			}
-			
-			if(!closeButton)
-			{
-				closeButton = new Button();
-				closeButton.label = "X";
-				closeButton.addEventListener(MouseEvent.CLICK,
+				spacerCanvas = new SpacerCanvas();
+				spacerCanvas.addEventListener(CloseEvent.CLOSE,
 					function():void
 					{
 						var avatarToRemove:Avatar = avatarByIndex(index);
 						if(avatarToRemove)
 							appModel.chats.removeItemAt(appModel.chats.getItemIndex(avatarToRemove.chat));
 					});
-				selectorCanvas.addChild(closeButton);
+				addChild(spacerCanvas);
 			}
 			
 			if(!messageStack)
@@ -264,6 +260,12 @@ package com.cleartext.ximpp.views.messages
 				messageStack = new ViewStack();
 				messageStack.setStyle("backgroundColor", 0xffffff);
 				addChild(messageStack);
+			}
+
+			if(!selector)
+			{
+				selector = new Sprite();
+				rawChildren.addChild(selector);
 			}
 		}
 		
@@ -277,29 +279,26 @@ package com.cleartext.ximpp.views.messages
 			avatarCanvas.move(0, Constants.TOP_BAR_HEIGHT);
 			avatarCanvas.setActualSize(unscaledWidth, XimppUtils.AVATAR_SIZE + SELECTOR_WIDTH + TRIANGLE_HEIGHT);
 			
-			selectorCanvas.move(0, Constants.TOP_BAR_HEIGHT);
-			selectorCanvas.setActualSize(unscaledWidth, avatarCanvas.height + SPACER_HEIGHT);
-			
-			closeButton.move(unscaledWidth - 50, TRIANGLE_HEIGHT + SELECTOR_WIDTH + XimppUtils.AVATAR_SIZE + 4);
+			spacerCanvas.move(0, Constants.TOP_BAR_HEIGHT +TRIANGLE_HEIGHT + SELECTOR_WIDTH + XimppUtils.AVATAR_SIZE);
+			spacerCanvas.setActualSize(unscaledWidth, SPACER_HEIGHT);
 
 			messageStack.move(0, Constants.TOP_BAR_HEIGHT + SPACER_HEIGHT + avatarCanvas.height);
 			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - avatarCanvas.height - SPACER_HEIGHT);
 			
-			var g:Graphics = selectorCanvas.graphics;
+			var g:Graphics = selector.graphics;
 			g.clear();
 			g.beginFill(0xffffff);
 			var xVal:Number = XimppUtils.AVATAR_SIZE + 2*H_GAP;
+			var yVal:Number = Constants.TOP_BAR_HEIGHT;
 			// draw triangle
-			g.moveTo(xVal + SELECTOR_WIDTH + (XimppUtils.AVATAR_SIZE - TRIANGLE_WIDTH)/2, 0);
-			g.lineTo(xVal + SELECTOR_WIDTH + (XimppUtils.AVATAR_SIZE + TRIANGLE_WIDTH)/2, 0);
-			g.lineTo(xVal + SELECTOR_WIDTH + XimppUtils.AVATAR_SIZE/2, TRIANGLE_HEIGHT-2);
-			g.lineTo(xVal + SELECTOR_WIDTH + (XimppUtils.AVATAR_SIZE - TRIANGLE_WIDTH)/2, 0);
+			g.moveTo(xVal + SELECTOR_WIDTH + (XimppUtils.AVATAR_SIZE - TRIANGLE_WIDTH)/2, yVal);
+			g.lineTo(xVal + SELECTOR_WIDTH + (XimppUtils.AVATAR_SIZE + TRIANGLE_WIDTH)/2, yVal);
+			g.lineTo(xVal + SELECTOR_WIDTH + XimppUtils.AVATAR_SIZE/2, TRIANGLE_HEIGHT-2 + yVal);
+			g.lineTo(xVal + SELECTOR_WIDTH + (XimppUtils.AVATAR_SIZE - TRIANGLE_WIDTH)/2, yVal);
 			// draw outer box
-			g.drawRect(xVal, TRIANGLE_HEIGHT, XimppUtils.AVATAR_SIZE + 2*SELECTOR_WIDTH, XimppUtils.AVATAR_SIZE + SELECTOR_WIDTH);
+			g.drawRect(xVal, TRIANGLE_HEIGHT + yVal, XimppUtils.AVATAR_SIZE + 2*SELECTOR_WIDTH, XimppUtils.AVATAR_SIZE + SELECTOR_WIDTH);
 			// draw inner box
-			g.drawRect(xVal + SELECTOR_WIDTH, TRIANGLE_HEIGHT + SELECTOR_WIDTH, XimppUtils.AVATAR_SIZE, XimppUtils.AVATAR_SIZE);
-			// draw spacer
-			g.drawRect(0, TRIANGLE_HEIGHT + SELECTOR_WIDTH + XimppUtils.AVATAR_SIZE, unscaledWidth, SPACER_HEIGHT);
+			g.drawRect(xVal + SELECTOR_WIDTH, TRIANGLE_HEIGHT + SELECTOR_WIDTH + yVal, XimppUtils.AVATAR_SIZE, XimppUtils.AVATAR_SIZE);
 		}
 		
 		private function avatarClickHandler(event:MouseEvent):void
@@ -372,7 +371,7 @@ package com.cleartext.ximpp.views.messages
 			avatarCanvas.removeChild(avatarToRemove);
 			avatars.removeItemAt(avatars.getItemIndex(avatarToRemove));
 
-			for each(var s:MessageSproutList in messageStack.getChildren())
+			for each(var s:Container in messageStack.getChildren())
 			{
 				if(s.data == avatarToRemove.chat)
 				{

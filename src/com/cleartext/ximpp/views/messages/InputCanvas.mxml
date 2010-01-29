@@ -23,8 +23,8 @@
 			{
 				if(inputTextArea.text.length != 0 && buddy && xmpp.connected)
 					messageCanvas.sendMessage(inputTextArea.text);
-
-				inputTextArea.text = "";
+				
+				callLater(function():void { inputTextArea.text = "";} );
 			}
 			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -59,7 +59,7 @@
 	
 	<mx:Label text="{'Type message to ' + buddy.nickName}" x="10" y="6"/>
 	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6"/>
-	<common:DefaultTextInput
+	<mx:TextInput
 		id="inputTextArea" 
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
 		keyDown="if(event.keyCode==Keyboard.ENTER) send()"

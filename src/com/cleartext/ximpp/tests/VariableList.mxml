@@ -2,6 +2,7 @@
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:list="com.universalsprout.flex.components.list.*" creationComplete="init()" xmlns:listTest="listTest.*" backgroundColor="0xffffff">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.tests.mesageRenderers.SimpleMessageRenderer;
 			import com.cleartext.ximpp.views.messages.MessageRenderer;
 			import com.cleartext.ximpp.models.valueObjects.Message;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
@@ -47,7 +48,7 @@
 					
 					var message:Message = new Message();
 					message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
-					message.body = randomString(40,140,4);
+					message.body = randomString(400,1400,4);
 					messageData.addItem(message);
 				}
 			}
@@ -250,7 +251,7 @@ Application
 			animate="false"
 			width="100%" height="100%"
 			dataProvider="{messageData}"
-			itemRenderer="{new ClassFactory(MessageRenderer)}"/>
+			itemRenderer="{new ClassFactory(SimpleMessageRenderer)}"/>
 		
 	</mx:HDividedBox>
 

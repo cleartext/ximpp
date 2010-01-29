@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -17,7 +18,6 @@ package com.cleartext.ximpp.models
 	import flash.filesystem.File;
 	
 	import mx.collections.ArrayCollection;
-	import mx.managers.CursorManager;
 	
 	public class DatabaseModel extends EventDispatcher
 	{
@@ -239,7 +239,7 @@ package com.cleartext.ximpp.models
 			}
 		}
 				
-		public function loadTimelineData():void
+		public function loadMicroBloggingData():void
 		{			
 			syncConn.begin(); 
 			appModel.log("Loading message data");
@@ -252,16 +252,15 @@ package com.cleartext.ximpp.models
 		    syncConn.commit(); 
 			
 			var result:SQLResult = stmt.getResult();
-			
-			appModel.timeLineMessages.removeAll();
+			appModel.microBloggingMessages.removeAll();
 			
 			if(result && result.data)
 			{
 				var len:int = result.data.length;
 				for(var i:int=0; i<len; i++)
-					appModel.timeLineMessages.addItem(Message.createFromDB(result.data[i]));
+					appModel.microBloggingMessages.addItem(Message.createFromDB(result.data[i]));
 			}
-		    // if we've got to this point without errors, commit the transaction 
+			
 			appModel.log("Message data loaded");
 		}
 		
@@ -501,8 +500,8 @@ package com.cleartext.ximpp.models
 			{
 				return insertStmt(table, values);
 			}
-			
 		}
+		
 	}
 	
 }

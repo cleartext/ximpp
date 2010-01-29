@@ -89,7 +89,6 @@
 				id="buddyCanvas"
 				width="25%"/>
 			<messages:MessageCanvas
-				backgroundColor="0xffffff"
 				id="chatCanvas"
 				width="75%"/>
 		</mx:HDividedBox>

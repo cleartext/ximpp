@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.views.common
 {
+	import flash.events.Event;
 	import flash.events.FocusEvent;
 	import flash.events.KeyboardEvent;
 	
@@ -23,7 +24,7 @@ package com.cleartext.ximpp.views.common
 			}
 		}
 		
-		[Bindable]
+	    [Bindable("textChanged")]
 		override public function get text():String
 		{
 			return (textSet) ? super.text : "";
@@ -37,6 +38,7 @@ package com.cleartext.ximpp.views.common
 				setStyle("color", 0x000000);
 				textSet = true;
 				super.text = value;
+				dispatchEvent(new Event("textChanged"));
 			}
 		}
 		
@@ -66,6 +68,12 @@ package com.cleartext.ximpp.views.common
 					super.text = "";
 				}
 			}
+		}
+		
+		public function set multiLine(value:Boolean):void
+		{
+			if(textField)
+				textField.multiline = value;
 		}
 		
 		override protected function focusInHandler(event:FocusEvent):void

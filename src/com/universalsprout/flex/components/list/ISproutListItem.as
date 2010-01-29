@@ -4,9 +4,6 @@ package com.universalsprout.flex.components.list
 	
 	public interface ISproutListItem extends IDataRenderer
 	{
-		function get used():Boolean;
-		function set used(value:Boolean):void;
-		
 		function get highlight():Boolean;
 		function set highlight(value:Boolean):void;
 		

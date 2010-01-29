@@ -46,7 +46,7 @@ package com.cleartext.ximpp.models
 		}
 		
 		[Bindable]
-		public var timeLineMessages:ArrayCollection = new ArrayCollection();
+		public var microBloggingMessages:ArrayCollection = new ArrayCollection();
 
 		[Bindable]
 		public var chats:ArrayCollection = new ArrayCollection();
@@ -164,11 +164,15 @@ package com.cleartext.ximpp.models
 		public function userIdChanged():void
 		{
 			chats.removeAll();
-			timeLineMessages.removeAll();
+			microBloggingMessages.removeAll();
 			rosterItems.removeAll();
+
+			var chat:Chat = new Chat(new Buddy("microBlogging"));
+			chat.messages = microBloggingMessages;
+			chats.addItem(chat);
 			
 			database.loadBuddyData();
-			database.loadTimelineData();
+			database.loadMicroBloggingData();
 		}
 		
 		public function getChat(buddy:Buddy, select:Boolean=true):Chat

@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.views.common
 {
+	import com.adobe.utils.StringUtil;
 	import com.cleartext.ximpp.events.SearchBoxEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	
@@ -37,6 +38,7 @@ package com.cleartext.ximpp.views.common
 			{
 				textInput = new DefaultTextInput();
 				textInput.defaultText = "Search...";
+				textInput.multiLine = false;
 				textInput.addEventListener(KeyboardEvent.KEY_UP, textInputHandler);
 				addChild(textInput);
 			}
@@ -51,6 +53,7 @@ package com.cleartext.ximpp.views.common
 		
 		private function textInputHandler(event:KeyboardEvent):void
 		{
+			textInput.multiLine = false;
 			setSearchString();
 		}
 		
@@ -62,6 +65,8 @@ package com.cleartext.ximpp.views.common
 		
 		private function setSearchString():void
 		{
+			resetButton.visible = (textInput.text.length > 0);
+			
 			if(textInput.text != searchString)
 			{
 				searchString = textInput.text;

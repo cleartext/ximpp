@@ -2,7 +2,6 @@ package com.cleartext.ximpp.views.buddies
 {
 	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
-	import com.cleartext.ximpp.models.XimppUtils;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
@@ -24,7 +23,7 @@ package com.cleartext.ximpp.views.buddies
 		private static const PADDING:Number = 3;
 		
 		private static const NO_HIGHLIGHT:uint = 0xffffff;
-		private static const HIGHLIGHT:uint = 0xb6b6dd;
+		private static const HIGHLIGHT:uint = 0xdddddd;
 
 		//---------------------------------------
 		// Constructor
@@ -224,15 +223,15 @@ package com.cleartext.ximpp.views.buddies
 
 			// layout status icon
 			statusIcon.setActualSize(StatusIcon.SIZE, StatusIcon.SIZE);
-			statusIcon.move(avatarSize + 2.5*PADDING, 21);
+			statusIcon.move(unscaledWidth - PADDING - StatusIcon.SIZE, 15);
 
 			// layout status label
 			statusLabel.setActualSize(unscaledWidth - avatarSize - 4*PADDING - StatusIcon.SIZE, statusLabel.height); 
-			statusLabel.move(avatarSize + 3*PADDING + StatusIcon.SIZE, 20);
+			statusLabel.move(avatarSize + 2*PADDING, 20);
 
 			// layout custom status label
 			customStatusLabel.setActualSize(unscaledWidth-2*PADDING, customStatusLabel.height);
-			customStatusLabel.move(PADDING, 39);
+			customStatusLabel.move(avatarSize + 2*PADDING, 39);
 			customStatusLabel.truncateToFit();
 		}
 	}

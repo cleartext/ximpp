@@ -1,7 +1,7 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.models.ApplicationModel;
-	import com.cleartext.ximpp.models.XimppUtils;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
@@ -27,7 +27,7 @@ package com.cleartext.ximpp.views.messages
 		private static const PADDING:Number = 3;
 		
 		private static const NO_HIGHLIGHT:uint = 0xffffff;
-		private static const HIGHLIGHT:uint = 0xb6b6dd;
+		private static const HIGHLIGHT:uint = 0xdddddd;
 
 		private static const AVATAR_SIZE:Number = 32;
 
@@ -58,7 +58,12 @@ package com.cleartext.ximpp.views.messages
 			super.data = value;
 
 			if(appModel && message)
-				avatar.data = appModel.getBuddyByJid(message.sender);
+			{
+				var buddy:Buddy = appModel.getBuddyByJid(message.sender);
+				avatar.data = buddy;
+				if(buddy)
+					fromLabel.text = buddy.nickName;
+			}
 		}
 		
 		//---------------------------------------
@@ -119,7 +124,6 @@ package com.cleartext.ximpp.views.messages
 			
 			// set values
 			messageLabel.htmlText = message.body;
-			fromLabel.text = message.sender;
 			timeLabel.text = message.timestamp.toDateString();
 			
 			// refresh styles

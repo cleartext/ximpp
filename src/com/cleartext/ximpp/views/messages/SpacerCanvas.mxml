@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:common="com.cleartext.ximpp.views.common.*"
+	borderStyle="none"
+	backgroundColor="0xffffff"
+	horizontalScrollPolicy="off"
+	verticalScrollPolicy="off"
+	creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Message;
+			import com.cleartext.ximpp.models.ApplicationModel;
+			import com.cleartext.ximpp.events.SearchBoxEvent;
+			import mx.events.CloseEvent;
+			
+			[Autowire]
+			public var appModel:ApplicationModel;
+			
+			private var searchString:String;
+			
+			private function doSearch(event:SearchBoxEvent):void
+			{
+				searchString = event.searchString;
+				appModel.microBloggingMessages.refresh();
+			}
+			
+			private function init():void
+			{
+				appModel.microBloggingMessages.filterFunction = filterMessages;
+			}
+			
+			private function filterMessages(message:Message):Boolean
+			{
+				return message.body.indexOf(searchString) != -1;
+			}
+		]]>
+	</mx:Script>
+
+	<common:SearchBox width="400" height="24" x="5" y="3" search="doSearch(event)"/>
+	<mx:Label text="300 of 433" x="410" y="3"/>
+	<mx:Button label="X" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE));" right="5"/>
+
+</mx:Canvas>

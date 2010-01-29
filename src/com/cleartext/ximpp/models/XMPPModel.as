@@ -178,6 +178,8 @@ package com.cleartext.ximpp.models
 		private function messageHandler(event:XMPPEvent):void
 		{
 			var message:Message = Message.createFromStanza(event.stanza);
+			if(message.body == "[OK]")
+				return;
 			database.saveMessage(message);
 
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
@@ -229,8 +231,8 @@ package com.cleartext.ximpp.models
 				
 				buddy.resource = stanza.from.resource;
 				// setFromStanzaType also handles "unsubscribe" and "subscribed"
-				buddy.status.setFromStanzaType(stanza.type);
-				buddy.setCustomStatus(stanza.status);
+				var error:Boolean = buddy.status.setFromStanzaType(stanza.type);
+				buddy.setCustomStatus((!error) ? stanza.status : "");
 				
 				var avatarHash:String = stanza.avatarHash;
 				if(avatarHash && buddy.avatarHash != avatarHash)
