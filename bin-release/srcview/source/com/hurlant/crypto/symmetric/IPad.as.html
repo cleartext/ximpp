@@ -1,0 +1,42 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>IPad.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * IPad
+ * 
+ * An interface for padding mechanisms to implement.
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">symmetric</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    
+    <span class="ActionScriptASDoc">/**
+     * Tiny interface that represents a padding mechanism.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptinterface">interface</span> <span class="ActionScriptDefault_Text">IPad</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * Add padding to the array
+         */</span>
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">pad</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">a</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>;
+        <span class="ActionScriptASDoc">/**
+         * Remove padding from the array.
+         * @throws Error if the padding is invalid.
+         */</span>
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unpad</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">a</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>;
+        <span class="ActionScriptASDoc">/**
+         * Set the blockSize to work on
+         */</span>
+        <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setBlockSize</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bs</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

@@ -1,0 +1,130 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Random.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * Random
+ * 
+ * An ActionScript 3 implementation of a Random Number Generator
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * Derived from:
+ *         The jsbn library, Copyright (c) 2003-2005 Tom Wu
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">prng</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Memory</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">system</span>.<span class="ActionScriptDefault_Text">System</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">system</span>.<span class="ActionScriptDefault_Text">Capabilities</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">accessibility</span>.<span class="ActionScriptDefault_Text">AccessibilityProperties</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">display</span>.<span class="ActionScriptDefault_Text">SWFVersion</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">display</span>.<span class="ActionScriptDefault_Text">Stage</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">getTimer</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">text</span>.<span class="ActionScriptDefault_Text">Font</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">Random</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">state</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IPRNG</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ready</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pptr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">seeded</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">Random</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">prng</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Class</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">prng</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptDefault_Text">prng</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">ARC4</span>;
+            <span class="ActionScriptDefault_Text">state</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">prng</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">IPRNG</span>;
+            <span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">state</span>.<span class="ActionScriptDefault_Text">getPoolSize</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">pool</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptDefault_Text">pptr</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pptr</span> <span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">psize</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 65536<span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">random</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">pptr</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">t</span> <span class="ActionScriptOperator">&gt;&gt;&gt;</span> 8;
+                <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">pptr</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">t</span><span class="ActionScriptOperator">&amp;</span>255;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">pptr</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Date</span><span class="ActionScriptBracket/Brace">()</span>.<span class="ActionScriptDefault_Text">getTime</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">pptr</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">^=</span> <span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">&amp;</span> 255;
+            <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">pptr</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">^=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">&gt;&gt;</span>8<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">&amp;</span>255;
+            <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">pptr</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">^=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">&gt;&gt;</span>16<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">&amp;</span>255;
+            <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">pptr</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">^=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">&gt;&gt;</span>24<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">&amp;</span>255;
+            <span class="ActionScriptDefault_Text">pptr</span> <span class="ActionScriptOperator">%=</span> <span class="ActionScriptDefault_Text">psize</span>;
+            <span class="ActionScriptDefault_Text">seeded</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Gather anything we have that isn&apos;t entirely predictable:
+         *  - memory used
+         *  - system capabilities
+         *  - timing stuff
+         *  - installed fonts
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">autoSeed</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">b</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">writeUnsignedInt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">System</span>.<span class="ActionScriptDefault_Text">totalMemory</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">writeUTF</span><span class="ActionScriptBracket/Brace">(C</span><span class="ActionScriptDefault_Text">apabilities</span>.<span class="ActionScriptDefault_Text">serverString</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">writeUnsignedInt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">getTimer</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">writeUnsignedInt</span><span class="ActionScriptBracket/Brace">((</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Date</span><span class="ActionScriptBracket/Brace">)</span>.<span class="ActionScriptDefault_Text">getTime</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">a</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Font</span>.<span class="ActionScriptDefault_Text">enumerateFonts</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">f</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Font</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">a</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">writeUTF</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">f</span>.<span class="ActionScriptDefault_Text">fontName</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">writeUTF</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">f</span>.<span class="ActionScriptDefault_Text">fontStyle</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">writeUTF</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">f</span>.<span class="ActionScriptDefault_Text">fontType</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">position</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">bytesAvailable</span><span class="ActionScriptOperator">&gt;=</span>4<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">b</span>.<span class="ActionScriptDefault_Text">readUnsignedInt</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">nextBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buffer</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>, <span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">buffer</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nextByte</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">nextByte</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">ready</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">seeded</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">autoSeed</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">state</span>.<span class="ActionScriptDefault_Text">init</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">=</span> 0;
+                <span class="ActionScriptDefault_Text">pptr</span> <span class="ActionScriptOperator">=</span> 0;
+                <span class="ActionScriptDefault_Text">ready</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">state</span>.<span class="ActionScriptDefault_Text">next</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">pool</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">random</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">*</span>256;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">pool</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptDefault_Text">pool</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptDefault_Text">state</span>.<span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">state</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptDefault_Text">psize</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptDefault_Text">pptr</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptDefault_Text">Memory</span>.<span class="ActionScriptDefault_Text">gc</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptString">&quot;random-&quot;</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">state</span>.<span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

@@ -1,0 +1,219 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Set.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * DATA STRUCTURES FOR GAME PROGRAMMERS
+ * Copyright (c) 2007 Michael Baczynski, http://www.polygonal.de
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * &quot;Software&quot;), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">de</span>.<span class="ActionScriptDefault_Text">polygonal</span>.<span class="ActionScriptDefault_Text">ds</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">Dictionary</span>;
+    
+    <span class="ActionScriptASDoc">/**
+     * A set is a collection of values, without any particular order and no
+     * repeated values. The value is its own key.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">Set</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">Collection</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Dictionary</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Dictionary</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Creates a new empty set.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">Set</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_set</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Dictionary</span><span class="ActionScriptBracket/Brace">()</span>;            
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Reads an item from the set.
+         * 
+         * @param obj The item to retrieve.
+         * @return The item matching the obj parameter or null if the item is
+         *         not part of the set.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptOperator">:*</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:*</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">val</span><span class="ActionScriptOperator">:*</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">val</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">undefined</span> <span class="ActionScriptOperator">?</span> <span class="ActionScriptDefault_Text">val</span> <span class="ActionScriptOperator">:</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptASDoc">/**
+         * Writes an item to the set.
+         * 
+         * @param obj The item to be added to the set.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptOperator">:*</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptReserved">undefined</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">])</span> <span class="ActionScriptReserved">return</span>;
+            
+            <span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span>;
+            <span class="ActionScriptDefault_Text">_size</span><span class="ActionScriptOperator">++</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Removes an item from the set.
+         * 
+         * @param  obj The item to remove
+         * @return The removed item or null if the item wasn&apos;t contained
+         *         by the set.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">remove</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptOperator">:*</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">undefined</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">delete</span> <span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">]</span>;
+                <span class="ActionScriptDefault_Text">_size</span><span class="ActionScriptOperator">--</span>;
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">contains</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptOperator">:*</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">undefined</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_set</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Dictionary</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">_size</span> <span class="ActionScriptOperator">=</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getIterator</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Iterator</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SetIterator</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">size</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_size</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">isEmpty</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_size</span> <span class="ActionScriptOperator">==</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toArray</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">a</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_size</span><span class="ActionScriptBracket/Brace">)</span>, <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:*</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptDefault_Text">a</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">i</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">a</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Prints out a string representing the current object.
+         * 
+         * @return A string representing the current object.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptString">&quot;[Set, size=&quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">size</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;]&quot;</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Prints out all elements (for debug/demo purposes).
+         * 
+         * @return A human-readable representation of the structure.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dump</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;Set:\n&quot;</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:*</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">_set</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">s</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">&quot;[val: &quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;]\n&quot;</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">s</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">de</span>.<span class="ActionScriptDefault_Text">polygonal</span>.<span class="ActionScriptDefault_Text">ds</span>.<span class="ActionScriptDefault_Text">Iterator</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">de</span>.<span class="ActionScriptDefault_Text">polygonal</span>.<span class="ActionScriptDefault_Text">ds</span>.<span class="ActionScriptDefault_Text">Set</span>;
+
+<span class="ActionScriptReserved">internal</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">SetIterator</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">Iterator</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Set</span>;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_a</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_cursor</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">SetIterator</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Set</span><span class="ActionScriptBracket/Brace">)</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptDefault_Text">_s</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">s</span>;
+        <span class="ActionScriptDefault_Text">_a</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">toArray</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptDefault_Text">_cursor</span> <span class="ActionScriptOperator">=</span> 0;
+        <span class="ActionScriptDefault_Text">_size</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">size</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">next</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:*</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_a</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">_cursor</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">]</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">hasNext</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_cursor</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">_size</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">start</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptDefault_Text">_cursor</span> <span class="ActionScriptOperator">=</span> 0;
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:*</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_a</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">_cursor</span><span class="ActionScriptBracket/Brace">]</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptOperator">:*</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptDefault_Text">_s</span>.<span class="ActionScriptDefault_Text">remove</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_a</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">_cursor</span><span class="ActionScriptBracket/Brace">])</span>;
+        <span class="ActionScriptDefault_Text">_s</span>.<span class="ActionScriptReserved">set</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>    
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

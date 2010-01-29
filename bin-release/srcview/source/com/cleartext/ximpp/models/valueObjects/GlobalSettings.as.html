@@ -1,0 +1,77 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>GlobalSettings.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">valueObjects</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">EventDispatcher</span>;
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">GlobalSettings</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">EventDispatcher</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IXimppValueObject</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">CREATE_GLOBAL_SETTINGS_TABLE</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span>
+                <span class="ActionScriptString">&quot;CREATE TABLE IF NOT EXISTS globalSettings (&quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;settingId INTEGER PRIMARY KEY AUTOINCREMENT, &quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;autoConnect BOOLEAN DEFAULT False, &quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;urlShortener TEXT DEFAULT &apos;&quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">UrlShortener</span>.<span class="ActionScriptDefault_Text">types</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;&apos;, &quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;timelineTopDown BOOLEAN DEFAULT True, &quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;chatTopDown BOOLEAN DEFAULT False, &quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;animateBuddyList BOOLEAN DEFAULT True, &quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;numChatMessages INTEGER DEFAULT 150, &quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;numTimelineMessages INTEGER DEFAULT 250, &quot;</span> <span class="ActionScriptOperator">+</span>
+                <span class="ActionScriptString">&quot;openChats TEXT, &quot;</span> <span class="ActionScriptOperator">+</span> 
+                <span class="ActionScriptString">&quot;userId INTEGER DEFAULT 1);&quot;</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">GlobalSettings</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">autoConnect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">urlShortener</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">timelineTopDown</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">chatTopDown</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">animateBuddyList</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> ;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">numChatMessages</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">numTimelineMessages</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createFromDB</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">GlobalSettings</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">newGlobalSettings</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">GlobalSettings</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">GlobalSettings</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptDefault_Text">newGlobalSettings</span>.<span class="ActionScriptDefault_Text">autoConnect</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptString">&quot;autoConnect&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">newGlobalSettings</span>.<span class="ActionScriptDefault_Text">urlShortener</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptString">&quot;urlShortener&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">newGlobalSettings</span>.<span class="ActionScriptDefault_Text">timelineTopDown</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptString">&quot;timelineTopDown&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">newGlobalSettings</span>.<span class="ActionScriptDefault_Text">chatTopDown</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptString">&quot;chatTopDown&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">newGlobalSettings</span>.<span class="ActionScriptDefault_Text">animateBuddyList</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptString">&quot;animateBuddyList&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">newGlobalSettings</span>.<span class="ActionScriptDefault_Text">numChatMessages</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptString">&quot;numChatMessages&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">newGlobalSettings</span>.<span class="ActionScriptDefault_Text">numTimelineMessages</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">obj</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptString">&quot;numTimelineMessages&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">newGlobalSettings</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toDatabaseValues</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">userId</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">[</span>
+                <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DatabaseValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;autoConnect&quot;</span>, <span class="ActionScriptDefault_Text">autoConnect</span><span class="ActionScriptBracket/Brace">)</span>,
+                <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DatabaseValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;urlShortener&quot;</span>, <span class="ActionScriptDefault_Text">urlShortener</span><span class="ActionScriptBracket/Brace">)</span>,
+                <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DatabaseValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;timelineTopDown&quot;</span>, <span class="ActionScriptDefault_Text">timelineTopDown</span><span class="ActionScriptBracket/Brace">)</span>,
+                <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DatabaseValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;chatTopDown&quot;</span>, <span class="ActionScriptDefault_Text">chatTopDown</span><span class="ActionScriptBracket/Brace">)</span>,
+                <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DatabaseValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;animateBuddyList&quot;</span>, <span class="ActionScriptDefault_Text">animateBuddyList</span><span class="ActionScriptBracket/Brace">)</span>,
+                <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DatabaseValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;numChatMessages&quot;</span>, <span class="ActionScriptDefault_Text">numChatMessages</span><span class="ActionScriptBracket/Brace">)</span>,
+                <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DatabaseValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;numTimelineMessages&quot;</span>, <span class="ActionScriptDefault_Text">numTimelineMessages</span><span class="ActionScriptBracket/Brace">)</span>,
+                <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DatabaseValue</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;userId&quot;</span>, <span class="ActionScriptDefault_Text">userId</span><span class="ActionScriptBracket/Brace">)]</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

@@ -148,7 +148,7 @@ package com.cleartext.ximpp.views.buddies
 			statusIcon.status.value = buddy.status.value;
 			
 			// refresh styles
-			nameLabel.styleName = "blackBold";
+			nameLabel.styleName = "dgreyNormal";
 			statusLabel.styleName = "lgreyNormal";
 			customStatusLabel.styleName = "dgreyNormal";
 			

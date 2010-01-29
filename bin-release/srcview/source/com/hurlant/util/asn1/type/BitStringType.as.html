@@ -1,0 +1,32 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>BitStringType.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">asn1</span>.<span class="ActionScriptDefault_Text">type</span> <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">net</span>.<span class="ActionScriptDefault_Text">registerClassAlias</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">BitStringType</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">ASN1Type</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptDefault_Text">registerClassAlias</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;com.hurlant.util.asn1.BitStringType&quot;</span>, <span class="ActionScriptDefault_Text">BitStringType</span><span class="ActionScriptBracket/Brace">)</span>;
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">BitStringType</span><span class="ActionScriptBracket/Brace">()</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">SN1Type</span>.<span class="ActionScriptDefault_Text">BIT_STRING</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">fromDERContent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>, <span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:*</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// structure: one byte telling us how many bits of padding we have
+</span>            <span class="ActionScriptComment">//            length-1 bytes of actual data.
+</span>            <span class="ActionScriptComment">// I don&apos;t really feel like dealing with bitstrings that don&apos;t fit exactly in bytes, though. XXX
+</span>            <span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">()</span>; <span class="ActionScriptComment">// I could assert if this is not zero, at least. FIXME
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">b</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">readBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">b</span>, 0, <span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">b</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

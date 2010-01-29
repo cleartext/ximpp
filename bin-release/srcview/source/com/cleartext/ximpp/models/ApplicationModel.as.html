@@ -1,0 +1,253 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ApplicationModel.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">BuddyEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">ChatEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">PopUpEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">valueObjects</span>.<span class="ActionScriptDefault_Text">Buddy</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">valueObjects</span>.<span class="ActionScriptDefault_Text">BuddyGroup</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">valueObjects</span>.<span class="ActionScriptDefault_Text">Chat</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">cleartext</span>.<span class="ActionScriptDefault_Text">ximpp</span>.<span class="ActionScriptDefault_Text">models</span>.<span class="ActionScriptDefault_Text">valueObjects</span>.<span class="ActionScriptDefault_Text">Status</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">Event</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">EventDispatcher</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">getTimer</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">collections</span>.<span class="ActionScriptDefault_Text">ArrayCollection</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">controls</span>.<span class="ActionScriptDefault_Text">Alert</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">Application</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">CloseEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ObjectUtil</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span>.<span class="ActionScriptDefault_Text">swizframework</span>.<span class="ActionScriptDefault_Text">Swiz</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ApplicationModel</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">EventDispatcher</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">Autowire</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">settings</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SettingsModel</span>;
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">Autowire</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">database</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">DatabaseModel</span>;
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">Autowire</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">xmpp</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">XMPPModel</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ApplicationModel</span><span class="ActionScriptBracket/Brace">()</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_rosterItems</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">BuddyGroup</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;roster items&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_rosterItems</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">BuddyGroup</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">rosterItems</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">BuddyGroup</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_rosterItems</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">timeLineMessages</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ArrayCollection</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ArrayCollection</span><span class="ActionScriptBracket/Brace">()</span>;
+
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">chats</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ArrayCollection</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ArrayCollection</span><span class="ActionScriptBracket/Brace">()</span>;
+        
+        <span class="ActionScriptComment">/*
+         * SERVER SIDE STATUS
+         * This variable stores the state that the server has for us based on
+         * the last communication with the server.
+         */</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">serverSideStatus</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Status</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Status</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Status</span>.<span class="ActionScriptDefault_Text">OFFLINE</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptComment">/*
+         * LOCAL STATUS
+         * This is the status that the user selects.
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_localStatus</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Status</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Status</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Status</span>.<span class="ActionScriptDefault_Text">OFFLINE</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">localStatus</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Status</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_localStatus</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">showConsole</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;logTextChanged&quot;</span><span class="ActionScriptBracket/Brace">)]</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">logText</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;&quot;</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">log</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">toLog</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">str</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">getTimer</span><span class="ActionScriptBracket/Brace">()</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot; : &quot;</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">toLog</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">str</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">toLog</span>;
+                <span class="ActionScriptDefault_Text">logText</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">str</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;\n&quot;</span>;
+                <span class="ActionScripttrace">trace</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">str</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">toLog</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">Event</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Event</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">toLog</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">Event</span>;
+                <span class="ActionScriptDefault_Text">logText</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">str</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">event</span>.<span class="ActionScriptDefault_Text">type</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;\n\t&quot;</span>;
+                <span class="ActionScripttrace">trace</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">str</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">event</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">toLog</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">Error</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">error</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Error</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">toLog</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">Error</span>;
+                <span class="ActionScriptDefault_Text">logText</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">str</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">error</span>.<span class="ActionScriptDefault_Text">name</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;\n\t&quot;</span>;
+                <span class="ActionScripttrace">trace</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">str</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">error</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Event</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;logTextChanged&quot;</span><span class="ActionScriptBracket/Brace">))</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setUserPresence</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">statusString</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>, <span class="ActionScriptDefault_Text">customStatus</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Status</span>.<span class="ActionScriptDefault_Text">USER_TYPES</span>.<span class="ActionScriptDefault_Text">indexOf</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">statusString</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">localStatus</span>.<span class="ActionScriptDefault_Text">value</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">statusString</span>;
+    
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span> <span class="ActionScriptOperator">||</span>
+                <span class="ActionScriptDefault_Text">localStatus</span>.<span class="ActionScriptDefault_Text">value</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">serverSideStatus</span>.<span class="ActionScriptDefault_Text">value</span> <span class="ActionScriptOperator">&amp;&amp;</span> 
+                <span class="ActionScriptDefault_Text">customStatus</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span>.<span class="ActionScriptDefault_Text">customStatus</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">customStatus</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span>.<span class="ActionScriptDefault_Text">customStatus</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span>.<span class="ActionScriptDefault_Text">setCustomStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">customStatus</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">saveUserAccount</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+
+            <span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">sendPresence</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">init</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Event</span>.<span class="ActionScriptDefault_Text">COMPLETE</span>, <span class="ActionScriptDefault_Text">databaseCompleteHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">createDatabase</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">databaseCompleteHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Event</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Event</span>.<span class="ActionScriptDefault_Text">COMPLETE</span>, <span class="ActionScriptDefault_Text">databaseCompleteHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+
+            <span class="ActionScriptComment">// if this changes the userId, it will reload all the data from the database
+</span>            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">loadGlobalSettings</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span>.<span class="ActionScriptDefault_Text">valid</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">Alert</span>.<span class="ActionScriptDefault_Text">show</span><span class="ActionScriptBracket/Brace">(</span>
+                    <span class="ActionScriptString">&quot;There are no valid settings selected. Do you want to change your preferences now?&quot;</span>,
+                     <span class="ActionScriptString">&quot;Invalid User Settings&quot;</span>, <span class="ActionScriptDefault_Text">Alert</span>.<span class="ActionScriptDefault_Text">YES</span> <span class="ActionScriptOperator">|</span> <span class="ActionScriptDefault_Text">Alert</span>.<span class="ActionScriptDefault_Text">NO</span>, <span class="ActionScriptReserved">null</span>,
+                     <span class="ActionScriptfunction">function</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">CloseEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+                     <span class="ActionScriptBracket/Brace">{</span>
+                         <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>.<span class="ActionScriptDefault_Text">detail</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">Alert</span>.<span class="ActionScriptDefault_Text">YES</span><span class="ActionScriptBracket/Brace">)</span>
+                             <span class="ActionScriptDefault_Text">Swiz</span>.<span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">PopUpEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">PopUpEvent</span>.<span class="ActionScriptDefault_Text">PREFERENCES_WINDOW</span><span class="ActionScriptBracket/Brace">))</span>;
+                     <span class="ActionScriptBracket/Brace">})</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">global</span>.<span class="ActionScriptDefault_Text">autoConnect</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">setUserPresence</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Status</span>.<span class="ActionScriptDefault_Text">AVAILABLE</span>, <span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span>.<span class="ActionScriptDefault_Text">customStatus</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">shutDown</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">xmpp</span>.<span class="ActionScriptDefault_Text">disconnect</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">close</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">fatalError</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">errorMsg</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">&quot;&quot;</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">Alert</span>.<span class="ActionScriptDefault_Text">show</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;Sorry, there has been a fatal error, please quit ximpp.\n&quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">errorMsg</span>, <span class="ActionScriptString">&quot;Fatal Error&quot;</span>, 4, <span class="ActionScriptReserved">null</span>,
+                <span class="ActionScriptfunction">function</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">Application</span>.<span class="ActionScriptDefault_Text">application</span>.<span class="ActionScriptDefault_Text">exit</span><span class="ActionScriptBracket/Brace">()</span>;
+                <span class="ActionScriptBracket/Brace">})</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">userIdChanged</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">chats</span>.<span class="ActionScriptDefault_Text">removeAll</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">timeLineMessages</span>.<span class="ActionScriptDefault_Text">removeAll</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">rosterItems</span>.<span class="ActionScriptDefault_Text">removeAll</span><span class="ActionScriptBracket/Brace">()</span>;
+            
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">loadBuddyData</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">loadTimelineData</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getChat</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Buddy</span>, <span class="ActionScriptDefault_Text">select</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Chat</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">buddy</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptReserved">each</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Chat</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">chats</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">c</span>.<span class="ActionScriptDefault_Text">buddy</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">buddy</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">select</span><span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptDefault_Text">Swiz</span>.<span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ChatEvent</span><span class="ActionScriptBracket/Brace">(C</span><span class="ActionScriptDefault_Text">hatEvent</span>.<span class="ActionScriptDefault_Text">SELECT_CHAT</span>, <span class="ActionScriptDefault_Text">c</span><span class="ActionScriptBracket/Brace">))</span>;
+                    <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">c</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">chat</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Chat</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Chat</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">chat</span>.<span class="ActionScriptDefault_Text">messages</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">loadMessages</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">chats</span>.<span class="ActionScriptDefault_Text">addItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">chat</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">chat</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getBuddyByJid</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">jid</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Buddy</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">jid</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptDefault_Text">jid</span><span class="ActionScriptOperator">==</span><span class="ActionScriptString">&quot;&quot;</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+                
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">jid</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span>.<span class="ActionScriptDefault_Text">jid</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">settings</span>.<span class="ActionScriptDefault_Text">userAccount</span>;
+            
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">rosterItems</span>.<span class="ActionScriptDefault_Text">getBuddy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">jid</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">compareBuddies</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Buddy</span>, <span class="ActionScriptDefault_Text">buddy2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Buddy</span>, <span class="ActionScriptDefault_Text">fields</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">nameCompare</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">ObjectUtil</span>.<span class="ActionScriptDefault_Text">compare</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy1</span>.<span class="ActionScriptDefault_Text">nickName</span>, <span class="ActionScriptDefault_Text">buddy2</span>.<span class="ActionScriptDefault_Text">nickName</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy1</span>.<span class="ActionScriptDefault_Text">status</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">buddy2</span>.<span class="ActionScriptDefault_Text">status</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">nameCompare</span>;
+            
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy1</span>.<span class="ActionScriptDefault_Text">status</span>.<span class="ActionScriptDefault_Text">value</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">Status</span>.<span class="ActionScriptDefault_Text">OFFLINE</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span> 1;
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy2</span>.<span class="ActionScriptDefault_Text">status</span>.<span class="ActionScriptDefault_Text">value</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">Status</span>.<span class="ActionScriptDefault_Text">OFFLINE</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span> <span class="ActionScriptOperator">-</span>1;
+            
+            <span class="ActionScriptReserved">return</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">addBuddy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">newBuddy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Buddy</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">saveBuddy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">newBuddy</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">rosterItems</span>.<span class="ActionScriptDefault_Text">addBuddy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">newBuddy</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(!</span><span class="ActionScriptDefault_Text">newBuddy</span>.<span class="ActionScriptDefault_Text">hasEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">BuddyEvent</span>.<span class="ActionScriptDefault_Text">CHANGED</span><span class="ActionScriptBracket/Brace">))</span>
+                <span class="ActionScriptDefault_Text">newBuddy</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">BuddyEvent</span>.<span class="ActionScriptDefault_Text">CHANGED</span>, <span class="ActionScriptDefault_Text">buddySaveHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">buddySaveHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">BuddyEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">saveBuddy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>.<span class="ActionScriptDefault_Text">target</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">Buddy</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">removeBuddy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Buddy</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">rosterItems</span>.<span class="ActionScriptDefault_Text">removeBuddy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">database</span>.<span class="ActionScriptDefault_Text">removeBuddy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buddy</span>.<span class="ActionScriptDefault_Text">buddyId</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">buddy</span>.<span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">BuddyEvent</span>.<span class="ActionScriptDefault_Text">CHANGED</span>, <span class="ActionScriptDefault_Text">buddySaveHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

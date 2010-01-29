@@ -1,0 +1,59 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>PrintableString.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * PrintableString
+ * 
+ * An ASN1 type for a PrintableString, held within a String
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">der</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">PrintableString</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IAsn1Type</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">type</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">len</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">str</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">PrintableString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">type</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>, <span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">type</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">type</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">len</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">length</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getLength</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">len</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getType</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">type</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">str</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">s</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">str</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">DER</span>.<span class="ActionScriptDefault_Text">indent</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">str</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toDER</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>; <span class="ActionScriptComment">// XXX not implemented
+</span>        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

@@ -1,0 +1,80 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>TLSConfig.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * TLSConfig
+ * 
+ * A set of configuration parameters for use by a TLSSocket or a TLSEngine.
+ * Most parameters are optional and will be set to appropriate default values for most use.
+ * 
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">tls</span> <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">der</span>.<span class="ActionScriptDefault_Text">PEM</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">rsa</span>.<span class="ActionScriptDefault_Text">RSAKey</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">cert</span>.<span class="ActionScriptDefault_Text">X509CertificateCollection</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">cert</span>.<span class="ActionScriptDefault_Text">MozillaRootCertificates</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">TLSConfig</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">entity</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>; <span class="ActionScriptComment">// SERVER | CLIENT
+</span>        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">certificate</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">privateKey</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">RSAKey</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cipherSuites</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">compressions</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ignoreCommonNameMismatch</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">trustAllCertificates</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">trustSelfSignedCertificates</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">promptUserForAcceptCert</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">CAStore</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">X509CertificateCollection</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">localKeyStore</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">X509CertificateCollection</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">version</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">TLSConfig</span><span class="ActionScriptBracket/Brace">(</span>    <span class="ActionScriptDefault_Text">entity</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>, <span class="ActionScriptDefault_Text">cipherSuites</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>, <span class="ActionScriptDefault_Text">compressions</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>, 
+                                    <span class="ActionScriptDefault_Text">certificate</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>, <span class="ActionScriptDefault_Text">privateKey</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">RSAKey</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>, <span class="ActionScriptDefault_Text">CAStore</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">X509CertificateCollection</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>, <span class="ActionScriptDefault_Text">ver</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0<span class="ActionScriptDefault_Text">x00</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">entity</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">entity</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">cipherSuites</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">cipherSuites</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">compressions</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">compressions</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">certificate</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">certificate</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">privateKey</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">privateKey</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">CAStore</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">CAStore</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">version</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">ver</span>;
+            <span class="ActionScriptComment">// default settings.
+</span>            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cipherSuites</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">cipherSuites</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">CipherSuites</span>.<span class="ActionScriptDefault_Text">getDefaultSuites</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">compressions</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">compressions</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">TLSSecurityParameters</span>.<span class="ActionScriptDefault_Text">COMPRESSION_NULL</span><span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(CA</span><span class="ActionScriptDefault_Text">Store</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">CAStore</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MozillaRootCertificates</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ver</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptDefault_Text">x00</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">// Default to TLS
+</span>                <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">version</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">TLSSecurityParameters</span>.<span class="ActionScriptDefault_Text">PROTOCOL_VERSION</span>;
+            <span class="ActionScriptBracket/Brace">}</span> 
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setPEMCertificate</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cert</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>, <span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">key</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">cert</span>; <span class="ActionScriptComment">// for folks who like to concat those two in one file.
+</span>            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">certificate</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">PEM</span>.<span class="ActionScriptDefault_Text">readCertIntoArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cert</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">privateKey</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">PEM</span>.<span class="ActionScriptDefault_Text">readRSAPrivateKey</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

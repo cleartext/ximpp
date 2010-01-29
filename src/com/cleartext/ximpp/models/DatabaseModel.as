@@ -220,7 +220,7 @@ package com.cleartext.ximpp.models
 				
 				var stmt:SQLStatement = new SQLStatement();
 				stmt.sqlConnection = syncConn;
-				stmt.text = "Select * from buddies WHERE userid=" + settings.userId ;
+				stmt.text = "Select * from buddies WHERE userid=" + settings.userId + " ORDER BY lastSeen ASC" ;
 				stmt.execute();
 			    syncConn.commit(); 
 				

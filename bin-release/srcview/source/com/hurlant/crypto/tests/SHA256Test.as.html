@@ -1,0 +1,70 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>SHA256Test.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * SHA256Test
+ * 
+ * A test class for SHA256
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">tests</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">SHA256</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Hex</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">SHA256Test</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">TestCase</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">SHA256Test</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ITestHarness</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">h</span>,<span class="ActionScriptString">&quot;SHA-256 Test&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">runTest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">testSha256</span>,<span class="ActionScriptString">&quot;SHA-256 Test Vectors&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">h</span>.<span class="ActionScriptDefault_Text">endTestCase</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Test vectors courtesy of
+         * https://www.cosic.esat.kuleuven.be/nessie/testvectors/hash/sha/Sha-2-256.unverified.test-vectors
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">testSha256</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">srcs</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span>
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;a&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;abc&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;message digest&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;12345678901234567890123456789012345678901234567890123456789012345678901234567890&quot;</span><span class="ActionScriptBracket/Brace">)</span>,
+            <span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">hashes</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span>
+            <span class="ActionScriptString">&quot;E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855&quot;</span>,
+            <span class="ActionScriptString">&quot;CA978112CA1BBDCAFAC231B39A23DC4DA786EFF8147C4E72B9807785AFEE48BB&quot;</span>,
+            <span class="ActionScriptString">&quot;BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD&quot;</span>,
+            <span class="ActionScriptString">&quot;F7846F55CF23E14EEBEAB5B4E1550CAD5B509E3348FBC4EFA3A1413D393CB650&quot;</span>,
+            <span class="ActionScriptString">&quot;71C480DF93D6AE2F1EFAD1447C66C9525E316218CF51FC8D9ED832F2DAF18B73&quot;</span>,
+            <span class="ActionScriptString">&quot;248D6A61D20638B8E5C026930C3E6039A33CE45964FF2167F6ECEDD419DB06C1&quot;</span>,
+            <span class="ActionScriptString">&quot;DB4BFCBD4DA0CD85A60C3C37D3FBD8805C77F15FC6B1FDFE614EE0A7C8FDB4C0&quot;</span>,
+            <span class="ActionScriptString">&quot;F371BC4A311F2B009EEF952DD83CA80E2B60026C8E935592D0F9C308453C813E&quot;</span><span class="ActionScriptBracket/Brace">]</span>;
+            
+            <span class="ActionScriptComment">// loop.
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sha256</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SHA256</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SHA256</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">srcs</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">toArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">srcs</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">digest</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sha256</span>.<span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">assert</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;SHA256 Test &quot;</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">i</span>, <span class="ActionScriptDefault_Text">Hex</span>.<span class="ActionScriptDefault_Text">fromArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">digest</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">hashes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>.<span class="ActionScriptDefault_Text">toLowerCase</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

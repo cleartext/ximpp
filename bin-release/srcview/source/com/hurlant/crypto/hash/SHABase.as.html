@@ -1,0 +1,78 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>SHABase.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * SHABase
+ * 
+ * An ActionScript 3 abstract class for the SHA family of hash functions
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">Endian</span>;
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">SHABase</span> <span class="ActionScriptReserved">implements</span> <span class="ActionScriptDefault_Text">IHash</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">pad_size</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 40;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getInputSize</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> 64;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getHashSize</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> 0;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getPadSize</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">pad_size</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">hash</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">savedLength</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">length</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">savedEndian</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">endian</span>;
+            
+            <span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">endian</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Endian</span>.<span class="ActionScriptDefault_Text">BIG_ENDIAN</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">len</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">savedLength</span> <span class="ActionScriptOperator">*</span>8;
+            <span class="ActionScriptComment">// pad to nearest int.
+</span>            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">%</span>4<span class="ActionScriptOperator">!=</span>0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">// convert ByteArray to an array of uint
+</span>            <span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">position</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">a</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[]</span>;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+=</span>4<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">a</span>.<span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">readUnsignedInt</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">h</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">core</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">a</span>, <span class="ActionScriptDefault_Text">len</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">out</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">words</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">getHashSize</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">/</span>4;
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">words</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">out</span>.<span class="ActionScriptDefault_Text">writeUnsignedInt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">h</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">])</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">// unpad, to leave the source untouched.
+</span>            <span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">savedLength</span>;
+            <span class="ActionScriptDefault_Text">src</span>.<span class="ActionScriptDefault_Text">endian</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">savedEndian</span>;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">out</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">core</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>, <span class="ActionScriptDefault_Text">len</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptString">&quot;sha&quot;</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

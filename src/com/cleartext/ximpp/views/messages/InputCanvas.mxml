@@ -23,7 +23,6 @@
 			{
 				if(inputTextArea.text.length != 0 && buddy && xmpp.connected)
 					messageCanvas.sendMessage(inputTextArea.text);
-				
 				callLater(function():void { inputTextArea.text = "";} );
 			}
 			
@@ -53,12 +52,18 @@
 				g.lineStyle(1, 0xffffff);
 				g.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, CORNER_RADIUS, CORNER_RADIUS);
 			}
+			
+			
+			private function updateCharCount():void
+			{
+				charCountDisplay.text = inputTextArea.text.length + ' Characters';
+			}
 
 		]]>
 	</mx:Script>
 	
 	<mx:Label text="{'Type message to ' + buddy.nickName}" x="10" y="6"/>
-	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6"/>
+	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6" id="charCountDisplay"/>
 	<mx:TextInput
 		id="inputTextArea" 
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
@@ -68,7 +73,7 @@
 		cornerRadius="{CORNER_RADIUS}"
 		backgroundAlpha="0"
 		borderStyle="none"
-		/>
-	<mx:Button label="send" right="0" top="35" click="send()"/>
+		  keyUp="updateCharCount();"/>
+	<mx:Button label="Send" right="14" top="40" click="send()" height="50" width="55"/>
 
 </mx:Canvas>

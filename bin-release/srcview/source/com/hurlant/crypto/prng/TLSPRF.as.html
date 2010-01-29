@@ -1,0 +1,152 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>TLSPRF.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * TLSPRF
+ * 
+ * An ActionScript 3 implementation of a pseudo-random generator
+ * that follows the TLS specification
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">prng</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">HMAC</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">MD5</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">hash</span>.<span class="ActionScriptDefault_Text">SHA1</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Memory</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Hex</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">IDataOutput</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * There&apos;s &quot;Random&quot;, and then there&apos;s TLS Random.
+     * .
+     * Still Pseudo-random, though.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">TLSPRF</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// XXX WAY TOO MANY STRUCTURES HERE
+</span>        
+        <span class="ActionScriptComment">// seed
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptComment">// P_MD5&apos;s secret
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptComment">// P_SHA-1&apos;s secret
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptComment">// HMAC_MD5&apos;s A
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">a1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptComment">// HMAC_SHA1&apos;s A
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">a2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptComment">// Pool for P_MD5
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">p1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptComment">// Pool for P_SHA1
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">p2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptComment">// Data for HMAC_MD5
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        <span class="ActionScriptComment">// Data for HMAC_SHA1
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">d2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+        
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">hmac_md5</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">HMAC</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">hmac_sha1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">HMAC</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">TLSPRF</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>, <span class="ActionScriptDefault_Text">label</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>, <span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">l</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Math</span>.<span class="ActionScriptDefault_Text">ceil</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">/</span>2<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s1</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptDefault_Text">s1</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span>, 0, <span class="ActionScriptDefault_Text">l</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">s2</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">secret</span>, <span class="ActionScriptDefault_Text">secret</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">-</span><span class="ActionScriptDefault_Text">l</span>, <span class="ActionScriptDefault_Text">l</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">s</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">writeUTFBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">label</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">s</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">seed</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">s</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">s1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">s1</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">s2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">s2</span>;
+            <span class="ActionScriptDefault_Text">hmac_md5</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">HMAC</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">MD5</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">hmac_sha1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">HMAC</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SHA1</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">a1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hmac_md5</span>.<span class="ActionScriptDefault_Text">compute</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s1</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">a2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hmac_sha1</span>.<span class="ActionScriptDefault_Text">compute</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s2</span>, <span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptDefault_Text">p1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptDefault_Text">p2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            
+            <span class="ActionScriptDefault_Text">d1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptDefault_Text">d2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ByteArray</span>;
+            <span class="ActionScriptDefault_Text">d1</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">MD5</span>.<span class="ActionScriptDefault_Text">HASH_SIZE</span>;
+            <span class="ActionScriptDefault_Text">d1</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">d2</span>.<span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">SHA1</span>.<span class="ActionScriptDefault_Text">HASH_SIZE</span>;
+            <span class="ActionScriptDefault_Text">d2</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span>.<span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">// XXX HORRIBLY SLOW. REWRITE.
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">nextBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">buffer</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">IDataOutput</span>, <span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">buffer</span>.<span class="ActionScriptDefault_Text">writeByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nextByte</span><span class="ActionScriptBracket/Brace">())</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">nextByte</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p1</span>.<span class="ActionScriptDefault_Text">bytesAvailable</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">more_md5</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p2</span>.<span class="ActionScriptDefault_Text">bytesAvailable</span><span class="ActionScriptOperator">==</span>0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">more_sha1</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">p1</span>.<span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">^</span><span class="ActionScriptDefault_Text">p2</span>.<span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">seed</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">seed</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">s1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s1</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">s2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s2</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">a1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">a1</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">a2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">a2</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">p1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p1</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">p2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">p2</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">d1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">d1</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">d2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">d2</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">hmac_md5</span>.<span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">hmac_md5</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptDefault_Text">hmac_sha1</span>.<span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptDefault_Text">hmac_sha1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptDefault_Text">Memory</span>.<span class="ActionScriptDefault_Text">gc</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptString">&quot;tls-prf&quot;</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dba</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ba</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">ba</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">ba</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">ba</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">more_md5</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">d1</span>.<span class="ActionScriptDefault_Text">position</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptDefault_Text">d1</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">a1</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">p</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p1</span>.<span class="ActionScriptDefault_Text">position</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">more</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hmac_md5</span>.<span class="ActionScriptDefault_Text">compute</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s1</span>, <span class="ActionScriptDefault_Text">d1</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">a1</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hmac_md5</span>.<span class="ActionScriptDefault_Text">compute</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s1</span>, <span class="ActionScriptDefault_Text">a1</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">p1</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">more</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">p1</span>.<span class="ActionScriptDefault_Text">position</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">p</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">more_sha1</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">d2</span>.<span class="ActionScriptDefault_Text">position</span><span class="ActionScriptOperator">=</span>0;
+            <span class="ActionScriptDefault_Text">d2</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">a2</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">p</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">p2</span>.<span class="ActionScriptDefault_Text">position</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">more</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hmac_sha1</span>.<span class="ActionScriptDefault_Text">compute</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s2</span>, <span class="ActionScriptDefault_Text">d2</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">a2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">hmac_sha1</span>.<span class="ActionScriptDefault_Text">compute</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">s2</span>, <span class="ActionScriptDefault_Text">a2</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">p2</span>.<span class="ActionScriptDefault_Text">writeBytes</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">more</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">p2</span>.<span class="ActionScriptDefault_Text">position</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">p</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

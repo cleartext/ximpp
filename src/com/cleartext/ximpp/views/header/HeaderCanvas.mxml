@@ -34,20 +34,19 @@
 	<mx:Button
 		label="{((appModel.showConsole) ? 'hide' : 'show' ) + ' console'}"
 		click="appModel.showConsole = !appModel.showConsole"
-		right="320" y="10" width="145"
-		/>
-	
-	<mx:Button
-		id="userPreferencesButton"
-		label="User Preferences..."
-		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));"
-		right="165" y="10" width="145"
-		/>
-
-	<mx:Button
-		id="advancedSearchButton"
-		label="Advanced Search..."
-		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADVANCED_SEARCH_WINDOW));"
-		right="10" y="10" width="145"
-		/>
+		right="122" y="10" width="145"
+		 visible="false"/>
+	<mx:Image top="6" left="8" width="150" height="32" scaleContent="true" autoLoad="true" id="ct">
+		<mx:source>file:////Users/dbanes/Documents/Cleartext/Graphics/Cleartext Logo/ximpp-cleartext.png</mx:source>
+	</mx:Image>
+	<mx:Image y="10" width="24" height="24" autoLoad="true" right="39" alpha="0.8">
+		<mx:click>Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));</mx:click>
+		<mx:source>file:////Users/dbanes/Desktop/Development/ximpp/Graphics/settings.png</mx:source>
+	</mx:Image>
+	<mx:Image y="10" width="24" height="24" right="9" alpha="0.8">
+		<mx:source>file:////Users/dbanes/Desktop/Development/ximpp/Graphics/help.png</mx:source>
+	</mx:Image>
+	<mx:Image y="10" width="24" height="24" click="appModel.showConsole = !appModel.showConsole" right="71" alpha="0.8">
+		<mx:source>file:////Users/dbanes/Desktop/Development/ximpp/Graphics/console.png</mx:source>
+	</mx:Image>
 </mx:Canvas>

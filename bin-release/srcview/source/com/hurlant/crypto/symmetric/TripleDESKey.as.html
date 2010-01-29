@@ -1,0 +1,98 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>TripleDESKey.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptASDoc">/**
+ * TripleDESKey
+ * 
+ * An Actionscript 3 implementation of Triple DES
+ * Copyright (c) 2007 Henri Torgemane
+ * 
+ * Derived from:
+ *         The Bouncy Castle Crypto package, 
+ *         Copyright (c) 2000-2004 The Legion Of The Bouncy Castle
+ *         (http://www.bouncycastle.org)
+ * 
+ * See LICENSE.txt for full license information.
+ */</span>
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">crypto</span>.<span class="ActionScriptDefault_Text">symmetric</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">utils</span>.<span class="ActionScriptDefault_Text">ByteArray</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Memory</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">com</span>.<span class="ActionScriptDefault_Text">hurlant</span>.<span class="ActionScriptDefault_Text">util</span>.<span class="ActionScriptDefault_Text">Hex</span>;
+
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">TripleDESKey</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">DESKey</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">encKey2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">encKey3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">decKey2</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">decKey3</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Array</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * This supports 2TDES and 3TDES.
+         * If the key passed is 128 bits, 2TDES is used.
+         * If the key has 192 bits, 3TDES is used.
+         * Other key lengths give &quot;undefined&quot; results.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">TripleDESKey</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">encKey2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">generateWorkingKey</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">false</span>, <span class="ActionScriptDefault_Text">key</span>, 8<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">decKey2</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">generateWorkingKey</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span>, <span class="ActionScriptDefault_Text">key</span>, 8<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">key</span>.<span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">&gt;</span>16<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">encKey3</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">generateWorkingKey</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">true</span>, <span class="ActionScriptDefault_Text">key</span>, 16<span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">decKey3</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">generateWorkingKey</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">false</span>, <span class="ActionScriptDefault_Text">key</span>, 16<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptReserved">else</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">encKey3</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">encKey</span>;
+                <span class="ActionScriptDefault_Text">decKey3</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">decKey</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span>.<span class="ActionScriptDefault_Text">dispose</span><span class="ActionScriptBracket/Brace">()</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">encKey2</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">encKey2</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span> <span class="ActionScriptDefault_Text">encKey2</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">encKey2</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">encKey3</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">encKey3</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span> <span class="ActionScriptDefault_Text">encKey3</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">encKey3</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">decKey2</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">decKey2</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span> <span class="ActionScriptDefault_Text">decKey2</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">decKey2</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">decKey3</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">decKey3</span>.<span class="ActionScriptDefault_Text">length</span>;<span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span> <span class="ActionScriptDefault_Text">decKey3</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptDefault_Text">decKey3</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">Memory</span>.<span class="ActionScriptDefault_Text">gc</span><span class="ActionScriptBracket/Brace">()</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">encrypt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">block</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>, <span class="ActionScriptDefault_Text">index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">desFunc</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">encKey</span>, <span class="ActionScriptDefault_Text">block</span>,<span class="ActionScriptDefault_Text">index</span>, <span class="ActionScriptDefault_Text">block</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">desFunc</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">encKey2</span>, <span class="ActionScriptDefault_Text">block</span>,<span class="ActionScriptDefault_Text">index</span>, <span class="ActionScriptDefault_Text">block</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">desFunc</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">encKey3</span>, <span class="ActionScriptDefault_Text">block</span>,<span class="ActionScriptDefault_Text">index</span>, <span class="ActionScriptDefault_Text">block</span>,<span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">decrypt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">block</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">ByteArray</span>, <span class="ActionScriptDefault_Text">index</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptOperator">=</span>0<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">desFunc</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">decKey3</span>, <span class="ActionScriptDefault_Text">block</span>, <span class="ActionScriptDefault_Text">index</span>, <span class="ActionScriptDefault_Text">block</span>, <span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">desFunc</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">decKey2</span>, <span class="ActionScriptDefault_Text">block</span>, <span class="ActionScriptDefault_Text">index</span>, <span class="ActionScriptDefault_Text">block</span>, <span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">desFunc</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">decKey</span>, <span class="ActionScriptDefault_Text">block</span>, <span class="ActionScriptDefault_Text">index</span>, <span class="ActionScriptDefault_Text">block</span>, <span class="ActionScriptDefault_Text">index</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">override</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptString">&quot;3des&quot;</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

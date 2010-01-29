@@ -288,8 +288,6 @@ package com.universalsprout.flex.components.list
 			
 			previousItemWidth = itemWidth;
 			
-			
-			
 			var highlightFlag:Boolean = false;
 			
 			var index:int = 0;
