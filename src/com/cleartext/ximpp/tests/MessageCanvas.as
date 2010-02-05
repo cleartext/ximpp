@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.tests
 {
-	import com.cleartext.ximpp.models.XimppUtils;
+	import com.cleartext.ximpp.models.AvatarUtils;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.views.common.Avatar;
 	
@@ -98,8 +98,8 @@ package com.cleartext.ximpp.tests
 				var avatar:Avatar = new Avatar();
 				avatar.data = chat;
 				avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
-				avatar.width = XimppUtils.AVATAR_SIZE;
-				avatar.height = XimppUtils.AVATAR_SIZE;
+				avatar.width = AvatarUtils.AVATAR_SIZE;
+				avatar.height = AvatarUtils.AVATAR_SIZE;
 				avatar.border = false;
 				avatar.toolTip = chat.buddy.nickName;
 				avatar.addEventListener(MouseEvent.ROLL_OVER, avatar_rollOver);
@@ -176,14 +176,14 @@ package com.cleartext.ximpp.tests
 			inputCanvas.setActualSize(unscaledWidth, INPUT_HEIGHT);
 			inputCanvas.move(0, 0);
 			
-			avatarCanvas.setActualSize(unscaledWidth, XimppUtils.AVATAR_SIZE + SELECTOR_WIDTH + TRIANGLE_HEIGHT);
+			avatarCanvas.setActualSize(unscaledWidth, AvatarUtils.AVATAR_SIZE + SELECTOR_WIDTH + TRIANGLE_HEIGHT);
 			avatarCanvas.move(0, INPUT_HEIGHT);
 			
 			messageCanvas.setActualSize(unscaledWidth, unscaledHeight - INPUT_HEIGHT - avatarCanvas.height);
 			messageCanvas.move(0, INPUT_HEIGHT + avatarCanvas.height);
 			
-			selectorCanvas.move(XimppUtils.AVATAR_SIZE + 2*H_GAP, 0);
-			selectorCanvas.setActualSize(XimppUtils.AVATAR_SIZE + 2*SELECTOR_WIDTH, avatarCanvas.height);
+			selectorCanvas.move(AvatarUtils.AVATAR_SIZE + 2*H_GAP, 0);
+			selectorCanvas.setActualSize(AvatarUtils.AVATAR_SIZE + 2*SELECTOR_WIDTH, avatarCanvas.height);
 
 			var g:Graphics = selectorCanvas.graphics;
 			g.clear();
@@ -192,8 +192,8 @@ package com.cleartext.ximpp.tests
 			g.lineTo((selectorCanvas.width+TRIANGLE_WIDTH)/2, 0);
 			g.lineTo(selectorCanvas.width/2, TRIANGLE_HEIGHT-2);
 			g.lineTo((selectorCanvas.width-TRIANGLE_WIDTH)/2, 0);
-			g.drawRect(0, TRIANGLE_HEIGHT, XimppUtils.AVATAR_SIZE + 2*SELECTOR_WIDTH, XimppUtils.AVATAR_SIZE + SELECTOR_WIDTH);
-			g.drawRect(SELECTOR_WIDTH, TRIANGLE_HEIGHT + SELECTOR_WIDTH, XimppUtils.AVATAR_SIZE, XimppUtils.AVATAR_SIZE);
+			g.drawRect(0, TRIANGLE_HEIGHT, AvatarUtils.AVATAR_SIZE + 2*SELECTOR_WIDTH, AvatarUtils.AVATAR_SIZE + SELECTOR_WIDTH);
+			g.drawRect(SELECTOR_WIDTH, TRIANGLE_HEIGHT + SELECTOR_WIDTH, AvatarUtils.AVATAR_SIZE, AvatarUtils.AVATAR_SIZE);
 		}
 		
 		private function avatarClickHandler(event:MouseEvent):void
@@ -214,7 +214,7 @@ package com.cleartext.ximpp.tests
 				fade.play();
 			}
 
-			var newX:Number = (XimppUtils.AVATAR_SIZE + H_GAP)*position + H_GAP;
+			var newX:Number = (AvatarUtils.AVATAR_SIZE + H_GAP)*position + H_GAP;
 
 			if(position == 1)
 				newX += SELECTOR_WIDTH;

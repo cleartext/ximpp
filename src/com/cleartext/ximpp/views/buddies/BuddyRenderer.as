@@ -7,40 +7,31 @@ package com.cleartext.ximpp.views.buddies
 	import com.cleartext.ximpp.views.common.StatusIcon;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
 	
-	import mx.core.IUITextField;
+	import flash.display.GradientType;
+	import flash.display.Graphics;
+	import flash.geom.Matrix;
+	
 	import mx.core.UITextField;
 	import mx.effects.Tween;
 
 	public class BuddyRenderer extends SproutListItemBase
 	{
-		//---------------------------------------
-		// Constants
-		//---------------------------------------
-		
 		private static const SMALL_HEIGHT:Number = 40;
-		private static const BIG_HEIGHT:Number = 56;
+		private static const BIG_HEIGHT:Number = 46;
+		private static const AVATAR_SIZE:Number = 32;
 
 		private static const PADDING:Number = 3;
 		
-		private static const NO_HIGHLIGHT:uint = 0xffffff;
-		private static const HIGHLIGHT:uint = 0xdddddd;
-
 		//---------------------------------------
 		// Constructor
 		//---------------------------------------
 		
-		public function BuddyRenderer()
+		public function BuddyRenderer(initialWidth:Number=NaN, initialHeight:Number=NaN)
 		{
-			super();
-			height = SMALL_HEIGHT;
-			wordWrap = false;
-			truncateToFit = true;
+			super(initialWidth, SMALL_HEIGHT);
+			heightTo = SMALL_HEIGHT;
 		}
-		
-		//---------------------------------------
-		// Buddy Data
-		//---------------------------------------
-		
+
 		private function get buddy():Buddy
 		{
 			return data as Buddy;
@@ -67,9 +58,15 @@ package com.cleartext.ximpp.views.buddies
 			invalidateProperties();
 		}
 		
+		private function isAvailable():Boolean
+		{
+			return (buddy && buddy.status.isAvailable());
+		}
+		
 		private function buddyChangedHandler(event:BuddyEvent):void
 		{
 			invalidateProperties();
+			invalidateDisplayList();
 		}
 		
 		//---------------------------------------
@@ -86,10 +83,7 @@ package com.cleartext.ximpp.views.buddies
 		private var statusIcon:StatusIcon;
 		private var nameLabel:UITextField;
 		private var statusLabel:UITextField;
-		private function get customStatusLabel():IUITextField
-		{
-			return textField;
-		}
+		private var customStatusLabel:UITextField
 		
 		//---------------------------------------
 		// Create Children
@@ -103,6 +97,10 @@ package com.cleartext.ximpp.views.buddies
 			{
 				avatar = new Avatar();
 				avatar.buttonMode = true;
+				avatar.x = PADDING;
+				avatar.y = PADDING;
+				avatar.width = AVATAR_SIZE;
+				avatar.height = AVATAR_SIZE;
 				avatar.addEventListener(AvatarEvent.EDIT_CLICKED, avatarClicked);
 				avatar.data = buddy;
 				addChild(avatar);
@@ -111,23 +109,38 @@ package com.cleartext.ximpp.views.buddies
 			if(!statusIcon)
 			{
 				statusIcon = new StatusIcon();
+				statusIcon.width = StatusIcon.SIZE;
+				statusIcon.height = StatusIcon.SIZE;
+				statusIcon.y = 12;
 				addChild(statusIcon);
 			}
 
 			if(!nameLabel)
 			{
 				nameLabel = new UITextField();
+				nameLabel.x = AVATAR_SIZE + 2*PADDING;
+				nameLabel.y = PADDING;
 				addChild(nameLabel);
 			}
 
 			if(!statusLabel)
 			{
 				statusLabel = new UITextField();
+				statusLabel.styleName = "lGreyNormal";
+				statusLabel.x = AVATAR_SIZE + 2*PADDING;
+				statusLabel.y = 16;
 				addChild(statusLabel);
 			}
 			
-			customStatusLabel.visible = false;
-			customStatusLabel.wordWrap = wordWrap;
+			if(!customStatusLabel)
+			{
+				customStatusLabel = new UITextField();
+				customStatusLabel.styleName = "lGreyNormal";
+				customStatusLabel.x = AVATAR_SIZE + 2*PADDING
+				customStatusLabel.y = 31;
+				customStatusLabel.visible = false;
+				addChild(customStatusLabel);
+			}
 		}
 		
 		//---------------------------------------
@@ -138,19 +151,12 @@ package com.cleartext.ximpp.views.buddies
 		{
 			if(!buddy)
 				return;
-			
-			customStatusLabel.wordWrap = false;
-
+	
 			// set values
 			customStatusLabel.text = buddy.customStatus;
 			nameLabel.text = buddy.nickName;
 			statusLabel.text = buddy.status.value;
 			statusIcon.status.value = buddy.status.value;
-			
-			// refresh styles
-			nameLabel.styleName = "dgreyNormal";
-			statusLabel.styleName = "lgreyNormal";
-			customStatusLabel.styleName = "dgreyNormal";
 			
 			// What height we should be depends if there is a custom
 			// status to show. If there is no custom status, then make
@@ -186,13 +192,40 @@ package com.cleartext.ximpp.views.buddies
 						// confirm we are at the right height (removes rounding errors
 						// from the tween)
 						updateHeight(heightTo);
-						_heightTo = NaN;
 						// check everything is ok
 						commitProperties();
 					});
 			}
-		}		
-		
+			
+			if(buddy.status.isAvailable())
+			{
+				nameLabel.styleName = "dGreyBold";
+				avatar.alpha = 1;
+				alpha = 1;
+			} 
+			else
+			{
+				nameLabel.styleName = "lGreyBold";
+				avatar.alpha = 0.5;
+				alpha = 0.6;
+			}
+
+			statusIcon.x = width - PADDING - StatusIcon.SIZE;
+			
+			var maxWidth:Number = width - AVATAR_SIZE - 3*PADDING;
+			nameLabel.width = maxWidth;
+
+			customStatusLabel.width = maxWidth;
+			customStatusLabel.truncateToFit();
+
+		}
+
+		override public function setWidth(widthVal:Number):Number
+		{
+			width = widthVal;
+			return heightTo;
+		}
+
 		private function avatarClicked(event:AvatarEvent):void
 		{
 			dispatchEvent(new BuddyEvent(BuddyEvent.EDIT_BUDDY, true));
@@ -204,35 +237,22 @@ package com.cleartext.ximpp.views.buddies
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-			commitProperties();
+			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
-			var avatarSize:Number = 32;
-			
-			// draw background
-			graphics.clear();
-			graphics.beginFill((highlight) ? HIGHLIGHT : NO_HIGHLIGHT, 0.18);
-			graphics.drawRect(0, 0, unscaledWidth-1, unscaledHeight);
-			
-			// layout avatar
-			avatar.setActualSize(avatarSize, avatarSize);
-			avatar.move(PADDING, PADDING)
-			
-			// layout name label
-			nameLabel.setActualSize(unscaledWidth - avatarSize - 3*PADDING, nameLabel.height);
-			nameLabel.move(avatarSize + 2*PADDING, PADDING);
+			var g:Graphics = graphics;
+			g.clear();
 
-			// layout status icon
-			statusIcon.setActualSize(StatusIcon.SIZE, StatusIcon.SIZE);
-			statusIcon.move(unscaledWidth - PADDING - StatusIcon.SIZE, 15);
-
-			// layout status label
-			statusLabel.setActualSize(unscaledWidth - avatarSize - 4*PADDING - StatusIcon.SIZE, statusLabel.height); 
-			statusLabel.move(avatarSize + 2*PADDING, 20);
-
-			// layout custom status label
-			customStatusLabel.setActualSize(unscaledWidth-2*PADDING, customStatusLabel.height);
-			customStatusLabel.move(avatarSize + 2*PADDING, 39);
-			customStatusLabel.truncateToFit();
+			var matrix:Matrix = new Matrix();
+			matrix.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2);
+			
+			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], matrix);
+			g.drawRect(0, 0, unscaledWidth, unscaledHeight);
+			
+			if(buddy && buddy.status.isAvailable())
+			{
+				g.beginFill(0x000000, 0.15)
+				g.drawRect(0, unscaledHeight-1, unscaledWidth, 1);
+			}
 		}
-	}
+	}		
 }

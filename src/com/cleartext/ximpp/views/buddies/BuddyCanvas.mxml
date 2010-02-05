@@ -37,11 +37,8 @@
 			{
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
 				
-				buddyList.move(6, buddyList.y);
-				buddyList.setActualSize(unscaledWidth-5, buddyList.height);
-				
 				var g:Graphics = statusCanvas.graphics;
-				var w:Number = statusCanvas.width;
+				var w:Number = statusCanvas.width-1;
 				var h:Number = statusCanvas.height;
 				
 				g.clear();
@@ -141,13 +138,18 @@
 		</common:Avatar>
 
 	</mx:Canvas>
+	
+	<mx:Canvas id="filterCanvas">
+		
+	</mx:Canvas>
 
 	<buddies:BuddySproutList
 		id="buddyList" 
+		horizontalScrollPolicy="off"
 		doubleClickEnabled="true"
 		itemDoubleClicked="itemDoubleClicked(event)"
 		dataProvider="{appModel.rosterItems}"
-		height="100%" 
+		height="100%" width="100%"
 		itemRenderer="{new ClassFactory(BuddyRenderer)}"
 		editBuddy="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW,'',(event.target.data as Buddy)))">
 	</buddies:BuddySproutList>

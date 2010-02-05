@@ -13,7 +13,7 @@ package com.cleartext.ximpp.models
 	import mx.utils.Base64Decoder;
 	import mx.utils.Base64Encoder;
 	
-	public class XimppUtils
+	public class AvatarUtils
 	{
 		public static const AVATAR_SIZE:int = 48;
 		

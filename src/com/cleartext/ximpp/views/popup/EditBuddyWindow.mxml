@@ -8,7 +8,7 @@
 	<mx:Script>
 		<![CDATA[
 			import mx.controls.Alert;
-			import com.cleartext.ximpp.models.XimppUtils;
+			import com.cleartext.ximpp.models.AvatarUtils;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
 			import mx.events.CloseEvent;
@@ -76,7 +76,7 @@
 		</mx:FormItem>
 		
 		<mx:FormItem label="avatar:">
-			<common:Avatar id="avatar" width="{XimppUtils.AVATAR_SIZE}" height="{XimppUtils.AVATAR_SIZE}"/>
+			<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}"/>
 		</mx:FormItem>
 
 		<mx:FormItem label="subscription:">

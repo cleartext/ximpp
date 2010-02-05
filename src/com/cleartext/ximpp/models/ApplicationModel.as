@@ -13,6 +13,7 @@ package com.cleartext.ximpp.models
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
 	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.events.CloseEvent;
@@ -34,16 +35,8 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var xmpp:XMPPModel;
 		
-		public function ApplicationModel()
-		{
-			_rosterItems = new BuddyGroup("roster items");
-		}
-		
-		private var _rosterItems:BuddyGroup;
-		public function get rosterItems():BuddyGroup
-		{
-			return _rosterItems;
-		}
+		[Bindable]
+		public var rosterItems:BuddyGroup = new BuddyGroup("roster items");
 		
 		[Bindable]
 		public var microBloggingMessages:ArrayCollection = new ArrayCollection();
@@ -70,7 +63,7 @@ package com.cleartext.ximpp.models
 		}
 		
 		[Bindable]
-		public var showConsole:Boolean = true;
+		public var showConsole:Boolean = false;
 
 		[Bindable (event="logTextChanged")]
 		public var logText:String = "";
@@ -121,6 +114,11 @@ package com.cleartext.ximpp.models
 		{
 			database.addEventListener(Event.COMPLETE, databaseCompleteHandler);
 			database.createDatabase();
+			
+			var sort:Sort = new Sort();
+			sort.compareFunction = compareBuddies;
+			rosterItems.sort = sort;
+			rosterItems.refresh();
 		}
 		
 		private function databaseCompleteHandler(event:Event):void
@@ -209,17 +207,12 @@ package com.cleartext.ximpp.models
 		
 		private function compareBuddies(buddy1:Buddy, buddy2:Buddy, fields:Object=null):int
 		{
-			var nameCompare:int = ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
-			
-			if(buddy1.status == buddy2.status)
-				return nameCompare;
-			
-			else if(buddy1.status.value == Status.OFFLINE)
-				return 1;
-			else if(buddy2.status.value == Status.OFFLINE)
-				return -1;
-			
-			return 0;
+			var statusCompare:int = buddy1.status.sortNumber() - buddy2.status.sortNumber();
+
+			if(statusCompare == 0)
+				return ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
+			else
+				return (statusCompare > 0) ? 1 : -1;
 		}
 
 		public function addBuddy(newBuddy:Buddy):void

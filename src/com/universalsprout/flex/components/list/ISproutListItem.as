@@ -1,13 +1,20 @@
 package com.universalsprout.flex.components.list
 {
 	import mx.core.IDataRenderer;
+	import mx.core.IUIComponent;
 	
-	public interface ISproutListItem extends IDataRenderer
+	public interface ISproutListItem extends IDataRenderer, IUIComponent
 	{
 		function get highlight():Boolean;
 		function set highlight(value:Boolean):void;
 		
 		function get heightTo():Number;
-		function tweenTo(xMove:Number, yMove:Number):void
+		function set heightTo(value:Number):void
+		
+		function get yTo():Number
+		function set yTo(value:Number):void
+		
+		function setWidth(widthVal:Number):Number;
+		
 	}
 }

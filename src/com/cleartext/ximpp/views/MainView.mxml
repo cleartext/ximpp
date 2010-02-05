@@ -2,7 +2,6 @@
 <mx:Canvas
 	width="100%" height="100%"
 	initialize="init();"
-	backgroundColor="0x000000"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:header="com.cleartext.ximpp.views.header.*"
 	xmlns:buddies="com.cleartext.ximpp.views.buddies.*" 
@@ -10,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.views.popup.PreferenceWindow;
 			import mx.core.IFlexDisplayObject;
 			import com.cleartext.ximpp.views.popup.EditBuddyWindow;
@@ -77,13 +77,43 @@
 				PopUpManager.addPopUp(window, this, true);
 				PopUpManager.centerPopUp(window);
 			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				var g:Graphics = graphics;
+				g.clear();
+	
+				g.beginFill(0x000000);
+				g.drawRect(0, 0, unscaledWidth, unscaledHeight);
+	
+				var matrix:Matrix = new Matrix();
+
+				var w:Number = unscaledWidth/2 - 50;
+				var r:Number = Math.tan(Math.atan(w/50) - Math.atan(50/w)) * w;
+				matrix.createGradientBox(unscaledWidth, 50, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT + headerCanvas.height + 10);
+				g.beginGradientFill(GradientType.LINEAR, [0x000000, 0x3e443f], [0.6, 0.6], [0, 255], matrix);
+				g.drawCircle(unscaledWidth/2, Constants.TOP_BAR_HEIGHT+headerCanvas.height+5-r, r+50);
+
+				matrix.createGradientBox(50, unscaledHeight);
+				g.beginGradientFill(GradientType.LINEAR, [0x3e443f, 0x000000], [1.0, 1.0], [0, 255], matrix);
+				g.drawRect(0, 0, 50, unscaledHeight);
+				
+				matrix.createGradientBox(50, unscaledHeight, Math.PI, unscaledWidth-50);
+				g.beginGradientFill(GradientType.LINEAR, [0x3e443f, 0x000000], [1.0, 1.0], [0, 255], matrix);
+				g.drawRect(unscaledWidth-50, 0, 50, unscaledHeight);
+			}
 
 		]]>
 	</mx:Script>
 	
 	<header:HeaderCanvas id="headerCanvas"/>
-	<mx:VDividedBox top="{headerCanvas.height}" bottom="0" liveDragging="true" right="50" left="50" >
-		<mx:HDividedBox height="70%" width="100%" liveDragging="true" >
+	<mx:VDividedBox 
+		top="{headerCanvas.height}" 
+		bottom="0" 
+		right="50" left="50" >
+		<mx:HDividedBox height="70%" width="100%" >
 			<buddies:BuddyCanvas
 				backgroundColor="0xffffff"
 				id="buddyCanvas"

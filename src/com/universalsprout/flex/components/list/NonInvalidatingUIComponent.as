@@ -134,13 +134,12 @@ public class NonInvalidatingUIComponent extends UIComponent
         if (isNaN(explicitWidth) || isNaN(explicitHeight))
             measure();
 
-        var changed:Boolean = (measuredWidth != oldWidth || measuredHeight != oldHeight)
-
-        oldWidth = measuredWidth;
-        oldHeight = measuredHeight;
-
-        if (changed)
-            invalidateDisplayList();
+       if(measuredWidth != oldWidth || measuredHeight != oldHeight)
+       {
+			oldWidth = measuredWidth;
+			oldHeight = measuredHeight;
+	        invalidateDisplayList();
+       }
     }
     
     override protected function commitProperties():void

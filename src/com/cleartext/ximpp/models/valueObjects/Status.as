@@ -115,5 +115,33 @@ package com.cleartext.ximpp.models.valueObjects
 				default : return "";
 			}
 		}
+		
+		public function sortNumber():int
+		{
+			switch(value)
+			{
+				case AVAILABLE :
+					return 0;
+				case AWAY :
+					return 1;
+				case BUSY :
+					return 2;
+				case EXTENDED_AWAY :
+					return 3;
+				case UNSUBSCRIBED :
+					return 4;
+				case UNKNOWN :
+					return 5;
+				case ERROR :
+					return 6;
+				default :
+					return 7;
+			}
+		}
+		
+		public function isAvailable():Boolean
+		{
+			return sortNumber() <= 3;
+		}
 	}
 }

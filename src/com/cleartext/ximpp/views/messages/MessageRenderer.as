@@ -1,92 +1,72 @@
 package com.cleartext.ximpp.views.messages
 {
-	import com.cleartext.ximpp.models.ApplicationModel;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
 	
-	import mx.core.IUITextField;
+	import flash.display.GradientType;
+	import flash.display.Graphics;
+	import flash.geom.Matrix;
+	
 	import mx.core.UITextField;
-	import mx.effects.Tween;
-
+	
 	public class MessageRenderer extends SproutListItemBase
 	{
-		[Autowire]
-		[Bindable]
-		public var appModel:ApplicationModel;
-		
-		//---------------------------------------
-		// Constants
-		//---------------------------------------
-		
-		private static const UITEXTFIELD_WIDTH_PADDING:Number = 5;
-		private static const UITEXTFIELD_HEIGHT_PADDING:Number = 4;
-
-		private static const TOP_BAR_HEIGHT:Number = 16;
-		private static const PADDING:Number = 3;
-		
-		private static const NO_HIGHLIGHT:uint = 0xffffff;
-		private static const HIGHLIGHT:uint = 0xdddddd;
-
 		private static const AVATAR_SIZE:Number = 32;
-
-		//---------------------------------------
-		// Constructor
-		//---------------------------------------
+		private static const PADDING:Number = 5;
+		private static const TOP_ROW_HEIGHT:Number = 22;
 		
 		public function MessageRenderer()
 		{
 			super();
-			alpha = 0;
-			// hack to force the textField to render slightly
-			// smaller than the width of this container
-			setStyle("paddingRight", 3*PADDING + AVATAR_SIZE);
 		}
-		
-		//---------------------------------------
-		// Message Data
-		//---------------------------------------
-		
-		private function get message():Message
-		{
-			return data as Message;
-		}
-		
-		override public function set data(value:Object):void
-		{
-			super.data = value;
 
-			if(appModel && message)
-			{
-				var buddy:Buddy = appModel.getBuddyByJid(message.sender);
-				avatar.data = buddy;
-				if(buddy)
-					fromLabel.text = buddy.nickName;
-			}
-		}
-		
-		//---------------------------------------
-		// Alpha Tween
-		//---------------------------------------
-		
-		private var alphaTween:Tween;
-		
-		//---------------------------------------
-		// Display Children
-		//---------------------------------------
-		
 		private var avatar:Avatar;
-		private var fromLabel:UITextField;
-		private var timeLabel:UITextField;
-		private function get messageLabel():IUITextField
+		private var nameTextField:UITextField;
+		private var dateTextField:UITextField;
+		private var bodyTextField:UITextField;
+		
+		private var previousWidth:Number;
+		private var previousHeight:Number;
+		private var dataChanged:Boolean = false;
+		
+		override protected function commitProperties():void
 		{
-			return textField;
-		}
+			super.commitProperties();
+			
+			var message:Message = data as Message;
+			if(message && nameTextField)
+			{
+				nameTextField.text = message.sender;
+				nameTextField.width = nameTextField.textWidth + PADDING;
 
-		//---------------------------------------
-		// Create Children
-		//---------------------------------------
+				dateTextField.text = message.timestamp.toString();
+				dateTextField.width = dateTextField.textWidth + PADDING;
+
+				bodyTextField.text = message.body;
+			}
+			
+			dateTextField.x = width - dateTextField.width;
+			calculateHeight();
+		}
+		
+		private function calculateHeight():void
+		{
+			if(!dataChanged && previousWidth == width)
+				return;
+
+			dataChanged = false;
+
+			bodyTextField.wordWrap = true;
+			bodyTextField.width = width - 3*PADDING - AVATAR_SIZE;
+			
+			var newHeight:Number = UITEXTFIELD_HEIGHT_PADDING;
+			for(var l:int=bodyTextField.numLines-1; l>=0; l--)
+				newHeight += Math.ceil(bodyTextField.getLineMetrics(l).height);
+
+			bodyTextField.height = newHeight;
+			heightTo = Math.max(AVATAR_SIZE + 2*PADDING, newHeight + TOP_ROW_HEIGHT);
+		}
 		
 		override protected function createChildren():void
 		{
@@ -95,88 +75,76 @@ package com.cleartext.ximpp.views.messages
 			if(!avatar)
 			{
 				avatar = new Avatar();
+				avatar.width = AVATAR_SIZE;
+				avatar.height = AVATAR_SIZE;
+				avatar.x = PADDING;
+				avatar.y = PADDING;
 				addChild(avatar);
 			}
 			
-			if(!fromLabel)
+			if(!nameTextField)
 			{
-				fromLabel = new UITextField();
-				addChild(fromLabel);
+				nameTextField = new UITextField();
+				nameTextField.y = PADDING;
+				nameTextField.x = AVATAR_SIZE + 2*PADDING;
+				nameTextField.styleName = "blackBold";
+				addChild(nameTextField);
 			}
-			
-			if(!timeLabel)
+
+			if(!dateTextField)
 			{
-				timeLabel = new UITextField();
-				addChild(timeLabel);
+				dateTextField = new UITextField();
+				dateTextField.y = PADDING;
+				dateTextField.styleName = "lGreyNormal";
+				addChild(dateTextField);
 			}
-			
-			data = data;
+
+			if(!bodyTextField)
+			{
+				bodyTextField = new UITextField();
+				bodyTextField.x = AVATAR_SIZE + 2*PADDING;
+				bodyTextField.y = TOP_ROW_HEIGHT;
+				bodyTextField.styleName = "dGreyNormal"
+				bodyTextField.selectable = true;
+				addChild(bodyTextField);
+			}
 		}
 		
-		//---------------------------------------
-		// Commit Properties
-		//---------------------------------------
-		
-		override protected function commitProperties():void
+		override public function setWidth(widthVal:Number):Number
 		{
-			if(!message)
-				return;
-			
-			// set values
-			messageLabel.htmlText = message.body;
-			fromLabel.text = message.sender;
-			timeLabel.text = message.timestamp.toTimeString();
-			
-			// refresh styles
-			fromLabel.styleName = "lgreyNormal";
-			timeLabel.styleName = "lgreyNormal";
-			messageLabel.styleName = "dgreyNormal";
-			
-			// check layout of super.textField
-			super.commitProperties();
-			
-			// if this is the first time we run then create a tween to fade in
-			if(!alphaTween)
-				alphaTween = new Tween(this, 0, 1, TWEEN_DURATION, -1, updateAlpha, updateAlpha);
-			
-			// set height
-			height = textFieldHeight + TOP_BAR_HEIGHT + 3*PADDING;
-			//trace("calculating " + height + " : " + messageLabel.numLines);
-
+			width = widthVal;
+			calculateHeight();
+			return heightTo;
 		}
-
-		//---------------------------------------
-		// Update Display List
-		//---------------------------------------
+		
+		override public function set heightTo(value:Number):void
+		{
+			super.heightTo = value;
+			updateHeight(value);
+		}
+		
+		override public function set data(value:Object):void
+		{
+			if(data != value)
+			{
+				super.data = value;
+				dataChanged = true;
+				invalidateProperties();
+			}
+		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-			//trace(unscaledWidth + " : " + unscaledHeight); 
-
-			commitProperties();
-
-			// draw background	
-			graphics.clear();
-			graphics.beginFill((highlight) ? HIGHLIGHT : NO_HIGHLIGHT, 0.18);
-			graphics.drawRect(0, 0, unscaledWidth-1, unscaledHeight);
+			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
-			// draw line at base
-			graphics.beginFill(0xdddddd);
-			graphics.drawRect(0, unscaledHeight-1, unscaledWidth-1, 1);
+			var g:Graphics = graphics;
+			var matrix:Matrix = new Matrix();
+			matrix.createGradientBox(width, heightTo, Math.PI/2);
 			
-			// layout avatar
-			avatar.setActualSize(AVATAR_SIZE, AVATAR_SIZE);
-			avatar.move(PADDING, PADDING);
-			
-			// layout from label
-			fromLabel.setActualSize(unscaledWidth - timeLabel.width - 3*PADDING-AVATAR_SIZE, fromLabel.height)
-			fromLabel.move(AVATAR_SIZE + 2*PADDING, PADDING);
-			
-			// layout time label
-			timeLabel.move(unscaledWidth - PADDING - timeLabel.width, PADDING);
-			
-			// layout message label
-			messageLabel.move(AVATAR_SIZE + 2*PADDING, 2*PADDING + TOP_BAR_HEIGHT);
+			g.clear();
+			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], matrix);
+			g.drawRect(0,0,width,heightTo);
 		}
+		
 	}
 }

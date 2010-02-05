@@ -13,7 +13,7 @@
 		<![CDATA[
 			import com.adobe.crypto.SHA1;
 			import com.cleartext.ximpp.models.valueObjects.Status;
-			import com.cleartext.ximpp.models.XimppUtils;
+			import com.cleartext.ximpp.models.AvatarUtils;
 			import com.cleartext.ximpp.events.BuddyEvent;
 			import mx.events.CollectionEvent;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -189,10 +189,10 @@
 								function():void
 								{
 									var loadedBitmap:Bitmap = loader.content as Bitmap;
-									var newBitmapData:BitmapData = new BitmapData(XimppUtils.AVATAR_SIZE, XimppUtils.AVATAR_SIZE);
-									var scale:Number = XimppUtils.AVATAR_SIZE / Math.max(loadedBitmap.width, loadedBitmap.height);
-									var tx:Number = (XimppUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
-									var ty:Number = (XimppUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
+									var newBitmapData:BitmapData = new BitmapData(AvatarUtils.AVATAR_SIZE, AvatarUtils.AVATAR_SIZE);
+									var scale:Number = AvatarUtils.AVATAR_SIZE / Math.max(loadedBitmap.width, loadedBitmap.height);
+									var tx:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
+									var ty:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
 									if(previousAccount)
 									{
@@ -246,7 +246,7 @@
 				<mx:TextInput id="nickName" change="changesMade = true;" />
 			</mx:FormItem>
 			<mx:FormItem label="profile picture:" direction="horizontal">
-				<common:Avatar id="avatar" width="{XimppUtils.AVATAR_SIZE}" height="{XimppUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
+				<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
 			</mx:FormItem>
 			<mx:FormItem label="jid:">
 				<mx:TextInput id="jid" change="changesMade = true;" />

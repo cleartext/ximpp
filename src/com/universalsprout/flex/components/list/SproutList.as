@@ -47,7 +47,7 @@ package com.universalsprout.flex.components.list
 		// used to keep scroll at base if bottomUp==true
 		protected var previousHeight:Number = 0;
 		
-		protected var previousItemWidth:Number = 0;
+		protected var previousWidth:Number = 0;
 		
 		protected var highlightChanged:Boolean = false;
 		
@@ -58,8 +58,6 @@ package com.universalsprout.flex.components.list
 		}
 		public function set itemRenderer(value:IFactory):void
 		{
-			trace(getTimer(), "set itemRenderer()");
-	
 			_itemRenderer = value;
 			resetItemRenderers = true;
 			invalidateSize();
@@ -160,12 +158,14 @@ package com.universalsprout.flex.components.list
 		 */
 		protected function collectionChangeHandler(event:CollectionEvent):void
 		{
+			trace(event.kind);
 			switch(event.kind)
 			{
+				case CollectionEventKind.UPDATE :
 				case CollectionEventKind.MOVE :
-					break;
-	
 				case CollectionEventKind.REFRESH :
+					itemHeightsInvalid = true;
+					invalidateProperties();
 					break;
 	
 				case CollectionEventKind.RESET :
@@ -176,7 +176,6 @@ package com.universalsprout.flex.components.list
 				case CollectionEventKind.ADD :
 				case CollectionEventKind.REMOVE :
 				case CollectionEventKind.REPLACE :
-				case CollectionEventKind.UPDATE :
 					// do nothing
 					break;
 	
@@ -225,21 +224,69 @@ package com.universalsprout.flex.components.list
 		{
 			super.commitProperties();
 			
+			var item:ISproutListItem;
+			var data:ISproutListData;
+
 			if(resetItemRenderers)
 			{
 				resetItemRenderers = false;
-				for each(var item:DisplayObject in itemRenderersByDataUid)
-					removeItemRenderer(item);
+				for each(item in itemRenderersByDataUid)
+					removeItemRenderer(item as DisplayObject);
 				
-				for each(var data:ISproutListData in dataProvider.list)
+				for each(data in dataProvider.list)
 					createItemRenderer(data);
+
+				itemHeightsInvalid = true;
 			}
 			
 			if(itemHeightsInvalid)
 			{
 				itemHeightsInvalid = false;
 				
+				var yCounter:Number = 0;
+				var vGap:Number = getStyle("verticalGap");
+				var itemWidth:Number = unscaledWidth - viewMetricsAndPadding.left - viewMetricsAndPadding.right;
+				var uid:String;
 				
+				var dataUidsToHide:Dictionary = new Dictionary();
+				for each(item in getChildren())
+				{
+					uid = (item.data as ISproutListData).uid;
+					dataUidsToHide[uid] = uid;
+				}
+				
+				for each(data in collection)
+				{
+					// we don't want to hide this one
+					delete dataUidsToHide[data.uid];
+	
+					// find itemRenderer
+					item = itemRenderersByDataUid[data.uid];
+					if(item)
+					{
+						item.visible = item.includeInLayout = true;
+
+						if(animate)
+							item.yTo = yCounter;
+						else
+							item.move(0, yCounter);
+		
+						yCounter += vGap + item.setWidth(itemWidth);
+					}
+				}
+				
+				for each(uid in dataUidsToHide)
+				{
+					item = itemRenderersByDataUid[uid];
+					item.visible = item.includeInLayout = false;
+				}
+				
+				if(yCounter != previousHeight)
+				{
+					if(bottomUp)
+						verticalScrollPosition += yCounter-previousHeight;
+					previousHeight = yCounter;
+				}
 			}
 		}
 		
@@ -249,9 +296,9 @@ package com.universalsprout.flex.components.list
 			(item as ISproutListItem).data = data;
 			item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
 			itemRenderersByDataUid[data.uid] = item;
-			if(index==-1)
-				index = numChildren;
-			addChildAt(item, index);
+//			if(index==-1)
+//				index = numChildren;
+			addChild(item);
 	
 			if(doubleClickEnabled)
 				item.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler, false, 0, true);
@@ -269,65 +316,32 @@ package com.universalsprout.flex.components.list
 		
 		private function itemsResizeHandler(event:ResizeEvent):void
 		{
+			callLater(invalidateLater);
+		}
+		
+		private function invalidateLater():void
+		{
 			itemHeightsInvalid = true;
 			invalidateProperties();
 		}
 		
+		override public function validateSize(recursive:Boolean=false):void
+		{
+			super.validateSize(recursive);
+		}
+		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
+			for each(var child:DisplayObject in getChildren())
+			{
+				if(child.width != unscaledWidth)
+				{
+					itemHeightsInvalid = true;
+					invalidateProperties();
+					return;
+				}
+			}
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
-	
-			var yCounter:Number = 0;
-			var vGap:Number = getStyle("verticalGap");
-			
-			var itemWidth:Number = unscaledWidth - viewMetricsAndPadding.left - viewMetricsAndPadding.right;
-			if(itemWidth == previousItemWidth)
-			{
-//				return;
-			}
-			
-			previousItemWidth = itemWidth;
-			
-			var highlightFlag:Boolean = false;
-			
-			var index:int = 0;
-			for each(var data:ISproutListData in collection)
-			{
-				// find a itemRenderer if one exists
-				var item:UIComponent = itemRenderersByDataUid[data.uid];
-				
-				if(!item)
-				{
-				}
-				
-				// layout itemRenderer
-				var customItem:ISproutListItem = item as ISproutListItem;
-				if(customItem)
-				{
-					customItem.highlight = highlightFlag;
-					highlightFlag = !highlightFlag;
-					if(animate)
-						customItem.tweenTo(0, yCounter);
-					else
-						item.move(0,yCounter);
-	
-					yCounter += vGap + customItem.heightTo;
-	
-					item.setActualSize(itemWidth, item.height);
-					setChildIndex(item, index);
-					index++;
-				}
-			}
-			
-			if(yCounter != previousHeight)
-			{
-				if(bottomUp)
-					verticalScrollPosition += yCounter-previousHeight;
-				previousHeight = yCounter;
-			}
-			
-			var end:int = getTimer();
-			//trace(end + " : " + (end - start) + " " + this + " creatingRows");
 		}
 		
 		protected function doubleClickHandler(event:MouseEvent):void

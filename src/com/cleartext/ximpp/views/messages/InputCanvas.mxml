@@ -53,18 +53,12 @@
 				g.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, CORNER_RADIUS, CORNER_RADIUS);
 			}
 			
-			
-			private function updateCharCount():void
-			{
-				charCountDisplay.text = inputTextArea.text.length + ' Characters';
-			}
-
 		]]>
 	</mx:Script>
 	
-	<mx:Label text="{'Type message to ' + buddy.nickName}" x="10" y="6"/>
-	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6" id="charCountDisplay"/>
-	<mx:TextInput
+	<mx:Label text="{'Type message to ' + buddy.nickName}" x="10" y="6" />
+	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6" />
+	<mx:TextArea
 		id="inputTextArea" 
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
 		keyDown="if(event.keyCode==Keyboard.ENTER) send()"
@@ -72,8 +66,8 @@
 		focusRoundedCorners="bl br" 
 		cornerRadius="{CORNER_RADIUS}"
 		backgroundAlpha="0"
-		borderStyle="none"
-		  keyUp="updateCharCount();"/>
+		wordWrap="true"
+		borderStyle="none"/>
 	<mx:Button label="Send" right="14" top="40" click="send()" height="50" width="55"/>
 
 </mx:Canvas>

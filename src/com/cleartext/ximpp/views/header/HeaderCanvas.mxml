@@ -24,7 +24,7 @@
 				
 				var matr1:Matrix = new Matrix();
 				matr1.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2, 0, 0);
-				graphics.beginGradientFill(GradientType.LINEAR, [0x4d4d4d, 0x080808], [1, 1], [0x00, 0xFF], matr1);  
+				graphics.beginGradientFill(GradientType.LINEAR, [0x3e443f, 0x000000], [1, 1], [0x00, 0xFF], matr1);  
 				graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			}
 			

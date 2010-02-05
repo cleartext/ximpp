@@ -2,7 +2,7 @@ package com.cleartext.ximpp.models.valueObjects
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.StatusEvent;
-	import com.cleartext.ximpp.models.XimppUtils;
+	import com.cleartext.ximpp.models.AvatarUtils;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
@@ -156,7 +156,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newBuddy.groups = (obj["groups"] as String).split(",");
 			newBuddy.avatarHash = obj["avatarHash"];
 			newBuddy.subscription = obj["subscription"];
-			XimppUtils.stringToAvatar(obj["avatar"], newBuddy);
+			AvatarUtils.stringToAvatar(obj["avatar"], newBuddy);
 
 			return newBuddy;
 		}
@@ -170,7 +170,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("groups", groups.join(",")),
 				new DatabaseValue("lastSeen", lastSeen),
 				new DatabaseValue("subscription", subscription),
-				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar)),
+				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("avatarHash", avatarHash)];
 		}

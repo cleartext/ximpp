@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.models.XimppUtils;
+	import com.cleartext.ximpp.models.AvatarUtils;
 	
 	public class UserAccount extends Buddy implements IXimppValueObject
 	{
@@ -41,7 +41,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newUserAccount.server = obj["server"];
 			newUserAccount.setCustomStatus(obj["customStatus"]);
 			newUserAccount.avatarHash = obj["avatarHash"];
-			XimppUtils.stringToAvatar(obj["avatar"], newUserAccount);
+			AvatarUtils.stringToAvatar(obj["avatar"], newUserAccount);
 			
 			return newUserAccount;
 		}
@@ -62,7 +62,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("avatarHash", avatarHash),
-				new DatabaseValue("avatar", XimppUtils.avatarToString(avatar))
+				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar))
 				];			
 		}
 		

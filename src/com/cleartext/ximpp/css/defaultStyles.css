@@ -1,13 +1,13 @@
 /* CSS file */
 
-.lgreyBold
+.lGreyBold
 {
 	color: #888888;
 	font-weight: bold;
 	font-size: 10px;
 }
 
-.dgreyBold
+.dGreyBold
 {
 	color: #555555;
 	font-weight: bold;
@@ -19,13 +19,13 @@
 	font-weight: bold;
 }
 
-.lgreyNormal
+.lGreyNormal
 {
 	color: #888888;
 	font-size: 10px;
 }		
 
-.dgreyNormal
+.dGreyNormal
 {
 	color: #444444;
 }
@@ -42,6 +42,30 @@ HDividedBox
 
 Application
 {
-	font-family: "Helvetica";
+	font-family: myFont;
 	font-size: 12px;
+}
+
+@font-face {
+    src:local("helvetica");
+    fontFamily: myFont;
+}
+
+@font-face {
+    src:local("helvetica");
+    fontWeight: bold;
+    fontFamily: myFont;
+}
+
+@font-face {
+    src:local("helvetica");
+    font-style: italic;
+    fontFamily: myFont;
+}
+
+@font-face {
+    src:local("helvetica");
+    fontWeight: bold;
+    font-style: italic;
+    fontFamily: myFont;
 }

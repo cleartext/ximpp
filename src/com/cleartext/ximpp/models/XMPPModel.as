@@ -180,7 +180,6 @@ package com.cleartext.ximpp.models
 			var message:Message = Message.createFromStanza(event.stanza);
 			if(message.body == "[OK]")
 				return;
-			database.saveMessage(message);
 
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			if(!buddy)
@@ -191,11 +190,12 @@ package com.cleartext.ximpp.models
 			
 			buddy.setLastSeen(message.timestamp);
 			buddy.resource = event.stanza.from.resource;
-			
 			database.saveBuddy(buddy);
 			
 			var chat:Chat = appModel.getChat(buddy, false);
 			chat.messages.addItemAt(message,0);
+
+			database.saveMessage(message);
 		}
 		
 		//-------------------------------
@@ -240,6 +240,8 @@ package com.cleartext.ximpp.models
 					buddy.tempAvatarHash = avatarHash;
 					sendIq(buddy.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
 				}
+				
+				appModel.rosterItems.refresh();
 
 				database.saveBuddy(buddy);
 			}
@@ -351,7 +353,7 @@ package com.cleartext.ximpp.models
 				gotAvatar = true;
 				var vCard:XMLList = xml.vCardTemp::vCard;
 				var serverAvatar:String = vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-				var localAvatar:String = XimppUtils.avatarToString(settings.userAccount.avatar);
+				var localAvatar:String = AvatarUtils.avatarToString(settings.userAccount.avatar);
 				
 				// if we have a different avatar to the one on the server, then send a
 				// vcard back to the server
@@ -369,7 +371,7 @@ package com.cleartext.ximpp.models
 			{
 				var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
 				var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
-				XimppUtils.stringToAvatar(avatarString, buddy);
+				AvatarUtils.stringToAvatar(avatarString, buddy);
 			}
 		}
 		

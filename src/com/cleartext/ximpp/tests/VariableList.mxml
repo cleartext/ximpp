@@ -2,7 +2,7 @@
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:list="com.universalsprout.flex.components.list.*" creationComplete="init()" xmlns:listTest="listTest.*" backgroundColor="0xffffff">
 	<mx:Script>
 		<![CDATA[
-			import com.cleartext.ximpp.tests.mesageRenderers.SimpleMessageRenderer;
+			import org.swizframework.util.TemplateUtil;
 			import com.cleartext.ximpp.views.messages.MessageRenderer;
 			import com.cleartext.ximpp.models.valueObjects.Message;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
@@ -14,7 +14,7 @@
 			import mx.utils.StringUtil;
 			import mx.collections.ArrayCollection;
 
-			private var maxMessages:Number = 50;
+			private var maxMessages:Number = 10000;
 
 			[Bindable]
 			private var buddyData:ArrayCollection = new ArrayCollection();
@@ -30,17 +30,13 @@
 				if(buddy1.status.value == buddy2.status.value)
 					return nameCompare;
 				
-				else if(buddy1.status.value == "offline")
-					return 1;
-				else if(buddy2.status.value == "offline")
-					return -1;
-				
-				return 0;
+				return buddy1.status.sortNumber() - buddy2.status.sortNumber();
 			}
 		
 			private function populate():void
 			{
-				for(var i:int=0; i<10; i++)
+		
+				for(var i:int=0; i<100; i++)
 				{
 					var b:Buddy = new Buddy("testJid@test.com");
 					b.setNickName(i + " " + randomString(4,8) + "@" + randomString(4,8) + ".com");
@@ -48,18 +44,32 @@
 					
 					var message:Message = new Message();
 					message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
-					message.body = randomString(400,1400,4);
+					message.body = randomString(10,140,4);
 					messageData.addItem(message);
 				}
+				
 			}
 			
 			private function trim():void
 			{
-				for(var i:int=0; i<6; i++)
+				for(var i:int=0; i<100; i++)
+				{
 					if(buddyData.length > 0)
 						buddyData.removeItemAt(Math.floor(buddyData.length/2));
+					if(messageData.length > 0)
+						messageData.removeItemAt(Math.floor(messageData.length/2));
+				}
 			}
-		
+			
+			private function resort():void
+			{
+				messageData.refresh();
+			}
+			
+			private function messageFilter(message:Message):Boolean
+			{
+				return message.body.indexOf(seachText.text) != -1;
+			}
 		
 			private function init():void
 			{
@@ -68,6 +78,8 @@
 				buddyData.sort = sort;
 				
 				buddyData.refresh();
+				
+				messageData.filterFunction = messageFilter;
 
 				populate();		
 
@@ -85,14 +97,16 @@
 						var message:Message = new Message();
 						message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
 						message.body = randomString(40,140,4);
-						messageData.addItem(message);
-						
+						messageData.addItemAt(message,0);
 						
 						if(messageData.length > maxMessages+1)
 						{
 							while(messageData.length > maxMessages)
 								messageData.removeItemAt(0);
 						}
+						
+						buddyData.refresh();
+						
 					});
 				timer.start();
 			}
@@ -188,13 +202,13 @@
 		]]>
 	</mx:Script>
 	<mx:Style>
-.lgreyBold
+.lGreyBold
 {
 	color: #888888;
 	font-weight: bold;
 }
 
-.dgreyBold
+.dGreyBold
 {
 	color: #333333;
 	font-weight: bold;
@@ -206,12 +220,12 @@
 	font-weight: bold;
 }
 
-.lgreyNormal
+.lGreyNormal
 {
 	color: #888888;
 }		
 
-.dgreyNormal
+.dGreyNormal
 {
 	color: #333333;
 }
@@ -234,24 +248,24 @@ Application
 		<mx:Button label="stop()" click="timer.stop()" />
 		<mx:Button label="play()" click="timer.start()" />
 		<mx:CheckBox id="animateCheckBox" label="animate" selected="true" />
+		<mx:TextInput id="seachText" change="resort()" />
 	</mx:HBox>
-	
+		
 	<mx:HDividedBox
-		liveDragging="true"
+		liveDragging="false"
 		left="10" right="10" top="30" bottom="10">
 		<list:SproutList
 			id="buddies"
-			animate="{animateCheckBox.selected}"
+			animate="true"
 			width="100%" height="100%"
 			dataProvider="{buddyData}"
 			itemRenderer="{new ClassFactory(BuddyRenderer)}"/>
 		<list:SproutList
 			id="messages"
-			bottomUp="true"
 			animate="false"
 			width="100%" height="100%"
 			dataProvider="{messageData}"
-			itemRenderer="{new ClassFactory(SimpleMessageRenderer)}"/>
+			itemRenderer="{new ClassFactory(MessageRenderer)}"/>
 		
 	</mx:HDividedBox>
 

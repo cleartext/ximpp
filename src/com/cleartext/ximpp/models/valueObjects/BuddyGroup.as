@@ -21,15 +21,15 @@ package com.cleartext.ximpp.models.valueObjects
 			_buddiesByJid = new Dictionary();
 		}
 		
-		override public function addItem(item:Object):void
-		{
-			throw new Error();
-		}
+//		override public function addItem(item:Object):void
+//		{
+//			throw new Error();
+//		}
 
-		override public function addItemAt(item:Object, index:int):void
-		{
-			throw new Error();
-		}
+//		override public function addItemAt(item:Object, index:int):void
+//		{
+//			throw new Error();
+//		}
 		
 		override public function removeAll():void
 		{
@@ -52,7 +52,7 @@ package com.cleartext.ximpp.models.valueObjects
 			if(!contains(buddy))
 			{
 				position = (isNaN(position)) ? length : position;
-				super.addItemAt(buddy, position);
+				addItem(buddy);
 				_buddiesByJid[buddy.jid] = buddy;
 			}
 		}
