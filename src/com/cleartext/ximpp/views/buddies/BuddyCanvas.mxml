@@ -205,7 +205,7 @@
 		<mx:Label styleName="whiteBoldBig" x="14" y="11" text="All Buddies" />
 		<common:SearchBox width="{filterCanvas.width - 85}" height="24" x="8" y="32" search="trace(event)"/>
 		<mx:Button
-			x="230" y="32"
+			right="36" y="32"
 			skin="{null}"
 			upSkin="{TimeUp}"
 			downSkin="{TimeUp}"
@@ -217,7 +217,7 @@
 			toolTip="sort by last seen"
 			/>
 		<mx:Button
-			x="257" y="32"
+			right="9" y="32"
 			skin="{null}"
 			upSkin="{AbcUp}"
 			downSkin="{AbcUp}"
