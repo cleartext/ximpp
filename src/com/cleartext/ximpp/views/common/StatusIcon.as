@@ -190,15 +190,19 @@ package com.cleartext.ximpp.views.common
 			var g:Graphics = graphics;
 			g.clear();
 
-			var matr2:Matrix = new Matrix();
-			matr2.createGradientBox(SIZE, SIZE/6, 0, 0, SIZE*11/12);
-			g.beginGradientFill(GradientType.RADIAL, [SHADDOW, SHADDOW], [0.3, 0], [0x77, 0xFF], matr2);  
-			g.drawEllipse(0, SIZE*11/12, SIZE, SIZE/6);
+//			var matr2:Matrix = new Matrix();
+//			matr2.createGradientBox(SIZE, SIZE/6, 0, 0, SIZE*11/12);
+//			g.beginGradientFill(GradientType.RADIAL, [SHADDOW, SHADDOW], [0.3, 0], [0x77, 0xFF], matr2);  
+//			g.drawEllipse(0, SIZE*11/12, SIZE, SIZE/6);
 
 			var matr1:Matrix = new Matrix();
 			matr1.createGradientBox(SIZE, SIZE, Math.PI/2, 0, 0);
 			g.beginGradientFill(GradientType.LINEAR, [colour, baseColour], [1, 1], [0x00, 0xFF], matr1);  
 			g.drawCircle(SIZE/2, SIZE/2, SIZE/2);
+			
+			g.beginGradientFill(GradientType.LINEAR, [0x636363, 0xe5e5e5], [1, 1], [0x00, 0xFF], matr1);
+			g.drawCircle(SIZE/2, SIZE/2, SIZE/2);
+			g.drawCircle(SIZE/2, SIZE/2, SIZE/2-1);
 			
 			if(status.edit)
 			{

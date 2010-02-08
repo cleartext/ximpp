@@ -2,7 +2,6 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:common="com.cleartext.ximpp.views.common.*"
 	borderStyle="none"
-	backgroundColor="0xffffff"
 	horizontalScrollPolicy="off"
 	verticalScrollPolicy="off"
 	creationComplete="init();">
@@ -33,11 +32,34 @@
 			{
 				return message.body.indexOf(searchString) != -1;
 			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+
+				var g:Graphics = graphics;
+				var w:Number = unscaledWidth;
+				var h:Number = unscaledHeight;
+				
+				g.clear();
+
+				var m:Matrix = new Matrix();
+				m.createGradientBox(w, h, Math.PI/2, 0, 0);
+				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0x4f5051], [1, 1], [0x18, 0xFF], m);  
+				g.drawRect(0, 0, w, h);
+				
+				g.endFill();
+				g.lineStyle(1, 0xffffff);
+				g.moveTo(0,h);
+				g.lineTo(0,0);
+				g.lineTo(w-1,0);
+				g.lineTo(w-1,h);
+			}
 		]]>
 	</mx:Script>
 
-	<common:SearchBox width="400" height="24" x="5" y="3" search="doSearch(event)"/>
-	<mx:Label text="300 of 433" x="410" y="3"/>
-	<mx:Button label="X" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE));" right="5"/>
+	<common:SearchBox width="400" height="24" x="12" y="8" search="doSearch(event)"/>
+	<mx:Label text="300 of 433" x="416" y="12"/>
+	<mx:Button label="X" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE));" right="5" y="8"/>
 
 </mx:Canvas>

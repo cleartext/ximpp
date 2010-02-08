@@ -93,7 +93,7 @@
 				var w:Number = unscaledWidth/2 - 50;
 				var r:Number = Math.tan(Math.atan(w/50) - Math.atan(50/w)) * w;
 				matrix.createGradientBox(unscaledWidth, 50, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT + headerCanvas.height + 10);
-				g.beginGradientFill(GradientType.LINEAR, [0x000000, 0x3e443f], [0.6, 0.6], [0, 255], matrix);
+				g.beginGradientFill(GradientType.LINEAR, [0x000000, 0x3e443f], [0.8, 0.8], [0, 255], matrix);
 				g.drawCircle(unscaledWidth/2, Constants.TOP_BAR_HEIGHT+headerCanvas.height+5-r, r+50);
 
 				matrix.createGradientBox(50, unscaledHeight);

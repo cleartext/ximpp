@@ -1,9 +1,8 @@
 package com.cleartext.ximpp.views.common
 {
-	import com.adobe.utils.StringUtil;
 	import com.cleartext.ximpp.events.SearchBoxEvent;
-	import com.cleartext.ximpp.models.ApplicationModel;
 	
+	import flash.display.Graphics;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	
@@ -21,10 +20,10 @@ package com.cleartext.ximpp.views.common
 		private var resetButton:Button;
 		private var searchString:String;
 		
-		[Autowire]
+		[Embed (source="/com/cleartext/ximpp/assets/clear.png")]
 		[Bindable]
-		public var appModel:ApplicationModel;		
-		
+		public var ClearIcon:Class;
+	
 		public function SearchBox()
 		{
 			super();
@@ -40,6 +39,15 @@ package com.cleartext.ximpp.views.common
 				textInput.defaultText = "Search...";
 				textInput.multiLine = false;
 				textInput.addEventListener(KeyboardEvent.KEY_UP, textInputHandler);
+				textInput.setStyle("cornerRadius", 12);
+				textInput.setStyle("paddingTop", 5);
+				textInput.setStyle("paddingLeft", 24);
+				textInput.setStyle("paddingRight", 24);
+				textInput.setStyle("backgroundAlpha", 0);
+				textInput.setStyle("borderStyle", "none");
+				textInput.wordWrap = false;
+				textInput.horizontalScrollPolicy = "off";
+				textInput.verticalScrollPolicy = "off";
 				addChild(textInput);
 			}
 			
@@ -47,6 +55,10 @@ package com.cleartext.ximpp.views.common
 			{
 				resetButton = new Button();
 				resetButton.addEventListener(MouseEvent.CLICK, resetButtonHandler);
+				resetButton.visible = false;
+				resetButton.setStyle("icon", ClearIcon);
+				resetButton.setStyle("skin", null);
+				resetButton.buttonMode = true;
 				addChild(resetButton);
 			}
 		}
@@ -71,7 +83,6 @@ package com.cleartext.ximpp.views.common
 			{
 				searchString = textInput.text;
 				dispatchEvent(new SearchBoxEvent(searchString));
-				appModel.log("Search: " + searchString);
 			}
 		}
 		
@@ -79,18 +90,40 @@ package com.cleartext.ximpp.views.common
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
-			var top:Number = viewMetricsAndPadding.top;
-			var right:Number = viewMetricsAndPadding.right;
-			var bottom:Number = viewMetricsAndPadding.bottom;
-			var left:Number = viewMetricsAndPadding.left;
-			
-			textInput.setActualSize(unscaledWidth - left - right, unscaledHeight - top - bottom);
-			textInput.move(left, top);
+			textInput.setActualSize(unscaledWidth, unscaledHeight);
 			
 			var buttonDims:Number = textInput.height - 6;
 			
 			resetButton.setActualSize(buttonDims, buttonDims);
-			resetButton. move(unscaledWidth - right - 3 - buttonDims, top + 3);
+			resetButton. move(unscaledWidth - 3 - buttonDims, 3);
+			
+			// draw background
+			var g:Graphics = graphics;
+			
+			g.clear();
+			
+			g.beginFill(0xffffff);
+			g.drawRoundRect(1, 0, unscaledWidth-2, 23, 23, 23);
+			g.endFill();
+			
+			g.lineStyle(2.5, 0x5b5b5b);
+			g.drawCircle(12, 11, 5); 
+
+			g.lineStyle(3, 0x5b5b5b);
+			g.moveTo(16, 15);
+			g.lineTo(20, 19);
+			
+			g.lineStyle(2, 0xeaeaea);
+			g.drawRoundRect(2, 3, unscaledWidth-4, 19, 19, 19);
+			
+			g.lineStyle(1, 0xeaeaea, 0.4);
+			g.drawRoundRect(1, 2, unscaledWidth-2, 22, 22, 22);
+			
+			g.lineStyle(1, 0x808080);
+			g.drawRoundRect(1, 1, unscaledWidth-2, 23, 23, 23);
+			
+			g.lineStyle(1, 0x4a4b4d);
+			g.drawRoundRect(1, 0, unscaledWidth-2, 23, 23, 23);
 		}
 		
 	}

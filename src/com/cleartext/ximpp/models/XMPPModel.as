@@ -237,6 +237,7 @@ package com.cleartext.ximpp.models
 				var avatarHash:String = stanza.avatarHash;
 				if(avatarHash && buddy.avatarHash != avatarHash)
 				{
+					trace(avatarHash);
 					buddy.tempAvatarHash = avatarHash;
 					sendIq(buddy.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
 				}

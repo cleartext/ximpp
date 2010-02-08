@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:common="com.cleartext.ximpp.views.common.*">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:common="com.cleartext.ximpp.views.common.*"
+	clipContent="false">
 	<mx:Script>
 		<![CDATA[
 			import com.cleartext.ximpp.models.Constants;
@@ -65,9 +67,22 @@
 		enabled="{!(!buddy || !xmpp.connected)}"
 		focusRoundedCorners="bl br" 
 		cornerRadius="{CORNER_RADIUS}"
+		paddingRight="20"
+		verticalScrollPolicy="off"
+		horizontalScrollPolicy="off"
 		backgroundAlpha="0"
 		wordWrap="true"
-		borderStyle="none"/>
-	<mx:Button label="Send" right="14" top="40" click="send()" height="50" width="55"/>
+		borderStyle="none"
+		focusAlpha="0.5"/>
+	<mx:Button
+		upIcon="@Embed(source='com/cleartext/ximpp/assets/send.png')"
+		overIcon="@Embed(source='com/cleartext/ximpp/assets/send.png')"
+		downIcon="@Embed(source='com/cleartext/ximpp/assets/sendDown.png')"
+		disabledIcon="@Embed(source='com/cleartext/ximpp/assets/sendDisabled.png')"
+		enabled="{!(!buddy || !xmpp.connected)}"
+		toolTip="send message"
+		right="-40" y="27"
+		width="50" height="50"
+		click="send()"/>
 
 </mx:Canvas>

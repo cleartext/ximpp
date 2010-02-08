@@ -217,11 +217,9 @@ package com.cleartext.ximpp.models
 
 		public function addBuddy(newBuddy:Buddy):void
 		{
-			database.saveBuddy(newBuddy);
 			rosterItems.addBuddy(newBuddy);
-			
-			if(!newBuddy.hasEventListener(BuddyEvent.CHANGED))
-				newBuddy.addEventListener(BuddyEvent.CHANGED, buddySaveHandler);
+			newBuddy.addEventListener(BuddyEvent.CHANGED, buddySaveHandler);
+			database.saveBuddy(newBuddy);
 		}
 		
 		private function buddySaveHandler(event:BuddyEvent):void

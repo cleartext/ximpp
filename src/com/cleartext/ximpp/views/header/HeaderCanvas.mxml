@@ -4,6 +4,7 @@
 	xmlns:common="com.cleartext.ximpp.views.common.*">
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
 			import com.cleartext.ximpp.events.UserAccountEvent;
@@ -31,22 +32,33 @@
 		]]>
 	</mx:Script>
 
+	<mx:Image y="6" x="8" source="@Embed(source='com/cleartext/ximpp/assets/logo.png')" height="30"/>
+
 	<mx:Button
-		label="{((appModel.showConsole) ? 'hide' : 'show' ) + ' console'}"
+		upIcon="@Embed(source='com/cleartext/ximpp/assets/help.png')"
+		overIcon="@Embed(source='com/cleartext/ximpp/assets/helpOver.png')"
+		downIcon="@Embed(source='com/cleartext/ximpp/assets/help.png')"
+		click="Alert.show('help me please', 'Help Menu');"
+		skin="{null}"
+		toolTip="help"
+		right="75" y="8" />
+
+	<mx:Button
+		upIcon="@Embed(source='com/cleartext/ximpp/assets/settings.png')"
+		overIcon="@Embed(source='com/cleartext/ximpp/assets/settingsOver.png')"
+		downIcon="@Embed(source='com/cleartext/ximpp/assets/settings.png')"
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));"
+		skin="{null}"
+		toolTip="preferences"
+		right="45" y="8" />
+
+	<mx:Button
+		upIcon="@Embed(source='com/cleartext/ximpp/assets/console.png')"
+		overIcon="@Embed(source='com/cleartext/ximpp/assets/consoleOver.png')"
+		downIcon="@Embed(source='com/cleartext/ximpp/assets/console.png')"
 		click="appModel.showConsole = !appModel.showConsole"
-		right="122" y="10" width="145"
-		 visible="false"/>
-	<mx:Image top="6" left="8" width="150" height="32" scaleContent="true" autoLoad="true" id="ct">
-		<mx:source>file:////Users/dbanes/Documents/Cleartext/Graphics/Cleartext Logo/ximpp-cleartext.png</mx:source>
-	</mx:Image>
-	<mx:Image y="10" width="24" height="24" autoLoad="true" right="39" alpha="0.8">
-		<mx:click>Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));</mx:click>
-		<mx:source>file:////Users/dbanes/Desktop/Development/ximpp/Graphics/settings.png</mx:source>
-	</mx:Image>
-	<mx:Image y="10" width="24" height="24" right="9" alpha="0.8">
-		<mx:source>file:////Users/dbanes/Desktop/Development/ximpp/Graphics/help.png</mx:source>
-	</mx:Image>
-	<mx:Image y="10" width="24" height="24" click="appModel.showConsole = !appModel.showConsole" right="71" alpha="0.8">
-		<mx:source>file:////Users/dbanes/Desktop/Development/ximpp/Graphics/console.png</mx:source>
-	</mx:Image>
+		skin="{null}"
+		toolTip="toggleConsole"
+		right="15" y="8" />
+
 </mx:Canvas>

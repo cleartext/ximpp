@@ -137,7 +137,7 @@ package com.cleartext.ximpp.views.buddies
 				customStatusLabel = new UITextField();
 				customStatusLabel.styleName = "lGreyNormal";
 				customStatusLabel.x = AVATAR_SIZE + 2*PADDING
-				customStatusLabel.y = 31;
+				customStatusLabel.y = 29;
 				customStatusLabel.visible = false;
 				addChild(customStatusLabel);
 			}

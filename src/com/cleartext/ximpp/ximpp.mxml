@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	initialize="maximize()"
+	applicationComplete="maximize(); ToolTipManager.showDelay=100;"
 	close="mainView.appModel.shutDown()"
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
 	xmlns:views="com.cleartext.ximpp.views.*"
-	 themeColor="#FFCC00">
+	themeColor="#FFCC00">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.ToolTipManager;
+		]]>
+	</mx:Script>
 	
 	<swiz:SwizConfig
 		strict="true"
@@ -19,5 +24,6 @@
 	<views:MainView id="mainView"/>
 	
 	<mx:Style source="css/defaultStyles.css"/>
+	<mx:Style source="css/scrollSkins.css"/>
 
 </mx:WindowedApplication>

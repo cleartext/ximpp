@@ -33,10 +33,39 @@
 			[Bindable]
 			public var settings:SettingsModel;
 			
+			[Bindable]
+			public var timeSort:Boolean = true;
+			
+			[Embed (source="/com/cleartext/ximpp/assets/timeUp.png")]
+			[Bindable]
+			public var TimeUp:Class;
+			
+			[Embed (source="/com/cleartext/ximpp/assets/timeOver.png")]
+			[Bindable]
+			public var TimeOver:Class;
+			
+			[Embed (source="/com/cleartext/ximpp/assets/timeSelected.png")]
+			[Bindable]
+			public var TimeSelected:Class;
+			
+			[Embed (source="/com/cleartext/ximpp/assets/abcUp.png")]
+			[Bindable]
+			public var AbcUp:Class;
+			
+			[Embed (source="/com/cleartext/ximpp/assets/abcOver.png")]
+			[Bindable]
+			public var AbcOver:Class;
+			
+			[Embed (source="/com/cleartext/ximpp/assets/abcSelected.png")]
+			[Bindable]
+			public var AbcSelected:Class;
+			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
 				
+				// STATUS PANEL
+
 				var g:Graphics = statusCanvas.graphics;
 				var w:Number = statusCanvas.width-1;
 				var h:Number = statusCanvas.height;
@@ -58,6 +87,32 @@
 				g.lineStyle(1, 0xc1c1c1);
 				g.moveTo(0,h);
 				g.lineTo(w,h);
+
+				// FILTER PANEL
+
+				g = filterCanvas.graphics;
+				w = filterCanvas.width;
+				h = filterCanvas.height;
+				
+				g.clear();
+
+				m = new Matrix();
+				m.createGradientBox(w, h, Math.PI/2, 0, 0);
+				g.beginGradientFill(GradientType.LINEAR, [0xa1a4a7, 0x4f5051], [1, 1], [0x00, 0xFF], m);  
+				g.drawRect(0, 0, w, h);
+				
+				g.beginFill(0x292a2a);
+				g.drawRect(0,0,w,1);
+				
+				g.beginFill(0x47484a);
+				g.drawRect(0,1,w,1);
+				
+				g.endFill();
+				g.lineStyle(1, 0x848688);
+				g.moveTo(0,h);
+				g.lineTo(0,2);
+				g.lineTo(w-1,2);
+				g.lineTo(w-1,h);
 			}
 			
 			private function itemDoubleClicked(event:SproutListEvent):void
@@ -88,11 +143,16 @@
 		width="100%" height="{Constants.TOP_BAR_HEIGHT}"
 		clipContent="false">
 
-		<mx:Label y="5" x="5" text="Status" color="0xffffff" fontWeight="bold"/>
+		<mx:Label
+			y="5" x="5" 
+			text="Status" 
+			color="0xffffff" 
+			fontWeight="bold"/>
 
 		<common:StatusIcon
 			statusString="{appModel.serverSideStatus.value}"
 			right="135" y="5"
+			scaleX="1.2" scaleY="1.2"
 			/>
 		
 		<mx:ComboBox
@@ -111,12 +171,12 @@
 			valueCommit="userPresenceChangeHandler()"
 			defaultText="custom status..."
 			keyDown="if(event.keyCode==Keyboard.ENTER) userPresenceChangeHandler()"
-			top="27" height="48"
+			top="29" height="33"
 			right="5" left="15"
 			text="{settings.userAccount.customStatus}"
 			borderStyle="none"
 			backgroundAlpha="0"
-			focusAlpha="0.1"
+			focusAlpha="0.5"
 			/>
 		
 		<mx:CheckBox
@@ -139,8 +199,35 @@
 
 	</mx:Canvas>
 	
-	<mx:Canvas id="filterCanvas">
-		
+	<mx:Canvas id="filterCanvas"
+		width="100%"
+		height="{Constants.AVATAR_TAB_HEIGHT}">
+		<mx:Label styleName="whiteBoldBig" x="14" y="11" text="All Buddies" />
+		<common:SearchBox width="{filterCanvas.width - 85}" height="24" x="8" y="32" search="trace(event)"/>
+		<mx:Button
+			x="230" y="32"
+			skin="{null}"
+			upSkin="{TimeUp}"
+			downSkin="{TimeUp}"
+			overSkin="{TimeUp}"
+			disabledSkin="{TimeSelected}"
+			enabled="{!timeSort}"
+			click="timeSort = !timeSort"
+			buttonMode="true"
+			toolTip="sort by last seen"
+			/>
+		<mx:Button
+			x="257" y="32"
+			skin="{null}"
+			upSkin="{AbcUp}"
+			downSkin="{AbcUp}"
+			overSkin="{AbcUp}"
+			disabledSkin="{AbcSelected}"
+			enabled="{timeSort}"
+			click="timeSort = !timeSort"
+			buttonMode="true"
+			toolTip="sort alphabetically"
+			/>
 	</mx:Canvas>
 
 	<buddies:BuddySproutList

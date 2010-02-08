@@ -1,0 +1,31 @@
+HScrollBar
+{
+	downArrowDisabledSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_downArrowUpSkin");
+	thumbDownSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_thumbDownSkin");
+	thumbIcon: Embed(source="scrollSkins.swf", symbol="HScrollBar_thumbIcon");
+	thumbOverSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_thumbOverSkin");
+	thumbUpSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_thumbUpSkin");
+	trackDisabledSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_trackDisabledSkin");
+	trackSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_trackSkin");
+	upArrowDisabledSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_upArrowDisabledSkin");
+	upArrowDownSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_upArrowDownSkin");
+	upArrowOverSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_upArrowOverSkin");
+	upArrowUpSkin: Embed(source="scrollSkins.swf", symbol="HScrollBar_upArrowUpSkin");
+}
+VScrollBar
+{
+	downArrowDisabledSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_downArrowDisabledSkin");
+	downArrowDownSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_downArrowDownSkin");
+	downArrowOverSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_downArrowOverSkin");
+	downArrowUpSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_downArrowUpSkin");
+	thumbDownSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_thumbDownSkin");
+	thumbIcon: Embed(source="scrollSkins.swf", symbol="VScrollBar_thumbIcon");
+	thumbOverSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_thumbOverSkin");
+	thumbUpSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_thumbUpSkin");
+	trackDisabledSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_trackDisabledSkin");
+	trackSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_trackSkin");
+	upArrowDisabledSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_upArrowDisabledSkin");
+	upArrowDownSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_upArrowDownSkin");
+	upArrowOverSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_upArrowOverSkin");
+	upArrowUpSkin: Embed(source="scrollSkins.swf", symbol="VScrollBar_upArrowUpSkin");
+}

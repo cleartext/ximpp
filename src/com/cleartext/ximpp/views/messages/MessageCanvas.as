@@ -49,15 +49,14 @@ package com.cleartext.ximpp.views.messages
 
 		private static const H_GAP:Number = 8;
 		private static const SELECTOR_WIDTH:Number = 5;
-		private static const TRIANGLE_HEIGHT:Number = 11;
+		private static const TRIANGLE_HEIGHT:Number = 12;
 		private static const TRIANGLE_WIDTH:Number = 16;
-		private static const SPACER_HEIGHT:Number = 32;
+		private static const SEARCH_BAR_HEIGHT:Number = 42;
 		private static const AVATAR_SIZE:Number = Constants.AVATAR_TAB_HEIGHT - TRIANGLE_HEIGHT - SELECTOR_WIDTH;
 		
 		private static const SELECTED_ALPHA:Number = 1.0;
 		private static const OVER_ALPHA:Number = 1.0;
 		private static const OUT_ALPHA:Number = 0.7;
-		
 		
 		private var avatars:ArrayCollection = new ArrayCollection();
 
@@ -282,10 +281,10 @@ package com.cleartext.ximpp.views.messages
 			avatarCanvas.setActualSize(unscaledWidth, AVATAR_SIZE + SELECTOR_WIDTH + TRIANGLE_HEIGHT);
 			
 			spacerCanvas.move(0, Constants.TOP_BAR_HEIGHT +TRIANGLE_HEIGHT + SELECTOR_WIDTH + AVATAR_SIZE);
-			spacerCanvas.setActualSize(unscaledWidth, SPACER_HEIGHT);
+			spacerCanvas.setActualSize(unscaledWidth, SEARCH_BAR_HEIGHT);
 
-			messageStack.move(0, Constants.TOP_BAR_HEIGHT + SPACER_HEIGHT + avatarCanvas.height);
-			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - avatarCanvas.height - SPACER_HEIGHT);
+			messageStack.move(0, Constants.TOP_BAR_HEIGHT + SEARCH_BAR_HEIGHT + avatarCanvas.height);
+			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - avatarCanvas.height - SEARCH_BAR_HEIGHT);
 			
 			var g:Graphics = selector.graphics;
 			g.clear();
