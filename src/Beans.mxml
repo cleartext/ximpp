@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<swiz:BeanLoader
+	xmlns:swiz="http://swiz.swizframework.org"
+	xmlns:models="com.cleartext.ximpp.models.*">
+
+	<models:SettingsModel id="settings" />
+
+	<models:DatabaseModel id="database" />
+
+	<models:XMPPModel id="xmpp" />
+
+	<models:BuddyModel id="buddies" />
+
+	<models:ApplicationModel id="appModel" />
+
+</swiz:BeanLoader>	

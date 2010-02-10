@@ -10,15 +10,15 @@ package com.cleartext.ximpp.events
 		
 		public var previousUserAccount:UserAccount;
 		
-		public function UserAccountEvent(previousUserAccount:UserAccount, bubbles:Boolean=false, cancelable:Boolean=false)
+		public function UserAccountEvent(type:String, previousUserAccount:UserAccount, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
-			super(CHANGED, bubbles, cancelable);
+			super(type, bubbles, cancelable);
 			this.previousUserAccount = previousUserAccount;
 		}
 		
 		override public function clone():Event
 		{
-			return new UserAccountEvent(previousUserAccount);
+			return new UserAccountEvent(type, previousUserAccount);
 		}
 	}
 }

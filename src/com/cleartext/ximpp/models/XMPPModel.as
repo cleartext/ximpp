@@ -37,6 +37,11 @@ package com.cleartext.ximpp.models
 			return appModel.database;
 		}
 		
+		private function get buddies():BuddyModel
+		{
+			return appModel.buddies;
+		}
+		
 		[Bindable]
 		public var connected:Boolean = false;
 
@@ -114,7 +119,7 @@ package com.cleartext.ximpp.models
 		 		(appModel.localStatus.value == Status.OFFLINE) ? 
 		 		Status.OFFLINE : Status.ERROR;
 
-	 		for each(var buddy:Buddy in appModel.rosterItems)
+	 		for each(var buddy:Buddy in buddies.buddies)
 	 			buddy.status.value = Status.OFFLINE;
 		}
 
@@ -181,11 +186,11 @@ package com.cleartext.ximpp.models
 			if(message.body == "[OK]")
 				return;
 
-			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
+			var buddy:Buddy = buddies.getBuddyByJid(message.sender);
 			if(!buddy)
 			{
 				buddy = new Buddy(message.sender);
-				appModel.addBuddy(buddy);
+				buddies.addBuddy(buddy);
 			}
 			
 			buddy.setLastSeen(message.timestamp);
@@ -221,7 +226,7 @@ package com.cleartext.ximpp.models
 			}
 			else
 			{
-				var buddy:Buddy = appModel.getBuddyByJid(fromJid);
+				var buddy:Buddy = buddies.getBuddyByJid(fromJid);
 				
 				if(!buddy)
 				{
@@ -242,7 +247,7 @@ package com.cleartext.ximpp.models
 					sendIq(buddy.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
 				}
 				
-				appModel.rosterItems.refresh();
+				buddies.buddies.refresh();
 
 				database.saveBuddy(buddy);
 			}
@@ -263,21 +268,21 @@ package com.cleartext.ximpp.models
 
 			// if we already have the buddy, then we just want to
 			// update the values, otherwise create a new buddy
-			var buddy:Buddy = appModel.getBuddyByJid(jid);
+			var buddy:Buddy = buddies.getBuddyByJid(jid);
 			if(!buddy)
 				buddy = new Buddy(jid);
 
 			var subscription:String = event.stanza["subscription"];
 			if(subscription == SubscriptionTypes.REMOVE)
 			{
-				appModel.removeBuddy(buddy);
+				buddies.removeBuddy(buddy);
 			}
 			else
 			{
 				buddy.groups = event.stanza["groups"];
 				buddy.setNickName(event.stanza["name"]);
 				buddy.subscription = subscription;
-				appModel.addBuddy(buddy);
+				buddies.addBuddy(buddy);
 			}
 		}
 
@@ -289,7 +294,7 @@ package com.cleartext.ximpp.models
 		{
 			appModel.log("getRosterHandler");
 			
-			for each(var b1:Buddy in appModel.rosterItems)
+			for each(var b1:Buddy in buddies.buddies)
 				b1.used = false;
 
 			namespace rosterns = "jabber:iq:roster";
@@ -299,7 +304,7 @@ package com.cleartext.ximpp.models
 				
 				// if we already have the buddy, then we just want to
 				// update the values, otherwise create a new buddy
-				var buddy:Buddy = appModel.getBuddyByJid(jid);
+				var buddy:Buddy = buddies.getBuddyByJid(jid);
 				if(!buddy)
 					buddy = new Buddy(jid);
 				
@@ -316,12 +321,12 @@ package com.cleartext.ximpp.models
 				buddy.used = true;
 				
 				// this adds, saves and adds an event listener to the buddy
-				appModel.addBuddy(buddy);
+				buddies.addBuddy(buddy);
 			}
 			
-			for each(var b2:Buddy in appModel.rosterItems)
+			for each(var b2:Buddy in buddies.buddies)
 				if(!b2.used)
-					appModel.removeBuddy(b2);
+					buddies.removeBuddy(b2);
 
 			gotRosterList = true;
 		}
@@ -371,7 +376,7 @@ package com.cleartext.ximpp.models
 			else
 			{
 				var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-				var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
+				var buddy:Buddy = buddies.getBuddyByJid(buddyJid);
 				AvatarUtils.stringToAvatar(avatarString, buddy);
 			}
 		}

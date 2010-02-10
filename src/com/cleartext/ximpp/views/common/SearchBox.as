@@ -23,6 +23,8 @@ package com.cleartext.ximpp.views.common
 		[Embed (source="/com/cleartext/ximpp/assets/clear.png")]
 		[Bindable]
 		public var ClearIcon:Class;
+		
+		public var borderAlpha:Number = 1;
 	
 		public function SearchBox()
 		{
@@ -113,16 +115,19 @@ package com.cleartext.ximpp.views.common
 			g.moveTo(16, 15);
 			g.lineTo(20, 19);
 			
-			g.lineStyle(2, 0xeaeaea);
+			g.lineStyle(2, 0xeaeaea, borderAlpha);
+//			g.lineStyle(2, 0x4a4b4d, 0.12);
 			g.drawRoundRect(2, 3, unscaledWidth-4, 19, 19, 19);
 			
-			g.lineStyle(1, 0xeaeaea, 0.4);
+			g.lineStyle(1, 0xeaeaea, 0.4 * borderAlpha);
+//			g.lineStyle(1, 0x4a4b4d, 0.32);
 			g.drawRoundRect(1, 2, unscaledWidth-2, 22, 22, 22);
 			
-			g.lineStyle(1, 0x808080);
+//			g.lineStyle(1, 0x808080);
+			g.lineStyle(1, 0x4a4b4d, 0.62 * borderAlpha);
 			g.drawRoundRect(1, 1, unscaledWidth-2, 23, 23, 23);
 			
-			g.lineStyle(1, 0x4a4b4d);
+			g.lineStyle(1, 0x4a4b4d, borderAlpha);
 			g.drawRoundRect(1, 0, unscaledWidth-2, 23, 23, 23);
 		}
 		

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<actionScriptProperties mainApplicationPath="com/cleartext/ximpp/ximpp.mxml" version="3">
+<actionScriptProperties mainApplicationPath="ximpp.mxml" version="3">
 <compiler additionalCompilerArguments="-locale en_US" copyDependentFiles="true" enableModuleDebug="true" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersion="9.0.124" htmlPlayerVersionCheck="true" outputFolderPath="bin-debug" sourceFolderPath="src" strict="true" useApolloConfig="true" verifyDigests="true" warn="true">
 <compilerSourcePath/>
 <libraryPath defaultLinkType="1">
@@ -11,7 +11,7 @@
 </sourceAttachmentPath>
 </compiler>
 <applications>
-<application path="com/cleartext/ximpp/ximpp.mxml"/>
+<application path="ximpp.mxml"/>
 <application path="com/cleartext/ximpp/tests/VariableList.mxml"/>
 </applications>
 <modules/>

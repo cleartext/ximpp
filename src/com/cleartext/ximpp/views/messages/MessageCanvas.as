@@ -51,7 +51,7 @@ package com.cleartext.ximpp.views.messages
 		private static const SELECTOR_WIDTH:Number = 5;
 		private static const TRIANGLE_HEIGHT:Number = 12;
 		private static const TRIANGLE_WIDTH:Number = 16;
-		private static const SEARCH_BAR_HEIGHT:Number = 42;
+		private static const SEARCH_BAR_HEIGHT:Number = 38;
 		private static const AVATAR_SIZE:Number = Constants.AVATAR_TAB_HEIGHT - TRIANGLE_HEIGHT - SELECTOR_WIDTH;
 		
 		private static const SELECTED_ALPHA:Number = 1.0;

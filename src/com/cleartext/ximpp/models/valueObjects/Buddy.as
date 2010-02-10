@@ -62,6 +62,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public function setJid(value:String):void
 		{
 			_jid = value;
+			isGateway = _jid.indexOf("@") == -1;
 		}
 		
 		private var _nickName:String;
@@ -132,17 +133,29 @@ package com.cleartext.ximpp.models.valueObjects
 		public var groups:Array = new Array();
 		public var subscription:String = SubscriptionTypes.NONE;
 		
+		//------------------------------------
 		// not storred in database 
-		public var used:Boolean = true;
+		//------------------------------------
+
+		// the current resource this buddy is using
 		public var resource:String;
+		// store the new avatarHash whilst we are downloading the 
+		// new hash until we have got the new avatar, we don't 
+		// want to set the avatarHash
 		public var tempAvatarHash:String;
+		// don't store this in the database as it is easier to set
+		// in the set jid(value:String) method
+		public var isGateway:Boolean = false;
+		// flag used by the roster handler in xmppModel to refresh the
+		// buddy list
+		public var used:Boolean = false;
 
 		private var _status:Status = new Status(Status.OFFLINE);
 		public function get status():Status
 		{
 			return _status;
 		}
-				
+			
 		public static function createFromDB(obj:Object):IXimppValueObject
 		{
 			var jid:String = obj["jid"];

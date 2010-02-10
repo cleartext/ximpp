@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	creationComplete="groupListChanged(null)">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Button;
+			import com.cleartext.ximpp.events.BuddyModelEvent;
+			import com.cleartext.ximpp.models.BuddyModel;
+			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			public var groupButtons:Dictionary = new Dictionary();
+			
+			[Mediate (event="BuddyModelEvent.GROUPS_CHANGED")]
+			public function groupListChanged(event:BuddyModelEvent):void
+			{
+				for each(var b:Button in groupButtons)
+				{
+					b.visible = button.includeInLayout = false;
+				}
+				
+				for each(var group:String in buddies.groups)
+				{
+					var button:Button = groupButtons[group] as Button;
+					
+					if(!button)
+					{
+						button = new Button();
+						groupButtons[group] = button;
+						button.label = group;
+						button.addEventListener(MouseEvent.CLICK, clickHandler);
+						addChild(button);
+					}	
+					else
+					{
+						button.visible = button.includeInLayout = true;
+					}
+				}
+			}
+			
+			private function clickHandler(event:MouseEvent):void
+			{
+				buddies.groupName = event.target.label;
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Button label="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" />
+	<mx:Button label="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" />
+	
+</mx:VBox>

@@ -35,6 +35,14 @@
 	color: #000000;
 }
 
+.whiteBoldBig
+{
+	color: #ffffff;
+	font-size: 14;
+	font-weight: bold;
+}
+
+
 HDividedBox
 {
 	bar-color: #000000;

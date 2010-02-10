@@ -45,7 +45,7 @@
 
 				var m:Matrix = new Matrix();
 				m.createGradientBox(w, h, Math.PI/2, 0, 0);
-				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0x4f5051], [1, 1], [0x18, 0xFF], m);  
+				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xeaeaea], [1, 1], [0x36, 0xFF], m);  
 				g.drawRect(0, 0, w, h);
 				
 				g.endFill();
@@ -54,12 +54,16 @@
 				g.lineTo(0,0);
 				g.lineTo(w-1,0);
 				g.lineTo(w-1,h);
+
+				g.lineStyle(1, 0xcccccc);
+				g.moveTo(1,h-1);
+				g.lineTo(w-2,h-1);
 			}
 		]]>
 	</mx:Script>
 
-	<common:SearchBox width="400" height="24" x="12" y="8" search="doSearch(event)"/>
-	<mx:Label text="300 of 433" x="416" y="12"/>
-	<mx:Button label="X" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE));" right="5" y="8"/>
+	<common:SearchBox width="400" height="24" x="12" y="6" search="doSearch(event)" borderAlpha="0.2"/>
+	<mx:Label text="300 of 433" x="416" y="10"/>
+	<mx:Button label="X" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE));" right="5" y="6"/>
 
 </mx:Canvas>

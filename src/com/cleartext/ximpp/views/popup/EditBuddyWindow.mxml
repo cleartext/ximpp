@@ -7,6 +7,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.BuddyModel;
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.models.AvatarUtils;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
@@ -19,11 +20,11 @@
 
 			[Autowire]
 			[Bindable]
-			public var appModel:ApplicationModel;
+			public var xmpp:XMPPModel;
 			
 			[Autowire]
 			[Bindable]
-			public var xmpp:XMPPModel;
+			public var buddies:BuddyModel;
 			
 			private function okHandler():void
 			{
@@ -44,10 +45,8 @@
 				else
 				{
 					buddy.setNickName(nickname.text);
-					appModel.addBuddy(buddy);
+					buddies.addBuddy(buddy);
 				}
-				
-				
 				
 				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
 			}

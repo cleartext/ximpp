@@ -1,7 +1,6 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
-	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -34,6 +33,11 @@ package com.cleartext.ximpp.models
 		private function get settings():SettingsModel
 		{
 			return appModel.settings;
+		}
+		
+		private function get buddies():BuddyModel
+		{
+			return appModel.buddies;
 		}
 				
 		public function close():void
@@ -228,7 +232,7 @@ package com.cleartext.ximpp.models
 				
 				if(result && result.data)
 					for(var i:int=result.data.length-1; i>=0; i--)
-						appModel.addBuddy(Buddy.createFromDB(result.data[i]) as Buddy);
+						buddies.addBuddy(Buddy.createFromDB(result.data[i]) as Buddy);
 
 			    // if we've got to this point without errors, commit the transaction 
 				appModel.log("Buddy list loaded");

@@ -1,12 +1,12 @@
 package com.cleartext.ximpp.models
 {
-	import adobe.utils.CustomActions;
-	
 	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
 	import flash.events.EventDispatcher;
+	
+	import org.swizframework.Swiz;
 	
 	public class SettingsModel extends EventDispatcher
 	{
@@ -17,6 +17,7 @@ package com.cleartext.ximpp.models
 		
 		public function SettingsModel()
 		{
+			super();
 		}
 		
 		public var global:GlobalSettings = new GlobalSettings();
@@ -34,10 +35,7 @@ package com.cleartext.ximpp.models
 			_userAccount = newUserAccount;
 			
 			if(!previousUserAccount || newUserAccount.userId != previousUserAccount.userId)
-			{
-				appModel.userIdChanged();
-			}
-			dispatchEvent(new UserAccountEvent(previousUserAccount));
+				Swiz.dispatchEvent(new UserAccountEvent(UserAccountEvent.CHANGED, previousUserAccount));
 		}
 		
 		public function get userId():int

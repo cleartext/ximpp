@@ -1,10 +1,9 @@
 package com.cleartext.ximpp.models
 {
-	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
+	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
-	import com.cleartext.ximpp.models.valueObjects.BuddyGroup;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	
@@ -13,11 +12,9 @@ package com.cleartext.ximpp.models
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
-	import mx.collections.Sort;
 	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.events.CloseEvent;
-	import mx.utils.ObjectUtil;
 	
 	import org.swizframework.Swiz;
 	
@@ -35,8 +32,9 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var xmpp:XMPPModel;
 		
+		[Autowire]
 		[Bindable]
-		public var rosterItems:BuddyGroup = new BuddyGroup("roster items");
+		public var buddies:BuddyModel;
 		
 		[Bindable]
 		public var microBloggingMessages:ArrayCollection = new ArrayCollection();
@@ -114,11 +112,6 @@ package com.cleartext.ximpp.models
 		{
 			database.addEventListener(Event.COMPLETE, databaseCompleteHandler);
 			database.createDatabase();
-			
-			var sort:Sort = new Sort();
-			sort.compareFunction = compareBuddies;
-			rosterItems.sort = sort;
-			rosterItems.refresh();
 		}
 		
 		private function databaseCompleteHandler(event:Event):void
@@ -159,11 +152,11 @@ package com.cleartext.ximpp.models
 				});
 		}
 		
-		public function userIdChanged():void
+		[Mediate(event="UserAccountEvent.CHANGED")]
+		public function userIdChanged(event:UserAccountEvent):void
 		{
 			chats.removeAll();
 			microBloggingMessages.removeAll();
-			rosterItems.removeAll();
 
 			var chat:Chat = new Chat(new Buddy("microBlogging"));
 			chat.messages = microBloggingMessages;
@@ -193,46 +186,5 @@ package com.cleartext.ximpp.models
 			chats.addItem(chat);
 			return chat;
 		}
-		
-		public function getBuddyByJid(jid:String):Buddy
-		{
-			if(!jid || jid=="")
-				return null;
-				
-			if(jid == settings.userAccount.jid)
-				return settings.userAccount;
-			
-			return rosterItems.getBuddy(jid);
-		}
-		
-		private function compareBuddies(buddy1:Buddy, buddy2:Buddy, fields:Object=null):int
-		{
-			var statusCompare:int = buddy1.status.sortNumber() - buddy2.status.sortNumber();
-
-			if(statusCompare == 0)
-				return ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
-			else
-				return (statusCompare > 0) ? 1 : -1;
-		}
-
-		public function addBuddy(newBuddy:Buddy):void
-		{
-			rosterItems.addBuddy(newBuddy);
-			newBuddy.addEventListener(BuddyEvent.CHANGED, buddySaveHandler);
-			database.saveBuddy(newBuddy);
-		}
-		
-		private function buddySaveHandler(event:BuddyEvent):void
-		{
-			database.saveBuddy(event.target as Buddy);
-		}
-		
-		public function removeBuddy(buddy:Buddy):void
-		{
-			rosterItems.removeBuddy(buddy);
-			database.removeBuddy(buddy.buddyId);
-			buddy.removeEventListener(BuddyEvent.CHANGED, buddySaveHandler);
-		}
-
 	}
 }
