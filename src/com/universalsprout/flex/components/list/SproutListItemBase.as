@@ -1,11 +1,9 @@
 package com.universalsprout.flex.components.list
 {
-	import com.universalsprout.flex.components.list.ISproutListData;
-	import com.universalsprout.flex.components.list.ISproutListItem;
-	import com.universalsprout.flex.components.list.NonInvalidatingUIComponent;
-	
+	import flash.display.Graphics;
 	import flash.events.Event;
 	
+	import mx.core.UIComponent;
 	import mx.effects.Tween;
 	import mx.events.PropertyChangeEvent;
 	import mx.events.ResizeEvent;
@@ -16,7 +14,7 @@ package com.universalsprout.flex.components.list
 		protected static const TOP_BAR_HEIGHT:Number = 16;
 		protected static const UITEXTFIELD_WIDTH_PADDING:Number = 5;
 		protected static const UITEXTFIELD_HEIGHT_PADDING:Number = 4;
-
+		
 		public function SproutListItemBase(initialWidth:Number=NaN, initialHeight:Number=NaN)
 		{
 			super(initialWidth, initialHeight);
@@ -42,18 +40,7 @@ package com.universalsprout.flex.components.list
 				invalidateProperties();
 			}
 		}
-		
-		protected var _highlight:Boolean = false;
-		public function get highlight():Boolean
-		{
-			return _highlight;
-		}
-		public function set highlight(value:Boolean):void
-		{
-			_highlight = value;
-			invalidateDisplayList();
-		}
-		
+				
 		protected var _heightTo:Number = NaN;
 		public function get heightTo():Number
 		{
@@ -111,12 +98,12 @@ package com.universalsprout.flex.components.list
 		
 		protected function updateY(value:Number):void
 		{
-			super.move(x, value);
+			y = value;
 		}
 		
 		protected function updateHeight(value:Number):void
 		{
-			setActualSize(width, value);
+			height = value;
 		}
 		
 		protected function onTweenEnd(value:Number):void

@@ -55,6 +55,7 @@ package com.cleartext.ximpp.models
 		 * This is the status that the user selects.
 		 */
 		private var _localStatus:Status = new Status(Status.OFFLINE);
+		[Bindable (event="changed")]
 		public function get localStatus():Status
 		{
 			return _localStatus;

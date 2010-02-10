@@ -95,6 +95,7 @@ package com.cleartext.ximpp.models.valueObjects
 				case "chat":			value = AVAILABLE; break;
 				case "away":			value = AWAY; break;
 				case "dnd":				value = BUSY; break;
+				case "inactive" :		value = EXTENDED_AWAY; break;
 				case "xa":				value = EXTENDED_AWAY; break;
 				case "error":			value = ERROR; return true;
 				default:				value = UNKNOWN + ": " + type;
@@ -139,9 +140,9 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 		
-		public function isAvailable():Boolean
+		public function isOffline():Boolean
 		{
-			return sortNumber() <= 3;
+			return sortNumber() > 3;
 		}
 	}
 }

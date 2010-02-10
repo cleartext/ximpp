@@ -2,6 +2,7 @@ package com.cleartext.ximpp.views.buddies
 {
 	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
@@ -9,6 +10,7 @@ package com.cleartext.ximpp.views.buddies
 	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
+	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
 	
 	import mx.core.UITextField;
@@ -16,6 +18,9 @@ package com.cleartext.ximpp.views.buddies
 
 	public class BuddyRenderer extends SproutListItemBase
 	{
+		[Autowire]
+		public var appModel:ApplicationModel;
+		
 		private static const SMALL_HEIGHT:Number = 40;
 		private static const BIG_HEIGHT:Number = 46;
 		private static const AVATAR_SIZE:Number = 32;
@@ -30,6 +35,11 @@ package com.cleartext.ximpp.views.buddies
 		{
 			super(initialWidth, SMALL_HEIGHT);
 			heightTo = SMALL_HEIGHT;
+			addEventListener(MouseEvent.CLICK,
+				function():void
+				{
+					appModel.getChat(buddy);
+				});
 		}
 
 		private function get buddy():Buddy
@@ -56,11 +66,6 @@ package com.cleartext.ximpp.views.buddies
 			}
 
 			invalidateProperties();
-		}
-		
-		private function isAvailable():Boolean
-		{
-			return (buddy && buddy.status.isAvailable());
 		}
 		
 		private function buddyChangedHandler(event:BuddyEvent):void
@@ -141,6 +146,17 @@ package com.cleartext.ximpp.views.buddies
 				customStatusLabel.visible = false;
 				addChild(customStatusLabel);
 			}
+			
+			addEventListener(MouseEvent.ROLL_OUT,
+				function():void
+				{
+					alpha = 0.5;
+				});
+			addEventListener(MouseEvent.ROLL_OVER,
+				function():void
+				{
+					alpha = 1;
+				});
 		}
 		
 		//---------------------------------------
@@ -197,27 +213,28 @@ package com.cleartext.ximpp.views.buddies
 					});
 			}
 			
-			if(buddy.status.isAvailable())
-			{
-				nameLabel.styleName = "dGreyBold";
-				avatar.alpha = 1;
-				alpha = 1;
-			} 
-			else
+			if(buddy.status.isOffline())
 			{
 				nameLabel.styleName = "lGreyBold";
 				avatar.alpha = 0.5;
 				alpha = 0.6;
+			} 
+			else
+			{
+				nameLabel.styleName = "dGreyBold";
+				avatar.alpha = 1;
+				alpha = 1;
 			}
 
 			statusIcon.x = width - PADDING - StatusIcon.SIZE;
 			
 			var maxWidth:Number = width - AVATAR_SIZE - 3*PADDING;
-			nameLabel.width = maxWidth;
+			nameLabel.setActualSize(maxWidth, nameLabel.textHeight);
 
-			customStatusLabel.width = maxWidth;
+			customStatusLabel.setActualSize(maxWidth, customStatusLabel.textHeight);
 			customStatusLabel.truncateToFit();
 
+			statusLabel.setActualSize(maxWidth, statusLabel.textHeight);
 		}
 
 		override public function setWidth(widthVal:Number):Number
@@ -248,7 +265,7 @@ package com.cleartext.ximpp.views.buddies
 			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], matrix);
 			g.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			
-			if(buddy && buddy.status.isAvailable())
+			if(buddy && !buddy.status.isOffline())
 			{
 				g.beginFill(0x000000, 0.15)
 				g.drawRect(0, unscaledHeight-1, unscaledWidth, 1);

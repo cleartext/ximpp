@@ -117,10 +117,10 @@
 				g.lineTo(w-1,h);
 			}
 			
-			private function itemDoubleClicked(event:SproutListEvent):void
-			{
-				appModel.getChat(event.data as Buddy, true);
-			}
+//			private function itemDoubleClicked(event:SproutListEvent):void
+//			{
+//				appModel.getChat(event.data as Buddy, true);
+//			}
 
 			private function userPresenceChangeHandler():void
 			{
@@ -250,8 +250,6 @@
 	<buddies:BuddySproutList
 		id="buddyList" 
 		horizontalScrollPolicy="off"
-		doubleClickEnabled="true"
-		itemDoubleClicked="itemDoubleClicked(event)"
 		dataProvider="{buddies.buddies}"
 		height="100%" width="100%"
 		itemRenderer="{new ClassFactory(BuddyRenderer)}"

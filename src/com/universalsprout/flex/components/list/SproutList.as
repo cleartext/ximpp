@@ -19,7 +19,7 @@ package com.universalsprout.flex.components.list
 	import mx.events.ResizeEvent;
 	
 	[Event(name="collectionChange", type="mx.events.CollectionEvent")]
-	[Event(name="itemDoubleClicked", type="com.universalsprout.flex.components.list.SproutListEvent")]
+//	[Event(name="itemDoubleClicked", type="com.universalsprout.flex.components.list.SproutListEvent")]
 	
 	public class SproutList extends Container
 	{
@@ -125,18 +125,18 @@ package com.universalsprout.flex.components.list
 			invalidateProperties();
 		}
 		
-		override public function set doubleClickEnabled(value:Boolean):void
-		{
-			super.doubleClickEnabled = value;
-			
-			for each(var item:UIComponent in itemRenderersByDataUid)
-			{
-				if(doubleClickEnabled)
-					item.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler, false, 0, true);
-				else
-					item.removeEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
-			}
-		}
+//		override public function set doubleClickEnabled(value:Boolean):void
+//		{
+//			super.doubleClickEnabled = value;
+//			
+//			for each(var item:UIComponent in itemRenderersByDataUid)
+//			{
+//				if(doubleClickEnabled)
+//					item.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler, false, 0, true);
+//				else
+//					item.removeEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
+//			}
+//		}
 		
 		protected function listChangedHandler(event:Event):void
 		{
@@ -264,7 +264,8 @@ package com.universalsprout.flex.components.list
 					item = itemRenderersByDataUid[data.uid];
 					if(item)
 					{
-						item.visible = item.includeInLayout = true;
+						item.visible = true;
+						item.includeInLayout = true;
 
 						if(animate)
 							item.yTo = yCounter;
@@ -278,7 +279,8 @@ package com.universalsprout.flex.components.list
 				for each(uid in dataUidsToHide)
 				{
 					item = itemRenderersByDataUid[uid];
-					item.visible = item.includeInLayout = false;
+					item.visible = false;
+					item.includeInLayout = false;
 				}
 				
 				if(yCounter != previousHeight)
@@ -300,8 +302,8 @@ package com.universalsprout.flex.components.list
 //				index = numChildren;
 			addChild(item);
 	
-			if(doubleClickEnabled)
-				item.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler, false, 0, true);
+//			if(doubleClickEnabled)
+//				item.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler, false, 0, true);
 		}
 		
 		private function removeItemRenderer(item:DisplayObject):void
@@ -309,8 +311,8 @@ package com.universalsprout.flex.components.list
 			delete itemRenderersByDataUid[(item as ISproutListItem).data.uid];
 			
 			item.removeEventListener(ResizeEvent.RESIZE, itemsResizeHandler);
-			if(doubleClickEnabled)
-				item.removeEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
+//			if(doubleClickEnabled)
+//				item.removeEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
 			removeChild(item);
 		}
 		
@@ -344,11 +346,11 @@ package com.universalsprout.flex.components.list
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 		}
 		
-		protected function doubleClickHandler(event:MouseEvent):void
-		{
-			var item:ISproutListItem = event.currentTarget as ISproutListItem;
-			if(item)
-				dispatchEvent(new SproutListEvent(SproutListEvent.ITEM_DOUBLE_CLICKED, item.data as ISproutListData));
-		}
+//		protected function doubleClickHandler(event:MouseEvent):void
+//		{
+//			var item:ISproutListItem = event.currentTarget as ISproutListItem;
+//			if(item)
+//				dispatchEvent(new SproutListEvent(SproutListEvent.ITEM_DOUBLE_CLICKED, item.data as ISproutListData));
+//		}
 	}
 }

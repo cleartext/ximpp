@@ -5,9 +5,6 @@ package com.universalsprout.flex.components.list
 	
 	public interface ISproutListItem extends IDataRenderer, IUIComponent
 	{
-		function get highlight():Boolean;
-		function set highlight(value:Boolean):void;
-		
 		function get heightTo():Number;
 		function set heightTo(value:Number):void
 		
@@ -15,6 +12,5 @@ package com.universalsprout.flex.components.list
 		function set yTo(value:Number):void
 		
 		function setWidth(widthVal:Number):Number;
-		
 	}
 }

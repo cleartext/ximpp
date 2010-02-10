@@ -45,8 +45,11 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var connected:Boolean = false;
 
+		// flags to track progress during connecting
 		private var gotAvatar:Boolean = false;
 		private var gotRosterList:Boolean = false;
+
+		// the xmpp object 
 		private var xmpp:XMPP;
 				
 		//-------------------------------
@@ -239,16 +242,18 @@ package com.cleartext.ximpp.models
 				var error:Boolean = buddy.status.setFromStanzaType(stanza.type);
 				buddy.setCustomStatus((!error) ? stanza.status : "");
 				
+				// only set last seen if the 
+				if(buddy.status.value == Status.AVAILABLE)
+					buddy.setLastSeen(new Date());
+				
 				var avatarHash:String = stanza.avatarHash;
 				if(avatarHash && buddy.avatarHash != avatarHash)
 				{
-					trace(avatarHash);
 					buddy.tempAvatarHash = avatarHash;
 					sendIq(buddy.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
 				}
 				
 				buddies.buddies.refresh();
-
 				database.saveBuddy(buddy);
 			}
 		}

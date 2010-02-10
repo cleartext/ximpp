@@ -28,6 +28,7 @@ package com.cleartext.ximpp.models
 		private var buddiesByJid:Dictionary;
 
 		private var _buddies:ArrayCollection;
+		[Bindable (event="changed")]
 		public function get buddies():ArrayCollection
 		{
 			return _buddies;
@@ -64,7 +65,6 @@ package com.cleartext.ximpp.models
 		}
 
 		private var _searchString:String = "";
-		[Bindable (event="filterChanged")]
 		public function get searchString():String
 		{
 			return _searchString;
@@ -75,7 +75,6 @@ package com.cleartext.ximpp.models
 			{
 				_searchString = value;
 				buddies.refresh();
-				dispatchEvent(new BuddyModelEvent(BuddyModelEvent.FILTER_CHANGED));
 			}
 		}
 
@@ -178,13 +177,19 @@ package com.cleartext.ximpp.models
 		
 		private function buddySort(buddy1:Buddy, buddy2:Buddy, fields:Object=null):int
 		{
-			switch(buddySort)
+			switch(sortType)
 			{
 				case BuddySortTypes.ALPHABETICAL :
+					trace("doing alphabetical");
 					return ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
+
 				case BuddySortTypes.LAST_SEEN :
-					return clamp(buddy2.lastSeen.time - buddy1.lastSeen.time);
+					trace("doing last seen");
+					return ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
+//					return 0;// clamp(buddy2.lastSeen.time - buddy1.lastSeen.time);
+
 				case BuddySortTypes.STATUS :
+					trace("doing status");
 					var statusCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());
 					if(statusCompare != 0)
 						return statusCompare;

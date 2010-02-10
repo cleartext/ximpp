@@ -62,10 +62,11 @@ package com.cleartext.ximpp.models.valueObjects
 		public function setJid(value:String):void
 		{
 			_jid = value;
-			isGateway = _jid.indexOf("@") == -1;
+			isGateway = _jid && _jid.indexOf("@") == -1;
 		}
 		
 		private var _nickName:String;
+		[Bindable (event="buddyChanged")]
 		public function get nickName():String
 		{
 			return (_nickName) ? _nickName : jid;
