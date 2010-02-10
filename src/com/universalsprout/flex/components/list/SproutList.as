@@ -19,7 +19,6 @@ package com.universalsprout.flex.components.list
 	import mx.events.ResizeEvent;
 	
 	[Event(name="collectionChange", type="mx.events.CollectionEvent")]
-//	[Event(name="itemDoubleClicked", type="com.universalsprout.flex.components.list.SproutListEvent")]
 	
 	public class SproutList extends Container
 	{
@@ -125,19 +124,6 @@ package com.universalsprout.flex.components.list
 			invalidateProperties();
 		}
 		
-//		override public function set doubleClickEnabled(value:Boolean):void
-//		{
-//			super.doubleClickEnabled = value;
-//			
-//			for each(var item:UIComponent in itemRenderersByDataUid)
-//			{
-//				if(doubleClickEnabled)
-//					item.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler, false, 0, true);
-//				else
-//					item.removeEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
-//			}
-//		}
-		
 		protected function listChangedHandler(event:Event):void
 		{
 			if(list)
@@ -163,6 +149,9 @@ package com.universalsprout.flex.components.list
 			{
 				case CollectionEventKind.UPDATE :
 				case CollectionEventKind.MOVE :
+				case CollectionEventKind.ADD :
+				case CollectionEventKind.REMOVE :
+				case CollectionEventKind.REPLACE :
 				case CollectionEventKind.REFRESH :
 					itemHeightsInvalid = true;
 					invalidateProperties();
@@ -173,9 +162,6 @@ package com.universalsprout.flex.components.list
 					invalidateProperties();
 					break;
 	
-				case CollectionEventKind.ADD :
-				case CollectionEventKind.REMOVE :
-				case CollectionEventKind.REPLACE :
 					// do nothing
 					break;
 	
@@ -191,7 +177,7 @@ package com.universalsprout.flex.components.list
 				case CollectionEventKind.ADD :
 					var startIndex:int = event.location;
 					for each(var add:ISproutListData in event.items)
-						createItemRenderer(add, startIndex++);
+						createItemRenderer(add);
 					break;
 	
 				case CollectionEventKind.REMOVE :
@@ -292,27 +278,19 @@ package com.universalsprout.flex.components.list
 			}
 		}
 		
-		private function createItemRenderer(data:ISproutListData, index:int=-1):void
+		private function createItemRenderer(data:ISproutListData):void
 		{
 			var item:UIComponent = itemRenderer.newInstance();
 			(item as ISproutListItem).data = data;
 			item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
 			itemRenderersByDataUid[data.uid] = item;
-//			if(index==-1)
-//				index = numChildren;
 			addChild(item);
-	
-//			if(doubleClickEnabled)
-//				item.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler, false, 0, true);
 		}
 		
 		private function removeItemRenderer(item:DisplayObject):void
 		{
 			delete itemRenderersByDataUid[(item as ISproutListItem).data.uid];
-			
 			item.removeEventListener(ResizeEvent.RESIZE, itemsResizeHandler);
-//			if(doubleClickEnabled)
-//				item.removeEventListener(MouseEvent.DOUBLE_CLICK, doubleClickHandler);
 			removeChild(item);
 		}
 		
@@ -325,11 +303,6 @@ package com.universalsprout.flex.components.list
 		{
 			itemHeightsInvalid = true;
 			invalidateProperties();
-		}
-		
-		override public function validateSize(recursive:Boolean=false):void
-		{
-			super.validateSize(recursive);
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -345,12 +318,5 @@ package com.universalsprout.flex.components.list
 			}
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 		}
-		
-//		protected function doubleClickHandler(event:MouseEvent):void
-//		{
-//			var item:ISproutListItem = event.currentTarget as ISproutListItem;
-//			if(item)
-//				dispatchEvent(new SproutListEvent(SproutListEvent.ITEM_DOUBLE_CLICKED, item.data as ISproutListData));
-//		}
 	}
 }

@@ -237,13 +237,16 @@ package com.cleartext.ximpp.models
 					return;
 				}
 				
+				var wasOffline:Boolean = buddy.status.isOffline();
+				
 				buddy.resource = stanza.from.resource;
 				// setFromStanzaType also handles "unsubscribe" and "subscribed"
 				var error:Boolean = buddy.status.setFromStanzaType(stanza.type);
 				buddy.setCustomStatus((!error) ? stanza.status : "");
 				
-				// only set last seen if the 
-				if(buddy.status.value == Status.AVAILABLE)
+				// only set last seen if the buddy was offline or we are now 
+				// explicitly going online
+				if(wasOffline || buddy.status.value == Status.AVAILABLE)
 					buddy.setLastSeen(new Date());
 				
 				var avatarHash:String = stanza.avatarHash;

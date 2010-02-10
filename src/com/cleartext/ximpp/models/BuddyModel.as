@@ -180,16 +180,21 @@ package com.cleartext.ximpp.models
 			switch(sortType)
 			{
 				case BuddySortTypes.ALPHABETICAL :
-					trace("doing alphabetical");
-					return ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
+					return buddy1.nickName.localeCompare(buddy2.nickName);
 
 				case BuddySortTypes.LAST_SEEN :
-					trace("doing last seen");
-					return ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
-//					return 0;// clamp(buddy2.lastSeen.time - buddy1.lastSeen.time);
+					var date1:Date = buddy1.lastSeen;
+					var date2:Date = buddy2.lastSeen;
+					
+					if(!date1 && !date2)
+						return 0;
+					if(!date1)
+						return 1;
+					if(!date2)
+						return -1;
+					return clamp(date2.time - date1.time);
 
 				case BuddySortTypes.STATUS :
-					trace("doing status");
 					var statusCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());
 					if(statusCompare != 0)
 						return statusCompare;

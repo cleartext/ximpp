@@ -27,6 +27,8 @@ package com.cleartext.ximpp.views.buddies
 
 		private static const PADDING:Number = 3;
 		
+		private var over:Boolean = false;
+		
 		//---------------------------------------
 		// Constructor
 		//---------------------------------------
@@ -35,10 +37,23 @@ package com.cleartext.ximpp.views.buddies
 		{
 			super(initialWidth, SMALL_HEIGHT);
 			heightTo = SMALL_HEIGHT;
-			addEventListener(MouseEvent.CLICK,
+			doubleClickEnabled = true;
+			addEventListener(MouseEvent.DOUBLE_CLICK,
 				function():void
 				{
 					appModel.getChat(buddy);
+				});
+			addEventListener(MouseEvent.ROLL_OUT,
+				function():void
+				{
+					over = false;
+					invalidateDisplayList();
+				});
+			addEventListener(MouseEvent.ROLL_OVER,
+				function():void
+				{
+					over = true;
+					invalidateDisplayList();
 				});
 		}
 
@@ -147,16 +162,6 @@ package com.cleartext.ximpp.views.buddies
 				addChild(customStatusLabel);
 			}
 			
-			addEventListener(MouseEvent.ROLL_OUT,
-				function():void
-				{
-					alpha = 0.5;
-				});
-			addEventListener(MouseEvent.ROLL_OVER,
-				function():void
-				{
-					alpha = 1;
-				});
 		}
 		
 		//---------------------------------------

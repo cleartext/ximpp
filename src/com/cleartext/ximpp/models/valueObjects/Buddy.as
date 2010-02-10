@@ -81,6 +81,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		
 		private var _lastSeen:Date;
+		[Bindable (event="buddyChanged")]
 		public function get lastSeen():Date
 		{
 			return _lastSeen;

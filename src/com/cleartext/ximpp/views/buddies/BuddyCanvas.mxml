@@ -117,11 +117,6 @@
 				g.lineTo(w-1,h);
 			}
 			
-//			private function itemDoubleClicked(event:SproutListEvent):void
-//			{
-//				appModel.getChat(event.data as Buddy, true);
-//			}
-
 			private function userPresenceChangeHandler():void
 			{
 				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);

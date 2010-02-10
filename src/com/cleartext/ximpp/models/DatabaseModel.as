@@ -261,6 +261,7 @@ package com.cleartext.ximpp.models
 			if(result && result.data)
 			{
 				var len:int = result.data.length;
+				appModel.log(stmt.text + " : " + len);
 				for(var i:int=0; i<len; i++)
 					appModel.microBloggingMessages.addItem(Message.createFromDB(result.data[i]));
 			}
