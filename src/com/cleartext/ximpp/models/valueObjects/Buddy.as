@@ -168,7 +168,10 @@ package com.cleartext.ximpp.models.valueObjects
 			newBuddy.setLastSeen(obj["lastSeen"]);
 			newBuddy.setCustomStatus(obj["customStatus"]);
 
-			newBuddy.groups = (obj["groups"] as String).split(",");
+			var groups:Array = (obj["groups"] as String).split(",");
+			if(groups.length == 1 && groups[0] == "")
+				groups = [];
+			newBuddy.groups = groups;
 			newBuddy.avatarHash = obj["avatarHash"];
 			newBuddy.subscription = obj["subscription"];
 			AvatarUtils.stringToAvatar(obj["avatar"], newBuddy);

@@ -42,6 +42,12 @@
 	font-weight: bold;
 }
 
+TitleWindow
+{
+	borderAlpha: 0.8;
+	borderColor: #333333;
+	titleStyleName: whiteBoldBig;
+}
 
 HDividedBox
 {

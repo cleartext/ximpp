@@ -2,9 +2,7 @@ package com.universalsprout.flex.components.list
 {
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-	import flash.events.MouseEvent;
 	import flash.utils.Dictionary;
-	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
@@ -144,14 +142,11 @@ package com.universalsprout.flex.components.list
 		 */
 		protected function collectionChangeHandler(event:CollectionEvent):void
 		{
-			trace(event.kind);
+			//trace("collection", event.kind);
 			switch(event.kind)
 			{
 				case CollectionEventKind.UPDATE :
 				case CollectionEventKind.MOVE :
-				case CollectionEventKind.ADD :
-				case CollectionEventKind.REMOVE :
-				case CollectionEventKind.REPLACE :
 				case CollectionEventKind.REFRESH :
 					itemHeightsInvalid = true;
 					invalidateProperties();
@@ -162,16 +157,21 @@ package com.universalsprout.flex.components.list
 					invalidateProperties();
 					break;
 	
+				case CollectionEventKind.ADD :
+				case CollectionEventKind.REMOVE :
+				case CollectionEventKind.REPLACE :
 					// do nothing
 					break;
 	
 				default :
 					trace("[SproutList] collectionChangeHander() called with unknown kind: " + event.kind);
 			}
+			invalidateDisplayList();
 		}
 		
 		protected function listCollectionChangeHandler(event:CollectionEvent):void
 		{
+			//trace("list      ", event.kind);
 			switch(event.kind)
 			{
 				case CollectionEventKind.ADD :
@@ -199,6 +199,7 @@ package com.universalsprout.flex.components.list
 				default :
 					trace("[SproutList] collectionChangeHander() called with unknown kind: " + event.kind);
 			}
+			invalidateDisplayList();
 		}
 		
 		override protected function createChildren():void
@@ -247,19 +248,16 @@ package com.universalsprout.flex.components.list
 					delete dataUidsToHide[data.uid];
 	
 					// find itemRenderer
-					item = itemRenderersByDataUid[data.uid];
-					if(item)
-					{
-						item.visible = true;
-						item.includeInLayout = true;
+					item = createItemRenderer(data);
+					item.visible = true;
+					item.includeInLayout = true;
 
-						if(animate)
-							item.yTo = yCounter;
-						else
-							item.move(0, yCounter);
-		
-						yCounter += vGap + item.setWidth(itemWidth);
-					}
+					if(animate)
+						item.yTo = yCounter;
+					else
+						item.move(0, yCounter);
+	
+					yCounter += vGap + item.setWidth(itemWidth);
 				}
 				
 				for each(uid in dataUidsToHide)
@@ -278,13 +276,18 @@ package com.universalsprout.flex.components.list
 			}
 		}
 		
-		private function createItemRenderer(data:ISproutListData):void
+		private function createItemRenderer(data:ISproutListData):ISproutListItem
 		{
-			var item:UIComponent = itemRenderer.newInstance();
-			(item as ISproutListItem).data = data;
-			item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
-			itemRenderersByDataUid[data.uid] = item;
-			addChild(item);
+			var item:ISproutListItem = itemRenderersByDataUid[data.uid]; 
+			if(!item)
+			{
+				item = itemRenderer.newInstance();
+				item.data = data;
+				item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
+				itemRenderersByDataUid[data.uid] = item;
+				addChild(item as UIComponent);
+			}
+			return item;
 		}
 		
 		private function removeItemRenderer(item:DisplayObject):void

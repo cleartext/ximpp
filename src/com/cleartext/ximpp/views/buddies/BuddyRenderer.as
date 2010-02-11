@@ -37,6 +37,7 @@ package com.cleartext.ximpp.views.buddies
 		{
 			super(initialWidth, SMALL_HEIGHT);
 			heightTo = SMALL_HEIGHT;
+			cacheAsBitmap = true;
 			doubleClickEnabled = true;
 			addEventListener(MouseEvent.DOUBLE_CLICK,
 				function():void

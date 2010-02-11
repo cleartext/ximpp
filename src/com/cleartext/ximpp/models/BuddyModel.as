@@ -24,6 +24,7 @@ package com.cleartext.ximpp.models
 		
 		public static const GATEWAY_GROUP:String = "Gateways";
 		public static const ALL_BUDDIES_GROUP:String = "All Buddies";
+		public static const UNASIGNED:String = "Unasigned";
 		
 		private var buddiesByJid:Dictionary;
 
@@ -71,6 +72,7 @@ package com.cleartext.ximpp.models
 		}
 		public function set searchString(value:String):void
 		{
+			value = value.toLowerCase();
 			if(_searchString != value)
 			{
 				_searchString = value;
@@ -110,7 +112,7 @@ package com.cleartext.ximpp.models
 		
 		public function addBuddy(buddy:Buddy):void
 		{
-			if(!buddies.contains(buddy))
+			if(buddies.list.getItemIndex(buddy) == -1)
 			{
 				buddies.addItem(buddy);
 				buddiesByJid[buddy.jid] = buddy;
@@ -162,12 +164,16 @@ package com.cleartext.ximpp.models
 
 		private function buddyFilter(buddy:Buddy):Boolean
 		{
-			if(buddy.nickName.indexOf(searchString) == -1)
+			if(searchString != "" && 
+					(buddy.nickName.toLowerCase().indexOf(searchString) == -1 || 
+					buddy.jid.toLowerCase().indexOf(searchString) == -1))
 				return false; 
 			
 			if(groupName == ALL_BUDDIES_GROUP && !buddy.isGateway)
 				return true;
 			else if(groupName == GATEWAY_GROUP && buddy.isGateway)
+				return true;
+			else if(groupName == UNASIGNED && buddy.groups.length == 0)
 				return true;
 			else if(buddy.groups.indexOf(groupName) != -1)
 				return true;
@@ -180,7 +186,7 @@ package com.cleartext.ximpp.models
 			switch(sortType)
 			{
 				case BuddySortTypes.ALPHABETICAL :
-					return buddy1.nickName.localeCompare(buddy2.nickName);
+					return clamp(buddy1.nickName.localeCompare(buddy2.nickName));
 
 				case BuddySortTypes.LAST_SEEN :
 					var date1:Date = buddy1.lastSeen;
@@ -198,7 +204,7 @@ package com.cleartext.ximpp.models
 					var statusCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());
 					if(statusCompare != 0)
 						return statusCompare;
-					return ObjectUtil.compare(buddy1.nickName, buddy2.nickName);
+					return clamp(buddy1.nickName.localeCompare(buddy2.nickName));
 			}
 			return 0;
 		}

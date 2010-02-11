@@ -250,7 +250,7 @@ package com.cleartext.ximpp.models
 					buddy.setLastSeen(new Date());
 				
 				var avatarHash:String = stanza.avatarHash;
-				if(avatarHash && buddy.avatarHash != avatarHash)
+				if(avatarHash && (buddy.avatarHash != avatarHash || !buddy.avatar))
 				{
 					buddy.tempAvatarHash = avatarHash;
 					sendIq(buddy.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
@@ -318,7 +318,11 @@ package com.cleartext.ximpp.models
 				
 				var groups:Array = new Array();
 				for each(var group:XML in item.rosterns::group)
-					groups.push(group.text());
+					{
+						var gString:String = String(group.text());
+						if(gString != "")
+							groups.push(gString);
+					}
 				buddy.groups = groups;
 				
 				buddy.setNickName(item.@name);

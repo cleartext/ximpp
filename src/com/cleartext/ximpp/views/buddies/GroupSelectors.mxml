@@ -49,5 +49,6 @@
 	
 	<mx:Button label="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" />
 	<mx:Button label="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" />
+	<mx:Button label="{BuddyModel.UNASIGNED}" click="clickHandler(event)" />
 	
 </mx:VBox>
