@@ -1,9 +1,8 @@
 package com.universalsprout.flex.components.list
 {
-	import flash.display.Graphics;
 	import flash.events.Event;
 	
-	import mx.core.UIComponent;
+	import mx.core.IInvalidating;
 	import mx.effects.Tween;
 	import mx.events.PropertyChangeEvent;
 	import mx.events.ResizeEvent;
@@ -98,6 +97,9 @@ package com.universalsprout.flex.components.list
 		
 		protected function updateY(value:Number):void
 		{
+			var p:IInvalidating = parent as IInvalidating;
+			if(p)
+				p.invalidateDisplayList();
 			y = value;
 		}
 		

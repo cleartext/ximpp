@@ -18,7 +18,7 @@ package com.cleartext.ximpp.views.messages
 		
 		public function MessageRenderer()
 		{
-			super();
+			super(NaN, 10);
 		}
 
 		private var avatar:Avatar;

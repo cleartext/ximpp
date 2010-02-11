@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-	creationComplete="groupListChanged(null)">
+	creationComplete="groupListChanged(null)"
+	xmlns:common="com.cleartext.ximpp.views.common.*"
+	width="100%"
+	height="100%">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.PopUpEvent;
+			import org.swizframework.Swiz;
+			import com.cleartext.ximpp.views.common.SideButton;
 			import mx.controls.Button;
 			import com.cleartext.ximpp.events.BuddyModelEvent;
 			import com.cleartext.ximpp.models.BuddyModel;
@@ -16,39 +22,58 @@
 			[Mediate (event="BuddyModelEvent.GROUPS_CHANGED")]
 			public function groupListChanged(event:BuddyModelEvent):void
 			{
-				for each(var b:Button in groupButtons)
+				var button:SideButton;
+				
+				for each(button in groupButtons)
 				{
-					b.visible = button.includeInLayout = false;
+					button.visible = button.includeInLayout = false;
 				}
 				
 				for each(var group:String in buddies.groups)
 				{
-					var button:Button = groupButtons[group] as Button;
+					button = groupButtons[group] as SideButton;
 					
 					if(!button)
 					{
-						button = new Button();
+						button = new SideButton();
 						groupButtons[group] = button;
-						button.label = group;
+						button.text = group;
 						button.addEventListener(MouseEvent.CLICK, clickHandler);
-						addChild(button);
+						addChildAt(button, numChildren-1);
 					}	
 					else
 					{
 						button.visible = button.includeInLayout = true;
 					}
 				}
+
+				for each(button in groupButtons)
+				{
+					if(!button.visible)
+						removeChild(button);
+				}
 			}
 			
 			private function clickHandler(event:MouseEvent):void
 			{
-				buddies.groupName = event.target.label;
+				buddies.groupName = event.target.text;
+				invalidateProperties();
 			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				for each(var sb:SideButton in getChildren())
+					sb.selected = sb.text==buddies.groupName;
+			}
+
 		]]>
 	</mx:Script>
 	
-	<mx:Button label="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" />
-	<mx:Button label="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" />
-	<mx:Button label="{BuddyModel.UNASIGNED}" click="clickHandler(event)" />
+	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" />
+	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" />
+	<common:SideButton text="{BuddyModel.UNASIGNED}" click="clickHandler(event)" />
 	
+	<common:SideButton text="Add / Remove" click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_NEW_BUDDY_WINDOW))" />
 </mx:VBox>

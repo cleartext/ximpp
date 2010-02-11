@@ -72,7 +72,8 @@ package com.cleartext.ximpp.models.valueObjects
 			newMessage.recipient = stanza.to.getBareJID();
 			newMessage.type = stanza.type;
 			newMessage.subject = stanza.subject;
-			newMessage.body = (stanza.html) ? stanza.html : stanza.body;
+//			newMessage.body = (stanza.html) ? stanza.html : stanza.body;
+			newMessage.body = stanza.body;
 			
 			return newMessage;
 		}

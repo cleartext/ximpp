@@ -302,7 +302,7 @@ package com.universalsprout.flex.components.list
 			callLater(invalidateLater);
 		}
 		
-		private function invalidateLater():void
+		protected function invalidateLater():void
 		{
 			itemHeightsInvalid = true;
 			invalidateProperties();

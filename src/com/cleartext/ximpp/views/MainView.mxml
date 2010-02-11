@@ -114,8 +114,6 @@
 	</mx:Script>
 	
 	<header:HeaderCanvas id="headerCanvas"/>
-	<buddies:GroupSelectors
-		top="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
 	<mx:VDividedBox 
 		top="{headerCanvas.height}" 
 		bottom="0" 
@@ -141,5 +139,7 @@
 			visible="{appModel.showConsole}"
 			/>
 	</mx:VDividedBox>
+	<buddies:GroupSelectors
+		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT + 1}" />
 	
 </mx:Canvas>

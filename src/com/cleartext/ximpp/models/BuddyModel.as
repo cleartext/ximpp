@@ -24,7 +24,7 @@ package com.cleartext.ximpp.models
 		
 		public static const GATEWAY_GROUP:String = "Gateways";
 		public static const ALL_BUDDIES_GROUP:String = "All Buddies";
-		public static const UNASIGNED:String = "Unasigned";
+		public static const UNASIGNED:String = "No Group";
 		
 		private var buddiesByJid:Dictionary;
 

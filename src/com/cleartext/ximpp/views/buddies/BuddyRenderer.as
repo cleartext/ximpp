@@ -24,6 +24,7 @@ package com.cleartext.ximpp.views.buddies
 		private static const SMALL_HEIGHT:Number = 40;
 		private static const BIG_HEIGHT:Number = 46;
 		private static const AVATAR_SIZE:Number = 32;
+		private static const LEFT_PADDING:Number = 6;
 
 		private static const PADDING:Number = 3;
 		
@@ -118,7 +119,7 @@ package com.cleartext.ximpp.views.buddies
 			{
 				avatar = new Avatar();
 				avatar.buttonMode = true;
-				avatar.x = PADDING;
+				avatar.x = LEFT_PADDING;
 				avatar.y = PADDING;
 				avatar.width = AVATAR_SIZE;
 				avatar.height = AVATAR_SIZE;
@@ -139,7 +140,7 @@ package com.cleartext.ximpp.views.buddies
 			if(!nameLabel)
 			{
 				nameLabel = new UITextField();
-				nameLabel.x = AVATAR_SIZE + 2*PADDING;
+				nameLabel.x = AVATAR_SIZE + PADDING + LEFT_PADDING;
 				nameLabel.y = PADDING;
 				addChild(nameLabel);
 			}
@@ -148,7 +149,7 @@ package com.cleartext.ximpp.views.buddies
 			{
 				statusLabel = new UITextField();
 				statusLabel.styleName = "lGreyNormal";
-				statusLabel.x = AVATAR_SIZE + 2*PADDING;
+				statusLabel.x = AVATAR_SIZE + PADDING + LEFT_PADDING;
 				statusLabel.y = 16;
 				addChild(statusLabel);
 			}
@@ -157,7 +158,7 @@ package com.cleartext.ximpp.views.buddies
 			{
 				customStatusLabel = new UITextField();
 				customStatusLabel.styleName = "lGreyNormal";
-				customStatusLabel.x = AVATAR_SIZE + 2*PADDING
+				customStatusLabel.x = AVATAR_SIZE + PADDING + LEFT_PADDING;
 				customStatusLabel.y = 29;
 				customStatusLabel.visible = false;
 				addChild(customStatusLabel);
@@ -234,7 +235,7 @@ package com.cleartext.ximpp.views.buddies
 
 			statusIcon.x = width - PADDING - StatusIcon.SIZE;
 			
-			var maxWidth:Number = width - AVATAR_SIZE - 3*PADDING;
+			var maxWidth:Number = width - AVATAR_SIZE - StatusIcon.SIZE - 4*PADDING - LEFT_PADDING;
 			nameLabel.setActualSize(maxWidth, nameLabel.textHeight);
 
 			customStatusLabel.setActualSize(maxWidth, customStatusLabel.textHeight);

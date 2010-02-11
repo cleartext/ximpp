@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	applicationComplete="maximize(); ToolTipManager.showDelay=100;"
+	applicationComplete="applicationCompleteHandler()"
 	close="mainView.appModel.shutDown()"
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
@@ -10,6 +10,12 @@
 	<mx:Script>
 		<![CDATA[
 			import mx.managers.ToolTipManager;
+			
+			private function applicationCompleteHandler():void
+			{
+				maximize();
+				ToolTipManager.showDelay=100;
+			}
 		]]>
 	</mx:Script>
 	

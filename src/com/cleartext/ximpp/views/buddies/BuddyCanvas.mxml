@@ -250,8 +250,4 @@
 		itemRenderer="{new ClassFactory(BuddyRenderer)}"
 		editBuddy="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW,'',(event.target.data as Buddy)))">
 	</buddies:BuddySproutList>
-
-	<mx:Canvas>
-		<mx:Button x="20" label="add buddy" click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_NEW_BUDDY_WINDOW))"/>
-	</mx:Canvas>
 </mx:VBox>
