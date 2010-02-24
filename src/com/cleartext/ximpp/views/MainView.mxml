@@ -9,6 +9,9 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.events.SendButtonEvent;
+			import org.swizframework.Swiz;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.views.popup.PreferenceWindow;
@@ -28,7 +31,11 @@
 		
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;		
+			public var buddies:BuddyModel;
+			
+			[Autowire(bean="xmpp", property="connected")]
+			[Bindable]
+			public var xmppConnected:Boolean;
 		
 			private function init():void
 			{
@@ -139,6 +146,18 @@
 			visible="{appModel.showConsole}"
 			/>
 	</mx:VDividedBox>
+
+	<mx:Button
+		upIcon="{Constants.SendUp}"
+		overIcon="{Constants.SendUp}"
+		downIcon="{Constants.SendDown}"
+		disabledIcon="{Constants.SendDisabled}"
+		toolTip="send message"
+		enabled="{xmppConnected}"
+		right="10" y="{27 + headerCanvas.height}"
+		width="50" height="50"
+		click="Swiz.dispatchEvent(new SendButtonEvent(SendButtonEvent.SEND_CLICKED));"/>
+
 	<buddies:GroupSelectors
 		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT + 1}" />
 	

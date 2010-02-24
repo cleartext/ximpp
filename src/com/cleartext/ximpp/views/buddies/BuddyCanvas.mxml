@@ -11,6 +11,9 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.DatabaseModel;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.events.CustomStatusEvent;
 			import com.cleartext.ximpp.models.valueObjects.BuddySortTypes;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import com.cleartext.ximpp.events.UserAccountEvent;
@@ -38,29 +41,13 @@
 			[Bindable]
 			public var buddies:BuddyModel;
 			
-			[Embed (source="/com/cleartext/ximpp/assets/timeUp.png")]
+			[Autowire]
 			[Bindable]
-			public var TimeUp:Class;
+			public var xmppModel:XMPPModel;
 			
-			[Embed (source="/com/cleartext/ximpp/assets/timeSelected.png")]
+			[Autowire]
 			[Bindable]
-			public var TimeSelected:Class;
-			
-			[Embed (source="/com/cleartext/ximpp/assets/abcUp.png")]
-			[Bindable]
-			public var AbcUp:Class;
-			
-			[Embed (source="/com/cleartext/ximpp/assets/abcSelected.png")]
-			[Bindable]
-			public var AbcSelected:Class;
-			
-			[Embed (source="/com/cleartext/ximpp/assets/statusUp.png")]
-			[Bindable]
-			public var StatusUp:Class;
-			
-			[Embed (source="/com/cleartext/ximpp/assets/statusSelected.png")]
-			[Bindable]
-			public var StatusSelected:Class;
+			public var database:DatabaseModel;
 			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
@@ -120,6 +107,11 @@
 			private function userPresenceChangeHandler():void
 			{
 				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
+				if(microBloggingCheckBox.selected && customStatusInput.text != "")
+				{
+					appModel.getChat(new Buddy("microBlogging"));
+					Swiz.dispatchEvent(new CustomStatusEvent(CustomStatusEvent.CUSTOM_STATUS_CHANGE, customStatusInput.text));
+				}
 			}
 			
 			private function init():void
@@ -165,6 +157,7 @@
 			
 		<common:DefaultTextInput
 			id="customStatusInput"
+			enabled="{xmppModel.connected}"
 			valueCommit="userPresenceChangeHandler()"
 			defaultText="custom status..."
 			keyDown="if(event.keyCode==Keyboard.ENTER) userPresenceChangeHandler()"
@@ -177,11 +170,17 @@
 			/>
 		
 		<mx:CheckBox
-			id="bloggingCheckBox"
+			id="microBloggingCheckBox"
 			bottom="5" right="5"
 			labelPlacement="right"
 			label="send status to micro-blogging networks?"
-			 fontSize="9.5" borderColor="#DFE0E1" color="#B0B0B0" cornerRadius="4"/>
+			fontSize="9.5"
+			borderColor="#DFE0E1"
+			color="#B0B0B0"
+			cornerRadius="4"
+			selected="{settings.global.sendStatusToMicroBlogging}"
+			click="settings.global.sendStatusToMicroBlogging = microBloggingCheckBox.selected; database.saveGlobalSettings()"
+			/>
 
 		<common:Avatar
 			id="avatar"
@@ -207,11 +206,11 @@
 		<mx:Button
 			right="64" y="32"
 			skin="{null}"
-			upSkin="{TimeUp}"
-			downSkin="{TimeUp}"
-			overSkin="{TimeUp}"
-			disabledSkin="{TimeSelected}"
-			enabled="{buddies.sortType != BuddySortTypes.LAST_SEEN}"
+			upSkin="{Constants.TimeUp}"
+			downSkin="{Constants.TimeUp}"
+			overSkin="{Constants.TimeUp}"
+			disabledSkin="{Constants.TimeSelected}"
+			enabled="{settings.global.buddySortMethod != BuddySortTypes.LAST_SEEN}"
 			click="buddies.sortType = BuddySortTypes.LAST_SEEN"
 			buttonMode="true"
 			toolTip="sort by last seen"
@@ -219,11 +218,11 @@
 		<mx:Button
 			right="36" y="32"
 			skin="{null}"
-			upSkin="{StatusUp}"
-			downSkin="{StatusUp}"
-			overSkin="{StatusUp}"
-			disabledSkin="{StatusSelected}"
-			enabled="{buddies.sortType != BuddySortTypes.STATUS}"
+			upSkin="{Constants.StatusUp}"
+			downSkin="{Constants.StatusUp}"
+			overSkin="{Constants.StatusUp}"
+			disabledSkin="{Constants.StatusSelected}"
+			enabled="{settings.global.buddySortMethod != BuddySortTypes.STATUS}"
 			click="buddies.sortType = BuddySortTypes.STATUS"
 			buttonMode="true"
 			toolTip="sort by status"
@@ -231,11 +230,11 @@
 		<mx:Button
 			right="9" y="32"
 			skin="{null}"
-			upSkin="{AbcUp}"
-			downSkin="{AbcUp}"
-			overSkin="{AbcUp}"
-			disabledSkin="{AbcSelected}"
-			enabled="{buddies.sortType != BuddySortTypes.ALPHABETICAL}"
+			upSkin="{Constants.AbcUp}"
+			downSkin="{Constants.AbcUp}"
+			overSkin="{Constants.AbcUp}"
+			disabledSkin="{Constants.AbcSelected}"
+			enabled="{settings.global.buddySortMethod != BuddySortTypes.ALPHABETICAL}"
 			click="buddies.sortType = BuddySortTypes.ALPHABETICAL"
 			buttonMode="true"
 			toolTip="sort alphabetically"

@@ -146,15 +146,21 @@ package com.seesmic.as3.xmpp
 		protected function handleDisconnected(e:StreamEvent):void {
 			state['connected'] = false;
 			tryReconnect(true);
-			/** modified by astewart@cleartext.com */
+			/**
+			 * modified by astewart@cleartext.com
+			 */
 			dispatchEvent(e);
+			/**/
 		}
 		
 		protected function handleConnectFailed(e:StreamEvent):void {
 			state['connected'] = false;
 			tryReconnect(false);
-			/** modified by astewart@cleartext.com */
+			/**
+			 * modified by astewart@cleartext.com
+			 */
 			dispatchEvent(e);
+			/**/
 		}
 		
 		private function tryReconnect(reset:Boolean=true):void {
@@ -317,7 +323,12 @@ package com.seesmic.as3.xmpp
 			//send("<message type='" + type + "' from='" + fulljid.toString() + "' to='" + tojid + "'><body>" + msg + "</body></message>");
 		}
 		
+		/**
+		 * modified by astewart@cleartext.com
+		 * added PresenceStanza avatarHash property
+		 */
 		public function sendPresence(status:String=null,show:String=null,priority:String=null,tojid:String=null,avatarHash:String=null):void {
+		/** old: public function sendPresence(status:String=null,show:String=null,priority:String=null,tojid:String=null):void {*/
 			var npres:PresenceStanza = new PresenceStanza(this);
 			if(tojid) {
 				npres.setTo(tojid);
@@ -333,11 +344,14 @@ package com.seesmic.as3.xmpp
 			}
 			
 			/**
-			 * PresenceStanza.avatarHash added by astewart@cleartext.com
+			 * modified by astewart@cleartext.com
+			 * added PresenceStanza avatarHash property
 			 */
 			if(avatarHash) {
 				npres.setAvatarHash(avatarHash);
 			}
+			/**/
+
 			npres.send();
 		}
 		
@@ -361,11 +375,17 @@ package com.seesmic.as3.xmpp
 				var result:Dictionary;
 				for each(var item:XML in xml.rosterns::query.rosterns::item) {
 					groups = new Array();
-					// old: for each(var group:XML in item.group) {
-					// edited by astewart@cleartext.com
+
+					/**
+					 * modified by astewart@cleartext.com
+					 * previous groups parsing did not work without namespace
+					 */
 					for each(var group:XML in item.rosterns::group) {
 						groups.push(group.text());
 					}
+
+					/** old: for each(var group:XML in item.group) { */
+
 					var jid:JID = new JID(item.@jid);
 					result = roster.updateItem(jid, item.@subscription, item.@name, groups);
 					dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_ITEM, false, false, result));

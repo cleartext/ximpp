@@ -6,16 +6,9 @@ package com.cleartext.ximpp.models.valueObjects
 	{
 		public static const CREATE_GLOBAL_SETTINGS_TABLE:String =
 				"CREATE TABLE IF NOT EXISTS globalSettings (" +
-				"settingId INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				"autoConnect BOOLEAN DEFAULT False, " +
-				"urlShortener TEXT DEFAULT '" + UrlShortener.types[0] + "', " +
-				"timelineTopDown BOOLEAN DEFAULT True, " +
-				"chatTopDown BOOLEAN DEFAULT False, " +
-				"animateBuddyList BOOLEAN DEFAULT True, " +
-				"numChatMessages INTEGER DEFAULT 150, " +
-				"numTimelineMessages INTEGER DEFAULT 250, " +
-				"openChats TEXT, " + 
-				"userId INTEGER DEFAULT 1);";
+				"settingId INTEGER PRIMARY KEY AUTOINCREMENT, " + 
+				"userId INTEGER DEFAULT 1, " +
+				"xml TEXT);";
 		
 		public function GlobalSettings()
 		{
@@ -24,40 +17,77 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public var autoConnect:Boolean;
 		public var urlShortener:String;
-		public var timelineTopDown:Boolean;
-		public var chatTopDown:Boolean;
-		public var animateBuddyList:Boolean ;
+		public var animateBuddyList:Boolean;
 		public var numChatMessages:uint;
 		public var numTimelineMessages:uint;
+		public var showOfflineBuddies:Boolean;
+		
+		[Bindable]
+		public var buddySortMethod:String;
+		
+		[Bindable]
+		public var sendStatusToMicroBlogging:Boolean;
 
 		public static function createFromDB(obj:Object):GlobalSettings
 		{
 			var newGlobalSettings:GlobalSettings = new GlobalSettings();
+
+			// if we have values from the db, then use them, else
+			// just set the default values
+			if(obj["xml"] != null)
+			{
+				var xml:XML = new XML(obj["xml"] as String);
+				newGlobalSettings.autoConnect = xml.@autoConnect == "true";
+				newGlobalSettings.urlShortener = xml.@urlShortener;
+				newGlobalSettings.animateBuddyList = xml.@animateBuddyList == "true";
+				newGlobalSettings.numChatMessages = xml.@numChatMessages;
+				newGlobalSettings.numTimelineMessages = xml.@numTimelineMessages;
+				newGlobalSettings.showOfflineBuddies = xml.@showOfflineBuddies == "true";
+				newGlobalSettings.sendStatusToMicroBlogging = xml.@sendStatusToMicroBlogging == "true";
+				newGlobalSettings.buddySortMethod = xml.@buddySortMethod;
+			}
+			else
+			{
+				newGlobalSettings.autoConnect = true;
+				newGlobalSettings.animateBuddyList = true;
+				newGlobalSettings.showOfflineBuddies = true;
+				newGlobalSettings.sendStatusToMicroBlogging = false;
+			}
 			
-			newGlobalSettings.autoConnect = obj["autoConnect"];
-			newGlobalSettings.urlShortener = obj["urlShortener"];
-			newGlobalSettings.timelineTopDown = obj["timelineTopDown"];
-			newGlobalSettings.chatTopDown = obj["chatTopDown"];
-			newGlobalSettings.animateBuddyList = obj["animateBuddyList"];
-			newGlobalSettings.numChatMessages = obj["numChatMessages"];
-			newGlobalSettings.numTimelineMessages = obj["numTimelineMessages"];
-			
+			// make sure that the values are set and are reasonable
+			if(newGlobalSettings.numChatMessages < 1)
+				newGlobalSettings.numChatMessages = 200;
+
+			if(newGlobalSettings.numTimelineMessages < 1)
+				newGlobalSettings.numTimelineMessages = 200;
+
+			if(UrlShortener.types.indexOf(newGlobalSettings.urlShortener) == -1)
+				newGlobalSettings.urlShortener = UrlShortener.types[0];
+
+			if(BuddySortTypes.types.indexOf(newGlobalSettings.buddySortMethod) == -1)
+				newGlobalSettings.buddySortMethod = BuddySortTypes.STATUS;
+
 			return newGlobalSettings;
 		}
 		
 		public function toDatabaseValues(userId:int):Array
 		{
+			var xml:XML = <globalSettings
+				autoConnect={autoConnect} 
+				urlShortener={urlShortener} 
+				animateBuddyList={animateBuddyList} 
+				numChatMessages={numChatMessages} 
+				numTimelineMessages={numTimelineMessages} 
+				showOfflineBuddies={showOfflineBuddies} 
+				sendStatusToMicroBlogging={sendStatusToMicroBlogging} 
+				buddySortMethod={buddySortMethod}
+				/>;
+				
 			return [
-				new DatabaseValue("autoConnect", autoConnect),
-				new DatabaseValue("urlShortener", urlShortener),
-				new DatabaseValue("timelineTopDown", timelineTopDown),
-				new DatabaseValue("chatTopDown", chatTopDown),
-				new DatabaseValue("animateBuddyList", animateBuddyList),
-				new DatabaseValue("numChatMessages", numChatMessages),
-				new DatabaseValue("numTimelineMessages", numTimelineMessages),
-				new DatabaseValue("userId", userId)];
+				new DatabaseValue("userId", userId),
+				new DatabaseValue("xml", xml.toXMLString())];
 		}
-		
+				
 		override public function toString():String
 		{
 			return null;

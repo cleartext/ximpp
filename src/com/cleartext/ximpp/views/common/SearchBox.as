@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.events.SearchBoxEvent;
+	import com.cleartext.ximpp.models.Constants;
 	
 	import flash.display.Graphics;
 	import flash.events.KeyboardEvent;
@@ -19,10 +20,6 @@ package com.cleartext.ximpp.views.common
 		private var textInput:DefaultTextInput;
 		private var resetButton:Button;
 		private var searchString:String;
-		
-		[Embed (source="/com/cleartext/ximpp/assets/clear.png")]
-		[Bindable]
-		public var ClearIcon:Class;
 		
 		public var borderAlpha:Number = 1;
 	
@@ -58,8 +55,10 @@ package com.cleartext.ximpp.views.common
 				resetButton = new Button();
 				resetButton.addEventListener(MouseEvent.CLICK, resetButtonHandler);
 				resetButton.visible = false;
-				resetButton.setStyle("icon", ClearIcon);
 				resetButton.setStyle("skin", null);
+				resetButton.setStyle("upIcon", Constants.CloseUp);
+				resetButton.setStyle("overIcon", Constants.CloseOver);
+				resetButton.setStyle("downIcon", Constants.CloseUp);
 				resetButton.buttonMode = true;
 				addChild(resetButton);
 			}

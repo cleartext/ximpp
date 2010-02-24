@@ -2,6 +2,7 @@ package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	
@@ -17,12 +18,9 @@ package com.cleartext.ximpp.views.common
 
 	public class Avatar extends UIComponent
 	{
-		[Embed (source="../../assets/edit.png")]
-		private var EditIcon:Class;
+		[Embed (source="/com/cleartext/ximpp/assets/user.jpg")]
+		public static const DefaultAvatar:Class;
 
-		[Embed(source="../../assets/user.jpg")]
-		private var DefaultAvatar:Class;
-		
 		public function Avatar()
 		{
 			super();
@@ -215,17 +213,17 @@ package com.cleartext.ximpp.views.common
 				g.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			}
 	
-			if(showEditIcon)
-			{
-				var editBitmapData:BitmapData = new EditIcon().bitmapData;
-				var transform:ColorTransform = new ColorTransform();
-				transform.alphaMultiplier = 0.85;
-				editBitmapData.colorTransform(editBitmapData.rect, transform);
-				
-				scale = Math.min(unscaledWidth/editBitmapData.width, unscaledHeight/editBitmapData.height);
-				g.beginBitmapFill(editBitmapData, new Matrix(scale, 0, 0, scale));
-				g.drawRect(0,0,unscaledWidth,unscaledHeight);
-			}
+//			if(showEditIcon)
+//			{
+//				var editBitmapData:BitmapData = new Constants.EditIcon().bitmapData;
+//				var transform:ColorTransform = new ColorTransform();
+//				transform.alphaMultiplier = 0.85;
+//				editBitmapData.colorTransform(editBitmapData.rect, transform);
+//				
+//				scale = Math.min(unscaledWidth/editBitmapData.width, unscaledHeight/editBitmapData.height);
+//				g.beginBitmapFill(editBitmapData, new Matrix(scale, 0, 0, scale));
+//				g.drawRect(0,0,unscaledWidth,unscaledHeight);
+//			}
 		}
 
 		

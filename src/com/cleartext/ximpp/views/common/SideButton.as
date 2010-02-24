@@ -1,32 +1,33 @@
 package com.cleartext.ximpp.views.common
 {
+	import com.cleartext.ximpp.models.Constants;
+	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
 	import flash.geom.Matrix;
 	
+	import mx.controls.Button;
 	import mx.controls.Image;
 	import mx.core.UIComponent;
 	import mx.core.UITextField;
 
 	public class SideButton extends UIComponent
 	{
-		[Embed (source="/com/cleartext/ximpp/assets/defaultGroup.png")]
-		public static const DefaultGroupIcon:Class;
-			
 		private static const SELECTED_WIDTH:Number = 41;
 		private static const NORMAL_WIDTH:Number = 32;
 //		private static const TRIANGLE_WIDTH:Number = 8;
 
 		private var textField:UITextField;
 		private var image:Image;
+		private var deleteButton:Button;
 		
 		private var hover:Boolean = false;
 		private var dropShaddow:DropShadowFilter = new DropShadowFilter(2);
 		public var expandRight:Boolean = true;
 
-		private var _icon:Class = DefaultGroupIcon;
+		private var _icon:Class = Constants.DefaultGroupIcon;
 		public function get icon():Class
 		{
 			return _icon;
@@ -51,7 +52,7 @@ package com.cleartext.ximpp.views.common
 				
 				if(hover)
 				{
-					width = textField.textWidth + 45;
+					width = textField.textWidth + 65;
 					filters = [dropShaddow];
 				}
 				else if(selected)
@@ -92,17 +93,16 @@ package com.cleartext.ximpp.views.common
 			width = NORMAL_WIDTH;
 			height = NORMAL_WIDTH;
 			
-			mouseChildren = false;
-			
 			addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
 		}
 		
 		private function rollOverHandler(event:MouseEvent):void
 		{
+			deleteButton.visible = true;
 			hover = true;
 			textField.visible = true;
-			width = textField.textWidth + 45;
+			width = textField.textWidth + 65;
 			invalidateDisplayList();
 			
 			if(selected)
@@ -111,6 +111,7 @@ package com.cleartext.ximpp.views.common
 		
 		private function rollOutHandler(event:MouseEvent):void
 		{
+			deleteButton.visible = false;
 			hover = false;
 			textField.visible = false;
 			width = selected ? SELECTED_WIDTH : NORMAL_WIDTH;
@@ -131,6 +132,7 @@ package com.cleartext.ximpp.views.common
 				textField.visible = hover;
 				textField.x = 34;
 				textField.y = 9;
+				textField.mouseEnabled = false;
 				addChild(textField);
 			}
 			
@@ -142,8 +144,28 @@ package com.cleartext.ximpp.views.common
 				image.y = 5;
 				image.width = 29;
 				image.height = 25;
+				image.mouseEnabled = false;
 				addChild(image);
 			}
+			
+			if(!deleteButton)
+			{
+				deleteButton = new Button();
+				deleteButton.setStyle("skin", null);
+				deleteButton.setStyle("upIcon", Constants.CloseUp);
+				deleteButton.setStyle("overIcon", Constants.CloseOver);
+				deleteButton.setStyle("downIcon", Constants.CloseUp);
+				deleteButton.addEventListener(MouseEvent.CLICK, delete_ClickHandler);
+				deleteButton.buttonMode = true;
+				deleteButton.visible = false;
+				deleteButton.setActualSize(14, 14);
+				addChild(deleteButton);
+			}
+		}
+		
+		private function delete_ClickHandler(event:MouseEvent):void
+		{
+			event.stopImmediatePropagation();
 		}
 		
 		override protected function commitProperties():void
@@ -158,6 +180,8 @@ package com.cleartext.ximpp.views.common
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
+			deleteButton.move(unscaledWidth - 18, 9);
+			
 			var g:Graphics = graphics;
 			g.clear();
 			
@@ -165,13 +189,10 @@ package com.cleartext.ximpp.views.common
 			{
 				g.beginFill(0xffffff)
 				if(hover)
-				{
 					g.drawRoundRect(0,0,unscaledWidth,unscaledHeight,8,8);
-				}
 				else
-				{
 					g.drawRoundRectComplex(0, 0, unscaledWidth, unscaledHeight, 4, 0, 4, 0);
-				}
+
 //				g.moveTo(unscaledWidth-TRIANGLE_WIDTH, 0);
 //				g.lineTo(unscaledWidth, unscaledHeight/2);
 //				g.lineTo(unscaledWidth-TRIANGLE_WIDTH, unscaledHeight);
@@ -182,8 +203,13 @@ package com.cleartext.ximpp.views.common
 				var m:Matrix = new Matrix();
 				m.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2);
 				
-				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xe1e1e1, 0xd1d1d1], [1,1,1], [0x00, 0x88, 0x88], m);
+				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xe1e1e1, 0xd1d1d1], [1,1,1], [0x00, 0x79, 0x80], m);
 				g.drawRoundRect(0,0,unscaledWidth,unscaledHeight,8,8);
+			}
+			
+			if(hover)
+			{
+//				g.beginFill(0x
 			}
 		}
 		

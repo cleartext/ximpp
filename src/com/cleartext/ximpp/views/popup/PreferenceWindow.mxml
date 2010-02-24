@@ -56,9 +56,8 @@
 				// set global values
 				autoConnectCheckBox.selected = settings.global.autoConnect;
 				urlShortenComboBox.selectedItem = settings.global.urlShortener;
-				sortTimelineCheckBox.selected = settings.global.timelineTopDown;
-				sortChatCheckBox.selected = settings.global.chatTopDown;
 				animateBuddyListCheckBox.selected = settings.global.animateBuddyList;
+				showOfflineBuddiesCheckBox.selected = settings.global.showOfflineBuddies;
 				numTimelineMessages.value = settings.global.numTimelineMessages;
 				numChatMessages.value = settings.global.numChatMessages;
 				
@@ -75,9 +74,7 @@
 				}
 				
 				if(appModel.serverSideStatus.value == Status.CONNECTING)
-				{
 					accountVBox.enabled = false;
-				}
 	
 				selectedAccountChanged();
 			}
@@ -86,12 +83,11 @@
 			{
 				selectedAccountChanged();
 				
-				// set simple values
+				// commit global values
 				settings.global.autoConnect = autoConnectCheckBox.selected;
 				settings.global.urlShortener = urlShortenComboBox.selectedItem as String;
-				settings.global.timelineTopDown = sortTimelineCheckBox.selected;
-				settings.global.chatTopDown = sortChatCheckBox.selected;
 				settings.global.animateBuddyList = animateBuddyListCheckBox.selected;
+				settings.global.showOfflineBuddies = showOfflineBuddiesCheckBox.selected;
 				settings.global.numTimelineMessages = numTimelineMessages.value;
 				settings.global.numChatMessages = numChatMessages.value;
 
@@ -218,8 +214,7 @@
 			<mx:Label text="url shorten service:" y="4"/>
 			<mx:ComboBox id="urlShortenComboBox" x="114" dataProvider="{UrlShortener.types}"/>
 		</mx:Canvas>
-		<mx:CheckBox label="sort timeline top to bottom" id="sortTimelineCheckBox"/>
-		<mx:CheckBox label="sort chat top to bottom" id="sortChatCheckBox"/>
+		<mx:CheckBox label="show offline buddies" id="showOfflineBuddiesCheckBox"/>
 		<mx:CheckBox label="animate buddy list" id="animateBuddyListCheckBox"/>
 		<mx:Canvas>
 			<mx:NumericStepper maximum="1000" minimum="0" id="numTimelineMessages" />

@@ -174,7 +174,7 @@ package com.cleartext.ximpp.models
 			
 			for each(var c:Chat in chats)
 			{
-				if(c.buddy == buddy)
+				if(c.buddy.jid == buddy.jid)
 				{
 					if(select)
 						Swiz.dispatchEvent(new ChatEvent(ChatEvent.SELECT_CHAT, c));

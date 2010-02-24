@@ -40,7 +40,7 @@
 						button.text = group;
 						button.addEventListener(MouseEvent.CLICK, clickHandler);
 						addChildAt(button, numChildren-1);
-					}	
+					}
 					else
 					{
 						button.visible = button.includeInLayout = true;

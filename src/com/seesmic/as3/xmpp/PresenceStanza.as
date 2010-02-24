@@ -31,10 +31,11 @@ package com.seesmic.as3.xmpp
 		default xml namespace = 'jabber:client';
 
 		/**
-		 * avatarHash added by astewart@cleartext.com
+		 * modified by astewart@cleartext.com
+		 * added avatarHash property
 		 */
 		public var avatarHash:String = '';
-		
+		/**/		
 		
 		public function PresenceStanza(connection:Object, parent:Stanza=null)
 		{
@@ -57,10 +58,12 @@ package com.seesmic.as3.xmpp
 			}
 
 			/**
-			 * avatarHash added by astewart@cleartext.com
+			 * modified by astewart@cleartext.com
+			 * added avatarHash property
 			 */
 			namespace vcard = "vcard-temp:x:update";
-			this.avatarHash = xml.vcard::x.vcard::photo;			
+			this.avatarHash = xml.vcard::x.vcard::photo;
+			/**/
 		}
 		
 		public function getCategory():String {
@@ -100,11 +103,13 @@ package com.seesmic.as3.xmpp
 		}
 		
 		/**
-		 * avatarHash added by astewart@cleartext.com
+		 * modified by astewart@cleartext.com
+		 * added avatarHash property
 		 */
 		public function setAvatarHash(nAvatarHash:String): void {
 			this.avatarHash = nAvatarHash;
 		}
+		/**/
 		
 		override public function render():void {
 			xml = <presence />;
@@ -129,12 +134,14 @@ package com.seesmic.as3.xmpp
 			}
 
 			/**
-			 * avatarHash added by astewart@cleartext.com
+			 * modified by astewart@cleartext.com
+			 * added avatarHash property
 			 */
 			if(this.avatarHash) {
 				var vcard:XML = <x xmlns='vcard-temp:x:update'><photo>{avatarHash}</photo></x>;
 				xml.appendChild(vcard);
 			}
+			/**/
 		}
 				
 	}

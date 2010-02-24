@@ -80,18 +80,18 @@ package com.cleartext.ximpp.models
 			}
 		}
 
-		private var _sortType:String = BuddySortTypes.STATUS;
 		[Bindable (event="filterChanged")]
 		public function get sortType():String
 		{
-			return _sortType;
+			return settings.global.buddySortMethod;
 		}
 		public function set sortType(value:String):void
 		{
-			if(_sortType != value)
+			if(sortType != value)
 			{
-				_sortType = value;
+				settings.global.buddySortMethod = value;
 				buddies.refresh();
+				database.saveGlobalSettings();
 				dispatchEvent(new BuddyModelEvent(BuddyModelEvent.FILTER_CHANGED));
 			}
 		}
@@ -165,8 +165,8 @@ package com.cleartext.ximpp.models
 		private function buddyFilter(buddy:Buddy):Boolean
 		{
 			if(searchString != "" && 
-					(buddy.nickName.toLowerCase().indexOf(searchString) == -1 || 
-					buddy.jid.toLowerCase().indexOf(searchString) == -1))
+					(buddy.nickName.toLowerCase().search(searchString) == -1 && 
+					buddy.jid.toLowerCase().search(searchString) == -1))
 				return false; 
 			
 			if(groupName == ALL_BUDDIES_GROUP && !buddy.isGateway)

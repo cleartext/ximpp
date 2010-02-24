@@ -13,12 +13,6 @@ package com.cleartext.ximpp.views.common
 
 	public class StatusIcon extends UIComponent
 	{
-		[Embed (source="../../assets/edit.png")]
-		private var EditIcon:Class;
-		
-		[Embed (source="../../assets/delete.png")]
-		private var CloseIcon:Class;
-		
 		public static const SIZE:Number = 14;
 		
 		public static const GREEN:uint = 0x99cb26;
@@ -204,21 +198,21 @@ package com.cleartext.ximpp.views.common
 			g.drawCircle(SIZE/2, SIZE/2, SIZE/2);
 			g.drawCircle(SIZE/2, SIZE/2, SIZE/2-1);
 			
-			if(status.edit)
-			{
-				var editBitmapData:BitmapData = new EditIcon().bitmapData;
-				var scale1:Number = SIZE / Math.max(editBitmapData.width, editBitmapData.height);
-				g.beginBitmapFill(editBitmapData, new Matrix(scale1, 0, 0, scale1));
-				g.drawRect(0,0,SIZE,SIZE);
-			}
-			
-			if(showCloseIcon)
-			{
-				var closeBitmapData:BitmapData = new CloseIcon().bitmapData;
-				var scale2:Number = (SIZE-2) / Math.max(closeBitmapData.width, closeBitmapData.height);
-				g.beginBitmapFill(closeBitmapData, new Matrix(scale2, 0, 0, scale2, 1, 1));
-				g.drawRect(1,1,SIZE-2,SIZE-2);
-			}
+//			if(status.edit)
+//			{
+//				var editBitmapData:BitmapData = new EditIcon().bitmapData;
+//				var scale1:Number = SIZE / Math.max(editBitmapData.width, editBitmapData.height);
+//				g.beginBitmapFill(editBitmapData, new Matrix(scale1, 0, 0, scale1));
+//				g.drawRect(0,0,SIZE,SIZE);
+//			}
+//			
+//			if(showCloseIcon)
+//			{
+//				var closeBitmapData:BitmapData = new CloseIcon().bitmapData;
+//				var scale2:Number = (SIZE-2) / Math.max(closeBitmapData.width, closeBitmapData.height);
+//				g.beginBitmapFill(closeBitmapData, new Matrix(scale2, 0, 0, scale2, 1, 1));
+//				g.drawRect(1,1,SIZE-2,SIZE-2);
+//			}
 		}
 
 	}

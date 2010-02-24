@@ -4,6 +4,8 @@
 	clipContent="false">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.SendButtonEvent;
+			import com.cleartext.ximpp.events.CustomStatusEvent;
 			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import com.cleartext.ximpp.models.valueObjects.Message;
@@ -21,11 +23,45 @@
 			[Bindable]
 			public var xmpp:XMPPModel;
 			
+			private function input_keyDownHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode==Keyboard.ENTER)
+				{
+					// if some muppet decides to carry on pressing the enter key
+					// they will start sending blank messages, the inputTextArea.text
+					// length will be 0 becaues the enter hasn't yet been appended to
+					// the text. Use call later to allow the enter to be appended, then
+					// force a reset.
+					if(inputTextArea.text.length == 0)
+						callLater(inputTextArea.reset, [true, false]);
+					else
+						send();
+				}
+			}
+			
+			[Mediate(event="SendButtonEvent.SEND_CLICKED")]
+			public function send_clickHandler(event:SendButtonEvent):void
+			{
+				inputTextArea.setFocus();
+				send();
+			}
+			
 			private function send():void
 			{
-				if(inputTextArea.text.length != 0 && buddy && xmpp.connected)
+				if(inputTextArea.text.length != 0)
+				{
 					messageCanvas.sendMessage(inputTextArea.text);
-				callLater(function():void { inputTextArea.text = "";} );
+					callLater(inputTextArea.reset, [true, false]);
+				}
+			}
+			
+			[Mediate(event="CustomStatusEvent.CUSTOM_STATUS_CHANGE")]
+			public function setInputField(event:CustomStatusEvent):void
+			{
+				inputTextArea.text = event.customStatus;
+
+				if(inputTextArea.enabled)
+					inputTextArea.setFocus();
 			}
 			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -58,31 +94,27 @@
 		]]>
 	</mx:Script>
 	
-	<mx:Label text="{'Type message to ' + buddy.nickName}" x="10" y="6" />
+	<mx:Label text="{'Conversation with ' + buddy.nickName}" x="10" y="6" />
+
 	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6" />
-	<mx:TextArea
-		id="inputTextArea" 
+
+	<common:DefaultTextInput
+		id="inputTextArea"
+		defaultText="type message here..."
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
-		keyDown="if(event.keyCode==Keyboard.ENTER) send()"
+		keyDown="input_keyDownHandler(event)"
 		enabled="{!(!buddy || !xmpp.connected)}"
 		focusRoundedCorners="bl br" 
 		cornerRadius="{CORNER_RADIUS}"
 		paddingRight="20"
+		paddingLeft="10"
+		paddingBottom="3"
+		paddingTop="3"
 		verticalScrollPolicy="off"
 		horizontalScrollPolicy="off"
 		backgroundAlpha="0"
 		wordWrap="true"
 		borderStyle="none"
-		focusAlpha="0.5"/>
-	<mx:Button
-		upIcon="@Embed(source='com/cleartext/ximpp/assets/send.png')"
-		overIcon="@Embed(source='com/cleartext/ximpp/assets/send.png')"
-		downIcon="@Embed(source='com/cleartext/ximpp/assets/sendDown.png')"
-		disabledIcon="@Embed(source='com/cleartext/ximpp/assets/sendDisabled.png')"
-		enabled="{!(!buddy || !xmpp.connected)}"
-		toolTip="send message"
-		right="-40" y="27"
-		width="50" height="50"
-		click="send()"/>
+		focusAlpha="0.5" />
 
 </mx:Canvas>

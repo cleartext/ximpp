@@ -29,8 +29,12 @@ package com.seesmic.as3.xmpp
 		namespace jc = 'jabber:client';
 		default xml namespace = 'jabber:client';
 		
-		// astewart@cleartext.com
+		/**
+		 * modified by astewart@cleartext.com
+		 * html property added
+		 */
 		public var html:String;
+		/**/
 		
 		public function MessageStanza(connection:Object, parent:Stanza=null)
 		{
@@ -45,8 +49,13 @@ package com.seesmic.as3.xmpp
 			this.type = xml.@type;
 			this.subject = xml.@subject;
 			this.body = xml.body.text();
-			// astewart@cleartext.com
+
+			/**
+			 * modified by astewart@cleartext.com
+			 * html property added
+			 */
 			this.html = xml.html.text();
+			/**/
 		}
 		
 		public function setTo(nto:String):void {
@@ -61,10 +70,14 @@ package com.seesmic.as3.xmpp
 			this.body = nbody;
 		}
 		
-		// astewart@cleartext.com
+		/**
+		 * modified by astewart@cleartext.com
+		 * html property added
+		 */
 		public function setHtml(nhtml:String):void {
 			this.html = nhtml;
 		}
+		/**/
 		
 		public function setSubject(nsubject:String):void {
 			this.subject = nsubject;
@@ -90,19 +103,34 @@ package com.seesmic.as3.xmpp
 			bodyx = <body>{body}</body>;
 			xml.appendChild(bodyx);
 
-			// astewart@cleartext.com
+			/**
+			 * modified by astewart@cleartext.com
+			 * html property added
+			 */
 			var htmlx:XML = new XML();
 			htmlx = <html>{html}</html>;
 			xml.appendChild(htmlx);
+			/**/
 		}
 		
-		// html added by astewart@cleartext.com
+		/**
+		 * modified by astewart@cleartext.com
+		 * html property added
+		 */
 		public function reply(newbody:String = null, newhtml:String = null):void {
+		/** old: public function reply(newbody:String = null):void */
 			// switch from and to, update body, re-render, send
 			to = from;
 			from = conn.fulljid;
 			setBody(newbody);
+
+			/**
+			 * modified by astewart@cleartext.com
+			 * html property added
+			 */
 			setHtml(newhtml);
+			/**/
+
 			send();
 		}
 	}

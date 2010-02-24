@@ -432,7 +432,8 @@ package com.cleartext.ximpp.models
 			// if we are already connected, then send the presence
 			else if(connected)
 			{
-				xmpp.sendPresence(customStatus, status.toShow(), "5", "", (gotAvatar) ? settings.userAccount.avatarHash : "");
+				var priority:String = (status.value == Status.AWAY || status.value == Status.EXTENDED_AWAY) ? "0" : "5";
+				xmpp.sendPresence(customStatus, status.toShow(), priority, "", (gotAvatar) ? settings.userAccount.avatarHash : "");
 				appModel.serverSideStatus.value = status.value;
 			}
 			

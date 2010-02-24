@@ -20,6 +20,7 @@ package com.cleartext.ximpp.models
 			super();
 		}
 		
+		[Bindable]
 		public var global:GlobalSettings = new GlobalSettings();
 
 		private var _userAccount:UserAccount;

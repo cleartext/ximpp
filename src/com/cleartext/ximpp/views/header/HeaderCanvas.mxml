@@ -4,6 +4,7 @@
 	xmlns:common="com.cleartext.ximpp.views.common.*">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.Constants;
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
@@ -32,33 +33,33 @@
 		]]>
 	</mx:Script>
 
-	<mx:Image y="6" x="8" source="@Embed(source='com/cleartext/ximpp/assets/logo.png')" height="30"/>
+	<mx:Image y="6" x="8" source="{Constants.Logo}" height="30"/>
 
 	<mx:Button
-		upIcon="@Embed(source='com/cleartext/ximpp/assets/help.png')"
-		overIcon="@Embed(source='com/cleartext/ximpp/assets/helpOver.png')"
-		downIcon="@Embed(source='com/cleartext/ximpp/assets/help.png')"
+		upIcon="{Constants.HelpUp}"
+		overIcon="{Constants.HelpOver}"
+		downIcon="{Constants.HelpUp}"
 		click="Alert.show('help me please', 'Help Menu');"
 		skin="{null}"
 		toolTip="help"
 		right="75" y="8" />
 
 	<mx:Button
-		upIcon="@Embed(source='com/cleartext/ximpp/assets/settings.png')"
-		overIcon="@Embed(source='com/cleartext/ximpp/assets/settingsOver.png')"
-		downIcon="@Embed(source='com/cleartext/ximpp/assets/settings.png')"
+		upIcon="{Constants.PreferencesUp}"
+		overIcon="{Constants.PreferencesOver}"
+		downIcon="{Constants.PreferencesUp}"
 		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));"
 		skin="{null}"
 		toolTip="preferences"
 		right="45" y="8" />
 
 	<mx:Button
-		upIcon="@Embed(source='com/cleartext/ximpp/assets/console.png')"
-		overIcon="@Embed(source='com/cleartext/ximpp/assets/consoleOver.png')"
-		downIcon="@Embed(source='com/cleartext/ximpp/assets/console.png')"
+		upIcon="{Constants.ConsoleUp}"
+		overIcon="{Constants.ConsoleOver}"
+		downIcon="{Constants.ConsoleUp}"
 		click="appModel.showConsole = !appModel.showConsole"
 		skin="{null}"
-		toolTip="toggleConsole"
+		toolTip="toggle console"
 		right="15" y="8" />
 
 </mx:Canvas>
