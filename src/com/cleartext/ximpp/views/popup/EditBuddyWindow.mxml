@@ -2,6 +2,7 @@
 <mx:TitleWindow 
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	layout="absolute"
+	showCloseButton="true"
 	title="Edit Buddy"
 	xmlns:common="com.cleartext.ximpp.views.common.*">
 	
@@ -28,25 +29,12 @@
 			
 			private function okHandler():void
 			{
-				if(remove.selected)
-				{
-					Alert.show("are you sure you want to delete " + buddy.jid + "?",
-						"Confirm Delete", 
-						(Alert.YES | Alert.NO), 
-						null,
-						function(event:CloseEvent):void
-						{
-							if(event.detail == Alert.YES)
-							{
-								xmpp.removeFromRoster(buddy.jid);
-							}
-						});
-				}
-				else
-				{
-					buddy.setNickName(nickname.text);
-					buddies.addBuddy(buddy);
-				}
+				buddy.setNickName(nickname.text);
+				buddy.groups = groups.selectedItems;
+				buddies.addBuddy(buddy);
+				buddies.refresh();
+				
+				xmpp.modifyRosterItem(buddy);
 				
 				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
 			}
@@ -63,8 +51,43 @@
 				nickname.text = buddy.nickName;
 				avatar.data = buddy;
 				subscription.text = buddy.subscription;
+				groups.selectedItems = buddy.groups;
+				avatar.buttonMode = (buddy.avatarHash == "");
 			}
 			
+			private function changeAvatar():void
+			{
+				try 
+				{
+					var newImage:File = new File();
+					newImage.browseForOpen("Open",  [new FileFilter("Images", "*.jpg;*.gif;*.png")]);
+					newImage.addEventListener(Event.SELECT, 
+						function():void
+						{
+							var filestream:FileStream=new FileStream();
+							filestream.open(newImage,"read");
+							var bytesRead:ByteArray = new ByteArray();
+							filestream.readBytes(bytesRead, 0, filestream.bytesAvailable);
+							var loader:Loader = new Loader();
+							loader.loadBytes(bytesRead);
+							loader.contentLoaderInfo.addEventListener(Event.COMPLETE,
+								function():void
+								{
+									var loadedBitmap:Bitmap = loader.content as Bitmap;
+									var newBitmapData:BitmapData = new BitmapData(AvatarUtils.AVATAR_SIZE, AvatarUtils.AVATAR_SIZE);
+									var scale:Number = AvatarUtils.AVATAR_SIZE / Math.max(loadedBitmap.width, loadedBitmap.height);
+									var tx:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
+									var ty:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
+									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
+									buddy.setAvatar(newBitmapData);
+								});
+						});
+				}
+				catch (error:Error)
+				{
+					// to do
+				}
+			}
 		]]>
 	</mx:Script>
 	
@@ -75,22 +98,27 @@
 		</mx:FormItem>
 		
 		<mx:FormItem label="avatar:">
-			<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}"/>
+			<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editClicked="changeAvatar()"/>
 		</mx:FormItem>
 
 		<mx:FormItem label="subscription:">
 			<mx:Label id="subscription" />
 		</mx:FormItem>
 
+		<mx:FormItem label="groups:">
+			<mx:Label text="use ctrl/cmd to select more than one" />
+			<mx:List id="groups" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
+		</mx:FormItem>
+
 		<mx:FormItem label="nickname:">
 			<mx:TextInput id="nickname" />
 		</mx:FormItem>
-		
-		<mx:FormItem>
-			<mx:CheckBox id="remove" label="remove buddy" />
-		</mx:FormItem>
-		
-		<mx:Button label="ok" click="okHandler()"/>
+				
 	</mx:Form>
+
+	<mx:ControlBar horizontalAlign="center">
+		<mx:Button label="done" click="okHandler()"/>
+		<mx:Button label="cancel" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
+	</mx:ControlBar>
 
 </mx:TitleWindow>

@@ -1,8 +1,9 @@
 package com.cleartext.ximpp.views.buddies
 {
-	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
+	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
@@ -10,21 +11,30 @@ package com.cleartext.ximpp.views.buddies
 	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
+	import flash.events.ContextMenuEvent;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
+	import flash.ui.ContextMenu;
+	import flash.ui.ContextMenuItem;
 	
 	import mx.core.UITextField;
 	import mx.effects.Tween;
+	
+	import org.swizframework.Swiz;
 
 	public class BuddyRenderer extends SproutListItemBase
 	{
 		[Autowire]
 		public var appModel:ApplicationModel;
 		
+		[Autowire]
+		public var xmpp:XMPPModel;
+		
 		private static const SMALL_HEIGHT:Number = 40;
 		private static const BIG_HEIGHT:Number = 46;
 		private static const AVATAR_SIZE:Number = 32;
-		private static const LEFT_PADDING:Number = 6;
+		private static const LEFT_PADDING:Number = 3;
 
 		private static const PADDING:Number = 3;
 		
@@ -49,14 +59,55 @@ package com.cleartext.ximpp.views.buddies
 				function():void
 				{
 					over = false;
+					invalidateProperties();
 					invalidateDisplayList();
 				});
 			addEventListener(MouseEvent.ROLL_OVER,
 				function():void
 				{
 					over = true;
+					nameLabel.styleName = "orangeBold";
 					invalidateDisplayList();
 				});
+
+			contextMenuLabel = new ContextMenuItem("");
+			contextMenuLabel.enabled = false;
+			
+			editItem = new ContextMenuItem("edit");
+			editItem.separatorBefore = true;
+			editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editHandler);
+			
+			deleteItem = new ContextMenuItem("delete");
+			deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteHandler);
+			
+			var customContextMenu:ContextMenu = new ContextMenu();
+			customContextMenu.hideBuiltInItems();
+			customContextMenu.customItems.push(contextMenuLabel);
+			customContextMenu.customItems.push(editItem);
+			customContextMenu.customItems.push(deleteItem);
+			
+			customContextMenu.addEventListener(Event.DISPLAYING, displayContextMenu);
+			
+			contextMenu = customContextMenu;
+		}
+		
+		private function displayContextMenu(event:Event):void
+		{
+			if(buddy)
+				contextMenuLabel.label = buddy.nickName + ((xmpp.connected) ? "" : " (go online to edit)");
+			
+//			editItem.enabled = xmpp.connected;
+//			deleteItem.enabled = xmpp.connected;
+		}
+
+		private function editHandler(event:ContextMenuEvent):void
+		{
+			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW, null, buddy));
+		}
+
+		private function deleteHandler(event:ContextMenuEvent):void
+		{
+			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.REMOVE_BUDDY_WINDOW, null, buddy));
 		}
 
 		private function get buddy():Buddy
@@ -107,6 +158,10 @@ package com.cleartext.ximpp.views.buddies
 		private var statusLabel:UITextField;
 		private var customStatusLabel:UITextField
 		
+		private var contextMenuLabel:ContextMenuItem;
+		private var editItem:ContextMenuItem;
+		private var deleteItem:ContextMenuItem;
+		
 		//---------------------------------------
 		// Create Children
 		//---------------------------------------
@@ -118,12 +173,10 @@ package com.cleartext.ximpp.views.buddies
 			if(!avatar)
 			{
 				avatar = new Avatar();
-				avatar.buttonMode = true;
 				avatar.x = LEFT_PADDING;
 				avatar.y = PADDING;
 				avatar.width = AVATAR_SIZE;
 				avatar.height = AVATAR_SIZE;
-				avatar.addEventListener(AvatarEvent.EDIT_CLICKED, avatarClicked);
 				avatar.data = buddy;
 				addChild(avatar);
 			}
@@ -163,7 +216,6 @@ package com.cleartext.ximpp.views.buddies
 				customStatusLabel.visible = false;
 				addChild(customStatusLabel);
 			}
-			
 		}
 		
 		//---------------------------------------
@@ -249,11 +301,6 @@ package com.cleartext.ximpp.views.buddies
 			width = widthVal;
 			return heightTo;
 		}
-
-		private function avatarClicked(event:AvatarEvent):void
-		{
-			dispatchEvent(new BuddyEvent(BuddyEvent.EDIT_BUDDY, true));
-		}
 		
 		//---------------------------------------
 		// Update Display List
@@ -263,20 +310,39 @@ package com.cleartext.ximpp.views.buddies
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
+			statusIcon.visible = !over;
+			
 			var g:Graphics = graphics;
 			g.clear();
 
 			var matrix:Matrix = new Matrix();
 			matrix.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2);
 			
-			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], matrix);
+			if(over)
+				g.beginFill(0xffffff, 1);
+			else
+				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], matrix);
+			
 			g.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			
-			if(buddy && !buddy.status.isOffline())
+			// arrow
+			if(over)
+			{
+				var xVal:Number = unscaledWidth - StatusIcon.SIZE + 2;
+				g.lineStyle(3.5, 0x585858, 0.75)
+				g.moveTo(xVal, 15);
+				g.lineTo(xVal + 5, 19);
+				g.lineTo(xVal, 23);
+				g.lineStyle();
+			}
+			
+			// bottom line
+			if(over || buddy && !buddy.status.isOffline())
 			{
 				g.beginFill(0x000000, 0.15)
 				g.drawRect(0, unscaledHeight-1, unscaledWidth, 1);
 			}
+			
 		}
 	}		
 }

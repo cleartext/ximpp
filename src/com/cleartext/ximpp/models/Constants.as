@@ -33,9 +33,6 @@ package com.cleartext.ximpp.models
 		[Embed (source="/com/cleartext/ximpp/assets/statusSelected.png")]
 		public static const StatusSelected:Class;
 			
-		[Embed (source="/com/cleartext/ximpp/assets/edit.png")]
-		public static const EditIcon:Class;
-					
 		[Embed (source="com/cleartext/ximpp/assets/logo.png")]
 		public static const Logo:Class;
 			
@@ -65,6 +62,18 @@ package com.cleartext.ximpp.models
 
 		[Embed (source="com/cleartext/ximpp/assets/consoleOver.png")]
 		public static const ConsoleOver:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/allBuddies.png")]
+		public static const AllBuddies:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/gateway.png")]
+		public static const Gateways:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/noGroup.png")]
+		public static const NoGroup:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/add.png")]
+		public static const Add:Class;
 
 	}
 }

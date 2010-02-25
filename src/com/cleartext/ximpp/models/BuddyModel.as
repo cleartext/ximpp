@@ -4,13 +4,13 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.BuddyModelEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.BuddySortTypes;
+	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
-	import mx.utils.ObjectUtil;
 
 	public class BuddyModel extends EventDispatcher
 	{
@@ -164,6 +164,9 @@ package com.cleartext.ximpp.models
 
 		private function buddyFilter(buddy:Buddy):Boolean
 		{
+			if(!settings.global.showOfflineBuddies && buddy.status.isOffline())
+				return false;
+			
 			if(searchString != "" && 
 					(buddy.nickName.toLowerCase().search(searchString) == -1 && 
 					buddy.jid.toLowerCase().search(searchString) == -1))
@@ -214,6 +217,11 @@ package com.cleartext.ximpp.models
 			if(value == 0)
 				return 0;
 			return (value > 0) ? 1 : -1;
+		}
+
+		public function refresh():void
+		{
+			buddies.refresh();
 		}
 
 		private function buddyChangeHandler(event:BuddyEvent):void

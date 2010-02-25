@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.RemoveBuddyWindow;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.events.SendButtonEvent;
 			import org.swizframework.Swiz;
@@ -58,6 +59,14 @@
 			public function showAddBuddyWindow(event:PopUpEvent):void
 			{
 				initializePopUp(new AddBuddyWindow());
+			}
+
+			[Mediate(event="PopUpEvent.REMOVE_BUDDY_WINDOW")]
+			public function showRemoveBuddyWindow(event:PopUpEvent):void
+			{
+				var window:RemoveBuddyWindow = new RemoveBuddyWindow();
+				window.buddy = event.buddy;
+				initializePopUp(window);
 			}
 
 			[Mediate(event="PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW")]
@@ -154,11 +163,11 @@
 		disabledIcon="{Constants.SendDisabled}"
 		toolTip="send message"
 		enabled="{xmppConnected}"
-		right="10" y="{27 + headerCanvas.height}"
+		right="10" y="{32 + headerCanvas.height}"
 		width="50" height="50"
 		click="Swiz.dispatchEvent(new SendButtonEvent(SendButtonEvent.SEND_CLICKED));"/>
 
 	<buddies:GroupSelectors
-		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT + 1}" />
+		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
 	
 </mx:Canvas>

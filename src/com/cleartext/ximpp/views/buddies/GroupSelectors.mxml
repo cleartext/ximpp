@@ -6,6 +6,7 @@
 	height="100%">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
 			import com.cleartext.ximpp.views.common.SideButton;
@@ -38,6 +39,7 @@
 						button = new SideButton();
 						groupButtons[group] = button;
 						button.text = group;
+						button.icon = Constants.DefaultGroupIcon;
 						button.addEventListener(MouseEvent.CLICK, clickHandler);
 						addChildAt(button, numChildren-1);
 					}
@@ -50,7 +52,10 @@
 				for each(button in groupButtons)
 				{
 					if(!button.visible)
+					{
 						removeChild(button);
+						delete groupButtons[button.text];
+					}
 				}
 			}
 			
@@ -71,9 +76,11 @@
 		]]>
 	</mx:Script>
 	
-	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" />
-	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" />
-	<common:SideButton text="{BuddyModel.UNASIGNED}" click="clickHandler(event)" />
+	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}"/>
+	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" icon="{Constants.Gateways}"/>
+	<common:SideButton text="{BuddyModel.UNASIGNED}" click="clickHandler(event)" icon="{Constants.NoGroup}"/>
 	
-	<common:SideButton text="Add / Remove" click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_NEW_BUDDY_WINDOW))" />
+	<common:SideButton text="Add Buddy/Group/Gateway"
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_NEW_BUDDY_WINDOW))"
+		icon="{Constants.Add}" forceWhiteBackground="true"/>
 </mx:VBox>

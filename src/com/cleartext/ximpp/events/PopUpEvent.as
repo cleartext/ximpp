@@ -9,6 +9,7 @@ package com.cleartext.ximpp.events
 		public static const PREFERENCES_WINDOW:String = "preferencesWindow";
 		public static const ADVANCED_SEARCH_WINDOW:String = "advancedSearchWindow";
 		public static const ADD_NEW_BUDDY_WINDOW:String = "addNewBuddyWindow";
+		public static const REMOVE_BUDDY_WINDOW:String = "removeBuddyWindow";
 		public static const SUBSCRIPTION_REQUEST_WINDOW:String = "subscriptionRequestWindow";
 		public static const EDIT_BUDDY_WINDOW:String = "editBuddyWindow";
 		

@@ -3,6 +3,7 @@
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	layout="absolute"
 	title="Add Buddy"
+	showCloseButton="true"
 	xmlns:common="com.cleartext.ximpp.views.common.*"
 	creationComplete="gatewayComboBox.dataProvider = [settings.userAccount.server]">
 	
@@ -16,11 +17,11 @@
 
 			[Autowire]
 			[Bindable]
-			public var settings:SettingsModel;
+			public var xmpp:XMPPModel;
 			
 			[Autowire]
 			[Bindable]
-			public var xmpp:XMPPModel;
+			public var settings:SettingsModel;
 			
 			private function addBuddyHandler():void
 			{
@@ -41,13 +42,17 @@
 		</mx:FormItem>
 		
 		<mx:FormItem>
-			<mx:CheckBox id="subscribe" selected="true" label="ask to see when buddy is online" labelPlacement="right"/>
+			<mx:CheckBox id="subscribe" 
+				selected="true" 
+				label="ask to see when buddy is online" 
+				labelPlacement="right"/>
 		</mx:FormItem>
 		
-		<mx:HBox>
-			<mx:Button label="add" click="addBuddyHandler()"/>
-			<mx:Button label="cancel" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
-		</mx:HBox>
 	</mx:Form>
+
+	<mx:ControlBar horizontalAlign="center">
+		<mx:Button label="add" click="addBuddyHandler()"/>
+		<mx:Button label="cancel" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
+	</mx:ControlBar>
 
 </mx:TitleWindow>

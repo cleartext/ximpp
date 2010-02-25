@@ -11,6 +11,7 @@
 	xmlns:common="com.cleartext.ximpp.views.common.*" xmlns:popup="com.cleartext.ximpp.views.popup.*">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.BuddyModel;
 			import com.adobe.crypto.SHA1;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import com.cleartext.ximpp.models.AvatarUtils;
@@ -51,6 +52,10 @@
 			[Bindable]
 			public var xmpp:XMPPModel;
 			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
 			private function init():void
 			{
 				// set global values
@@ -90,10 +95,12 @@
 				settings.global.showOfflineBuddies = showOfflineBuddiesCheckBox.selected;
 				settings.global.numTimelineMessages = numTimelineMessages.value;
 				settings.global.numChatMessages = numChatMessages.value;
-
+				
 				settings.userAccount = accountList.selectedItem as UserAccount;
 				
 				database.saveGlobalSettings();
+
+				buddies.refresh();
 			}
 			
 			private function selectedAccountChanged():void

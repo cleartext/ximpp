@@ -186,7 +186,7 @@
 			id="avatar"
 			width="48"
 			height="48"
-			x="-40" y="27"
+			x="-40" y="32"
 			border="false">
 			<common:filters>
 				<mx:DropShadowFilter distance="0" blurX="4" blurY="4" />
@@ -246,7 +246,6 @@
 		horizontalScrollPolicy="off"
 		dataProvider="{buddies.buddies}"
 		height="100%" width="100%"
-		itemRenderer="{new ClassFactory(BuddyRenderer)}"
-		editBuddy="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW,'',(event.target.data as Buddy)))">
+		itemRenderer="{new ClassFactory(BuddyRenderer)}">
 	</buddies:BuddySproutList>
 </mx:VBox>

@@ -21,13 +21,14 @@ package com.cleartext.ximpp.views.common
 
 		private var textField:UITextField;
 		private var image:Image;
-		private var deleteButton:Button;
+		
+		public var forceWhiteBackground:Boolean = false;
 		
 		private var hover:Boolean = false;
 		private var dropShaddow:DropShadowFilter = new DropShadowFilter(2);
 		public var expandRight:Boolean = true;
 
-		private var _icon:Class = Constants.DefaultGroupIcon;
+		private var _icon:Class;
 		public function get icon():Class
 		{
 			return _icon;
@@ -95,11 +96,15 @@ package com.cleartext.ximpp.views.common
 			
 			addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
+			
+			setStyle("padding-top", 0);
+			setStyle("padding-left", 0);
+			setStyle("padding-bottom", 0);
+			setStyle("padding-right", 0);
 		}
 		
 		private function rollOverHandler(event:MouseEvent):void
 		{
-			deleteButton.visible = true;
 			hover = true;
 			textField.visible = true;
 			width = textField.textWidth + 65;
@@ -111,7 +116,6 @@ package com.cleartext.ximpp.views.common
 		
 		private function rollOutHandler(event:MouseEvent):void
 		{
-			deleteButton.visible = false;
 			hover = false;
 			textField.visible = false;
 			width = selected ? SELECTED_WIDTH : NORMAL_WIDTH;
@@ -140,26 +144,10 @@ package com.cleartext.ximpp.views.common
 			{
 				image = new Image();
 				image.source = icon;
-				image.x = 2;
-				image.y = 5;
-				image.width = 29;
-				image.height = 25;
+				image.width = 32;
+				image.height = 32;
 				image.mouseEnabled = false;
 				addChild(image);
-			}
-			
-			if(!deleteButton)
-			{
-				deleteButton = new Button();
-				deleteButton.setStyle("skin", null);
-				deleteButton.setStyle("upIcon", Constants.CloseUp);
-				deleteButton.setStyle("overIcon", Constants.CloseOver);
-				deleteButton.setStyle("downIcon", Constants.CloseUp);
-				deleteButton.addEventListener(MouseEvent.CLICK, delete_ClickHandler);
-				deleteButton.buttonMode = true;
-				deleteButton.visible = false;
-				deleteButton.setActualSize(14, 14);
-				addChild(deleteButton);
 			}
 		}
 		
@@ -180,8 +168,6 @@ package com.cleartext.ximpp.views.common
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
-			deleteButton.move(unscaledWidth - 18, 9);
-			
 			var g:Graphics = graphics;
 			g.clear();
 			
@@ -189,9 +175,9 @@ package com.cleartext.ximpp.views.common
 			{
 				g.beginFill(0xffffff)
 				if(hover)
-					g.drawRoundRect(0,0,unscaledWidth,unscaledHeight,8,8);
+					g.drawRoundRect(0,0,unscaledWidth,unscaledHeight, 10, 10);
 				else
-					g.drawRoundRectComplex(0, 0, unscaledWidth, unscaledHeight, 4, 0, 4, 0);
+					g.drawRoundRectComplex(0, 0, unscaledWidth, unscaledHeight, 5, 0, 5, 0);
 
 //				g.moveTo(unscaledWidth-TRIANGLE_WIDTH, 0);
 //				g.lineTo(unscaledWidth, unscaledHeight/2);
@@ -204,12 +190,7 @@ package com.cleartext.ximpp.views.common
 				m.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2);
 				
 				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xe1e1e1, 0xd1d1d1], [1,1,1], [0x00, 0x79, 0x80], m);
-				g.drawRoundRect(0,0,unscaledWidth,unscaledHeight,8,8);
-			}
-			
-			if(hover)
-			{
-//				g.beginFill(0x
+				g.drawRoundRect(0,0,unscaledWidth,unscaledHeight, 10, 10);
 			}
 		}
 		

@@ -4,7 +4,12 @@
 {
 	color: #888888;
 	font-weight: bold;
-	font-size: 10px;
+}
+
+.orangeBold
+{
+	color: #f7a136;
+	font-weight: bold;
 }
 
 .dGreyBold

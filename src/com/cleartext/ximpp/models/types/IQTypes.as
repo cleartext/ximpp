@@ -1,5 +1,7 @@
 package com.cleartext.ximpp.models.types
 {
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	
 	public class IQTypes
 	{
 		public static const GET:String = "get";
@@ -16,6 +18,20 @@ package com.cleartext.ximpp.models.types
 			var item:XML = <item jid={jid} />
 			if(remove)
 				item.@subscription = SubscriptionTypes.REMOVE;
+			
+			result.appendChild(item);
+			return result;
+		}
+		
+		public static function modifyRosterItem(buddy:Buddy):XML
+		{
+			var result:XML = <query xmlns="jabber:iq:roster" />;
+			var item:XML = <item jid={buddy.jid} subscription={buddy.subscription}/>
+			if(buddy.nickName != buddy.jid)
+				item.@name = buddy.nickName;
+			
+			for each(var group:String in buddy.groups)
+				item.appendChild(<group>{group}</group>);
 			
 			result.appendChild(item);
 			return result;

@@ -6,6 +6,7 @@ package com.cleartext.ximpp.views.common
 	import flash.display.Graphics;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.ui.Keyboard;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Button;
@@ -26,6 +27,17 @@ package com.cleartext.ximpp.views.common
 		public function SearchBox()
 		{
 			super();
+		}
+		
+		override protected function keyDownHandler(event:KeyboardEvent):void
+		{
+			super.keyDownHandler(event);
+
+			if(event.keyCode == Keyboard.ESCAPE)
+			{
+				textInput.reset(true);
+				setSearchString();
+			}
 		}
 		
 		override protected function createChildren():void
