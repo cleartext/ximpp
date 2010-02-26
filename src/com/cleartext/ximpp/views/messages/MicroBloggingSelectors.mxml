@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:common="com.cleartext.ximpp.views.common.*"
+	width="100%"
+	height="100%">
+	<mx:Script>
+		<![CDATA[
+			import mx.core.UIComponent;
+			import com.cleartext.ximpp.models.Constants;
+			import com.cleartext.ximpp.events.PopUpEvent;
+			import org.swizframework.Swiz;
+			import com.cleartext.ximpp.views.common.SideButton;
+			import mx.controls.Button;
+			import com.cleartext.ximpp.events.BuddyModelEvent;
+			import com.cleartext.ximpp.models.BuddyModel;
+			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			[Autowire (bean="xmpp", property="connected")]
+			[Bindable]
+			public var connected:Boolean;
+			
+			private function clickHandler(event:MouseEvent):void
+			{
+				
+			}
+
+		]]>
+	</mx:Script>
+	
+	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}" showEditButton="false" expandRight="false"/>
+	
+	<mx:Button
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_MICRO_BLOGGING_WINDOW))"
+		toolTip="{(connected) ? 'add microblogging' : 'go online to add microblogging'}"
+		width="32" height="32"
+		enabled="{connected}"
+		skin="{null}"
+		upIcon="{Constants.Add}"
+		overIcon="{Constants.AddOver}"
+		downIcon="{Constants.Add}"
+		disabledIcon="{Constants.AddOver}"
+		/>
+</mx:VBox>

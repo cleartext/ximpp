@@ -2,13 +2,14 @@
 <mx:TitleWindow 
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	layout="absolute"
-	title="Add Buddy"
+	title="Add..."
 	showCloseButton="true"
 	xmlns:common="com.cleartext.ximpp.views.common.*"
 	creationComplete="gatewayComboBox.dataProvider = [settings.userAccount.server]">
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.BuddyModel;
 			import mx.events.CloseEvent;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.models.DatabaseModel;
@@ -23,32 +24,61 @@
 			[Bindable]
 			public var settings:SettingsModel;
 			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
 			private function addBuddyHandler():void
 			{
-				xmpp.addToRoster(newJid.text, subscribe.selected);
+				xmpp.addToRoster(newJid.text, subscribe.selected, groupList.selectedItems);
 				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
 			}
 			
 		]]>
 	</mx:Script>
 	
-	<mx:Form>
-		<mx:FormItem label="gateway:" >
-			<mx:ComboBox id="gatewayComboBox" />
-		</mx:FormItem>
 		
-		<mx:FormItem label="buddy id:">
-			<mx:TextInput id="newJid"  />
-		</mx:FormItem>
+		<mx:Accordion width="100%" height="100%">
+            
+            <mx:Form label="Buddy">
+				<mx:FormItem label="gateway:" >
+					<mx:ComboBox id="gatewayComboBox" />
+				</mx:FormItem>
+				
+				<mx:FormItem label="buddy id:">
+					<mx:TextInput id="newJid"  />
+				</mx:FormItem>
 		
-		<mx:FormItem>
-			<mx:CheckBox id="subscribe" 
-				selected="true" 
-				label="ask to see when buddy is online" 
-				labelPlacement="right"/>
-		</mx:FormItem>
+				<mx:FormItem label="groups:">
+					<mx:Label text="use ctrl/cmd to select more than one" />
+					<mx:List id="groupList" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
+				</mx:FormItem>
+				
+				<mx:FormItem>
+					<mx:CheckBox id="subscribe" 
+						selected="true" 
+						label="ask to see when buddy is online" 
+						labelPlacement="right"/>
+				</mx:FormItem>
+            </mx:Form>
+
+            <mx:Form label="Group">
+				<mx:FormItem label="name:">
+					<mx:TextInput id="newGroup"  />
+				</mx:FormItem>
 		
-	</mx:Form>
+				<mx:FormItem label="buddies:">
+					<mx:Label text="use ctrl/cmd to select more than one" />
+					<mx:List id="buddyList" allowMultipleSelection="true" dataProvider="{buddies.buddies}" labelField="nickName" width="190" height="80"/>
+				</mx:FormItem>
+				
+            </mx:Form>
+
+            <mx:Form label="Gateway">
+            	<mx:Text width="270" text="Adding a gateway is currently not supported - comming soon." />
+            </mx:Form>
+
+        </mx:Accordion>	
 
 	<mx:ControlBar horizontalAlign="center">
 		<mx:Button label="add" click="addBuddyHandler()"/>

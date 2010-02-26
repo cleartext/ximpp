@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.views.common
 {
-	import com.cleartext.ximpp.models.Constants;
+	import com.cleartext.ximpp.events.PopUpEvent;
 	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
@@ -10,23 +10,61 @@ package com.cleartext.ximpp.views.common
 	
 	import mx.controls.Button;
 	import mx.controls.Image;
+	import mx.controls.LinkButton;
 	import mx.core.UIComponent;
 	import mx.core.UITextField;
+	
+	import org.swizframework.Swiz;
 
 	public class SideButton extends UIComponent
 	{
+		
+		[Autowire(bean="xmpp", property="connected")]
+		[Bindable]
+		public var connected:Boolean;
+		
 		private static const SELECTED_WIDTH:Number = 41;
 		private static const NORMAL_WIDTH:Number = 32;
+		private static const BAR_HEIGHT:Number = 32;
 //		private static const TRIANGLE_WIDTH:Number = 8;
 
 		private var textField:UITextField;
 		private var image:Image;
+		private var editButton:Button;
+		private var deleteButton:Button;
 		
 		public var forceWhiteBackground:Boolean = false;
 		
 		private var hover:Boolean = false;
 		private var dropShaddow:DropShadowFilter = new DropShadowFilter(2);
-		public var expandRight:Boolean = true;
+
+		private var _expandRight:Boolean = true;
+		public function get exandRight():Boolean
+		{
+			return _expandRight;
+		}
+		public function set expandRight(value:Boolean):void
+		{
+			if(value != _expandRight)
+			{
+				_expandRight = value;
+				invalidateProperties();
+			}
+		}
+
+		private var _showEditButton:Boolean = true;
+		public function get showEditButton():Boolean
+		{
+			return _showEditButton;
+		}
+		public function set showEditButton(value:Boolean):void
+		{
+			if(value != _showEditButton)
+			{
+				_showEditButton = value;
+				invalidateProperties();
+			}
+		}
 
 		private var _icon:Class;
 		public function get icon():Class
@@ -88,6 +126,8 @@ package com.cleartext.ximpp.views.common
 		public function SideButton()
 		{
 			super();
+
+			buttonMode = true;
 			
 			filters = [dropShaddow];
 			
@@ -96,20 +136,21 @@ package com.cleartext.ximpp.views.common
 			
 			addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
-			
-			setStyle("padding-top", 0);
-			setStyle("padding-left", 0);
-			setStyle("padding-bottom", 0);
-			setStyle("padding-right", 0);
 		}
 		
 		private function rollOverHandler(event:MouseEvent):void
 		{
 			hover = true;
 			textField.visible = true;
+			editButton.visible = deleteButton.visible = showEditButton;
 			width = textField.textWidth + 65;
 			invalidateDisplayList();
 			
+			editButton.enabled = deleteButton.enabled = connected;
+
+			editButton.toolTip = (connected) ? "" : "go online to edit";
+			deleteButton.toolTip = (connected) ? "" : "go online to delete";
+
 			if(selected)
 				filters = [dropShaddow];
 		}
@@ -118,6 +159,8 @@ package com.cleartext.ximpp.views.common
 		{
 			hover = false;
 			textField.visible = false;
+			editButton.visible = false;
+			deleteButton.visible = false;
 			width = selected ? SELECTED_WIDTH : NORMAL_WIDTH;
 			invalidateDisplayList();
 
@@ -134,7 +177,6 @@ package com.cleartext.ximpp.views.common
 				textField = new UITextField();
 				textField.text = text;
 				textField.visible = hover;
-				textField.x = 34;
 				textField.y = 9;
 				textField.mouseEnabled = false;
 				addChild(textField);
@@ -149,11 +191,42 @@ package com.cleartext.ximpp.views.common
 				image.mouseEnabled = false;
 				addChild(image);
 			}
+			
+			if(!editButton)
+			{
+				editButton = new LinkButton();
+				editButton.setActualSize(70, 18);
+				editButton.move(11+NORMAL_WIDTH, BAR_HEIGHT+2);
+				editButton.setStyle("themeColor", 0x444444);
+				editButton.visible = false;
+				editButton.label = "edit";
+				editButton.addEventListener(MouseEvent.CLICK, edit_clickHandler);
+				addChild(editButton);
+			}
+			
+			if(!deleteButton)
+			{
+				deleteButton = new LinkButton();
+				deleteButton.setActualSize(70, 18);
+				deleteButton.move(11+NORMAL_WIDTH, BAR_HEIGHT+22);
+				deleteButton.setStyle("themeColor", 0x444444);
+				deleteButton.visible = false;
+				deleteButton.label = "delete";
+				deleteButton.addEventListener(MouseEvent.CLICK, delete_clickHandler);
+				addChild(deleteButton);
+			}
 		}
 		
-		private function delete_ClickHandler(event:MouseEvent):void
+		private function delete_clickHandler(event:MouseEvent):void
 		{
 			event.stopImmediatePropagation();
+			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.DELETE_GROUP_WINDOW, text));
+		}
+		
+		private function edit_clickHandler(event:MouseEvent):void
+		{
+			event.stopImmediatePropagation();
+			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_GROUP_WINDOW, text));
 		}
 		
 		override protected function commitProperties():void
@@ -162,6 +235,8 @@ package com.cleartext.ximpp.views.common
 			
 			textField.styleName = "dGreyBold";
 			textField.setActualSize(textField.textWidth+10, textField.textHeight+10);
+			
+			textField.x = (exandRight) ? 42 : (-10 -textField.width);
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -171,26 +246,34 @@ package com.cleartext.ximpp.views.common
 			var g:Graphics = graphics;
 			g.clear();
 			
+			var xVal:Number = exandRight ? 0 : (-textField.width -10);
+			
 			if(selected)
 			{
 				g.beginFill(0xffffff)
 				if(hover)
-					g.drawRoundRect(0,0,unscaledWidth,unscaledHeight, 10, 10);
+					g.drawRoundRect(xVal,0,unscaledWidth,BAR_HEIGHT, 10, 10);
 				else
-					g.drawRoundRectComplex(0, 0, unscaledWidth, unscaledHeight, 5, 0, 5, 0);
+					g.drawRoundRectComplex(xVal, 0, unscaledWidth, BAR_HEIGHT, 5, 0, 5, 0);
 
 //				g.moveTo(unscaledWidth-TRIANGLE_WIDTH, 0);
 //				g.lineTo(unscaledWidth, unscaledHeight/2);
-//				g.lineTo(unscaledWidth-TRIANGLE_WIDTH, unscaledHeight);
+//				g.lineTo(unscaledWidth-TRIANGLE_WIDTH, BAR_HEIGHT);
 //				g.lineTo(unscaledWidth-TRIANGLE_WIDTH, 0);
 			}
 			else
 			{
 				var m:Matrix = new Matrix();
-				m.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2);
+				m.createGradientBox(unscaledWidth, BAR_HEIGHT, Math.PI/2, xVal);
 				
 				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xe1e1e1, 0xd1d1d1], [1,1,1], [0x00, 0x79, 0x80], m);
-				g.drawRoundRect(0,0,unscaledWidth,unscaledHeight, 10, 10);
+				g.drawRoundRect(xVal,0,unscaledWidth,BAR_HEIGHT, 10, 10);
+			}
+			
+			if(hover && showEditButton)
+			{
+				g.beginFill(0xffffff);
+				g.drawRect(9+NORMAL_WIDTH, BAR_HEIGHT, 74, 42);
 			}
 		}
 		

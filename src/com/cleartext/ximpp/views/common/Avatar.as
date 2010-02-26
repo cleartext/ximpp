@@ -2,7 +2,6 @@ package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
-	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	
@@ -23,6 +22,10 @@ package com.cleartext.ximpp.views.common
 
 		[Embed (source="/com/cleartext/ximpp/assets/edit.png")]
 		public static const EditIcon:Class;
+		
+		private var editBitmapData:BitmapData = new EditIcon().bitmapData;
+
+		private var defaultBitmapData:BitmapData = new DefaultAvatar().bitmapData;
 
 		public function Avatar()
 		{
@@ -193,7 +196,7 @@ package com.cleartext.ximpp.views.common
 		{
 			var g:Graphics = graphics;
 			g.clear();
-			var bmd:BitmapData = (bitmapData) ? bitmapData : new DefaultAvatar().bitmapData;
+			var bmd:BitmapData = (bitmapData) ? bitmapData : defaultBitmapData;
 			
 			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 
 			var w:Number = bmd.width * scale;
@@ -218,7 +221,6 @@ package com.cleartext.ximpp.views.common
 	
 			if(showEditIcon)
 			{
-				var editBitmapData:BitmapData = new EditIcon().bitmapData;
 				var transform:ColorTransform = new ColorTransform();
 				transform.alphaMultiplier = 0.85;
 				editBitmapData.colorTransform(editBitmapData.rect, transform);

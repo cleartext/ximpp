@@ -7,6 +7,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.BuddyModel;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
 			import mx.events.CloseEvent;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -17,12 +18,16 @@
 			[Autowire]
 			[Bindable]
 			public var xmpp:XMPPModel;
+
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
 			
 			private function okHandler():void
 			{
 				xmpp.sendSubscribe(fromJid, (allow.selected) ? SubscriptionTypes.SUBSCRIBED : SubscriptionTypes.UNSUBSCRIBED);
 				if(addUser.selected)
-					xmpp.addToRoster(fromJid, subscribe.selected);
+					xmpp.addToRoster(fromJid, subscribe.selected, groupList.selectedItems);
 				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
 			}
 			
@@ -50,6 +55,11 @@
 			<mx:CheckBox id="subscribe" selected="true" label="ask to see when they are online" labelPlacement="right"/>
 		</mx:FormItem>
 		
+		<mx:FormItem label="groups:">
+			<mx:Label text="use ctrl/cmd to select more than one" />
+			<mx:List id="groupList" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
+		</mx:FormItem>
+				
 		<mx:Button label="ok" click="okHandler()"/>
 	</mx:Form>
 

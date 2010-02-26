@@ -6,6 +6,7 @@
 	height="100%">
 	<mx:Script>
 		<![CDATA[
+			import mx.core.UIComponent;
 			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
@@ -17,6 +18,10 @@
 			[Autowire]
 			[Bindable]
 			public var buddies:BuddyModel;
+			
+			[Autowire (bean="xmpp", property="connected")]
+			[Bindable]
+			public var connected:Boolean;
 			
 			public var groupButtons:Dictionary = new Dictionary();
 			
@@ -69,18 +74,30 @@
 			{
 				super.commitProperties();
 				
-				for each(var sb:SideButton in getChildren())
-					sb.selected = sb.text==buddies.groupName;
+				for each(var child:UIComponent in getChildren())
+				{
+					var sb:SideButton = child as SideButton;
+					if(sb)
+						sb.selected = sb.text==buddies.groupName;
+				}
 			}
 
 		]]>
 	</mx:Script>
 	
-	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}"/>
-	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" icon="{Constants.Gateways}"/>
-	<common:SideButton text="{BuddyModel.UNASIGNED}" click="clickHandler(event)" icon="{Constants.NoGroup}"/>
+	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}" showEditButton="false"/>
+	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" icon="{Constants.Gateways}" showEditButton="false"/>
+	<common:SideButton text="{BuddyModel.UNASIGNED}" click="clickHandler(event)" icon="{Constants.NoGroup}" showEditButton="false"/>
 	
-	<common:SideButton text="Add Buddy/Group/Gateway"
-		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_NEW_BUDDY_WINDOW))"
-		icon="{Constants.Add}" forceWhiteBackground="true"/>
+	<mx:Button
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_WINDOW))"
+		toolTip="{(connected) ? 'add group, buddy or gateway' : 'go online to add a buddy, group or gateway'}"
+		width="32" height="32"
+		enabled="{connected}"
+		skin="{null}"
+		upIcon="{Constants.Add}"
+		overIcon="{Constants.AddOver}"
+		downIcon="{Constants.Add}"
+		disabledIcon="{Constants.AddOver}"
+		/>
 </mx:VBox>

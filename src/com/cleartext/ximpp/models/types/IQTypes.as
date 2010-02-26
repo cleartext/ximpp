@@ -12,12 +12,16 @@ package com.cleartext.ximpp.models.types
 		public static const GET_ROSTER:XML = <query xmlns='jabber:iq:roster'/>;
 		public static const GET_USERS_VCARD:XML = <vCard xmlns='vcard-temp'/>;
 		
-		public static function modifyRoster(jid:String, remove:Boolean=false):XML
+		public static function addRemoveRosterItem(jid:String, remove:Boolean=false, groups:Array=null):XML
 		{
 			var result:XML = <query xmlns="jabber:iq:roster" />;
 			var item:XML = <item jid={jid} />
 			if(remove)
 				item.@subscription = SubscriptionTypes.REMOVE;
+
+			if(groups)
+				for each(var group:String in groups)
+					item.appendChild(<group>{group}</group>);
 			
 			result.appendChild(item);
 			return result;

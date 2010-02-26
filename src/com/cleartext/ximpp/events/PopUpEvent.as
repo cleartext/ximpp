@@ -8,24 +8,33 @@ package com.cleartext.ximpp.events
 	{
 		public static const PREFERENCES_WINDOW:String = "preferencesWindow";
 		public static const ADVANCED_SEARCH_WINDOW:String = "advancedSearchWindow";
-		public static const ADD_NEW_BUDDY_WINDOW:String = "addNewBuddyWindow";
-		public static const REMOVE_BUDDY_WINDOW:String = "removeBuddyWindow";
+
+		public static const ADD_WINDOW:String = "addWindow";
+
 		public static const SUBSCRIPTION_REQUEST_WINDOW:String = "subscriptionRequestWindow";
+
 		public static const EDIT_BUDDY_WINDOW:String = "editBuddyWindow";
+		public static const DELETE_BUDDY_WINDOW:String = "deleteBuddyWindow";
+
+		public static const EDIT_GROUP_WINDOW:String = "editGroupWindow";
+		public static const DELETE_GROUP_WINDOW:String = "deleteGroupWindow";
+
+		public static const ADD_MICRO_BLOGGING_WINDOW:String = "addMicroBloggingWindow";
+		public static const EDIT_MICRO_BLOGGING_WINDOW:String = "editMicroBloggingWindow";
 		
-		public var jid:String;
+		public var dataString:String;
 		public var buddy:Buddy;
 		
-		public function PopUpEvent(type:String, jid:String="", buddy:Buddy=null, bubbles:Boolean=false, cancelable:Boolean=false)
+		public function PopUpEvent(type:String, dataString:String="", buddy:Buddy=null, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
-			this.jid = jid;
+			this.dataString = dataString;
 			this.buddy = buddy;
 		}
 		
 		override public function clone():Event
 		{
-			return new PopUpEvent(type, jid, buddy, bubbles, cancelable);
+			return new PopUpEvent(type, dataString, buddy, bubbles, cancelable);
 		}
 	}
 }

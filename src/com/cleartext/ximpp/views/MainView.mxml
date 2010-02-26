@@ -55,13 +55,13 @@
 				Alert.show("Advanced search is not currently implemented.","Advanced Search");
 			}
 			
-			[Mediate(event="PopUpEvent.ADD_NEW_BUDDY_WINDOW")]
+			[Mediate(event="PopUpEvent.ADD_WINDOW")]
 			public function showAddBuddyWindow(event:PopUpEvent):void
 			{
 				initializePopUp(new AddBuddyWindow());
 			}
 
-			[Mediate(event="PopUpEvent.REMOVE_BUDDY_WINDOW")]
+			[Mediate(event="PopUpEvent.DELETE_BUDDY_WINDOW")]
 			public function showRemoveBuddyWindow(event:PopUpEvent):void
 			{
 				var window:RemoveBuddyWindow = new RemoveBuddyWindow();
@@ -72,10 +72,10 @@
 			[Mediate(event="PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW")]
 			public function showSubscriptionRequest(event:PopUpEvent):void
 			{
-				var buddyExists:Boolean = buddies.containsJid(event.jid);
+				var buddyExists:Boolean = buddies.containsJid(event.dataString);
 
 				var window:SubscriptionRequestWindow = new SubscriptionRequestWindow();
-				window.fromJid = event.jid;
+				window.fromJid = event.dataString;
 				window.addToRoster = !buddyExists;
 				initializePopUp(window);
 			}
@@ -158,8 +158,8 @@
 
 	<mx:Button
 		upIcon="{Constants.SendUp}"
-		overIcon="{Constants.SendUp}"
-		downIcon="{Constants.SendDown}"
+		overIcon="{Constants.SendDown}"
+		downIcon="{Constants.SendUp}"
 		disabledIcon="{Constants.SendDisabled}"
 		toolTip="send message"
 		enabled="{xmppConnected}"
@@ -169,5 +169,8 @@
 
 	<buddies:GroupSelectors
 		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
+	
+	<messages:MicroBloggingSelectors
+		x="{width-41}" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
 	
 </mx:Canvas>

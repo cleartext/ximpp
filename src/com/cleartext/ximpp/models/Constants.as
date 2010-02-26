@@ -75,5 +75,8 @@ package com.cleartext.ximpp.models
 		[Embed (source="com/cleartext/ximpp/assets/add.png")]
 		public static const Add:Class;
 
+		[Embed (source="com/cleartext/ximpp/assets/addOver.png")]
+		public static const AddOver:Class;
+
 	}
 }

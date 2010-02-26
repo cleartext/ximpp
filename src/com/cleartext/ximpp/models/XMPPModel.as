@@ -458,11 +458,11 @@ package com.cleartext.ximpp.models
 		// ADD TO ROSTER 
 		//-------------------------------
 		
-		public function addToRoster(toJid:String, subscribeToStatus:Boolean):void
+		public function addToRoster(toJid:String, subscribeToStatus:Boolean, groups:Array):void
 		{
 			sendIq(settings.userAccount.jid,
 					IQTypes.SET,
-					IQTypes.modifyRoster(toJid),
+					IQTypes.addRemoveRosterItem(toJid, false, groups),
 					modifyRosterHandler);
 
 			if(subscribeToStatus)
@@ -477,7 +477,7 @@ package com.cleartext.ximpp.models
 		{
 			sendIq(settings.userAccount.jid, 
 					IQTypes.SET,
-					IQTypes.modifyRoster(toJid, true),
+					IQTypes.addRemoveRosterItem(toJid, true),
 					modifyRosterHandler);
 					
 			if(stopPublishingStatus)

@@ -66,7 +66,7 @@ package com.cleartext.ximpp.views.buddies
 				function():void
 				{
 					over = true;
-					nameLabel.styleName = "orangeBold";
+					nameLabel.styleName = "blackBold";
 					invalidateDisplayList();
 				});
 
@@ -93,11 +93,10 @@ package com.cleartext.ximpp.views.buddies
 		
 		private function displayContextMenu(event:Event):void
 		{
-			if(buddy)
-				contextMenuLabel.label = buddy.nickName + ((xmpp.connected) ? "" : " (go online to edit)");
+			contextMenuLabel.label = (buddy && xmpp.connected) ? buddy.nickName : "go online to edit";
 			
-//			editItem.enabled = xmpp.connected;
-//			deleteItem.enabled = xmpp.connected;
+			editItem.enabled = xmpp.connected;
+			deleteItem.enabled = xmpp.connected;
 		}
 
 		private function editHandler(event:ContextMenuEvent):void
@@ -107,7 +106,7 @@ package com.cleartext.ximpp.views.buddies
 
 		private function deleteHandler(event:ContextMenuEvent):void
 		{
-			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.REMOVE_BUDDY_WINDOW, null, buddy));
+			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.DELETE_BUDDY_WINDOW, null, buddy));
 		}
 
 		private function get buddy():Buddy
