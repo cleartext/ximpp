@@ -160,6 +160,7 @@ package com.cleartext.ximpp.models
 			microBloggingMessages.removeAll();
 
 			var chat:Chat = new Chat(new Buddy("microBlogging"));
+			chat.microBlogging = true;
 			chat.messages = microBloggingMessages;
 			chats.addItem(chat);
 			

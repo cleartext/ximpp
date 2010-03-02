@@ -13,8 +13,8 @@
 			
 			private function applicationCompleteHandler():void
 			{
-				maximize();
 				ToolTipManager.showDelay=100;
+				maximize();
 			}
 		]]>
 	</mx:Script>

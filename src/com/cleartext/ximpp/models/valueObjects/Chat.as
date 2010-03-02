@@ -9,6 +9,8 @@ package com.cleartext.ximpp.models.valueObjects
 		public var buddy:Buddy;
 		public var used:Boolean = true;
 		public var messages:ArrayCollection = new ArrayCollection();
+		
+		public var microBlogging:Boolean = false;
 
 		public function Chat(buddy:Buddy)
 		{

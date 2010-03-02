@@ -200,7 +200,7 @@ package com.cleartext.ximpp.views.buddies
 			if(!statusLabel)
 			{
 				statusLabel = new UITextField();
-				statusLabel.styleName = "lGreyNormal";
+				statusLabel.styleName = "lGreySmall";
 				statusLabel.x = AVATAR_SIZE + PADDING + LEFT_PADDING;
 				statusLabel.y = 16;
 				addChild(statusLabel);
@@ -209,7 +209,7 @@ package com.cleartext.ximpp.views.buddies
 			if(!customStatusLabel)
 			{
 				customStatusLabel = new UITextField();
-				customStatusLabel.styleName = "lGreyNormal";
+				customStatusLabel.styleName = "lGreySmall";
 				customStatusLabel.x = AVATAR_SIZE + PADDING + LEFT_PADDING;
 				customStatusLabel.y = 29;
 				customStatusLabel.visible = false;

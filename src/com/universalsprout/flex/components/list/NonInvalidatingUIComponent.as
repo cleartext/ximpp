@@ -108,10 +108,15 @@ public class NonInvalidatingUIComponent extends UIComponent
     override public function set includeInLayout(value:Boolean):void
     {
         if (_includeInLayout != value)
-        {
-            _includeInLayout = value;
+        	setIncludeInLayout(value);
+    }
+    
+    public function setIncludeInLayout(value:Boolean, noEvent:Boolean=false):void
+    {
+        _includeInLayout = value;
+
+        if(!noEvent)
             dispatchEvent(new Event("includeInLayoutChanged"));
-        }
     }
     
     override public function validateSize(recursive:Boolean = false):void

@@ -10,7 +10,6 @@ package com.universalsprout.flex.components.list
 	public class SproutListItemBase extends NonInvalidatingUIComponent implements ISproutListItem
 	{
 		protected static const TWEEN_DURATION:Number = 500;
-		protected static const TOP_BAR_HEIGHT:Number = 16;
 		protected static const UITEXTFIELD_WIDTH_PADDING:Number = 5;
 		protected static const UITEXTFIELD_HEIGHT_PADDING:Number = 4;
 		

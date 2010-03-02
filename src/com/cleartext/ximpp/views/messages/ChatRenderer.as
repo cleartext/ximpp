@@ -14,7 +14,7 @@ package com.cleartext.ximpp.views.messages
 	import mx.core.UITextField;
 	import mx.formatters.DateFormatter;
 	
-	public class MessageRenderer extends SproutListItemBase
+	public class ChatRenderer extends SproutListItemBase
 	{
 		[Autowire]
 		public var buddies:BuddyModel;
@@ -27,11 +27,25 @@ package com.cleartext.ximpp.views.messages
 		private static const TOP_ROW_HEIGHT:Number = 28;
 		
 		private var df:DateFormatter;
-
-		public function MessageRenderer()
+		
+		private var _showTopRow:Boolean = true;
+		public function get showTopRow():Boolean
+		{
+			return _showTopRow;
+		}
+		public function set showTopRow(value:Boolean):void
+		{
+			if(_showTopRow != value)
+			{
+				_showTopRow = value;
+				invalidateProperties();
+			}
+		}
+		
+		public function ChatRenderer()
 		{
 			super();
-
+			
 			df = new DateFormatter();
 			df.formatString = "EEE MMM D YYYY at L:NN A";
 		}
@@ -40,7 +54,7 @@ package com.cleartext.ximpp.views.messages
 		private var nameTextField:UITextField;
 		private var dateTextField:UITextField;
 		private var bodyTextField:UITextField;
-		
+
 		private var previousWidth:Number;
 		private var previousHeight:Number;
 		private var dataChanged:Boolean = false;
@@ -62,9 +76,9 @@ package com.cleartext.ximpp.views.messages
 				fromThisUser = (fromBuddy == userAccount);
 				
 				avatar.data = fromBuddy;
-				
+
 				nameTextField.text = fromBuddy.nickName;
-				nameTextField.width = nameTextField.textWidth + 6*PADDING;
+				nameTextField.width = nameTextField.textWidth + PADDING;
 				nameTextField.styleName = (fromThisUser) ? "lGreyBold" : "blackBold";
 
 				dateTextField.text = df.format(message.timestamp);
@@ -74,8 +88,18 @@ package com.cleartext.ximpp.views.messages
 				bodyTextField.text = message.body;
 				bodyTextField.styleName = (fromThisUser) ? "lGreyNormal" : "blackNormal";
 			}
+						
+			avatar.visible = showTopRow;
+			dateTextField.visible = showTopRow;
+			nameTextField.visible = showTopRow;
 			
-			dateTextField.x = width - dateTextField.width - 2*PADDING;
+			avatar.includeInLayout = showTopRow;
+			dateTextField.includeInLayout = showTopRow;
+			nameTextField.includeInLayout = showTopRow;
+			
+			bodyTextField.y = showTopRow ? TOP_ROW_HEIGHT+PADDING : PADDING;
+			dateTextField.x = width - dateTextField.width - 2*PADDING;	
+
 			calculateHeight();
 		}
 		
@@ -87,14 +111,14 @@ package com.cleartext.ximpp.views.messages
 			dataChanged = false;
 
 			bodyTextField.wordWrap = true;
-			bodyTextField.width = width - 3*PADDING - AVATAR_SIZE;
+			bodyTextField.width = width - 8*PADDING - AVATAR_SIZE;
 			
 			var newHeight:Number = UITEXTFIELD_HEIGHT_PADDING;
 			for(var l:int=bodyTextField.numLines-1; l>=0; l--)
 				newHeight += Math.ceil(bodyTextField.getLineMetrics(l).height);
 
 			bodyTextField.height = newHeight;
-			heightTo = Math.max(AVATAR_SIZE + 2*PADDING, newHeight + TOP_ROW_HEIGHT+PADDING);
+			heightTo = newHeight + ((showTopRow) ? TOP_ROW_HEIGHT+PADDING : PADDING);
 		}
 		
 		override protected function createChildren():void
@@ -107,14 +131,14 @@ package com.cleartext.ximpp.views.messages
 				avatar.width = AVATAR_SIZE;
 				avatar.height = AVATAR_SIZE;
 				avatar.x = 2*PADDING;
-				avatar.y = PADDING;
+				avatar.y = 2;
 				addChild(avatar);
 			}
 			
 			if(!nameTextField)
 			{
 				nameTextField = new UITextField();
-				nameTextField.y = PADDING;
+				nameTextField.y = PADDING + 2;
 				nameTextField.x = AVATAR_SIZE + 5*PADDING;
 				addChild(nameTextField);
 			}
@@ -122,7 +146,7 @@ package com.cleartext.ximpp.views.messages
 			if(!dateTextField)
 			{
 				dateTextField = new UITextField();
-				dateTextField.y = PADDING;
+				dateTextField.y = PADDING + 2;
 				addChild(dateTextField);
 			}
 
@@ -130,7 +154,6 @@ package com.cleartext.ximpp.views.messages
 			{
 				bodyTextField = new UITextField();
 				bodyTextField.x = AVATAR_SIZE + 5*PADDING;
-				bodyTextField.y = TOP_ROW_HEIGHT;
 				bodyTextField.selectable = true;
 				addChild(bodyTextField);
 			}
@@ -166,19 +189,35 @@ package com.cleartext.ximpp.views.messages
 			var g:Graphics = graphics;
 			g.clear();
 
-			if(!fromThisUser)
+			if(showTopRow)
 			{
 				var matrix:Matrix = new Matrix();
-				matrix.createGradientBox(width, heightTo, Math.PI/2);
-				
-				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], matrix);
-				g.drawRect(0, 0, width, heightTo);
-			}
+				matrix.createGradientBox(width, TOP_ROW_HEIGHT, Math.PI/2);
+	
+				if(fromThisUser)
+					g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], matrix);
+				else
+					g.beginGradientFill(GradientType.LINEAR, [0xeeeeee, 0xbbbbbb], [0.5, 0.5], [95, 255], matrix);
 
-			g.lineStyle(1, 0xdedede, 0.75);
-			g.moveTo(0,heightTo);
-			g.lineTo(width, heightTo);
+				g.drawRoundRect(4*PADDING + AVATAR_SIZE, 2, width-5*PADDING-AVATAR_SIZE, TOP_ROW_HEIGHT-4, 10, 10);
+			}
+			else
+			{
+				g.lineStyle(1, 0xdedede);
+				
+				var xVal:Number = 6*PADDING + AVATAR_SIZE;
+				var dash:Number = 3;
+				var gap:Number = 3;
+				var limit:Number = xVal + 60;
+				
+				while(xVal < limit)
+				{
+					g.moveTo(xVal, 0);
+					xVal += dash;
+					g.lineTo(xVal, 0);
+					xVal += gap;
+				}
+			}
 		}
-		
 	}
 }

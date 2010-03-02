@@ -235,22 +235,20 @@ package com.universalsprout.flex.components.list
 				var itemWidth:Number = unscaledWidth - viewMetricsAndPadding.left - viewMetricsAndPadding.right;
 				var uid:String;
 				
-				var dataUidsToHide:Dictionary = new Dictionary();
+				// set them all to invisible first, then later, make them
+				// visible if we want them
 				for each(item in getChildren())
 				{
-					uid = (item.data as ISproutListData).uid;
-					dataUidsToHide[uid] = uid;
+					item.setVisible(false, true);
+					item.setIncludeInLayout(false, true);
 				}
 				
 				for each(data in collection)
 				{
-					// we don't want to hide this one
-					delete dataUidsToHide[data.uid];
-	
 					// find itemRenderer
 					item = createItemRenderer(data);
-					item.visible = true;
-					item.includeInLayout = true;
+					item.setVisible(true, true);
+					item.setIncludeInLayout(true, true);
 
 					if(animate)
 						item.yTo = yCounter;
@@ -258,13 +256,6 @@ package com.universalsprout.flex.components.list
 						item.move(0, yCounter);
 	
 					yCounter += vGap + item.setWidth(itemWidth);
-				}
-				
-				for each(uid in dataUidsToHide)
-				{
-					item = itemRenderersByDataUid[uid];
-					item.visible = false;
-					item.includeInLayout = false;
 				}
 				
 				if(yCounter != previousHeight)
