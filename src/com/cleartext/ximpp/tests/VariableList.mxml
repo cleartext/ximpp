@@ -3,7 +3,7 @@
 	<mx:Script>
 		<![CDATA[
 			import org.swizframework.util.TemplateUtil;
-			import com.cleartext.ximpp.views.messages.MessageRenderer;
+			import com.cleartext.ximpp.views.messages.MicroBloggingRenderer;
 			import com.cleartext.ximpp.models.valueObjects.Message;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.views.buddies.BuddyRenderer;
@@ -265,7 +265,7 @@ Application
 			animate="false"
 			width="100%" height="100%"
 			dataProvider="{messageData}"
-			itemRenderer="{new ClassFactory(MessageRenderer)}"/>
+			itemRenderer="{new ClassFactory(MicroBloggingRenderer)}"/>
 		
 	</mx:HDividedBox>
 

@@ -1,5 +1,7 @@
 package com.cleartext.ximpp.models.valueObjects
 {
+	import com.cleartext.ximpp.events.MicroBloggingMessageEvent;
+	import com.cleartext.ximpp.models.types.MessageStatusTypes;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
 	public class Message extends SproutListDataBase implements IXimppValueObject
@@ -17,10 +19,27 @@ package com.cleartext.ximpp.models.valueObjects
 			"rawxml TEXT);";
 		
 		public var messageId:int = -1;
+
 		[Bindable]
 		public var timestamp:Date = new Date();
 		[Bindable]
 		public var sender:String;
+		
+		private var _status:String = MessageStatusTypes.UNKNOWN;
+		[Bindable(event="messageStatusChanged")]
+		public function get status():String
+		{
+			return _status;
+		}
+		public function set status(value:String):void
+		{
+			if(_status != value)
+			{
+				_status = value;
+				dispatchEvent(new MicroBloggingMessageEvent(MicroBloggingMessageEvent.MESSAGE_STATUS_CHANGED, this));
+			}
+		}
+		
 		public var recipient:String;
 		public var type:String;
 		public var subject:String;

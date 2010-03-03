@@ -108,7 +108,7 @@ package com.cleartext.ximpp.views.common
 			var buttonDims:Number = textInput.height - 6;
 			
 			resetButton.setActualSize(buttonDims, buttonDims);
-			resetButton. move(unscaledWidth - 3 - buttonDims, 3);
+			resetButton.move(unscaledWidth - 3 - buttonDims, 3);
 			
 			// draw background
 			var g:Graphics = graphics;

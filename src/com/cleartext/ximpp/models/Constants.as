@@ -78,5 +78,35 @@ package com.cleartext.ximpp.models
 		[Embed (source="com/cleartext/ximpp/assets/addOver.png")]
 		public static const AddOver:Class;
 
+		[Embed (source="com/cleartext/ximpp/assets/replyUp.png")]
+		public static const ReplyUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/replyOver.png")]
+		public static const ReplyOver:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/retweetUp.png")]
+		public static const RetweetUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/retweetOver.png")]
+		public static const RetweetOver:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/deleteUp.png")]
+		public static const DeleteUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/deleteOver.png")]
+		public static const DeleteOver:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/directMessageUp.png")]
+		public static const DirectMessageUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/directMessageOver.png")]
+		public static const DirectMessageOver:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/atUp.png")]
+		public static const AtUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/atOver.png")]
+		public static const AtOver:Class;
+
 	}
 }

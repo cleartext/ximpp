@@ -25,7 +25,7 @@ package com.cleartext.ximpp.views.messages
 			{
 				dataProvider = chat.messages;
 				if(chat.microBlogging)
-					itemRenderer = new ClassFactory(MessageRenderer);
+					itemRenderer = new ClassFactory(MicroBloggingRenderer);
 				else
 					itemRenderer = new ClassFactory(ChatRenderer);
 			}
