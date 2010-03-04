@@ -34,6 +34,9 @@ package com.seesmic.as3.xmpp
 		 * html property added
 		 */
 		public var html:String;
+		public var chatState:String = "";
+
+		public static const states:Array = ["active", "composing", "paused", "inactive", "gone"];
 		/**/
 		
 		public function MessageStanza(connection:Object, parent:Stanza=null)
@@ -55,6 +58,12 @@ package com.seesmic.as3.xmpp
 			 * html property added
 			 */
 			this.html = xml.html.text();
+			
+			chatState = "";
+			for each(var possibleState:String in states)
+				if(xml.children().contains(new XML("<" + possibleState + " xmlns='http://jabber.org/protocol/chatstates'/>")))
+					chatState = possibleState;
+			
 			/**/
 		}
 		
@@ -74,6 +83,10 @@ package com.seesmic.as3.xmpp
 		 * modified by astewart@cleartext.com
 		 * html property added
 		 */
+		public function setChatState(nstate:String):void {
+			this.chatState = nstate;
+		}
+		
 		public function setHtml(nhtml:String):void {
 			this.html = nhtml;
 		}
@@ -99,17 +112,29 @@ package com.seesmic.as3.xmpp
 				subjectx = <subject>{this.subject}</subject>;
 				xml.appendChild(subjectx);
 			}
-			var bodyx:XML = new XML();
-			bodyx = <body>{body}</body>;
-			xml.appendChild(bodyx);
+			
+			if(body) {
+				var bodyx:XML = new XML();
+				bodyx = <body>{body}</body>;
+				xml.appendChild(bodyx);
+			}
 
 			/**
 			 * modified by astewart@cleartext.com
 			 * html property added
 			 */
-			var htmlx:XML = new XML();
-			htmlx = <html>{html}</html>;
-			xml.appendChild(htmlx);
+			if(html) {
+				var htmlx:XML = new XML();
+				htmlx = <html>{html}</html>;
+				xml.appendChild(htmlx);
+			}
+			
+			if(chatState) {
+				xml.appendChild(new XML("<" + chatState + " xmlns='http://jabber.org/protocol/chatstates'/>"));
+			}
+			else {
+				xml.appendChild(new XML("<active xmlns='http://jabber.org/protocol/chatstates'/>"));
+			}
 			/**/
 		}
 		

@@ -25,6 +25,8 @@
 			
 			private function input_keyDownHandler(event:KeyboardEvent):void
 			{
+				event.stopPropagation();
+
 				if(event.keyCode==Keyboard.ENTER)
 				{
 					// if some muppet decides to carry on pressing the enter key
@@ -36,6 +38,10 @@
 						callLater(inputTextArea.reset, [true, false]);
 					else
 						send();
+				}
+				else
+				{
+					dispatchEvent(event);
 				}
 			}
 			
@@ -94,7 +100,11 @@
 		]]>
 	</mx:Script>
 	
-	<mx:Label text="{'Conversation with ' + buddy.nickName}" x="10" y="6" />
+	<common:StatusIcon statusString="{buddy.status.value}" x="10" y="6"  visible="{!buddy.isTyping}"/>
+	
+	<mx:Image source="{Constants.IsTyping}" x="10" y="6" visible="{buddy.isTyping}"/>
+	
+	<mx:Label text="{buddy.nickName}" x="28" y="6" styleName="blackBold"/>
 
 	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6" />
 

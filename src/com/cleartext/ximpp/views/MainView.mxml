@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.views.popup.RemoveBuddyWindow;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.events.SendButtonEvent;
@@ -25,6 +26,8 @@
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			import mx.controls.Alert;
+			
+			import mx.core.mx_internal;
 
 			[Autowire]
 			[Bindable]
@@ -42,7 +45,7 @@
 			{
 				appModel.init();
 			}
-			
+					
 			[Mediate(event="PopUpEvent.PREFERENCES_WINDOW")]
 			public function showPreferencesWindow(event:PopUpEvent):void
 			{
@@ -171,6 +174,7 @@
 		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
 	
 	<messages:MicroBloggingSelectors
+		visible="false"
 		x="{width-41}" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
 	
 </mx:Canvas>

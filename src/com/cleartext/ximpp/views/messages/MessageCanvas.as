@@ -1,23 +1,30 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.events.ChatEvent;
+	import com.cleartext.ximpp.events.SearchBoxEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.DatabaseModel;
 	import com.cleartext.ximpp.models.SettingsModel;
 	import com.cleartext.ximpp.models.XMPPModel;
+	import com.cleartext.ximpp.models.types.ChatStateTypes;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
+	import com.cleartext.ximpp.views.common.SearchBox;
 	
+	import flash.display.GradientType;
 	import flash.display.Graphics;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
+	import flash.geom.Matrix;
+	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.containers.ViewStack;
 	import mx.core.Container;
 	import mx.core.ScrollPolicy;
-	import mx.effects.Fade;
 	import mx.effects.Move;
 	import mx.events.CloseEvent;
 	import mx.events.CollectionEvent;
@@ -48,20 +55,23 @@ package com.cleartext.ximpp.views.messages
 		private static const SELECTOR_WIDTH:Number = 5;
 		private static const TRIANGLE_HEIGHT:Number = 12;
 		private static const TRIANGLE_WIDTH:Number = 16;
-		private static const SEARCH_BAR_HEIGHT:Number = 20;
+		private static const LIST_HEADER_HEIGHT:Number = 20;
+		private static const SEARCH_BAR_HEIGHT:Number = 24;
+		private static const SEARCH_BAR_BORDER:Number = 4;
+		private static const SEARCH_BAR_WIDTH:Number = 220;
 		private static const AVATAR_SIZE:Number = Constants.AVATAR_TAB_HEIGHT - TRIANGLE_HEIGHT - SELECTOR_WIDTH;
-		
-		private static const SELECTED_ALPHA:Number = 1.0;
-		private static const OVER_ALPHA:Number = 1.0;
-		private static const OUT_ALPHA:Number = 0.7;
 		
 		private var avatars:ArrayCollection = new ArrayCollection();
 
 		private var inputCanvas:InputCanvas;
 		private var avatarCanvas:Canvas;
-		private var spacerCanvas:SpacerCanvas;
+		private var searchBox:SearchBox;
 		private var messageStack:ViewStack;
 
+		private var searchString:String="";
+		
+		private var isTypingTimer:Timer;
+		
 		private var _index:int = 0;
 		public function get index():int
 		{
@@ -94,6 +104,9 @@ package com.cleartext.ximpp.views.messages
 			percentHeight = 100;
 			percentWidth = 100;
 			
+			isTypingTimer = new Timer(3000, 2);
+			isTypingTimer.addEventListener(TimerEvent.TIMER, isTimerTypingHandler);
+			
 			addEventListener(FlexEvent.CREATION_COMPLETE, 
 				function():void
 				{
@@ -118,6 +131,8 @@ package com.cleartext.ximpp.views.messages
 		{
 			var chat:Chat = avatarByIndex(index).chat;
 			
+			chat.chatState = ChatStateTypes.ACTIVE;
+
 			xmpp.sendMessage(chat.buddy.fullJid, messageString);
 			
 			var message:Message = new Message();
@@ -152,10 +167,13 @@ package com.cleartext.ximpp.views.messages
 			var exists:Boolean = false;
 			for(var i:int=0; i<avatars.length; i++)
 			{
-				if(avatarByIndex(i).chat == chat)
+				var c:Chat = avatarByIndex(i).chat;
+				setChatStateTo(c, ChatStateTypes.ACTIVE);
+				if(c == chat)
 				{
 					_index = i;
-					moveAvatar(index, 1, SELECTED_ALPHA);
+					moveAvatar(index, 1);
+
 					exists = true;
 					
 					for each(var s:Container in messageStack.getChildren())
@@ -166,12 +184,14 @@ package com.cleartext.ximpp.views.messages
 							break;
 						}
 					}
-					break;
 				}
 			}
 			
 			if(!exists)
 			{
+				chat.messages.filterFunction = filterMessages;
+				setChatStateTo(chat, ChatStateTypes.ACTIVE);
+				
 				var avatar:AvatarTab = new AvatarTab();
 				avatar.data = chat;
 				avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
@@ -179,13 +199,11 @@ package com.cleartext.ximpp.views.messages
 				avatar.height = AVATAR_SIZE;
 				avatar.border = false;
 				avatar.toolTip = chat.buddy.nickName;
-				avatar.addEventListener(MouseEvent.ROLL_OVER, avatar_rollOver);
-				avatar.addEventListener(MouseEvent.ROLL_OUT, avatar_rollOut);
 				avatar.addEventListener(CloseEvent.CLOSE, avatar_close);
 				avatar.alpha = 0;
 	
 				avatars.addItemAt(avatar, index);
-				moveAvatar(index, 1, SELECTED_ALPHA, false);
+				moveAvatar(index, 1, false);
 				avatarCanvas.addChildAt(avatar, 0);
 					
 				var sproutList:MessageSproutList = new MessageSproutList();
@@ -195,6 +213,8 @@ package com.cleartext.ximpp.views.messages
 				messageStack.selectedChild = sproutList;
 			}
 			
+			chat.messages.refresh();
+			
 			// do all the other avatars
 			var cursor:int = index+1;
 			for(var j:int=1; j<avatars.length; j++)
@@ -203,8 +223,18 @@ package com.cleartext.ximpp.views.messages
 					cursor = 0;
 				
 				// the last avatar needs to go to position 0
-				moveAvatar(cursor, (j==avatars.length-1) ? 0 : j+1, OUT_ALPHA);
+				moveAvatar(cursor, (j==avatars.length-1) ? 0 : j+1);
 				cursor++;
+			}
+		}
+		
+		private function setChatStateTo(chat:Chat, newState:String, sendStanza:Boolean=true):void
+		{
+			if(chat.chatState != newState)
+			{
+				chat.chatState = newState;
+				if(sendStanza && xmpp.connected)
+					xmpp.sendMessage(chat.buddy.fullJid, null, null, 'chat', newState);
 			}
 		}
 		
@@ -213,21 +243,7 @@ package com.cleartext.ximpp.views.messages
 			var avatar:AvatarTab = event.target as AvatarTab;
 			appModel.chats.removeItemAt(appModel.chats.getItemIndex(avatar.chat));
 		}
-		
-		private function avatar_rollOver(event:MouseEvent):void
-		{
-			var avatar:AvatarTab = event.target as AvatarTab;
-			if(avatarByIndex(index) != avatar)
-				avatar.alpha = OVER_ALPHA;
-		}
-		
-		private function avatar_rollOut(event:MouseEvent):void
-		{
-			var avatar:AvatarTab = event.target as AvatarTab;
-			if(avatarByIndex(index) != avatar)
-				avatar.alpha = OUT_ALPHA;
-		}
-		
+				
 		override protected function createChildren():void
 		{
 			super.createChildren();
@@ -235,6 +251,7 @@ package com.cleartext.ximpp.views.messages
 			if(!inputCanvas)
 			{
 				inputCanvas = new InputCanvas();
+				inputCanvas.addEventListener(KeyboardEvent.KEY_DOWN, input_keyDownHandler);
 				inputCanvas.messageCanvas = this;
 				addChild(inputCanvas);
 			}
@@ -246,10 +263,16 @@ package com.cleartext.ximpp.views.messages
 				addChild(avatarCanvas);
 			}
 			
-			if(!spacerCanvas)
+			if(!searchBox)
 			{
-				spacerCanvas = new SpacerCanvas();
-				addChild(spacerCanvas);
+				searchBox = new SearchBox();
+				searchBox.width = SEARCH_BAR_WIDTH;
+				searchBox.height = SEARCH_BAR_HEIGHT;
+				searchBox.borderAlpha = 0.5;
+				searchBox.setConstraintValue("right", 23);
+				searchBox.addEventListener(SearchBoxEvent.SEARCH, doSearch);
+				searchBox.y = Constants.TOP_BAR_HEIGHT + TRIANGLE_HEIGHT + SELECTOR_WIDTH + AVATAR_SIZE - SEARCH_BAR_HEIGHT/2;
+				addChild(searchBox);
 			}
 			
 			if(!messageStack)
@@ -258,12 +281,23 @@ package com.cleartext.ximpp.views.messages
 				messageStack.setStyle("backgroundColor", 0xffffff);
 				addChild(messageStack);
 			}
-
-//			if(!selector)
-//			{
-//				selector = new Sprite();
-//				rawChildren.addChild(selector);
-//			}
+		}
+		
+		private function input_keyDownHandler(event:KeyboardEvent):void
+		{
+			setChatStateTo(avatarByIndex(index).chat, ChatStateTypes.COMPOSING);
+			isTypingTimer.reset();
+			isTypingTimer.start();
+		}
+		
+		private function isTimerTypingHandler(event:TimerEvent):void
+		{
+			var chat:Chat = avatarByIndex(index).chat;
+			
+			if(chat.chatState == ChatStateTypes.COMPOSING)
+				setChatStateTo(chat, ChatStateTypes.PAUSED);
+			else
+				setChatStateTo(chat, ChatStateTypes.ACTIVE);
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -275,9 +309,6 @@ package com.cleartext.ximpp.views.messages
 			
 			avatarCanvas.move(0, Constants.TOP_BAR_HEIGHT);
 			avatarCanvas.setActualSize(unscaledWidth, AVATAR_SIZE + SELECTOR_WIDTH + TRIANGLE_HEIGHT);
-			
-			spacerCanvas.move(0, Constants.TOP_BAR_HEIGHT +TRIANGLE_HEIGHT + SELECTOR_WIDTH + AVATAR_SIZE);
-			spacerCanvas.setActualSize(unscaledWidth, SEARCH_BAR_HEIGHT);
 
 			messageStack.move(0, Constants.TOP_BAR_HEIGHT + SEARCH_BAR_HEIGHT + avatarCanvas.height);
 			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - avatarCanvas.height - SEARCH_BAR_HEIGHT);
@@ -296,30 +327,59 @@ package com.cleartext.ximpp.views.messages
 			g.drawRect(xVal, TRIANGLE_HEIGHT + yVal, AVATAR_SIZE + 2*SELECTOR_WIDTH, AVATAR_SIZE + SELECTOR_WIDTH);
 			// draw inner box
 			g.drawRect(xVal + SELECTOR_WIDTH, TRIANGLE_HEIGHT + SELECTOR_WIDTH + yVal, AVATAR_SIZE, AVATAR_SIZE);
+
+			g.beginFill(0xffffff);
+			g.drawRoundRect(
+				unscaledWidth - SEARCH_BAR_WIDTH - 23 - SEARCH_BAR_BORDER,
+				Constants.TOP_BAR_HEIGHT+TRIANGLE_HEIGHT + SELECTOR_WIDTH + AVATAR_SIZE - SEARCH_BAR_HEIGHT/2 - SEARCH_BAR_BORDER,
+				SEARCH_BAR_WIDTH + 2*SEARCH_BAR_BORDER,
+				SEARCH_BAR_HEIGHT + 2*SEARCH_BAR_BORDER,
+				SEARCH_BAR_HEIGHT + SEARCH_BAR_BORDER,
+				SEARCH_BAR_HEIGHT + SEARCH_BAR_BORDER);
+
+			g.beginFill(0xffffff);
+			g.drawRoundRect(
+				0,
+				Constants.TOP_BAR_HEIGHT+TRIANGLE_HEIGHT+SELECTOR_WIDTH+AVATAR_SIZE,
+				unscaledWidth,
+				LIST_HEADER_HEIGHT + 8,
+				8, 8);
+
+			var m:Matrix = new Matrix();
+			m.createGradientBox(unscaledWidth, LIST_HEADER_HEIGHT, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT+TRIANGLE_HEIGHT+SELECTOR_WIDTH+AVATAR_SIZE);
+			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0, 0.5], [95, 255], m); 
+			g.drawRect(1, Constants.TOP_BAR_HEIGHT+TRIANGLE_HEIGHT+SELECTOR_WIDTH+AVATAR_SIZE , unscaledWidth-2, LIST_HEADER_HEIGHT);
 		}
 		
+		private function doSearch(event:SearchBoxEvent):void
+		{
+			searchString = event.searchString;
+			avatarByIndex(index).chat.messages.refresh();
+		}
+
+		private function filterMessages(message:Message):Boolean
+		{
+			return message.body.indexOf(searchString) != -1;
+		}
+			
 		private function avatarClickHandler(event:MouseEvent):void
 		{
 			setCurrentChat((event.target as AvatarTab).chat);
 		}
 		
-		private function moveAvatar(avatarIndex:int, position:int, newAlpha:Number=-1, animate:Boolean=true):void
+		private function moveAvatar(avatarIndex:int, position:int, animate:Boolean=true):void
 		{
 			var avatar:AvatarTab = avatarByIndex(avatarIndex);
 			
-			if(newAlpha != -1 && newAlpha != avatar.alpha)
-			{
-				var fade:Fade = new Fade(avatar);
-				fade.alphaFrom = avatar.alpha;
-				fade.alphaTo = newAlpha;
-				fade.duration = ANIMATION_DURATION;
-				fade.play();
-			}
-
+			avatar.selected = (position == 1);
+	
 			var newX:Number = (AVATAR_SIZE + H_GAP)*position + H_GAP;
 
 			if(position == 1)
+			{
+				avatar.chat.unreadMessageCount = 0;
 				newX += SELECTOR_WIDTH;
+			}
 			else if(position >1)
 				newX += 2*SELECTOR_WIDTH;
 

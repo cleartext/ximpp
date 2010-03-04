@@ -172,9 +172,9 @@ package com.cleartext.ximpp.models
 					buddy.jid.toLowerCase().search(searchString) == -1))
 				return false; 
 			
-			if(groupName == ALL_BUDDIES_GROUP && !buddy.isGateway)
-				return true;
-			else if(groupName == GATEWAY_GROUP && buddy.isGateway)
+			if(buddy.isGateway)
+				return groupName == GATEWAY_GROUP;
+			else if(groupName == ALL_BUDDIES_GROUP && !buddy.isGateway)
 				return true;
 			else if(groupName == UNASIGNED && buddy.groups.length == 0)
 				return true;

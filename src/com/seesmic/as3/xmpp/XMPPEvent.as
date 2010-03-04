@@ -38,6 +38,9 @@ package com.seesmic.as3.xmpp
 		public static const ROSTER_ERROR:String = "xmpp-roster-error";
 		public static const BOUND:String = "xmpp-jid-bound";
 		
+		// astewart@cleartext.com
+		public static const CHAT_STATE:String = "xmpp-chat-state";
+		
 		public var stanza:Object;
 		public function XMPPEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false, stanza:Object=null)
 		{

@@ -4,8 +4,6 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.types.MessageStatusTypes;
 	import com.cleartext.ximpp.models.types.MicroBloggingMessageTypes;
-	import com.cleartext.ximpp.models.valueObjects.Status;
-	import com.cleartext.ximpp.views.common.StatusIcon;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
@@ -14,6 +12,7 @@ package com.cleartext.ximpp.views.messages
 	import flash.geom.Matrix;
 	
 	import mx.controls.Button;
+	import mx.controls.Image;
 	
 	import org.swizframework.Swiz;
 	
@@ -42,14 +41,13 @@ package com.cleartext.ximpp.views.messages
 				{
 					case MicroBloggingMessageTypes.TWEET_SENT :
 						
-						var statusIcon:StatusIcon = new StatusIcon();
-						statusIcon.width = 16;
-						statusIcon.height = 16;
-						statusIcon.alpha = 0.75;
-						statusIcon.x = padding;
-						statusIcon.y = padding;
-						buttons.push(statusIcon);
-						addChild(statusIcon);
+						var statusImage:Image = new Image();
+						statusImage.width = 16;
+						statusImage.height = 16;
+						statusImage.x = padding;
+						statusImage.y = padding;
+						buttons.push(statusImage);
+						addChild(statusImage);
 						
 						var deleteButton:Button = new Button();
 						deleteButton.data = MicroBloggingMessageEvent.TWITTER_DELETE;
@@ -150,22 +148,22 @@ package com.cleartext.ximpp.views.messages
 		{
 			if(buttons.length > 0)
 			{
-				var statusIcon:StatusIcon = buttons[0] as StatusIcon;
-				if(statusIcon)
+				var statusImage:Image = buttons[0] as Image;
+				if(statusImage)
 				{
 					switch(message.status)
 					{
 						case MessageStatusTypes.ERROR :
-							statusIcon.status.value = Status.ERROR;
+							statusImage.source = Constants.Error;
 							break;
 						case MessageStatusTypes.PENDING :
-							statusIcon.status.value = Status.CONNECTING;
+							statusImage.source = Constants.Pending;
 							break;
 						case MessageStatusTypes.SUCCESS :
-							statusIcon.status.value = Status.AVAILABLE;
+							statusImage.source = Constants.Sucess;
 							break;
 						default :
-							statusIcon.status.value = Status.UNKNOWN;
+							statusImage.source = null;
 							break;
 					}
 				}
@@ -198,7 +196,10 @@ package com.cleartext.ximpp.views.messages
 				messageType = MicroBloggingMessageTypes.TWEET_RECEIVED;
 			
 			if(fromThisUser)
+			{
 				messageType = MicroBloggingMessageTypes.TWEET_SENT;
+				message.status = MessageStatusTypes.SUCCESS;
+			}
 		}
 		
 		override protected function createChildren():void

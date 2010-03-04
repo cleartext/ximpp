@@ -9,6 +9,7 @@ package com.cleartext.ximpp.events
 		public static const ADD_CHAT:String = "addChat";
 		public static const REMOVE_CHAT:String = "removeChat";
 		public static const SELECT_CHAT:String = "selectChat";
+		public static const CHAT_CHANGED:String = "chatChanged";
 
 		public var chat:Chat;
 		

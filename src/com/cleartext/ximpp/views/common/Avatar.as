@@ -5,6 +5,7 @@ package com.cleartext.ximpp.views.common
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
@@ -68,7 +69,7 @@ package com.cleartext.ximpp.views.common
 			return data as Chat;
 		}
 		
-		private function buddyChangedHandler(event:BuddyEvent):void
+		protected function buddyChangedHandler(event:BuddyEvent):void
 		{
 			var bmd:BitmapData = (buddy) ? buddy.avatar : null;
 			
@@ -197,7 +198,7 @@ package com.cleartext.ximpp.views.common
 			var g:Graphics = graphics;
 			g.clear();
 			var bmd:BitmapData = (bitmapData) ? bitmapData : defaultBitmapData;
-			
+
 			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 
 			var w:Number = bmd.width * scale;
 			var h:Number = bmd.height * scale;
@@ -209,7 +210,7 @@ package com.cleartext.ximpp.views.common
 			g.drawRect(tx,ty,w,h);
 			
 			g.beginBitmapFill(bmd, new Matrix(scale, 0, 0, scale, tx, ty), false, true);
-	
+
 			g.drawRect(tx,ty,w,h);
 			g.endFill();
 
@@ -230,7 +231,5 @@ package com.cleartext.ximpp.views.common
 				g.drawRect(0,0,unscaledWidth,unscaledHeight);
 			}
 		}
-
-		
 	}
 }

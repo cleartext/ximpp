@@ -74,6 +74,7 @@ package com.cleartext.ximpp.models
 
 			// event listeners for messages, presance and changes to the roster
 			xmpp.addEventListener(XMPPEvent.MESSAGE, messageHandler);
+			xmpp.addEventListener(XMPPEvent.CHAT_STATE, chatStateHandler);
 			xmpp.addEventListener(XMPPEvent.PRESENCE, presenceHandler);
 			xmpp.addEventListener(XMPPEvent.ROSTER_ITEM, rosterListChangeHandler);
 		}
@@ -186,10 +187,9 @@ package com.cleartext.ximpp.models
 		private function messageHandler(event:XMPPEvent):void
 		{
 			var message:Message = Message.createFromStanza(event.stanza);
-			if(message.body == "[OK]")
-				return;
 
 			var buddy:Buddy = buddies.getBuddyByJid(message.sender);
+			
 			if(!buddy)
 			{
 				buddy = new Buddy(message.sender);
@@ -197,13 +197,25 @@ package com.cleartext.ximpp.models
 			}
 			
 			buddy.setLastSeen(message.timestamp);
+			buddy.isTyping = false;
 			buddy.resource = event.stanza.from.resource;
-			database.saveBuddy(buddy);
-			
+
 			var chat:Chat = appModel.getChat(buddy, false);
 			chat.messages.addItemAt(message,0);
+			chat.unreadMessageCount++;
 
 			database.saveMessage(message);
+			database.saveBuddy(buddy);
+		}
+		
+		private function chatStateHandler(event:XMPPEvent):void
+		{
+			var chatState:String = event.stanza.chatState;
+			var fromJid:String = event.stanza.from.getBareJID();
+			var buddy:Buddy = buddies.getBuddyByJid(fromJid);
+
+			if(buddy)
+				buddy.isTyping = (chatState == "composing");
 		}
 		
 		//-------------------------------
@@ -292,6 +304,7 @@ package com.cleartext.ximpp.models
 				buddy.subscription = subscription;
 				buddies.addBuddy(buddy);
 			}
+			buddies.refresh();
 		}
 
 		//-------------------------------
@@ -449,9 +462,9 @@ package com.cleartext.ximpp.models
 		// SEND MESSAGE
 		//-------------------------------
 		
-		public function sendMessage(toJid:String, body:String, subject:String=null, type:String='chat'):void
+		public function sendMessage(toJid:String, body:String, subject:String=null, type:String='chat', chatState:String=null):void
 		{
-			xmpp.sendMessage(toJid, body, subject, type);
+			xmpp.sendMessage(toJid, body, subject, type, chatState);
 		}
 		
 		//-------------------------------
@@ -505,6 +518,7 @@ package com.cleartext.ximpp.models
 			/**
 			 * TO DO:
 			 */
+			buddies.refresh();
 			appModel.log("modifyRosterHandler");
 		}
 

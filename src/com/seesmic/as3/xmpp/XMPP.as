@@ -68,6 +68,8 @@ package com.seesmic.as3.xmpp
 			handlers = new Array();
 			addHandler(new XPathHandler("{http://etherx.jabber.org/streams}features", StreamFeaturesHandler));
 			addHandler(new XPathHandler('{jabber:client}message/{jabber:client}body', handleMessage));
+			//astewart@cleartext.com
+			addHandler(new XPathHandler('{jabber:client}message/{xmlns="http://jabber.org/protocol/chatstates"}', handleChatState));
 			addHandler(new XPathHandler("{urn:ietf:params:xml:ns:xmpp-sasl}success", authSuccessHandler));
 			addHandler(new XPathHandler("{urn:ietf:params:xml:ns:xmpp-sasl}failure", authFailureHandler));
 			addHandler(new XPathHandler("{jabber:client}presence", handlePresence));
@@ -192,6 +194,11 @@ package com.seesmic.as3.xmpp
 			return String(stanzaId);
 		}
 		
+		// astewart@cleartext.com
+		private function handleChatState(msg:MessageStanza):void {
+			dispatchEvent(new XMPPEvent(XMPPEvent.CHAT_STATE, false, false, msg));
+		}
+		
 		private function handleMessage(msg:MessageStanza):void {
 			if(msg.type == 'chat' || !msg.type || msg.type == 'normal') {
 				dispatchEvent(new XMPPEvent(XMPPEvent.MESSAGE, false, false, msg));
@@ -313,12 +320,13 @@ package com.seesmic.as3.xmpp
 			disconnect();
 		}
 		
-		public function sendMessage(tojid:String, msg:String, subject:String=null, type:String='chat'):void {
+		public function sendMessage(tojid:String, msg:String, subject:String=null, type:String='chat', chatStatus:String=null):void {
 			var nmsg:MessageStanza = new MessageStanza(this);
 			nmsg.setTo(tojid);
 			nmsg.setFrom(fulljid.toString());
 			nmsg.setBody(msg);
 			nmsg.setType(type);
+			nmsg.setChatState(chatStatus);
 			nmsg.send();
 			//send("<message type='" + type + "' from='" + fulljid.toString() + "' to='" + tojid + "'><body>" + msg + "</body></message>");
 		}

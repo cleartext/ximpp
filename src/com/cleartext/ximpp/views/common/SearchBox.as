@@ -28,18 +28,7 @@ package com.cleartext.ximpp.views.common
 		{
 			super();
 		}
-		
-		override protected function keyDownHandler(event:KeyboardEvent):void
-		{
-			super.keyDownHandler(event);
-
-			if(event.keyCode == Keyboard.ESCAPE)
-			{
-				textInput.reset(true);
-				setSearchString();
-			}
-		}
-		
+			
 		override protected function createChildren():void
 		{
 			super.createChildren();
@@ -78,7 +67,11 @@ package com.cleartext.ximpp.views.common
 		
 		private function textInputHandler(event:KeyboardEvent):void
 		{
-			textInput.multiLine = false;
+			if(event.keyCode == Keyboard.ESCAPE)
+				textInput.reset(true, false);
+			else
+				textInput.multiLine = false;
+	
 			setSearchString();
 		}
 		

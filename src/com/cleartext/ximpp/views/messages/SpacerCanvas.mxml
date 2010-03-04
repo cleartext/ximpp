@@ -49,11 +49,11 @@
 				g.drawRoundRect(unscaledWidth - 23 - 220 - 4, -15, 220 + 8, 30, 28, 28);
 
 				g.beginFill(0xffffff);
-				g.drawRect(0,0,w,h);
+				g.drawRoundRect(0,0,w,h+8, 8, 8);
 
 				var m:Matrix = new Matrix();
 				m.createGradientBox(w, h, Math.PI/2, 0, 0);
-				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], m); 
+				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0, 0.5], [95, 255], m); 
 				g.drawRect(1, 1, w-2, h-2);
 				
 				

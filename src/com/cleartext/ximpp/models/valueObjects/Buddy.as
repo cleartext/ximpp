@@ -80,6 +80,21 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 		
+		private var _isTyping:Boolean = false;
+		[Bindable (event="buddyChanged")]
+		public function get isTyping():Boolean
+		{
+			return _isTyping;
+		}
+		public function set isTyping(value:Boolean):void
+		{
+			if(_isTyping != value)
+			{
+				_isTyping = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
+		}
+		
 		private var _lastSeen:Date;
 		[Bindable (event="buddyChanged")]
 		public function get lastSeen():Date

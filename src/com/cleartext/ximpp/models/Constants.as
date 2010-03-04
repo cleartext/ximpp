@@ -108,5 +108,17 @@ package com.cleartext.ximpp.models
 		[Embed (source="com/cleartext/ximpp/assets/atOver.png")]
 		public static const AtOver:Class;
 
+		[Embed (source="com/cleartext/ximpp/assets/success.png")]
+		public static const Sucess:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/error.png")]
+		public static const Error:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/pending.png")]
+		public static const Pending:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/isTyping.png")]
+		public static const IsTyping:Class;
+
 	}
 }

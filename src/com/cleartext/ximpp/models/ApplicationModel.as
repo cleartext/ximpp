@@ -7,6 +7,7 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	
+	import flash.desktop.NativeApplication;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.utils.getTimer;
@@ -61,6 +62,8 @@ package com.cleartext.ximpp.models
 			return _localStatus;
 		}
 		
+		private var lastStatus:String;
+		
 		[Bindable]
 		public var showConsole:Boolean = false;
 
@@ -90,6 +93,31 @@ package com.cleartext.ximpp.models
 			dispatchEvent(new Event("logTextChanged"));
 		}
 		
+		public function ApplicationModel()
+		{
+			super();
+			var nApp:NativeApplication = NativeApplication.nativeApplication;
+			nApp.idleThreshold = 360;
+			nApp.addEventListener(Event.USER_IDLE, userHandler);
+			nApp.addEventListener(Event.USER_PRESENT, userHandler);
+		}
+		
+		private function userHandler(event:Event):void
+		{
+			if(!xmpp.connected)
+				return;
+
+			if(event.type == Event.USER_IDLE)
+			{
+				lastStatus = localStatus.value;
+				setUserPresence(Status.AWAY, settings.userAccount.customStatus)
+			}
+			else if(event.type == Event.USER_PRESENT)
+			{
+				setUserPresence(lastStatus, settings.userAccount.customStatus)
+			}
+		}	
+			
 		public function setUserPresence(statusString:String, customStatus:String):void
 		{
 			if(Status.USER_TYPES.indexOf(statusString) != -1)
