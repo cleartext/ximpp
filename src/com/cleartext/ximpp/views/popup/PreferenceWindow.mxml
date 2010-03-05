@@ -108,9 +108,9 @@
 				if(previousAccount && changesMade)
 				{
 					previousAccount.accountName = accountName.text;
-					previousAccount.setNickName(nickName.text);
-					previousAccount.setAvatar(avatar.getBitmapData());
-					previousAccount.setJid(jid.text);
+					previousAccount.nickName = nickName.text;
+					previousAccount.avatar = avatar.getBitmapData();
+					previousAccount.jid = jid.text;
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
 					
@@ -199,7 +199,7 @@
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
 									if(previousAccount)
 									{
-										previousAccount.setAvatar(newBitmapData);
+										previousAccount.avatar = newBitmapData;
 										previousAccount.avatarHash = SHA1.hashBytes(newBitmapData.getPixels(newBitmapData.rect));
 									}
 								});

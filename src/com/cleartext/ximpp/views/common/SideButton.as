@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.events.PopUpEvent;
+	import com.cleartext.ximpp.models.Constants;
 	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
@@ -10,7 +11,6 @@ package com.cleartext.ximpp.views.common
 	
 	import mx.controls.Button;
 	import mx.controls.Image;
-	import mx.controls.LinkButton;
 	import mx.core.UIComponent;
 	import mx.core.UITextField;
 	
@@ -26,7 +26,6 @@ package com.cleartext.ximpp.views.common
 		private static const SELECTED_WIDTH:Number = 41;
 		private static const NORMAL_WIDTH:Number = 32;
 		private static const BAR_HEIGHT:Number = 32;
-//		private static const TRIANGLE_WIDTH:Number = 8;
 
 		private var textField:UITextField;
 		private var image:Image;
@@ -148,8 +147,8 @@ package com.cleartext.ximpp.views.common
 			
 			editButton.enabled = deleteButton.enabled = connected;
 
-			editButton.toolTip = (connected) ? "" : "go online to edit";
-			deleteButton.toolTip = (connected) ? "" : "go online to delete";
+			editButton.toolTip = (connected) ? "edit group" : "go online to edit";
+			deleteButton.toolTip = (connected) ? "remove group" : "go online to remove";
 
 			if(selected)
 				filters = [dropShaddow];
@@ -194,24 +193,30 @@ package com.cleartext.ximpp.views.common
 			
 			if(!editButton)
 			{
-				editButton = new LinkButton();
-				editButton.setActualSize(70, 18);
-				editButton.move(11+NORMAL_WIDTH, BAR_HEIGHT+2);
-				editButton.setStyle("themeColor", 0x444444);
+				editButton = new Button();
 				editButton.visible = false;
-				editButton.label = "edit";
+				editButton.setStyle("skin", null);
+				editButton.setStyle("upIcon", Constants.EditUp);
+				editButton.setStyle("overIcon", Constants.EditOver);
+				editButton.setStyle("downIcon", Constants.EditUp);
+				editButton.setStyle("disabledIcon", Constants.EditUp);
+				editButton.width = 16;
+				editButton.height = 16;
 				editButton.addEventListener(MouseEvent.CLICK, edit_clickHandler);
 				addChild(editButton);
 			}
 			
 			if(!deleteButton)
 			{
-				deleteButton = new LinkButton();
-				deleteButton.setActualSize(70, 18);
-				deleteButton.move(11+NORMAL_WIDTH, BAR_HEIGHT+22);
-				deleteButton.setStyle("themeColor", 0x444444);
+				deleteButton = new Button();
 				deleteButton.visible = false;
-				deleteButton.label = "delete";
+				deleteButton.setStyle("skin", null);
+				deleteButton.setStyle("upIcon", Constants.CloseUp);
+				deleteButton.setStyle("overIcon", Constants.CloseOver);
+				deleteButton.setStyle("downIcon", Constants.CloseUp);
+				deleteButton.setStyle("disabledIcon", Constants.CloseUp);
+				deleteButton.width = 16;
+				deleteButton.height = 16;
 				deleteButton.addEventListener(MouseEvent.CLICK, delete_clickHandler);
 				addChild(deleteButton);
 			}
@@ -237,6 +242,9 @@ package com.cleartext.ximpp.views.common
 			textField.setActualSize(textField.textWidth+10, textField.textHeight+10);
 			
 			textField.x = (exandRight) ? 42 : (-10 -textField.width);
+			
+			editButton.move(textField.textWidth + 56, 8);
+			deleteButton.move(textField.textWidth + 78, 8);
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -247,35 +255,31 @@ package com.cleartext.ximpp.views.common
 			g.clear();
 			
 			var xVal:Number = exandRight ? 0 : (-textField.width -10);
+			var wVal:Number = unscaledWidth + ((deleteButton.visible) ? 35 : 0);
 			
 			if(selected)
 			{
 				g.beginFill(0xffffff)
 				if(hover)
-					g.drawRoundRect(xVal,0,unscaledWidth,BAR_HEIGHT, 10, 10);
+					g.drawRoundRect(xVal,0,wVal,BAR_HEIGHT, 10, 10);
 				else
-					g.drawRoundRectComplex(xVal, 0, unscaledWidth, BAR_HEIGHT, 5, 0, 5, 0);
-
-//				g.moveTo(unscaledWidth-TRIANGLE_WIDTH, 0);
-//				g.lineTo(unscaledWidth, unscaledHeight/2);
-//				g.lineTo(unscaledWidth-TRIANGLE_WIDTH, BAR_HEIGHT);
-//				g.lineTo(unscaledWidth-TRIANGLE_WIDTH, 0);
+					g.drawRoundRectComplex(xVal, 0, wVal, BAR_HEIGHT, 5, 0, 5, 0);
 			}
 			else
 			{
 				var m:Matrix = new Matrix();
-				m.createGradientBox(unscaledWidth, BAR_HEIGHT, Math.PI/2, xVal);
+				m.createGradientBox(wVal, BAR_HEIGHT, Math.PI/2, xVal);
 				
 				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xe1e1e1, 0xd1d1d1], [1,1,1], [0x00, 0x79, 0x80], m);
-				g.drawRoundRect(xVal,0,unscaledWidth,BAR_HEIGHT, 10, 10);
+				g.drawRoundRect(xVal,0,wVal,BAR_HEIGHT, 10, 10);
 			}
 			
-			if(hover && showEditButton)
+			if(deleteButton.visible)
 			{
-				g.beginFill(0xffffff);
-				g.drawRect(9+NORMAL_WIDTH, BAR_HEIGHT, 74, 42);
+				g.beginFill(0x000000, 0.35);
+				g.drawRect(wVal - 25, 5, 1, unscaledHeight-10);
+				g.drawRect(wVal - 48, 5, 1, unscaledHeight-10);
 			}
 		}
-		
 	}
 }

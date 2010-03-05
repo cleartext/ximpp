@@ -120,5 +120,11 @@ package com.cleartext.ximpp.models
 		[Embed (source="com/cleartext/ximpp/assets/isTyping.png")]
 		public static const IsTyping:Class;
 
+		[Embed (source="com/cleartext/ximpp/assets/editUp.png")]
+		public static const EditUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/editOver.png")]
+		public static const EditOver:Class;
+
 	}
 }

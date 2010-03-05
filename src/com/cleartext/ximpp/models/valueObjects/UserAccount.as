@@ -21,7 +21,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			// Buddy() requires a jid in the constructor
 			super("");
-			setBuddyId(-2);
+			buddyId = -2;
 		}
 		
 		public var userId:int = -1;
@@ -35,11 +35,11 @@ package com.cleartext.ximpp.models.valueObjects
 			
 			newUserAccount.userId = obj["userId"];
 			newUserAccount.accountName = obj["accountName"];	
-			newUserAccount.setJid(obj["jid"]);	
-			newUserAccount.setNickName(obj["nickname"]);			
+			newUserAccount.jid = obj["jid"];	
+			newUserAccount.nickName = obj["nickname"];			
 			newUserAccount.password = obj["password"];			
 			newUserAccount.server = obj["server"];
-			newUserAccount.setCustomStatus(obj["customStatus"]);
+			newUserAccount.customStatus = obj["customStatus"];
 			newUserAccount.avatarHash = obj["avatarHash"];
 			AvatarUtils.stringToAvatar(obj["avatar"], newUserAccount);
 			

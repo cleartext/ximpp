@@ -9,6 +9,8 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.EditGroupWindow;
+			import com.cleartext.ximpp.views.popup.RemoveGroupWindow;
 			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.views.popup.RemoveBuddyWindow;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -21,7 +23,7 @@
 			import com.cleartext.ximpp.views.popup.EditBuddyWindow;
 			import com.cleartext.ximpp.views.popup.SubscriptionRequestWindow;
 			import com.cleartext.ximpp.events.PopUpEvent;
-			import com.cleartext.ximpp.views.popup.AddBuddyWindow;
+			import com.cleartext.ximpp.views.popup.AddBuddyGroupGatewayWindow;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
@@ -61,7 +63,7 @@
 			[Mediate(event="PopUpEvent.ADD_WINDOW")]
 			public function showAddBuddyWindow(event:PopUpEvent):void
 			{
-				initializePopUp(new AddBuddyWindow());
+				initializePopUp(new AddBuddyGroupGatewayWindow());
 			}
 
 			[Mediate(event="PopUpEvent.DELETE_BUDDY_WINDOW")]
@@ -69,6 +71,22 @@
 			{
 				var window:RemoveBuddyWindow = new RemoveBuddyWindow();
 				window.buddy = event.buddy;
+				initializePopUp(window);
+			}
+
+			[Mediate(event="PopUpEvent.DELETE_GROUP_WINDOW")]
+			public function showRemoveGroupWindow(event:PopUpEvent):void
+			{
+				var window:RemoveGroupWindow = new RemoveGroupWindow();
+				window.groupName = event.dataString;
+				initializePopUp(window);
+			}
+
+			[Mediate(event="PopUpEvent.EDIT_GROUP_WINDOW")]
+			public function showEditGroupWindow(event:PopUpEvent):void
+			{
+				var window:EditGroupWindow = new EditGroupWindow();
+				window.groupName = event.dataString;
 				initializePopUp(window);
 			}
 
@@ -166,7 +184,7 @@
 		disabledIcon="{Constants.SendDisabled}"
 		toolTip="send message"
 		enabled="{xmppConnected}"
-		right="10" y="{32 + headerCanvas.height}"
+		right="10" y="{30 + headerCanvas.height}"
 		width="50" height="50"
 		click="Swiz.dispatchEvent(new SendButtonEvent(SendButtonEvent.SEND_CLICKED));"/>
 

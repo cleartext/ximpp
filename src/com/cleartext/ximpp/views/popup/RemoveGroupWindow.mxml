@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	layout="vertical"
+	showCloseButton="true"
+	title="Remove Group" >
+	
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.models.BuddyModel;
+			import com.cleartext.ximpp.models.types.SubscriptionTypes;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import mx.events.CloseEvent;
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+
+			[Bindable]
+			public var groupName:String;
+
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			private function removeGroupHandler():void
+			{
+				for each(var buddy:Buddy in buddies.buddies.source)
+				{
+					var index:int = buddy.groups.indexOf(groupName);
+					if(index != -1)
+					{
+						buddy.groups.splice(index, 1);
+						xmpp.modifyRosterItem(buddy);
+					}
+				}
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:Form>
+		<mx:Label text="{'Are you sure you want to remove group ' + groupName + ' ?'}" />
+
+	</mx:Form>
+	
+	<mx:ControlBar horizontalAlign="center">
+		<mx:Button label="remove" click="removeGroupHandler()"/>
+		<mx:Button label="cancel" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
+	</mx:ControlBar>
+
+</mx:TitleWindow>

@@ -18,6 +18,12 @@
 	font-weight: bold;
 }
 
+.whiteBold
+{
+	color: #ffffff;
+	font-weight: bold;
+}
+
 .blackBold
 {
 	color: #000000;
@@ -44,6 +50,12 @@
 .dGreyNormal
 {
 	color: #444444;
+}
+
+.redBold
+{
+	color: #ff3333;
+	font-weight: normal;
 }
 
 .blackNormal

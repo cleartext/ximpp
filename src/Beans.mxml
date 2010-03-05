@@ -11,6 +11,8 @@
 
 	<models:BuddyModel id="buddies" />
 
+	<models:MicroBloggingModel id="microBlogging" />
+
 	<models:ApplicationModel id="appModel" />
 
 </swiz:BeanLoader>	

@@ -39,7 +39,7 @@
 				for(var i:int=0; i<100; i++)
 				{
 					var b:Buddy = new Buddy("testJid@test.com");
-					b.setNickName(i + " " + randomString(4,8) + "@" + randomString(4,8) + ".com");
+					b.nickName = (i + " " + randomString(4,8) + "@" + randomString(4,8) + ".com");
 					buddyData.addItem(b);
 					
 					var message:Message = new Message();
@@ -91,7 +91,7 @@
 							var index:int = Math.random() * Status.USER_TYPES.length;
 							buddy.status.value = Status.USER_TYPES[index];
 							buddy.status.numUnread = Math.round(Math.random() * 300);
-							buddy.setCustomStatus((buddy.status.value == Status.OFFLINE) ? "" : randomString(5, 100, 4));
+							buddy.customStatus = ((buddy.status.value == Status.OFFLINE) ? "" : randomString(5, 100, 4));
 						}
 						
 						var message:Message = new Message();

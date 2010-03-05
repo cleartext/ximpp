@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-	creationComplete="groupListChanged(null)"
+	creationComplete="init()"
 	xmlns:common="com.cleartext.ximpp.views.common.*"
 	width="100%"
 	height="100%">
 	<mx:Script>
 		<![CDATA[
+			import mx.events.CollectionEvent;
 			import mx.core.UIComponent;
 			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.events.PopUpEvent;
@@ -25,8 +26,13 @@
 			
 			public var groupButtons:Dictionary = new Dictionary();
 			
-			[Mediate (event="BuddyModelEvent.GROUPS_CHANGED")]
-			public function groupListChanged(event:BuddyModelEvent):void
+			private function init():void
+			{
+				buddies.groups.addEventListener(CollectionEvent.COLLECTION_CHANGE, groupListChanged);
+				groupListChanged(null);
+			}
+			
+			public function groupListChanged(event:CollectionEvent):void
 			{
 				var button:SideButton;
 				

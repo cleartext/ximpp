@@ -7,7 +7,7 @@ package com.cleartext.ximpp.models.valueObjects
 	
 	import mx.collections.ArrayCollection;
 	
-	public class Chat extends EventDispatcher implements IXimppValueObject
+	public class Chat extends EventDispatcher
 	{
 		[Autowire]
 		public var xmppModel:XMPPModel;
@@ -31,7 +31,10 @@ package com.cleartext.ximpp.models.valueObjects
 		public var used:Boolean = true;
 		public var messages:ArrayCollection = new ArrayCollection();
 		
-		public var microBlogging:Boolean = false;
+		public function get microBlogging():Boolean
+		{
+			return buddy && buddy.microBlogging;
+		}
 		
 		public var chatState:String;
 		
@@ -39,25 +42,6 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			super();
 			this.buddy = buddy;
-		}
-		
-		public function fillFromDB(obj:Object):void
-		{
-		}
-		
-		public function toDatabaseValues(userId:int):Array
-		{
-			return null;
-		}
-		
-		override public function toString():String
-		{
-			return null;
-		}
-		
-		public function toXML():XML
-		{
-			return null;
 		}
 		
 	}

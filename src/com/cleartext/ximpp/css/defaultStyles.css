@@ -52,6 +52,12 @@
 	color: #444444;
 }
 
+.redBold
+{
+	color: #ff3333;
+	font-weight: normal;
+}
+
 .blackNormal
 {
 	color: #000000;

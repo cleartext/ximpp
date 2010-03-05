@@ -57,7 +57,7 @@ package com.cleartext.ximpp.models
 			var bmd:BitmapData = new BitmapData(Math.min(bitmap.width*scale, AVATAR_SIZE), Math.min(bitmap.height*scale, AVATAR_SIZE));
 			bmd.draw(bitmap, matrix);
 			
-			image.data.setAvatar(bmd);
+			(image.data as Buddy).avatar = bmd;
 			image.removeEventListener(Event.COMPLETE, imageCompleteHandler);
 		}
 	}

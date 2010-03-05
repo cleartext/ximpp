@@ -3,7 +3,7 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.events.MicroBloggingMessageEvent;
 	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.types.MessageStatusTypes;
-	import com.cleartext.ximpp.models.types.MicroBloggingMessageTypes;
+	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
@@ -21,7 +21,7 @@ package com.cleartext.ximpp.views.messages
 		protected var buttonWidth:Number = 16;
 		protected var buttons:Array = new Array();
 		
-		private var _messageType:String = MicroBloggingMessageTypes.UNKNOWN_TYPE;
+		private var _messageType:String = MicroBloggingTypes.UNKNOWN_TYPE;
 		public function get messageType():String
 		{
 			return _messageType;
@@ -39,7 +39,7 @@ package com.cleartext.ximpp.views.messages
 				
 				switch(_messageType)
 				{
-					case MicroBloggingMessageTypes.TWEET_SENT :
+					case MicroBloggingTypes.TWEET_SENT :
 						
 						var statusImage:Image = new Image();
 						statusImage.width = 16;
@@ -67,7 +67,7 @@ package com.cleartext.ximpp.views.messages
 
 						break;
 
-					case MicroBloggingMessageTypes.TWEET_RECEIVED :
+					case MicroBloggingTypes.TWEET_RECEIVED :
 						var reply:Button = new Button();
 						reply.data = MicroBloggingMessageEvent.TWITTER_REPLY;
 						reply.addEventListener(MouseEvent.CLICK, button_clickHandler);
@@ -91,7 +91,7 @@ package com.cleartext.ximpp.views.messages
 						retweet.setStyle("skin", null);
 						retweet.setStyle("upIcon", Constants.RetweetUp);
 						retweet.setStyle("overIcon", Constants.RetweetOver);
-						retweet.setStyle("downIcon", Constants.ReplyUp);
+						retweet.setStyle("downIcon", Constants.RetweetUp);
 						retweet.width = 16;
 						retweet.height = 16;
 						retweet.y = 1.5*padding + 16;
@@ -193,11 +193,11 @@ package com.cleartext.ximpp.views.messages
 			super.commitProperties();
 	
 			if(message.sender == "twitter.cleartext.com")
-				messageType = MicroBloggingMessageTypes.TWEET_RECEIVED;
+				messageType = MicroBloggingTypes.TWEET_RECEIVED;
 			
 			if(fromThisUser)
 			{
-				messageType = MicroBloggingMessageTypes.TWEET_SENT;
+				messageType = MicroBloggingTypes.TWEET_SENT;
 				message.status = MessageStatusTypes.SUCCESS;
 			}
 		}

@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.views.messages
 {
-	import com.cleartext.ximpp.models.BuddyModel;
+	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
@@ -13,7 +13,7 @@ package com.cleartext.ximpp.views.messages
 	public class MessageRendererBase extends SproutListItemBase
 	{
 		[Autowire]
-		public var buddies:BuddyModel;
+		public var appModel:ApplicationModel;
 		
 		[Autowire(bean="settings", property="userAccount")]
 		public var userAccount:UserAccount;
@@ -52,7 +52,7 @@ package com.cleartext.ximpp.views.messages
 			
 			if(message)
 			{
-				var fromBuddy:Buddy = buddies.getBuddyByJid(message.sender);
+				var fromBuddy:Buddy = appModel.getBuddyByJid(message.sender);
 				fromThisUser = (fromBuddy == userAccount);
 				
 				avatar.data = fromBuddy;

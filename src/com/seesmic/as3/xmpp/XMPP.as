@@ -389,7 +389,9 @@ package com.seesmic.as3.xmpp
 					 * previous groups parsing did not work without namespace
 					 */
 					for each(var group:XML in item.rosterns::group) {
-						groups.push(group.text());
+						var gText:String = String(group.text());
+						if(gText != null && gText != "")
+							groups.push(gText);
 					}
 
 					/** old: for each(var group:XML in item.group) { */

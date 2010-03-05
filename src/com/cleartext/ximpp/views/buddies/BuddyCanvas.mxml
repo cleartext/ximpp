@@ -186,7 +186,7 @@
 			id="avatar"
 			width="48"
 			height="48"
-			x="-40" y="32"
+			x="-40" y="30"
 			border="false">
 			<common:filters>
 				<mx:DropShadowFilter distance="0" blurX="4" blurY="4" />

@@ -188,7 +188,7 @@ package com.cleartext.ximpp.models
 		{
 			var message:Message = Message.createFromStanza(event.stanza);
 
-			var buddy:Buddy = buddies.getBuddyByJid(message.sender);
+			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			
 			if(!buddy)
 			{
@@ -196,7 +196,7 @@ package com.cleartext.ximpp.models
 				buddies.addBuddy(buddy);
 			}
 			
-			buddy.setLastSeen(message.timestamp);
+			buddy.lastSeen = message.timestamp;
 			buddy.isTyping = false;
 			buddy.resource = event.stanza.from.resource;
 
@@ -212,7 +212,7 @@ package com.cleartext.ximpp.models
 		{
 			var chatState:String = event.stanza.chatState;
 			var fromJid:String = event.stanza.from.getBareJID();
-			var buddy:Buddy = buddies.getBuddyByJid(fromJid);
+			var buddy:Buddy = appModel.getBuddyByJid(fromJid);
 
 			if(buddy)
 				buddy.isTyping = (chatState == "composing");
@@ -241,7 +241,7 @@ package com.cleartext.ximpp.models
 			}
 			else
 			{
-				var buddy:Buddy = buddies.getBuddyByJid(fromJid);
+				var buddy:Buddy = appModel.getBuddyByJid(fromJid);
 				
 				if(!buddy)
 				{
@@ -254,12 +254,12 @@ package com.cleartext.ximpp.models
 				buddy.resource = stanza.from.resource;
 				// setFromStanzaType also handles "unsubscribe" and "subscribed"
 				var error:Boolean = buddy.status.setFromStanzaType(stanza.type);
-				buddy.setCustomStatus((!error) ? stanza.status : "");
+				buddy.customStatus = (!error) ? stanza.status : "";
 				
 				// only set last seen if the buddy was offline or we are now 
 				// explicitly going online
 				if(wasOffline || buddy.status.value == Status.AVAILABLE)
-					buddy.setLastSeen(new Date());
+					buddy.lastSeen = new Date();
 				
 				var avatarHash:String = stanza.avatarHash;
 				if(avatarHash && (buddy.avatarHash != avatarHash || !buddy.avatar))
@@ -288,7 +288,7 @@ package com.cleartext.ximpp.models
 
 			// if we already have the buddy, then we just want to
 			// update the values, otherwise create a new buddy
-			var buddy:Buddy = buddies.getBuddyByJid(jid);
+			var buddy:Buddy = appModel.getBuddyByJid(jid);
 			if(!buddy)
 				buddy = new Buddy(jid);
 
@@ -300,7 +300,7 @@ package com.cleartext.ximpp.models
 			else
 			{
 				buddy.groups = event.stanza["groups"];
-				buddy.setNickName(event.stanza["name"]);
+				buddy.nickName = event.stanza["name"];
 				buddy.subscription = subscription;
 				buddies.addBuddy(buddy);
 			}
@@ -325,7 +325,7 @@ package com.cleartext.ximpp.models
 				
 				// if we already have the buddy, then we just want to
 				// update the values, otherwise create a new buddy
-				var buddy:Buddy = buddies.getBuddyByJid(jid);
+				var buddy:Buddy = appModel.getBuddyByJid(jid);
 				if(!buddy)
 					buddy = new Buddy(jid);
 				
@@ -338,7 +338,7 @@ package com.cleartext.ximpp.models
 					}
 				buddy.groups = groups;
 				
-				buddy.setNickName(item.@name);
+				buddy.nickName = item.@name;
 				buddy.subscription = item.@subscription;
 				
 				// flag used to delete buddies that are no longer in
@@ -401,7 +401,7 @@ package com.cleartext.ximpp.models
 			else
 			{
 				var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-				var buddy:Buddy = buddies.getBuddyByJid(buddyJid);
+				var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
 				AvatarUtils.stringToAvatar(avatarString, buddy);
 			}
 		}

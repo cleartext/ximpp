@@ -3,6 +3,7 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.StatusEvent;
 	import com.cleartext.ximpp.models.AvatarUtils;
+	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
@@ -19,7 +20,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public function Buddy(jid:String)
 		{
 			super();
-			setJid(jid);
+			this.jid = jid;
 			status.addEventListener(StatusEvent.STATUS_CHANGED,
 				function():void
 				{
@@ -46,7 +47,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return _buddyId;
 		}
-		public function setBuddyId(value:int):void
+		public function set buddyId(value:int):void
 		{
 			if(_buddyId == -1)
 				_buddyId = value;
@@ -59,7 +60,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return _jid;
 		}
-		public function setJid(value:String):void
+		public function set jid(value:String):void
 		{
 			_jid = value;
 			isGateway = _jid && _jid.indexOf("@") == -1;
@@ -71,7 +72,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return (_nickName) ? _nickName : jid;
 		}
-		public function setNickName(value:String):void
+		public function set nickName(value:String):void
 		{
 			if(_nickName != value)
 			{
@@ -101,7 +102,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return _lastSeen;
 		}
-		public function setLastSeen(value:Date):void
+		public function set lastSeen(value:Date):void
 		{
 			if(_lastSeen != value)
 			{
@@ -116,7 +117,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return _customStatus;
 		}
-		public function setCustomStatus(value:String):void
+		public function set customStatus(value:String):void
 		{
 			if(_customStatus != value)
 			{
@@ -131,7 +132,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return _avatar;
 		}
-		public function setAvatar(value:BitmapData):void
+		public function set avatar(value:BitmapData):void
 		{
 			if(_avatar != value)
 			{
@@ -142,6 +143,31 @@ package com.cleartext.ximpp.models.valueObjects
 				}
 				
 				_avatar = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
+		}
+
+		private var _microBlogging:Boolean = false;
+		[Bindable (event="buddyChanged")]
+		public function get microBlogging():Boolean
+		{
+			return _microBlogging;
+		}
+		public function set microBlogging(value:Boolean):void
+		{
+			if(_microBlogging != value)
+			{
+				_microBlogging = value;
+				
+				// find if we already have the correct group
+				var index:int = groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP);
+				
+				// add or remove the group value as required
+				if(index!=-1 && !microBlogging)
+					groups.splice(index,1);
+				else if(index==-1 && microBlogging)
+					groups.push(MicroBloggingTypes.MICRO_BLOGGING_GROUP);
+				
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
 		}
@@ -178,15 +204,16 @@ package com.cleartext.ximpp.models.valueObjects
 			var jid:String = obj["jid"];
 			var newBuddy:Buddy = new Buddy(jid);
 			
-			newBuddy.setBuddyId(obj["buddyId"]);
-			newBuddy.setNickName(obj["nickName"]);
-			newBuddy.setLastSeen(obj["lastSeen"]);
-			newBuddy.setCustomStatus(obj["customStatus"]);
+			newBuddy.buddyId = obj["buddyId"];
+			newBuddy.nickName = obj["nickName"];
+			newBuddy.lastSeen = obj["lastSeen"];
+			newBuddy.customStatus = obj["customStatus"];
 
 			var groups:Array = (obj["groups"] as String).split(",");
 			if(groups.length == 1 && groups[0] == "")
 				groups = [];
 			newBuddy.groups = groups;
+			newBuddy.microBlogging = (groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP) != -1);
 			newBuddy.avatarHash = obj["avatarHash"];
 			newBuddy.subscription = obj["subscription"];
 			AvatarUtils.stringToAvatar(obj["avatar"], newBuddy);

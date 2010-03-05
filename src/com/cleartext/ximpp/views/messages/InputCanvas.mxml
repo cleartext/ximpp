@@ -24,7 +24,7 @@
 			public var xmpp:XMPPModel;
 			
 			private function input_keyDownHandler(event:KeyboardEvent):void
-			{
+			{ 	
 				event.stopPropagation();
 
 				if(event.keyCode==Keyboard.ENTER)
@@ -105,8 +105,18 @@
 	<mx:Image source="{Constants.IsTyping}" x="10" y="6" visible="{buddy.isTyping}"/>
 	
 	<mx:Label text="{buddy.nickName}" x="28" y="6" styleName="blackBold"/>
+	
+	<mx:CheckBox 
+		label="auto-shorten urls" 
+		id="shortenUrls" 
+		y="6" right="130" 
+		visible="{buddy.microBlogging}"/>
 
-	<mx:Label text="{inputTextArea.text.length + ' Characters'}" right="10" y="6" />
+	<mx:Label
+		text="{inputTextArea.text.length + ' Characters'}" 
+		right="10" y="6" 
+		styleName="{(inputTextArea.text.length > 140) ? 'redBold' : 'dGreyNormal'}" 
+		visible="{buddy.microBlogging}"/>
 
 	<common:DefaultTextInput
 		id="inputTextArea"

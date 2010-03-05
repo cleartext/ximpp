@@ -4,7 +4,6 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.BuddyModelEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.BuddySortTypes;
-	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -15,11 +14,9 @@ package com.cleartext.ximpp.models
 	public class BuddyModel extends EventDispatcher
 	{
 		[Autowire]
-		[Bindable]
 		public var database:DatabaseModel;
 		
 		[Autowire]
-		[Bindable]
 		public var settings:SettingsModel;
 		
 		public static const GATEWAY_GROUP:String = "Gateways";
@@ -29,25 +26,13 @@ package com.cleartext.ximpp.models
 		private var buddiesByJid:Dictionary;
 
 		private var _buddies:ArrayCollection;
-		[Bindable (event="changed")]
 		public function get buddies():ArrayCollection
 		{
 			return _buddies;
 		}
 		
-		[Bindable (event="groupsChanged")]
-		public function get groups():Array
-		{
-			var result:Array = [];
-			for each(var buddy:Buddy in buddies.source)
-			{
-				if(!buddy.isGateway)
-					for each(var group:String in buddy.groups)
-						if(result.indexOf(group) == -1)
-							result.push(group);
-			}
-			return result;
-		}
+		[Bindable]
+		public var groups:ArrayCollection;
 		
 		private var _groupName:String = ALL_BUDDIES_GROUP;
 		[Bindable (event="filterChanged")]
@@ -99,6 +84,8 @@ package com.cleartext.ximpp.models
 		public function BuddyModel()
 		{
 			super();
+
+			groups = new ArrayCollection();
 			
 			buddiesByJid = new Dictionary();
 			
@@ -108,6 +95,9 @@ package com.cleartext.ximpp.models
 			sort.compareFunction = buddySort;
 			buddies.sort = sort;
 			buddies.refresh();
+
+			groups.sort = new Sort();
+			groups.refresh();
 		}
 		
 		public function addBuddy(buddy:Buddy):void
@@ -118,7 +108,7 @@ package com.cleartext.ximpp.models
 				buddiesByJid[buddy.jid] = buddy;
 				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
 			}
-			dispatchEvent(new BuddyModelEvent(BuddyModelEvent.GROUPS_CHANGED));
+			refresh();
 			database.saveBuddy(buddy);
 		}
 		
@@ -131,25 +121,19 @@ package com.cleartext.ximpp.models
 				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
 				buddies.removeItemAt(index);
 				delete buddiesByJid[buddy.jid];
-				dispatchEvent(new BuddyModelEvent(BuddyModelEvent.GROUPS_CHANGED));
 			}
+			refresh();
 		}
 
 		public function reset():void
 		{
 			buddies.removeAll();
 			buddiesByJid = new Dictionary();
-			dispatchEvent(new BuddyModelEvent(BuddyModelEvent.GROUPS_CHANGED));
+			refresh();
 		}
 
 		public function getBuddyByJid(jid:String):Buddy
 		{
-			if(!jid || jid=="")
-				return null;
-				
-			if(jid == settings.userAccount.jid)
-				return settings.userAccount;
-			
 			return buddiesByJid[jid];
 		}
 		
@@ -222,12 +206,47 @@ package com.cleartext.ximpp.models
 		public function refresh():void
 		{
 			buddies.refresh();
+			
+			var groupsTemp:ArrayCollection = new ArrayCollection();
+			
+			for each(var buddy:Buddy in buddies.source)
+			{
+				if(!buddy.isGateway)
+				for each(var group:String in buddy.groups)
+					if(!groupsTemp.contains(group))
+						groupsTemp.addItem(group);
+			}
+			
+			groups.list = groupsTemp.list;
+			
+			groups.refresh();
 		}
 
 		private function buddyChangeHandler(event:BuddyEvent):void
 		{
+			refresh();
 			database.saveBuddy(event.target as Buddy);
-			dispatchEvent(new BuddyModelEvent(BuddyModelEvent.GROUPS_CHANGED));
+		}
+		
+		public function get realPeople():Array
+		{
+			var result:Array = new Array();
+			for each(var buddy:Buddy in buddies.source)
+				if(!buddy.isGateway)
+					result.push(buddy);
+			
+			return result;
+		}
+		
+		public function get gatewayNames():Array
+		{
+			var result:Array = ["none"];
+
+			for each(var buddy:Buddy in buddies.source)
+				if(buddy.isGateway)
+					result.push(buddy.jid);
+			
+			return result;
 		}
 		
 	}

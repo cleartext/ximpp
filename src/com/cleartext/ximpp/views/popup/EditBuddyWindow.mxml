@@ -29,7 +29,7 @@
 			
 			private function okHandler():void
 			{
-				buddy.setNickName(nickname.text);
+				buddy.nickName = nickname.text;
 				buddy.groups = groups.selectedItems;
 				buddies.addBuddy(buddy);
 				buddies.refresh();
@@ -51,8 +51,9 @@
 				nickname.text = buddy.nickName;
 				avatar.data = buddy;
 				subscription.text = buddy.subscription;
+				groups.enabled = !buddy.isGateway && !buddy.microBlogging;
 				groups.selectedItems = buddy.groups;
-				avatar.buttonMode = (buddy.avatarHash == "");
+				avatar.buttonMode = (buddy.avatarHash == "" || buddy.avatarHash == null);
 			}
 			
 			private function changeAvatar():void
@@ -79,7 +80,7 @@
 									var tx:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
 									var ty:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-									buddy.setAvatar(newBitmapData);
+									buddy.avatar = newBitmapData;
 								});
 						});
 				}
@@ -107,13 +108,17 @@
 
 		<mx:FormItem label="groups:">
 			<mx:Label text="use ctrl/cmd to select more than one" />
-			<mx:List id="groups" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
+			<mx:List
+				id="groups" 
+				allowMultipleSelection="true" 
+				dataProvider="{buddies.groups}" 
+				width="190" height="80"/>
 		</mx:FormItem>
 
 		<mx:FormItem label="nickname:">
 			<mx:TextInput id="nickname" />
 		</mx:FormItem>
-				
+
 	</mx:Form>
 
 	<mx:ControlBar horizontalAlign="center">

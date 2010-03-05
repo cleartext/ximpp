@@ -37,6 +37,10 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var buddies:BuddyModel;
 		
+		[Autowire]
+		[Bindable]
+		public var microBlogging:MicroBloggingModel;
+		
 		[Bindable]
 		public var microBloggingMessages:ArrayCollection = new ArrayCollection();
 
@@ -130,7 +134,7 @@ package com.cleartext.ximpp.models
 			
 			if(customStatus != settings.userAccount.customStatus)
 			{
-				settings.userAccount.setCustomStatus(customStatus);
+				settings.userAccount.customStatus = customStatus;
 				database.saveUserAccount(settings.userAccount);
 			}
 
@@ -186,14 +190,31 @@ package com.cleartext.ximpp.models
 		{
 			chats.removeAll();
 			microBloggingMessages.removeAll();
-
-			var chat:Chat = new Chat(new Buddy("microBlogging"));
-			chat.microBlogging = true;
+			
+			var buddy:Buddy = new Buddy("Micro Blogging");
+			buddy.microBlogging = true;
+			
+			var chat:Chat = new Chat(buddy);
 			chat.messages = microBloggingMessages;
 			chats.addItem(chat);
 			
 			database.loadBuddyData();
 			database.loadMicroBloggingData();
+		}
+		
+		public function getBuddyByJid(jid:String):Buddy
+		{
+			if(!jid || jid=="")
+				return null;
+				
+			if(jid == settings.userAccount.jid)
+				return settings.userAccount;
+			
+			var mBuddy:Buddy = microBlogging.getBuddyByJid(jid);
+			if(mBuddy)
+				return mBuddy;
+			
+			return buddies.getBuddyByJid(jid);
 		}
 		
 		public function getChat(buddy:Buddy, select:Boolean=true):Chat
