@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow 
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
-	layout="vertical"
-	showCloseButton="true"
-	title="Remove Buddy" >
+	title="Remove Buddy"
+	submitButtonLabel="remove"
+	isValid="true">
 	
 	<mx:Script>
 		<![CDATA[
@@ -19,10 +20,10 @@
 			[Bindable]
 			public var xmpp:XMPPModel;
 			
-			private function removeBuddyHandler():void
+			override protected function submit(event:Event):void
 			{
 				xmpp.removeFromRoster(buddy.jid, stopPublishingStatus.selected)
-				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				closeWindow();
 			}
 			
 		]]>
@@ -42,9 +43,6 @@
 
 	</mx:Form>
 	
-	<mx:ControlBar horizontalAlign="center">
-		<mx:Button label="remove" click="removeBuddyHandler()"/>
-		<mx:Button label="cancel" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
-	</mx:ControlBar>
+	<mx:ControlBar/>
 
-</mx:TitleWindow>
+</popup:PopupWindowBase>

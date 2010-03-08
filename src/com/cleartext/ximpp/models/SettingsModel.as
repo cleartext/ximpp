@@ -36,7 +36,11 @@ package com.cleartext.ximpp.models
 			_userAccount = newUserAccount;
 			
 			if(!previousUserAccount || newUserAccount.userId != previousUserAccount.userId)
-				Swiz.dispatchEvent(new UserAccountEvent(UserAccountEvent.CHANGED, previousUserAccount));
+			{
+				var event:UserAccountEvent = new UserAccountEvent(UserAccountEvent.CHANGED, previousUserAccount);
+				Swiz.dispatchEvent(event);
+				dispatchEvent(event);
+			}
 		}
 		
 		public function get userId():int

@@ -217,6 +217,14 @@ package com.cleartext.ximpp.models
 			return buddies.getBuddyByJid(jid);
 		}
 		
+		public function addBuddy(buddy:Buddy):void
+		{
+			if(buddy.microBlogging)
+				microBlogging.addBuddy(buddy);
+			else
+				buddies.addBuddy(buddy);
+		}
+		
 		public function getChat(buddy:Buddy, select:Boolean=true):Chat
 		{
 			if(!buddy)

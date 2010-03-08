@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Add Buddy"
+	xmlns:common="com.cleartext.ximpp.views.common.*"
+	submitButtonLabel="add"
+	>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			import com.cleartext.ximpp.models.BuddyModel;
+			import mx.events.CloseEvent;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.models.DatabaseModel;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.ApplicationModel;
+
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			override protected function init(event:FlexEvent):void
+			{
+				gatewayComboBox.dataProvider = buddies.gatewayNames;
+				groupList.dataProvider = buddies.groups;
+			}
+			
+			override protected function submit(event:Event):void
+			{
+				xmpp.addToRoster(newJid.text, subscribe.selected, groupList.selectedItems);
+				closeWindow();
+			}
+			
+			override protected function validateForm():void
+			{
+				isValid = newJid.text != "";
+			}
+			
+		]]>
+	</mx:Script>
+	
+    <mx:Form>
+		<mx:FormItem label="gateway:" >
+			<mx:ComboBox id="gatewayComboBox"/>
+		</mx:FormItem>
+		
+		<mx:FormItem label="buddy id:">
+			<mx:VBox>
+				<mx:TextInput id="newJid" change="validateInput(event, 'jid can not be empty')" focusOut="validateInput(event, 'jid can not be empty')"/>
+			</mx:VBox>
+		</mx:FormItem>
+
+		<mx:FormItem label="groups:">
+			<mx:Label text="use ctrl/cmd - click to deselect and to select more than one" />
+			<mx:List id="groupList" allowMultipleSelection="true" width="210" height="120"/>
+		</mx:FormItem>
+		
+		<mx:FormItem>
+			<mx:CheckBox id="subscribe" 
+				selected="true" 
+				label="ask to see when buddy is online" 
+				labelPlacement="right"/>
+		</mx:FormItem>
+    </mx:Form>
+
+	<mx:ControlBar/>
+	
+</popup:PopupWindowBase>

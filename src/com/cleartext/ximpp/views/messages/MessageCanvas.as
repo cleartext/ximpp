@@ -359,7 +359,7 @@ package com.cleartext.ximpp.views.messages
 
 		private function filterMessages(message:Message):Boolean
 		{
-			return message.body.indexOf(searchString) != -1;
+			return message.body.toLowerCase().indexOf(searchString.toLowerCase()) != -1;
 		}
 			
 		private function avatarClickHandler(event:MouseEvent):void
@@ -377,7 +377,7 @@ package com.cleartext.ximpp.views.messages
 
 			if(position == 1)
 			{
-				avatar.chat.unreadMessageCount = 0;
+				avatar.buddy.unreadMessageCount = 0;
 				newX += SELECTOR_WIDTH;
 			}
 			else if(position >1)

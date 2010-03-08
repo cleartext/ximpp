@@ -40,6 +40,11 @@ package com.cleartext.ximpp.models
 			return appModel.buddies;
 		}
 				
+		private function get microBlogging():MicroBloggingModel
+		{
+			return appModel.microBlogging;
+		}
+				
 		public function close():void
 		{
 			appModel.log("Closing async database connection")
@@ -232,8 +237,8 @@ package com.cleartext.ximpp.models
 				
 				if(result && result.data)
 					for(var i:int=result.data.length-1; i>=0; i--)
-						buddies.addBuddy(Buddy.createFromDB(result.data[i]) as Buddy);
-
+						appModel.addBuddy(Buddy.createFromDB(result.data[i]) as Buddy);
+	
 			    // if we've got to this point without errors, commit the transaction 
 				appModel.log("Buddy list loaded");
 			}

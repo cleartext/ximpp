@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow 
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
-	layout="absolute"
 	title="Subscription Request"
-	xmlns:common="com.cleartext.ximpp.views.common.*">
+	submitButtonLabel="ok"
+	isValid="true">
 	
 	<mx:Script>
 		<![CDATA[
@@ -23,7 +24,7 @@
 			[Bindable]
 			public var buddies:BuddyModel;
 			
-			private function okHandler():void
+			override protected function submit(event:Event):void
 			{
 				xmpp.sendSubscribe(fromJid, (allow.selected) ? SubscriptionTypes.SUBSCRIBED : SubscriptionTypes.UNSUBSCRIBED);
 				if(addUser.selected)
@@ -59,8 +60,8 @@
 			<mx:Label text="use ctrl/cmd to select more than one" />
 			<mx:List id="groupList" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
 		</mx:FormItem>
-				
-		<mx:Button label="ok" click="okHandler()"/>
 	</mx:Form>
+	
+	<mx:ControlBar />
 
-</mx:TitleWindow>
+</popup:PopupWindowBase>

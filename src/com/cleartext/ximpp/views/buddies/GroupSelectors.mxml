@@ -52,7 +52,7 @@
 						button.text = group;
 						button.icon = Constants.DefaultGroupIcon;
 						button.addEventListener(MouseEvent.CLICK, clickHandler);
-						addChildAt(button, numChildren-1);
+						addChildAt(button, numChildren-3);
 					}
 					else
 					{
@@ -92,18 +92,45 @@
 	</mx:Script>
 	
 	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}" showEditButton="false"/>
+
 	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" icon="{Constants.Gateways}" showEditButton="false"/>
+
 	<common:SideButton text="{BuddyModel.UNASIGNED}" click="clickHandler(event)" icon="{Constants.NoGroup}" showEditButton="false"/>
-	
+
 	<mx:Button
-		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_WINDOW))"
-		toolTip="{(connected) ? 'add group, buddy or gateway' : 'go online to add a buddy, group or gateway'}"
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_BUDDY_WINDOW))"
+		toolTip="{(connected) ? 'add buddy' : 'go online to add a buddy'}"
+		width="32" height="32"
+		enabled="{connected}"
+		skin="{null}"
+		upIcon="{Constants.AddBuddyUp}"
+		overIcon="{Constants.AddBuddyOver}"
+		downIcon="{Constants.AddBuddyOver}"
+		disabledIcon="{Constants.AddBuddyOver}"
+		/>
+
+	<mx:Button
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_GATEWAY_WINDOW))"
+		toolTip="{(connected) ? 'add gateway' : 'go online to add a gateway'}"
+		width="32" height="32"
+		enabled="{connected}"
+		skin="{null}"
+		upIcon="{Constants.AddGatewayUp}"
+		overIcon="{Constants.AddGatewayOver}"
+		downIcon="{Constants.AddGatewayOver}"
+		disabledIcon="{Constants.AddGatewayOver}"
+		/>
+
+	<mx:Button
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_GROUP_WINDOW))"
+		toolTip="{(connected) ? 'add group' : 'go online to add a group'}"
 		width="32" height="32"
 		enabled="{connected}"
 		skin="{null}"
 		upIcon="{Constants.Add}"
 		overIcon="{Constants.AddOver}"
-		downIcon="{Constants.Add}"
+		downIcon="{Constants.AddOver}"
 		disabledIcon="{Constants.AddOver}"
 		/>
+
 </mx:VBox>

@@ -14,9 +14,7 @@ package com.cleartext.ximpp.models.valueObjects
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IXimppValueObject
 	{
-		
-		/** TODO: subscription property */
-		
+
 		public function Buddy(jid:String)
 		{
 			super();
@@ -110,7 +108,7 @@ package com.cleartext.ximpp.models.valueObjects
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
 		}
-		
+
 		private var _customStatus:String;
 		[Bindable (event="buddyChanged")]
 		public function get customStatus():String
@@ -180,6 +178,21 @@ package com.cleartext.ximpp.models.valueObjects
 		// not storred in database 
 		//------------------------------------
 
+		private var _unreadMessageCount:int = 0;
+		[Bindable(event="buddyChanged")]
+		public function get unreadMessageCount():int
+		{
+			return _unreadMessageCount;
+		}
+		public function set unreadMessageCount(value:int):void
+		{
+			if(_unreadMessageCount != value)
+			{
+				_unreadMessageCount = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
+		}
+		
 		// the current resource this buddy is using
 		public var resource:String;
 		// store the new avatarHash whilst we are downloading the 

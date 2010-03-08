@@ -152,8 +152,8 @@ package com.cleartext.ximpp.models
 				return false;
 			
 			if(searchString != "" && 
-					(buddy.nickName.toLowerCase().search(searchString) == -1 && 
-					buddy.jid.toLowerCase().search(searchString) == -1))
+					(buddy.nickName.toLowerCase().search(searchString.toLowerCase()) == -1 && 
+					buddy.jid.toLowerCase().search(searchString.toLowerCase()) == -1))
 				return false; 
 			
 			if(buddy.isGateway)

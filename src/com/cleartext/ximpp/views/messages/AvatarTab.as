@@ -1,7 +1,9 @@
 package com.cleartext.ximpp.views.messages
 {
+	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.models.Constants;
+	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.views.common.Avatar;
 	
 	import flash.display.Graphics;
@@ -54,26 +56,17 @@ package com.cleartext.ximpp.views.messages
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
 		}
 		
-		override public function set data(value:Object):void
+		public function get chat():Chat
 		{
-			if(data != value)
-			{
-				if(chat)
-					chat.removeEventListener(ChatEvent.CHAT_CHANGED, chatChangedHandler);
-
-				super.data = value;
-				
-				if(chat)
-					chat.addEventListener(ChatEvent.CHAT_CHANGED, chatChangedHandler, false, 0, true);
-			}
-			chatChangedHandler(null);
+			return data as Chat;
 		}
 		
-		private function chatChangedHandler(event:ChatEvent):void
+		override protected function buddyChangedHandler(event:BuddyEvent):void
 		{
+			super.buddyChangedHandler(event);
 			invalidateProperties();
 		}
-
+		
 		override protected function createChildren():void
 		{
 			super.createChildren();
@@ -108,18 +101,18 @@ package com.cleartext.ximpp.views.messages
 		{
 			super.commitProperties();
 
-			if(chat && unreadMessageCount)
+			if(buddy && unreadMessageCount)
 			{
-				if(chat.unreadMessageCount > 0)
+				if(buddy.unreadMessageCount > 0)
 				{
 					if(selected)
 					{
-						chat.unreadMessageCount = 0;
+						buddy.unreadMessageCount = 0;
 						return;
 					}
 
 					unreadMessageCount.visible = true;
-					unreadMessageCount.text = chat.unreadMessageCount.toString();
+					unreadMessageCount.text = buddy.unreadMessageCount.toString();
 					unreadMessageCount.width = unreadMessageCount.textWidth + 4;
 					invalidateDisplayList();
 				}

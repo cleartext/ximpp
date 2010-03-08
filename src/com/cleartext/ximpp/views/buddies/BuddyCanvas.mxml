@@ -109,7 +109,7 @@
 				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
 				if(microBloggingCheckBox.selected && customStatusInput.text != "")
 				{
-					appModel.getChat(new Buddy("microBlogging"));
+					appModel.getChat(new Buddy("Micro Blogging"));
 					Swiz.dispatchEvent(new CustomStatusEvent(CustomStatusEvent.CUSTOM_STATUS_CHANGE, customStatusInput.text));
 				}
 			}

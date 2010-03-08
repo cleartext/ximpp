@@ -9,6 +9,8 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.AddGatewayWindow;
+			import com.cleartext.ximpp.views.popup.AddBuddyWindow;
 			import com.cleartext.ximpp.views.popup.EditGroupWindow;
 			import com.cleartext.ximpp.views.popup.RemoveGroupWindow;
 			import mx.events.FlexEvent;
@@ -23,7 +25,7 @@
 			import com.cleartext.ximpp.views.popup.EditBuddyWindow;
 			import com.cleartext.ximpp.views.popup.SubscriptionRequestWindow;
 			import com.cleartext.ximpp.events.PopUpEvent;
-			import com.cleartext.ximpp.views.popup.AddBuddyGroupGatewayWindow;
+			import com.cleartext.ximpp.views.popup.AddGroupWindow;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
@@ -60,12 +62,6 @@
 				Alert.show("Advanced search is not currently implemented.","Advanced Search");
 			}
 			
-			[Mediate(event="PopUpEvent.ADD_WINDOW")]
-			public function showAddBuddyWindow(event:PopUpEvent):void
-			{
-				initializePopUp(new AddBuddyGroupGatewayWindow());
-			}
-
 			[Mediate(event="PopUpEvent.DELETE_BUDDY_WINDOW")]
 			public function showRemoveBuddyWindow(event:PopUpEvent):void
 			{
@@ -108,6 +104,25 @@
 				initializePopUp(window);
 				window.buddy = event.buddy;
 			}
+
+			[Mediate(event="PopUpEvent.ADD_GROUP_WINDOW")]
+			public function showAddGroupWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddGroupWindow());
+			}
+
+			[Mediate(event="PopUpEvent.ADD_BUDDY_WINDOW")]
+			public function showAddBuddyWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddBuddyWindow());
+			}
+
+			[Mediate(event="PopUpEvent.ADD_GATEWAY_WINDOW")]
+			public function showAddGatewayWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddGatewayWindow());
+			}
+
 			
 			private function initializePopUp(window:IFlexDisplayObject):void
 			{

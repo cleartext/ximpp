@@ -53,7 +53,7 @@ package com.cleartext.ximpp.views.common
 			buddyChangedHandler(null);
 		}
 		
-		private function get buddy():Buddy
+		public function get buddy():Buddy
 		{
 			if(data is Buddy)
 				return data as Buddy;
@@ -62,11 +62,6 @@ package com.cleartext.ximpp.views.common
 				return (data as Chat).buddy;
 			
 			return null;
-		}
-		
-		public function get chat():Chat
-		{
-			return data as Chat;
 		}
 		
 		protected function buddyChangedHandler(event:BuddyEvent):void

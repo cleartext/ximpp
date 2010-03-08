@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
 	width="100%" height="100%"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	showCloseButton="true"
-	layout="absolute"
 	title="User Preferences"
-	close="closeHandler()"
-	creationComplete="init()"
+	layout="absolute"
 	xmlns:preferences="com.cleartext.ximpp.views.preferences.*" 
-	xmlns:common="com.cleartext.ximpp.views.common.*" xmlns:popup="com.cleartext.ximpp.views.popup.*">
+	xmlns:common="com.cleartext.ximpp.views.common.*" 
+	submitButtonLabel="save"
+	isValid="true"
+	>
+	
 	<mx:Script>
 		<![CDATA[
+			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import com.adobe.crypto.SHA1;
 			import com.cleartext.ximpp.models.valueObjects.Status;
@@ -28,13 +31,15 @@
 			import mx.graphics.codec.JPEGEncoder;
 			import mx.collections.ArrayCollection;
 			
-			private var changesMade:Boolean = false;
+			public var changesMade:Boolean = false;
 			
 			private var previousAccount:UserAccount;
 			private function get accountCollection():ArrayCollection
 			{
 				return accountList.dataProvider as ArrayCollection;
 			}
+			
+			private var accountsToDelete:Array = new Array();
 			
 			[Autowire]
 			[Bindable]
@@ -56,7 +61,7 @@
 			[Bindable]
 			public var buddies:BuddyModel;
 			
-			private function init():void
+			override protected function init(event:FlexEvent):void
 			{
 				// set global values
 				autoConnectCheckBox.selected = settings.global.autoConnect;
@@ -84,7 +89,7 @@
 				selectedAccountChanged();
 			}
 		
-			private function closeHandler():void
+			override protected function submit(event:Event):void
 			{
 				selectedAccountChanged();
 				
@@ -96,16 +101,24 @@
 				settings.global.numTimelineMessages = numTimelineMessages.value;
 				settings.global.numChatMessages = numChatMessages.value;
 				
+				for each(var userId:int in accountsToDelete)
+					database.removeAccount(userId);
+				
+				for each(var userAccount:UserAccount in accountList.dataProvider)
+					database.saveUserAccount(userAccount);
+				
 				settings.userAccount = accountList.selectedItem as UserAccount;
 				
 				database.saveGlobalSettings();
 
 				buddies.refresh();
+				
+				closeWindow();
 			}
 			
 			private function selectedAccountChanged():void
 			{
-				if(previousAccount && changesMade)
+				if(previousAccount)
 				{
 					previousAccount.accountName = accountName.text;
 					previousAccount.nickName = nickName.text;
@@ -113,9 +126,6 @@
 					previousAccount.jid = jid.text;
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
-					
-					database.saveUserAccount(previousAccount);
-					changesMade = false;
 				}
 				
 				previousAccount = accountList.selectedItem as UserAccount;
@@ -140,7 +150,6 @@
 			private function addAccount():void
 			{
 				var account:UserAccount = new UserAccount();
-				database.saveUserAccount(account);
 				accountCollection.addItem(account);
 				accountList.selectedItem = account;
 				selectedAccountChanged();
@@ -155,21 +164,17 @@
 				}
 					
 				var index: int = accountList.selectedIndex;
-				appModel.log("index to delete: " + index);
 				accountCollection.removeItemAt(index);
-				database.removeAccount(previousAccount.userId);
+				accountsToDelete.push(previousAccount.userId);
 				previousAccount = null;
 				
 				if(accountCollection.length > 0)
 				{
 					index = Math.max(0, index-1);
-					appModel.log("new index: " + index);
 					accountList.selectedItem = accountCollection.getItemAt(index);
 				}
 				
 				selectedAccountChanged();
-				
-				appModel.log("final index: " + accountList.selectedIndex);
 			}
 			
 			private function changeAvatar():void
@@ -211,6 +216,7 @@
 				}
 			}
 			
+			
 		]]>
 	</mx:Script>
 	
@@ -242,7 +248,11 @@
 		
 		<mx:Form>
 			<mx:FormItem label="account name:">
-				<mx:TextInput id="accountName" change="changesMade = true; if(previousAccount) { previousAccount.accountName = accountName.text; accountCollection.refresh(); }"/>
+				<mx:VBox>
+					<mx:TextInput id="accountName"
+						focusOut="validateInput(event, 'account name can not be empty')" 
+						change="changesMade = true; validateInput(event, 'account name can not be empty'); if(previousAccount) { previousAccount.accountName = accountName.text; accountCollection.refresh(); }"/>
+				</mx:VBox>
 			</mx:FormItem>
 			<mx:FormItem label="nick name:">
 				<mx:TextInput id="nickName" change="changesMade = true;" />
@@ -251,13 +261,19 @@
 				<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
 			</mx:FormItem>
 			<mx:FormItem label="jid:">
-				<mx:TextInput id="jid" change="changesMade = true;" />
+				<mx:VBox>
+					<mx:TextInput id="jid" change="changesMade = true; validateInput(event, 'jid can not be empty');" focusOut="validateInput(event, 'jid can not be empty'); " />
+				</mx:VBox>
 			</mx:FormItem>
 			<mx:FormItem label="password:">
-				<mx:TextInput id="password" displayAsPassword="true" change="changesMade = true;" />
+				<mx:VBox>
+					<mx:TextInput id="password" displayAsPassword="true" change="changesMade = true; validateInput(event, 'password can not be empty');" focusOut="validateInput(event, 'password can not be empty'); " />
+				</mx:VBox>
 			</mx:FormItem>
 			<mx:FormItem label="server:">
-				<mx:TextInput id="server" change="changesMade = true;" />
+				<mx:VBox>
+					<mx:TextInput id="server" change="changesMade = true; validateInput(event, 'server can not be empty');" focusOut="validateInput(event, 'server can not be empty'); "  />
+				</mx:VBox>
 			</mx:FormItem>
 		</mx:Form>
 	</mx:VBox>
@@ -265,5 +281,7 @@
 	<mx:Canvas visible="{!accountVBox.enabled}" width="210" x="255" y="30" height="26" backgroundColor="0xffffff" borderStyle="solid" borderColor="0x444444">
 		<mx:Text text="please log off to edit account settings" textAlign="center" horizontalCenter="0" verticalCenter="0"/>
 	</mx:Canvas>
+	
+	<mx:ControlBar/>
 
-</mx:TitleWindow>
+</popup:PopupWindowBase>

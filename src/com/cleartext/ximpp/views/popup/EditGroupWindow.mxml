@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow 
-	xmlns:mx="http://www.adobe.com/2006/mxml" 
-	layout="absolute"
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml"
 	title="Edit Group"
-	showCloseButton="true"
-	xmlns:common="com.cleartext.ximpp.views.common.*"
-	creationComplete="init()">
+	submitButtonLabel="done" >
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.events.FlexEvent;
 			import mx.collections.ArrayCollection;
 			import de.polygonal.ds.Array3;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
@@ -28,8 +27,8 @@
 			public var buddies:BuddyModel;
 			
 			public var groupName:String;
-
-			private function init():void
+			
+			override protected function init(event:FlexEvent):void
 			{
 				groupNameInput.text = groupName;
 				var realPeople:Array = buddies.realPeople;
@@ -43,7 +42,7 @@
 				buddyList.selectedItems = haveGroup;
 			}
 			
-			private function submit():void
+			override protected function submit(event:Event):void
 			{
 				var newGroupName:String = groupNameInput.text;
 				
@@ -75,9 +74,13 @@
 					}
 				}
 				
-				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				closeWindow();
 			}
 			
+			override protected function validateForm():void
+			{
+				isValid = groupNameInput.text != "" && buddyList.selectedItems.length > 0;
+			}
 		]]>
 	</mx:Script>
 	
@@ -85,20 +88,22 @@
     <mx:Form>
 
 		<mx:FormItem label="name:">
-			<mx:TextInput id="groupNameInput" />
+			<mx:VBox>
+				<mx:TextInput id="groupNameInput" change="validateInput(event, 'group name can not be empty')" focusOut="validateInput(event, 'group name can not be empty')"/>
+			</mx:VBox>
 		</mx:FormItem>
 
 		<mx:FormItem label="buddies:">
-			<mx:Label text="use ctrl/cmd to select more than one" />
-			<mx:List id="buddyList" allowMultipleSelection="true" labelField="nickName" width="190" height="80"/>
+			<mx:VBox>
+				<mx:Label text="use ctrl/cmd - click to deselect and to select more than one" />
+				<mx:List id="buddyList" allowMultipleSelection="true" labelField="nickName" width="210" height="300"
+					 change="validateInput(event,'need to select at least one buddy')" focusOut="validateInput(event, 'need to select at least one buddy')"/>
+			</mx:VBox>
 		</mx:FormItem>
 		
     </mx:Form>
+    
+    <mx:ControlBar />
 
-	<mx:ControlBar horizontalAlign="center">
-		<mx:Button label="done" click="submit()"/>
-		<mx:Button label="cancel" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
-	</mx:ControlBar>
-
-</mx:TitleWindow>
+</popup:PopupWindowBase>
 

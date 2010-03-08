@@ -126,5 +126,17 @@ package com.cleartext.ximpp.models
 		[Embed (source="com/cleartext/ximpp/assets/editOver.png")]
 		public static const EditOver:Class;
 
+		[Embed (source="com/cleartext/ximpp/assets/addBuddyUp.png")]
+		public static const AddBuddyUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/addBuddyOver.png")]
+		public static const AddBuddyOver:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/addGatewayUp.png")]
+		public static const AddGatewayUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/addGatewayOver.png")]
+		public static const AddGatewayOver:Class;
+
 	}
 }

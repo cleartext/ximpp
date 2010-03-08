@@ -12,21 +12,6 @@ package com.cleartext.ximpp.models.valueObjects
 		[Autowire]
 		public var xmppModel:XMPPModel;
 		
-		private var _unreadMessageCount:int = 0;
-		[Bindable(event="chatChanged")]
-		public function get unreadMessageCount():int
-		{
-			return _unreadMessageCount;
-		}
-		public function set unreadMessageCount(value:int):void
-		{
-			if(_unreadMessageCount != value)
-			{
-				_unreadMessageCount = value;
-				dispatchEvent(new ChatEvent(ChatEvent.CHAT_CHANGED, this));
-			}
-		}
-		
 		public var buddy:Buddy;
 		public var used:Boolean = true;
 		public var messages:ArrayCollection = new ArrayCollection();

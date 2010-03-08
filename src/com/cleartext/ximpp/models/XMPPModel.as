@@ -193,16 +193,16 @@ package com.cleartext.ximpp.models
 			if(!buddy)
 			{
 				buddy = new Buddy(message.sender);
-				buddies.addBuddy(buddy);
+				appModel.addBuddy(buddy);
 			}
 			
 			buddy.lastSeen = message.timestamp;
 			buddy.isTyping = false;
 			buddy.resource = event.stanza.from.resource;
+			buddy.unreadMessageCount++;
 
 			var chat:Chat = appModel.getChat(buddy, false);
 			chat.messages.addItemAt(message,0);
-			chat.unreadMessageCount++;
 
 			database.saveMessage(message);
 			database.saveBuddy(buddy);
@@ -302,7 +302,7 @@ package com.cleartext.ximpp.models
 				buddy.groups = event.stanza["groups"];
 				buddy.nickName = event.stanza["name"];
 				buddy.subscription = subscription;
-				buddies.addBuddy(buddy);
+				appModel.addBuddy(buddy);
 			}
 			buddies.refresh();
 		}
@@ -346,7 +346,7 @@ package com.cleartext.ximpp.models
 				buddy.used = true;
 				
 				// this adds, saves and adds an event listener to the buddy
-				buddies.addBuddy(buddy);
+				appModel.addBuddy(buddy);
 			}
 			
 			for each(var b2:Buddy in buddies.buddies)

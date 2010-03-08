@@ -1,5 +1,7 @@
 package com.universalsprout.flex.components.list
 {
+	import com.adobe.air.filesystem.VolumeMonitor;
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
@@ -10,7 +12,6 @@ package com.universalsprout.flex.components.list
 	import mx.collections.XMLListCollection;
 	import mx.core.Container;
 	import mx.core.IFactory;
-	import mx.core.ScrollPolicy;
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
@@ -24,7 +25,6 @@ package com.universalsprout.flex.components.list
 		{
 			super();
 			setStyle("verticalGap", 0);
-			verticalScrollPolicy = ScrollPolicy.ON;
 		}
 		
 		public var animate:Boolean = true;
@@ -233,6 +233,8 @@ package com.universalsprout.flex.components.list
 				var yCounter:Number = 0;
 				var vGap:Number = getStyle("verticalGap");
 				var itemWidth:Number = unscaledWidth - viewMetricsAndPadding.left - viewMetricsAndPadding.right;
+				if(verticalScrollBar)
+					itemWidth -= verticalScrollBar.width;
 				var uid:String;
 				
 				// set them all to invisible first, then later, make them

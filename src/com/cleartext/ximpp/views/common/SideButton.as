@@ -65,6 +65,20 @@ package com.cleartext.ximpp.views.common
 			}
 		}
 
+		private var _showAddButton:Boolean = true;
+		public function get showAddButton():Boolean
+		{
+			return _showAddButton;
+		}
+		public function set showAddButton(value:Boolean):void
+		{
+			if(value != _showAddButton)
+			{
+				_showAddButton = value;
+				invalidateProperties();
+			}
+		}
+
 		private var _icon:Class;
 		public function get icon():Class
 		{

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow 
-	xmlns:mx="http://www.adobe.com/2006/mxml" 
-	layout="absolute"
-	showCloseButton="true"
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:common="com.cleartext.ximpp.views.common.*"
 	title="Edit Buddy"
-	xmlns:common="com.cleartext.ximpp.views.common.*">
+	submitButtonLabel="done"
+	isValid="true">
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.models.AvatarUtils;
@@ -27,7 +29,7 @@
 			[Bindable]
 			public var buddies:BuddyModel;
 			
-			private function okHandler():void
+			override protected function submit(event:Event):void
 			{
 				buddy.nickName = nickname.text;
 				buddy.groups = groups.selectedItems;
@@ -36,7 +38,7 @@
 				
 				xmpp.modifyRosterItem(buddy);
 				
-				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				closeWindow();
 			}
 			
 			private var _buddy:Buddy;
@@ -89,6 +91,7 @@
 					// to do
 				}
 			}
+
 		]]>
 	</mx:Script>
 	
@@ -107,12 +110,12 @@
 		</mx:FormItem>
 
 		<mx:FormItem label="groups:">
-			<mx:Label text="use ctrl/cmd to select more than one" />
+			<mx:Label text="use ctrl/cmd - click to deselect and to select more than one" />
 			<mx:List
 				id="groups" 
 				allowMultipleSelection="true" 
 				dataProvider="{buddies.groups}" 
-				width="190" height="80"/>
+				width="210" height="120"/>
 		</mx:FormItem>
 
 		<mx:FormItem label="nickname:">
@@ -121,9 +124,6 @@
 
 	</mx:Form>
 
-	<mx:ControlBar horizontalAlign="center">
-		<mx:Button label="done" click="okHandler()"/>
-		<mx:Button label="cancel" click="dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
-	</mx:ControlBar>
+	<mx:ControlBar/>
 
-</mx:TitleWindow>
+</popup:PopupWindowBase>

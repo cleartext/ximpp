@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Add Gateway"
+	xmlns:common="com.cleartext.ximpp.views.common.*"
+	submitButtonLabel="add"
+	>
+	
+    <mx:Form label="Gateway">
+    	<mx:Text width="270" text="Adding a gateway is currently not supported." />
+    </mx:Form>
+
+	<mx:ControlBar/>
+	
+</popup:PopupWindowBase>
