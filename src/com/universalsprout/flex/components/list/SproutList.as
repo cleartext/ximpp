@@ -1,7 +1,5 @@
 package com.universalsprout.flex.components.list
 {
-	import com.adobe.air.filesystem.VolumeMonitor;
-	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
@@ -29,24 +27,21 @@ package com.universalsprout.flex.components.list
 		
 		public var animate:Boolean = true;
 		
-		public var bottomUp:Boolean = false;
-		
 		protected var collection:ListCollectionView;
 	
 		protected var list:IList;
 		
 		protected var itemRenderersByDataUid:Dictionary = new Dictionary();
 	
-		protected var itemHeightsInvalid:Boolean = false;
-		
-		protected var resetItemRenderers:Boolean = false;
-		
-		// used to keep scroll at base if bottomUp==true
-		protected var previousHeight:Number = 0;
+		protected var resetItemRenderers:Boolean = true;
 		
 		protected var previousWidth:Number = 0;
 		
 		protected var highlightChanged:Boolean = false;
+		
+		public var virtualList:Boolean = true;
+		
+		protected var bottomOfListComponent:UIComponent;
 		
 		private var _itemRenderer:IFactory;
 		public function get itemRenderer():IFactory
@@ -57,8 +52,7 @@ package com.universalsprout.flex.components.list
 		{
 			_itemRenderer = value;
 			resetItemRenderers = true;
-			invalidateSize();
-			invalidateDisplayList();
+			invalidateProperties();
 			dispatchEvent(new Event("itemRendererChanged"));
 		}
 		
@@ -142,69 +136,42 @@ package com.universalsprout.flex.components.list
 		 */
 		protected function collectionChangeHandler(event:CollectionEvent):void
 		{
-			//trace("collection", event.kind);
-			switch(event.kind)
+			if(event.kind == CollectionEventKind.RESET)
 			{
-				case CollectionEventKind.UPDATE :
-				case CollectionEventKind.MOVE :
-				case CollectionEventKind.REFRESH :
-					itemHeightsInvalid = true;
-					invalidateProperties();
-					break;
-	
-				case CollectionEventKind.RESET :
-					resetItemRenderers = true;
-					invalidateProperties();
-					break;
-	
-				case CollectionEventKind.ADD :
-				case CollectionEventKind.REMOVE :
-				case CollectionEventKind.REPLACE :
-					// do nothing
-					break;
-	
-				default :
-					trace("[SproutList] collectionChangeHander() called with unknown kind: " + event.kind);
+				resetItemRenderers = true;
+				invalidateProperties();
 			}
-			invalidateDisplayList();
+			else
+			{
+				invalidateDisplayList();
+			}
 		}
 		
 		protected function listCollectionChangeHandler(event:CollectionEvent):void
 		{
-			//trace("list      ", event.kind);
-			switch(event.kind)
+			if(event.kind == CollectionEventKind.RESET)
 			{
-				case CollectionEventKind.ADD :
-					var startIndex:int = event.location;
-					for each(var add:ISproutListData in event.items)
-						createItemRenderer(add);
-					break;
-	
-				case CollectionEventKind.REMOVE :
-					for each(var remove:ISproutListData in event.items)
-						removeItemRenderer(itemRenderersByDataUid[remove.uid]);
-					break;
-	
-				case CollectionEventKind.REPLACE :
-					// replace the item
-					break;
-	
-				case CollectionEventKind.RESET :
-				case CollectionEventKind.REFRESH :
-				case CollectionEventKind.MOVE :
-				case CollectionEventKind.UPDATE :
-					// do nothing
-					break;
-	
-				default :
-					trace("[SproutList] collectionChangeHander() called with unknown kind: " + event.kind);
+				resetItemRenderers = true;
+				invalidateProperties();
 			}
-			invalidateDisplayList();
+			else
+			{
+				invalidateDisplayList();
+			}
 		}
 		
 		override protected function createChildren():void
 		{
 			super.createChildren();
+			
+			if(!bottomOfListComponent)
+			{
+				bottomOfListComponent = new UIComponent();
+				bottomOfListComponent.graphics.beginFill(0xff0000);
+				bottomOfListComponent.graphics.drawRect(0,0,10,10);
+				bottomOfListComponent.visible = false;
+				addChild(bottomOfListComponent);
+			}
 		}
 		
 		override protected function commitProperties():void
@@ -217,102 +184,87 @@ package com.universalsprout.flex.components.list
 			if(resetItemRenderers)
 			{
 				resetItemRenderers = false;
+				
 				for each(item in itemRenderersByDataUid)
-					removeItemRenderer(item as DisplayObject);
-				
-				for each(data in dataProvider.list)
-					createItemRenderer(data);
-
-				itemHeightsInvalid = true;
-			}
-			
-			if(itemHeightsInvalid)
-			{
-				itemHeightsInvalid = false;
-				
-				var yCounter:Number = 0;
-				var vGap:Number = getStyle("verticalGap");
-				var itemWidth:Number = unscaledWidth - viewMetricsAndPadding.left - viewMetricsAndPadding.right;
-				if(verticalScrollBar)
-					itemWidth -= verticalScrollBar.width;
-				var uid:String;
-				
-				// set them all to invisible first, then later, make them
-				// visible if we want them
-				for each(item in getChildren())
 				{
-					item.setVisible(false, true);
-					item.setIncludeInLayout(false, true);
+					delete itemRenderersByDataUid[item.data.uid];
+					item.removeEventListener(ResizeEvent.RESIZE, itemsResizeHandler);
+					removeChild(item as DisplayObject);
 				}
 				
-				for each(data in collection)
-				{
-					// find itemRenderer
-					item = createItemRenderer(data);
-					item.setVisible(true, true);
-					item.setIncludeInLayout(true, true);
-
-					if(animate)
-						item.yTo = yCounter;
-					else
-						item.move(0, yCounter);
-	
-					yCounter += vGap + item.setWidth(itemWidth);
-				}
-				
-				if(yCounter != previousHeight)
-				{
-					if(bottomUp)
-						verticalScrollPosition += yCounter-previousHeight;
-					previousHeight = yCounter;
-				}
+				invalidateDisplayList();
 			}
-		}
-		
-		private function createItemRenderer(data:ISproutListData):ISproutListItem
-		{
-			var item:ISproutListItem = itemRenderersByDataUid[data.uid]; 
-			if(!item)
-			{
-				item = itemRenderer.newInstance();
-				item.data = data;
-				item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
-				itemRenderersByDataUid[data.uid] = item;
-				addChild(item as UIComponent);
-			}
-			return item;
-		}
-		
-		private function removeItemRenderer(item:DisplayObject):void
-		{
-			delete itemRenderersByDataUid[(item as ISproutListItem).data.uid];
-			item.removeEventListener(ResizeEvent.RESIZE, itemsResizeHandler);
-			removeChild(item);
 		}
 		
 		private function itemsResizeHandler(event:ResizeEvent):void
 		{
-			callLater(invalidateLater);
-		}
-		
-		protected function invalidateLater():void
-		{
-			itemHeightsInvalid = true;
-			invalidateProperties();
+			invalidateDisplayList();
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-			for each(var child:DisplayObject in getChildren())
+			super.updateDisplayList(unscaledWidth, unscaledHeight);
+
+			for each(item in itemRenderersByDataUid)
 			{
-				if(child.width != unscaledWidth)
+				if(item.visible && !collection.contains(item.data));
 				{
-					itemHeightsInvalid = true;
-					invalidateProperties();
+					item.setVisible(false, true);
+					item.setIncludeInLayout(false, true);
+				}
+			}
+
+			var itemWidth:Number = unscaledWidth - viewMetricsAndPadding.left - viewMetricsAndPadding.right;
+			var extraRenderers:int = 10;
+
+			var yCounter:Number = 0;
+			var vGap:Number = getStyle("verticalGap");
+
+			var numDrawn:int = 0;
+
+			for each(var data:ISproutListData in collection)
+			{
+				numDrawn++;
+
+				var newItem:Boolean = false;
+				var item:ISproutListItem = itemRenderersByDataUid[data.uid]; 
+				if(!item)
+				{
+					item = itemRenderer.newInstance();
+					item.data = data;
+					item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
+					itemRenderersByDataUid[data.uid] = item;
+					addChild(item as UIComponent);
+					newItem = true;
+				}
+
+				if(!item.visible)
+				{
+					item.setVisible(true, true);
+					item.setIncludeInLayout(true, true);
+					invalidateDisplayList();
+				}
+
+				if(animate && !newItem)
+					item.yTo = yCounter;
+				else
+					item.move(0, yCounter);
+				
+				yCounter += item.setWidth(itemWidth) + vGap;
+				
+				if(virtualList && (yCounter > verticalScrollPosition + unscaledHeight))
+					extraRenderers--;
+				
+				if(extraRenderers < 1)
+				{
+					var estimatedHeight:Number = (yCounter+vGap)/numDrawn * collection.length;
+					bottomOfListComponent.includeInLayout = true;
+					bottomOfListComponent.move(0, estimatedHeight-10);
 					return;
 				}
 			}
-			super.updateDisplayList(unscaledWidth, unscaledHeight);
+
+			bottomOfListComponent.includeInLayout = false;
 		}
 	}
 }

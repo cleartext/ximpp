@@ -17,11 +17,16 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public var autoConnect:Boolean;
 		public var urlShortener:String;
-		public var animateBuddyList:Boolean;
 		public var numChatMessages:uint;
 		public var numTimelineMessages:uint;
 		public var showOfflineBuddies:Boolean;
 		
+		[Bindable]
+		public var animateBuddyList:Boolean;
+
+		[Bindable]
+		public var animateMessageList:Boolean;
+
 		[Bindable]
 		public var buddySortMethod:String;
 		
@@ -40,6 +45,7 @@ package com.cleartext.ximpp.models.valueObjects
 				newGlobalSettings.autoConnect = xml.@autoConnect == "true";
 				newGlobalSettings.urlShortener = xml.@urlShortener;
 				newGlobalSettings.animateBuddyList = xml.@animateBuddyList == "true";
+				newGlobalSettings.animateMessageList = xml.@animateMessageList == "true";
 				newGlobalSettings.numChatMessages = xml.@numChatMessages;
 				newGlobalSettings.numTimelineMessages = xml.@numTimelineMessages;
 				newGlobalSettings.showOfflineBuddies = xml.@showOfflineBuddies == "true";
@@ -50,6 +56,7 @@ package com.cleartext.ximpp.models.valueObjects
 			{
 				newGlobalSettings.autoConnect = true;
 				newGlobalSettings.animateBuddyList = true;
+				newGlobalSettings.animateMessageList = true;
 				newGlobalSettings.showOfflineBuddies = true;
 				newGlobalSettings.sendStatusToMicroBlogging = false;
 			}
@@ -76,6 +83,7 @@ package com.cleartext.ximpp.models.valueObjects
 				autoConnect={autoConnect} 
 				urlShortener={urlShortener} 
 				animateBuddyList={animateBuddyList} 
+				animateMessageList={animateMessageList} 
 				numChatMessages={numChatMessages} 
 				numTimelineMessages={numTimelineMessages} 
 				showOfflineBuddies={showOfflineBuddies} 

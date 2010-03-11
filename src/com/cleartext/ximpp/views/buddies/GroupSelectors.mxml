@@ -24,7 +24,7 @@
 			[Bindable]
 			public var connected:Boolean;
 			
-			public var groupButtons:Dictionary = new Dictionary();
+			private var groupButtons:Dictionary = new Dictionary();
 			
 			private function init():void
 			{

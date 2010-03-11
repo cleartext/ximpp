@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.events.ChatEvent;
+	import com.cleartext.ximpp.models.BuddyModel;
 	import com.cleartext.ximpp.models.XMPPModel;
 	
 	import flash.events.EventDispatcher;

@@ -2,9 +2,14 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:common="com.cleartext.ximpp.views.common.*"
 	width="100%"
-	height="100%">
+	height="100%"
+	creationComplete="init()">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.ApplicationModel;
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			import mx.events.CollectionEvent;
+			import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 			import mx.core.UIComponent;
 			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.events.PopUpEvent;
@@ -18,19 +23,71 @@
 			[Bindable]
 			public var buddies:BuddyModel;
 			
+			[Autowire]
+			[Bindable]
+			public var appModel:ApplicationModel;
+			
 			[Autowire (bean="xmpp", property="connected")]
 			[Bindable]
 			public var connected:Boolean;
 			
+			private var mbButtons:Dictionary = new Dictionary();
+			
+			private function init():void
+			{
+				buddies.microBloggingBuddies.addEventListener(CollectionEvent.COLLECTION_CHANGE, microBloggingChanged);
+//				microBlogging.buddies.addEventListener(CollectionEvent.COLLECTION_CHANGE, microBloggingChanged);
+				microBloggingChanged(null);
+			}
+			
+			private function microBloggingChanged(event:CollectionEvent):void
+			{
+				var button:SideButton;
+				
+				for each(button in mbButtons)
+				{
+					button.visible = button.includeInLayout = false;
+				}
+				
+				for each(var buddy:Buddy in buddies.microBloggingBuddies)
+				{
+					button = mbButtons[buddy.jid] as SideButton;
+					
+					if(!button)
+					{
+						button = new SideButton();
+						mbButtons[buddy.jid] = button;
+						button.expandRight = false;
+						button.data = buddy;
+						button.addEventListener(MouseEvent.CLICK, clickHandler);
+						addChildAt(button, numChildren-1);
+					}
+					else
+					{
+						button.visible = button.includeInLayout = true;
+					}
+				}
+
+				for each(button in mbButtons)
+				{
+					if(!button.visible)
+					{
+						removeChild(button);
+						delete mbButtons[button.data.jid];
+					}
+				}
+			}
+			
 			private function clickHandler(event:MouseEvent):void
 			{
-				
+				var buddy:Buddy = event.target.data as Buddy;
+				appModel.getChat(buddy);
 			}
 
 		]]>
 	</mx:Script>
 	
-	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}" showEditButton="false" expandRight="false"/>
+	<common:SideButton text="Micro Blogging" data="{Buddy.ALL_MICRO_BLOGGING_BUDDY}" click="clickHandler(event)" icon="{Constants.AllBuddies}" expandRight="false" showEditButton="false"/>
 	
 	<mx:Button
 		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_MICRO_BLOGGING_WINDOW))"

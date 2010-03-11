@@ -37,10 +37,6 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var buddies:BuddyModel;
 		
-		[Autowire]
-		[Bindable]
-		public var microBlogging:MicroBloggingModel;
-		
 		[Bindable]
 		public var microBloggingMessages:ArrayCollection = new ArrayCollection();
 
@@ -189,17 +185,8 @@ package com.cleartext.ximpp.models
 		public function userIdChanged(event:UserAccountEvent):void
 		{
 			chats.removeAll();
-			microBloggingMessages.removeAll();
-			
-			var buddy:Buddy = new Buddy("Micro Blogging");
-			buddy.microBlogging = true;
-			
-			var chat:Chat = new Chat(buddy);
-			chat.messages = microBloggingMessages;
-			chats.addItem(chat);
-			
 			database.loadBuddyData();
-			database.loadMicroBloggingData();
+			getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
 		}
 		
 		public function getBuddyByJid(jid:String):Buddy
@@ -210,21 +197,9 @@ package com.cleartext.ximpp.models
 			if(jid == settings.userAccount.jid)
 				return settings.userAccount;
 			
-			var mBuddy:Buddy = microBlogging.getBuddyByJid(jid);
-			if(mBuddy)
-				return mBuddy;
-			
 			return buddies.getBuddyByJid(jid);
 		}
-		
-		public function addBuddy(buddy:Buddy):void
-		{
-			if(buddy.microBlogging)
-				microBlogging.addBuddy(buddy);
-			else
-				buddies.addBuddy(buddy);
-		}
-		
+				
 		public function getChat(buddy:Buddy, select:Boolean=true):Chat
 		{
 			if(!buddy)

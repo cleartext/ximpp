@@ -17,6 +17,8 @@ package com.cleartext.ximpp.models
 	import flash.filesystem.File;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
+	import mx.collections.SortField;
 	
 	public class DatabaseModel extends EventDispatcher
 	{
@@ -38,11 +40,6 @@ package com.cleartext.ximpp.models
 		private function get buddies():BuddyModel
 		{
 			return appModel.buddies;
-		}
-				
-		private function get microBlogging():MicroBloggingModel
-		{
-			return appModel.microBlogging;
 		}
 				
 		public function close():void
@@ -237,7 +234,7 @@ package com.cleartext.ximpp.models
 				
 				if(result && result.data)
 					for(var i:int=result.data.length-1; i>=0; i--)
-						appModel.addBuddy(Buddy.createFromDB(result.data[i]) as Buddy);
+						buddies.addBuddy(Buddy.createFromDB(result.data[i]) as Buddy);
 	
 			    // if we've got to this point without errors, commit the transaction 
 				appModel.log("Buddy list loaded");
@@ -248,32 +245,6 @@ package com.cleartext.ximpp.models
 			}
 		}
 				
-		public function loadMicroBloggingData():void
-		{			
-			syncConn.begin(); 
-			appModel.log("Loading message data");
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "Select * from messages WHERE userid=" + settings.userId
-				+ " ORDER BY timestamp DESC LIMIT 0," + settings.global.numTimelineMessages;
-			stmt.execute();
-		    syncConn.commit(); 
-			
-			var result:SQLResult = stmt.getResult();
-			appModel.microBloggingMessages.removeAll();
-			
-			if(result && result.data)
-			{
-				var len:int = result.data.length;
-				appModel.log(stmt.text + " : " + len);
-				for(var i:int=0; i<len; i++)
-					appModel.microBloggingMessages.addItem(Message.createFromDB(result.data[i]));
-			}
-			
-			appModel.log("Message data loaded");
-		}
-		
 		public function getAllUserAccounts():ArrayCollection
 		{
 			// start a transaction 
@@ -372,33 +343,56 @@ package com.cleartext.ximpp.models
 		
 		public function loadMessages(buddy:Buddy):ArrayCollection
 		{
-			// start a transaction 
-			syncConn.begin(); 
-			appModel.log("Loading messages with " + buddy.jid);
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "Select * from messages WHERE userid=" + settings.userId
-				+ " AND (sender='" + buddy.jid + "'"
-				+ " OR recipient='" + buddy.jid + "')"
-				+ " ORDER BY timestamp DESC "
-				+ "LIMIT 0," + settings.global.numChatMessages;
-			stmt.execute();
-			
-			var result:SQLResult = stmt.getResult();
-
-			var messages:ArrayCollection = new ArrayCollection();
-			
-			if(result && result.data)
+			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
-				var len:int = result.data.length;
-				for(var i:int=0; i<len; i++)
-					messages.addItem(Message.createFromDB(result.data[i]));
+				var firstTemp:ArrayCollection = new ArrayCollection();
+				for each(var buddy:Buddy in buddies.microBloggingBuddies)
+				{
+					for each(var message:Message in loadMessages(buddy))
+						firstTemp.addItem(message);
+				}
+				
+				var sort:Sort = new Sort();
+				sort.fields = [new SortField("timestamp", false, true)];
+				firstTemp.sort = sort;
+				firstTemp.refresh();
+				
+				var secondTemp:ArrayCollection = new ArrayCollection();
+				for(var index:int=0; index<settings.global.numTimelineMessages; index++)
+					secondTemp.addItem(firstTemp.getItemAt(index));
+				
+				return secondTemp;
 			}
-		    // if we've got to this point without errors, commit the transaction 
-		    syncConn.commit(); 
-			appModel.log("Messages loaded");
-			return messages;
+			else
+			{
+				// start a transaction 
+				syncConn.begin(); 
+				appModel.log("Loading messages with " + buddy.jid);
+				
+				var stmt:SQLStatement = new SQLStatement();
+				stmt.sqlConnection = syncConn;
+				stmt.text = "Select * from messages WHERE userid=" + settings.userId
+					+ " AND (sender='" + buddy.jid + "'"
+					+ " OR recipient='" + buddy.jid + "')"
+					+ " ORDER BY timestamp DESC "
+					+ "LIMIT 0," + settings.global.numChatMessages;
+				stmt.execute();
+				
+				var result:SQLResult = stmt.getResult();
+	
+				var messages:ArrayCollection = new ArrayCollection();
+				
+				if(result && result.data)
+				{
+					var len:int = result.data.length;
+					for(var i:int=0; i<len; i++)
+						messages.addItem(Message.createFromDB(result.data[i]));
+				}
+			    // if we've got to this point without errors, commit the transaction 
+			    syncConn.commit(); 
+				appModel.log("Messages loaded");
+				return messages;
+			}
 		}
 		
 		private function insertStmt(table:String, values:Array):int

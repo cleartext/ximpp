@@ -67,6 +67,7 @@
 				autoConnectCheckBox.selected = settings.global.autoConnect;
 				urlShortenComboBox.selectedItem = settings.global.urlShortener;
 				animateBuddyListCheckBox.selected = settings.global.animateBuddyList;
+				animateMessageListCheckBox.selected = settings.global.animateMessageList;
 				showOfflineBuddiesCheckBox.selected = settings.global.showOfflineBuddies;
 				numTimelineMessages.value = settings.global.numTimelineMessages;
 				numChatMessages.value = settings.global.numChatMessages;
@@ -97,6 +98,7 @@
 				settings.global.autoConnect = autoConnectCheckBox.selected;
 				settings.global.urlShortener = urlShortenComboBox.selectedItem as String;
 				settings.global.animateBuddyList = animateBuddyListCheckBox.selected;
+				settings.global.animateMessageList = animateMessageListCheckBox.selected;
 				settings.global.showOfflineBuddies = showOfflineBuddiesCheckBox.selected;
 				settings.global.numTimelineMessages = numTimelineMessages.value;
 				settings.global.numChatMessages = numChatMessages.value;
@@ -229,6 +231,7 @@
 		</mx:Canvas>
 		<mx:CheckBox label="show offline buddies" id="showOfflineBuddiesCheckBox"/>
 		<mx:CheckBox label="animate buddy list" id="animateBuddyListCheckBox"/>
+		<mx:CheckBox label="animate message list" id="animateMessageListCheckBox"/>
 		<mx:Canvas>
 			<mx:NumericStepper maximum="1000" minimum="0" id="numTimelineMessages" />
 			<mx:Label x="78" text="max timeline messages" />

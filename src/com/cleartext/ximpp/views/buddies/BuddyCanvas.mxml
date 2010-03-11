@@ -107,7 +107,7 @@
 			private function userPresenceChangeHandler():void
 			{
 				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
-				if(microBloggingCheckBox.selected && customStatusInput.text != "")
+				if(xmppModel.connected && microBloggingCheckBox.selected && customStatusInput.text != "")
 				{
 					appModel.getChat(new Buddy("Micro Blogging"));
 					Swiz.dispatchEvent(new CustomStatusEvent(CustomStatusEvent.CUSTOM_STATUS_CHANGE, customStatusInput.text));
@@ -243,6 +243,8 @@
 
 	<buddies:BuddySproutList
 		id="buddyList" 
+		virtualList="false"
+		animate="{settings.global.animateBuddyList}"
 		horizontalScrollPolicy="off"
 		dataProvider="{buddies.buddies}"
 		height="100%" width="100%"

@@ -1,10 +1,13 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.universalsprout.flex.components.list.ISproutListData;
+	import com.universalsprout.flex.components.list.ISproutListItem;
 	import com.universalsprout.flex.components.list.SproutList;
 	
 	import flash.events.Event;
+	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
 	
 	import mx.core.ClassFactory;
@@ -31,18 +34,9 @@ package com.cleartext.ximpp.views.messages
 			}
 		}
 
-		private function resizeLater(event:Event):void
-		{
-			setTimeout(invalidateDisplayList, 80);
-		}
-		
 		public function MessageSproutList()
 		{
 			super();
-			animate = false;
-
-			addEventListener(ResizeEvent.RESIZE, resizeLater);
-			addEventListener(Event.ADDED_TO_STAGE, resizeLater);
 		}
 		
 		override protected function commitProperties():void
@@ -55,9 +49,12 @@ package com.cleartext.ximpp.views.messages
 				for each(var data:ISproutListData in dataProvider)
 				{
 					var item:ChatRenderer = itemRenderersByDataUid[data.uid] as ChatRenderer;
-					var thisJid:String = item.message.sender;
-					item.showTopRow = (thisJid != previousJid);
-					previousJid = thisJid;
+					if(item)
+					{
+						var thisJid:String = item.message.sender;
+						item.showTopRow = (thisJid != previousJid);
+						previousJid = thisJid;
+					}
 				}
 			}
 		}

@@ -96,7 +96,7 @@
 		<mx:FormItem label="buddies:">
 			<mx:VBox>
 				<mx:Label text="use ctrl/cmd - click to deselect and to select more than one" />
-				<mx:List id="buddyList" allowMultipleSelection="true" labelField="nickName" width="210" height="300"
+				<mx:List id="buddyList" allowMultipleSelection="true" labelField="nickName" width="300" height="300"
 					 change="validateInput(event,'need to select at least one buddy')" focusOut="validateInput(event, 'need to select at least one buddy')"/>
 			</mx:VBox>
 		</mx:FormItem>

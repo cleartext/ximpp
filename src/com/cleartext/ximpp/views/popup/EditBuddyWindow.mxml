@@ -32,7 +32,8 @@
 			override protected function submit(event:Event):void
 			{
 				buddy.nickName = nickname.text;
-				buddy.groups = groups.selectedItems;
+				if(!buddy.microBlogging)
+					buddy.groups = groups.selectedItems;
 				buddies.addBuddy(buddy);
 				buddies.refresh();
 				

@@ -10,6 +10,7 @@ package com.cleartext.ximpp.models
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
+	import mx.collections.SortField;
 
 	public class BuddyModel extends EventDispatcher
 	{
@@ -30,6 +31,9 @@ package com.cleartext.ximpp.models
 		{
 			return _buddies;
 		}
+		
+		[Bindable]
+		public var microBloggingBuddies:ArrayCollection;
 		
 		[Bindable]
 		public var groups:ArrayCollection;
@@ -86,6 +90,7 @@ package com.cleartext.ximpp.models
 			super();
 
 			groups = new ArrayCollection();
+			microBloggingBuddies = new ArrayCollection();
 			
 			buddiesByJid = new Dictionary();
 			
@@ -95,7 +100,12 @@ package com.cleartext.ximpp.models
 			sort.compareFunction = buddySort;
 			buddies.sort = sort;
 			buddies.refresh();
-
+			
+			sort = new Sort();
+			sort.fields = [new SortField("nickName")];
+			microBloggingBuddies.sort = sort;
+			microBloggingBuddies.refresh();
+			
 			groups.sort = new Sort();
 			groups.refresh();
 		}
@@ -139,16 +149,15 @@ package com.cleartext.ximpp.models
 		
 		public function containsJid(jid:String):Boolean
 		{
-			for each(var buddy:Buddy in buddies)
-				if(buddy.jid == jid)
-					return true;
-
-			return false;
+			return buddiesByJid.hasOwnProperty(jid);
 		}
 
 		private function buddyFilter(buddy:Buddy):Boolean
 		{
 			if(!settings.global.showOfflineBuddies && buddy.status.isOffline())
+				return false;
+			
+			if(buddy.microBlogging)
 				return false;
 			
 			if(searchString != "" && 
@@ -208,18 +217,24 @@ package com.cleartext.ximpp.models
 			buddies.refresh();
 			
 			var groupsTemp:ArrayCollection = new ArrayCollection();
+			var microBloggingTemp:ArrayCollection = new ArrayCollection();
 			
 			for each(var buddy:Buddy in buddies.source)
 			{
-				if(!buddy.isGateway)
-				for each(var group:String in buddy.groups)
-					if(!groupsTemp.contains(group))
-						groupsTemp.addItem(group);
+				if(buddy.microBlogging)
+					microBloggingTemp.addItem(buddy);
+
+				else if(!buddy.isGateway)
+					for each(var group:String in buddy.groups)
+						if(!groupsTemp.contains(group))
+							groupsTemp.addItem(group);
 			}
 			
 			groups.list = groupsTemp.list;
-			
 			groups.refresh();
+
+			microBloggingBuddies.list = microBloggingTemp.list;
+			microBloggingBuddies.refresh();
 		}
 
 		private function buddyChangeHandler(event:BuddyEvent):void
@@ -232,10 +247,20 @@ package com.cleartext.ximpp.models
 		{
 			var result:Array = new Array();
 			for each(var buddy:Buddy in buddies.source)
-				if(!buddy.isGateway)
+				if(!buddy.isGateway && !buddy.microBlogging)
 					result.push(buddy);
 			
-			return result;
+			return result.sortOn("nickName");
+		}
+		
+		public function get nonMicroBlogging():Array
+		{
+			var result:Array = new Array();
+			for each(var buddy:Buddy in buddies.source)
+				if(!buddy.microBlogging)
+					result.push(buddy);
+			
+			return result.sortOn("nickName");
 		}
 		
 		public function get gatewayNames():Array
@@ -246,7 +271,7 @@ package com.cleartext.ximpp.models
 				if(buddy.isGateway)
 					result.push(buddy.jid);
 			
-			return result;
+			return result.sortOn("nickName");
 		}
 		
 	}

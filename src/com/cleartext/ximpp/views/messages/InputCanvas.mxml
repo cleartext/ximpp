@@ -4,6 +4,8 @@
 	clipContent="false">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.BuddyModel;
+			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.events.SendButtonEvent;
 			import com.cleartext.ximpp.events.CustomStatusEvent;
 			import com.cleartext.ximpp.models.Constants;
@@ -123,7 +125,7 @@
 		defaultText="type message here..."
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
 		keyDown="input_keyDownHandler(event)"
-		enabled="{!(!buddy || !xmpp.connected)}"
+		enabled="{!(!buddy || !xmpp.connected || buddy.status.isOffline())}"
 		focusRoundedCorners="bl br" 
 		cornerRadius="{CORNER_RADIUS}"
 		paddingRight="20"

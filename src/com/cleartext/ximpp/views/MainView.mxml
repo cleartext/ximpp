@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.AddMicroBloggingWindow;
 			import com.cleartext.ximpp.views.popup.AddGatewayWindow;
 			import com.cleartext.ximpp.views.popup.AddBuddyWindow;
 			import com.cleartext.ximpp.views.popup.EditGroupWindow;
@@ -123,6 +124,12 @@
 				initializePopUp(new AddGatewayWindow());
 			}
 
+			[Mediate(event="PopUpEvent.ADD_MICRO_BLOGGING_WINDOW")]
+			public function showAddMicroBloggingWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddMicroBloggingWindow());
+			}
+
 			
 			private function initializePopUp(window:IFlexDisplayObject):void
 			{
@@ -207,7 +214,6 @@
 		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
 	
 	<messages:MicroBloggingSelectors
-		visible="false"
 		x="{width-41}" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
 	
 </mx:Canvas>

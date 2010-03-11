@@ -3,11 +3,13 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.events.SearchBoxEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
+	import com.cleartext.ximpp.models.BuddyModel;
 	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.DatabaseModel;
 	import com.cleartext.ximpp.models.SettingsModel;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.types.ChatStateTypes;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.views.common.SearchBox;
@@ -20,6 +22,7 @@ package com.cleartext.ximpp.views.messages
 	import flash.geom.Matrix;
 	import flash.utils.Timer;
 	
+	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.containers.ViewStack;
@@ -44,6 +47,10 @@ package com.cleartext.ximpp.views.messages
 		[Autowire]
 		[Bindable]
 		public var settings:SettingsModel;
+		
+		[Autowire]
+		[Bindable]
+		public var buddies:BuddyModel;
 		
 		[Autowire]
 		[Bindable]
@@ -130,19 +137,39 @@ package com.cleartext.ximpp.views.messages
 		public function sendMessage(messageString:String):void
 		{
 			var chat:Chat = avatarByIndex(index).chat;
-			
 			chat.chatState = ChatStateTypes.ACTIVE;
+			
+			var buddiesToSendTo:Array;
+			
+			if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				buddiesToSendTo = buddies.microBloggingBuddies.toArray();
+			else
+				buddiesToSendTo = [chat.buddy];
 
-			xmpp.sendMessage(chat.buddy.fullJid, messageString);
-			
-			var message:Message = new Message();
-			message.sender = settings.userAccount.jid;
-			message.recipient = chat.buddy.jid;
-			message.body = messageString;
-			message.timestamp = new Date();
-			
-			chat.messages.addItemAt(message,0);
-			database.saveMessage(message);
+			for each(var buddy:Buddy in buddiesToSendTo)
+			{
+				if(buddy.status.isOffline())
+					continue;
+
+				xmpp.sendMessage(buddy.fullJid, messageString);
+				
+				var message:Message = new Message();
+				message.sender = settings.userAccount.jid;
+				message.recipient = buddy.jid;
+				message.body = messageString;
+				message.timestamp = new Date();
+				
+				var c:Chat = appModel.getChat(buddy, false);
+				c.messages.addItemAt(message,0);
+				
+				if(buddy.microBlogging)
+				{
+					c = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, false);
+					c.messages.addItemAt(message,0);
+				}
+
+				database.saveMessage(message);
+			}
 		}
 		
 		public function numChats():int
@@ -207,6 +234,7 @@ package com.cleartext.ximpp.views.messages
 				avatarCanvas.addChildAt(avatar, 0);
 					
 				var sproutList:MessageSproutList = new MessageSproutList();
+				BindingUtils.bindProperty(sproutList, "animate", settings.global, "animateMessageList");
 				sproutList.horizontalScrollPolicy = "off";
 				sproutList.data = chat;
 				messageStack.addChild(sproutList);

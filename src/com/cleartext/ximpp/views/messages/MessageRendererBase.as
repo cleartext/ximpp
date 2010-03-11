@@ -7,6 +7,8 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
 	
+	import flash.utils.getTimer;
+	
 	import mx.core.UITextField;
 	import mx.formatters.DateFormatter;
 
@@ -25,7 +27,7 @@ package com.cleartext.ximpp.views.messages
 		protected var dateTextField:UITextField;
 		protected var bodyTextField:UITextField;
 		
-		protected var invalidateHeightFlag:Boolean = true;
+		protected var heightInvalid:Boolean = true;
 		
 		protected var fromThisUser:Boolean = false;
 		
@@ -35,7 +37,7 @@ package com.cleartext.ximpp.views.messages
 		
 		public function MessageRendererBase()
 		{
-			super();
+			super(NaN, 32);
 
 			df = new DateFormatter();
 			df.formatString = "EEE MMM D YYYY at L:NN A";
@@ -57,18 +59,19 @@ package com.cleartext.ximpp.views.messages
 				
 				avatar.data = fromBuddy;
 
-				nameTextField.text = fromBuddy.nickName;
-				nameTextField.width = nameTextField.textWidth + padding;
+				nameTextField.text = (fromBuddy) ? fromBuddy.nickName : "";
+				nameTextField.width = nameTextField.textWidth + padding*4;
 				nameTextField.styleName = (fromThisUser) ? "lGreyBold" : "blackBold";
 
 				dateTextField.text = df.format(message.timestamp);
-				dateTextField.width = dateTextField.textWidth + padding;
+				dateTextField.width = dateTextField.textWidth + padding*2;
 				dateTextField.styleName = (fromThisUser) ? "lGreySmall" : "blackSmall";
 
 				bodyTextField.text = message.body;
 				bodyTextField.styleName = (fromThisUser) ? "lGreyNormal" : "blackNormal";
 			}
-						
+					
+			heightInvalid = true;
 			calculateHeight();
 		}
 		
@@ -79,19 +82,24 @@ package com.cleartext.ximpp.views.messages
 		
 		protected function calculateHeight():Number
 		{
-			if(!invalidateHeightFlag)
-				return bodyTextField.height;
-
-			invalidateHeightFlag = false;
-
-			bodyTextField.wordWrap = true;
-			bodyTextField.width = bodyTextWidth;
-			
 			var newHeight:Number = UITEXTFIELD_HEIGHT_PADDING;
-			for(var l:int=bodyTextField.numLines-1; l>=0; l--)
-				newHeight += Math.ceil(bodyTextField.getLineMetrics(l).height);
 
-			bodyTextField.height = newHeight;
+			if(!heightInvalid)
+				return (bodyTextField) ? bodyTextField.height : newHeight;
+
+			heightInvalid = false;
+			
+			if(bodyTextField)
+			{
+				bodyTextField.wordWrap = true;
+				bodyTextField.width = bodyTextWidth;
+				
+				for(var l:int=bodyTextField.numLines-1; l>=0; l--)
+					newHeight += Math.ceil(bodyTextField.getLineMetrics(l).height);
+	
+				bodyTextField.height = newHeight;
+			}
+			
 			return newHeight;
 		}
 		
@@ -129,8 +137,11 @@ package com.cleartext.ximpp.views.messages
 		
 		override public function setWidth(widthVal:Number):Number
 		{
-			width = widthVal;
-			invalidateHeightFlag = true;
+			if(width != widthVal)
+			{
+				width = widthVal;
+				heightInvalid = true;
+			}
 			return calculateHeight();
 		}
 		
@@ -145,7 +156,7 @@ package com.cleartext.ximpp.views.messages
 			if(data != value)
 			{
 				super.data = value;
-				invalidateHeightFlag = true;
+				heightInvalid = true;
 				invalidateProperties();
 			}
 		}

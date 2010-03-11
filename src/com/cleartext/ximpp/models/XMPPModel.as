@@ -193,7 +193,9 @@ package com.cleartext.ximpp.models
 			if(!buddy)
 			{
 				buddy = new Buddy(message.sender);
-				appModel.addBuddy(buddy);
+				buddies.addBuddy(buddy);
+				
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW, null, buddy));
 			}
 			
 			buddy.lastSeen = message.timestamp;
@@ -203,6 +205,13 @@ package com.cleartext.ximpp.models
 
 			var chat:Chat = appModel.getChat(buddy, false);
 			chat.messages.addItemAt(message,0);
+			
+			if(buddy.microBlogging)
+			{
+				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessageCount++;
+				chat = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, false);
+				chat.messages.addItemAt(message, 0);
+			}
 
 			database.saveMessage(message);
 			database.saveBuddy(buddy);
@@ -302,7 +311,7 @@ package com.cleartext.ximpp.models
 				buddy.groups = event.stanza["groups"];
 				buddy.nickName = event.stanza["name"];
 				buddy.subscription = subscription;
-				appModel.addBuddy(buddy);
+				buddies.addBuddy(buddy);
 			}
 			buddies.refresh();
 		}
@@ -346,7 +355,7 @@ package com.cleartext.ximpp.models
 				buddy.used = true;
 				
 				// this adds, saves and adds an event listener to the buddy
-				appModel.addBuddy(buddy);
+				buddies.addBuddy(buddy);
 			}
 			
 			for each(var b2:Buddy in buddies.buddies)
@@ -365,7 +374,7 @@ package com.cleartext.ximpp.models
 			sendIq(jid,
 					IQTypes.GET,
 					IQTypes.GET_USERS_VCARD,
-					vCardHandler);			
+					vCardHandler);	
 		}
 		
 		//-------------------------------

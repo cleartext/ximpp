@@ -1,8 +1,12 @@
 package com.cleartext.ximpp.views.common
 {
+	import com.adobe.protocols.dict.events.ConnectedEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.Constants;
+	import com.cleartext.ximpp.models.XMPPModel;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	
+	import flash.display.Bitmap;
 	import flash.display.GradientType;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
@@ -10,7 +14,6 @@ package com.cleartext.ximpp.views.common
 	import flash.geom.Matrix;
 	
 	import mx.controls.Button;
-	import mx.controls.Image;
 	import mx.core.UIComponent;
 	import mx.core.UITextField;
 	
@@ -18,17 +21,16 @@ package com.cleartext.ximpp.views.common
 
 	public class SideButton extends UIComponent
 	{
-		
-		[Autowire(bean="xmpp", property="connected")]
+		[Autowire]
 		[Bindable]
-		public var connected:Boolean;
+		public var xmpp:XMPPModel;
 		
 		private static const SELECTED_WIDTH:Number = 41;
 		private static const NORMAL_WIDTH:Number = 32;
 		private static const BAR_HEIGHT:Number = 32;
 
 		private var textField:UITextField;
-		private var image:Image;
+		private var image:RoundedImage;
 		private var editButton:Button;
 		private var deleteButton:Button;
 		
@@ -37,8 +39,36 @@ package com.cleartext.ximpp.views.common
 		private var hover:Boolean = false;
 		private var dropShaddow:DropShadowFilter = new DropShadowFilter(2);
 
+		private var _data:Object;
+		public function get data():Object
+		{
+			return _data;
+		}
+		public function set data(value:Object):void
+		{
+			if(_data != value)
+			{
+				_data = value;
+				
+				if(buddy)
+				{
+					if(buddy.avatar && image)
+						image.source = new Bitmap(buddy.avatar);
+					else
+						icon = Constants.DefaultGroupIcon;
+					
+					text = buddy.nickName;
+				}
+			}
+		}
+
+		public function get buddy():Buddy
+		{
+			return data as Buddy;
+		}		
+
 		private var _expandRight:Boolean = true;
-		public function get exandRight():Boolean
+		public function get expandRight():Boolean
 		{
 			return _expandRight;
 		}
@@ -61,20 +91,6 @@ package com.cleartext.ximpp.views.common
 			if(value != _showEditButton)
 			{
 				_showEditButton = value;
-				invalidateProperties();
-			}
-		}
-
-		private var _showAddButton:Boolean = true;
-		public function get showAddButton():Boolean
-		{
-			return _showAddButton;
-		}
-		public function set showAddButton(value:Boolean):void
-		{
-			if(value != _showAddButton)
-			{
-				_showAddButton = value;
 				invalidateProperties();
 			}
 		}
@@ -103,20 +119,12 @@ package com.cleartext.ximpp.views.common
 				_selected = value;
 				
 				if(hover)
-				{
-					width = textField.textWidth + 65;
 					filters = [dropShaddow];
-				}
 				else if(selected)
-				{
-					width = SELECTED_WIDTH;
 					filters = [];
-				}
 				else
-				{
-					width = NORMAL_WIDTH;
 					filters = [dropShaddow];
-				}
+
 				invalidateDisplayList();
 			}
 		}
@@ -141,11 +149,11 @@ package com.cleartext.ximpp.views.common
 			super();
 
 			buttonMode = true;
-			
-			filters = [dropShaddow];
-			
+
 			width = NORMAL_WIDTH;
 			height = NORMAL_WIDTH;
+			
+			filters = [dropShaddow];
 			
 			addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
@@ -156,13 +164,25 @@ package com.cleartext.ximpp.views.common
 			hover = true;
 			textField.visible = true;
 			editButton.visible = deleteButton.visible = showEditButton;
-			width = textField.textWidth + 65;
 			invalidateDisplayList();
 			
-			editButton.enabled = deleteButton.enabled = connected;
+			editButton.enabled = deleteButton.enabled = xmpp.connected;
 
-			editButton.toolTip = (connected) ? "edit group" : "go online to edit";
-			deleteButton.toolTip = (connected) ? "remove group" : "go online to remove";
+			if(!showEditButton)
+			{
+				editButton.toolTip = null;
+				deleteButton.toolTip = null;
+			}
+			else if(xmpp.connected)
+			{
+				editButton.toolTip = (buddy) ? "edit micro blogging" : "edit group";
+				deleteButton.toolTip = (buddy) ? "remove from micro blogging list" : "remove group";
+			}
+			else
+			{
+				editButton.toolTip = "go online to edit";
+				deleteButton.toolTip = "go online to remove";
+			}
 
 			if(selected)
 				filters = [dropShaddow];
@@ -174,7 +194,6 @@ package com.cleartext.ximpp.views.common
 			textField.visible = false;
 			editButton.visible = false;
 			deleteButton.visible = false;
-			width = selected ? SELECTED_WIDTH : NORMAL_WIDTH;
 			invalidateDisplayList();
 
 			if(selected)
@@ -190,15 +209,21 @@ package com.cleartext.ximpp.views.common
 				textField = new UITextField();
 				textField.text = text;
 				textField.visible = hover;
-				textField.y = 9;
 				textField.mouseEnabled = false;
 				addChild(textField);
 			}
 			
 			if(!image)
 			{
-				image = new Image();
-				image.source = icon;
+				image = new RoundedImage();
+				image.radius = 10;
+				if(buddy && buddy.avatar)
+				{
+					image.source = new Bitmap(buddy.avatar);
+					image.alpha = 0.7;
+				}
+				else
+					image.source = icon;
 				image.width = 32;
 				image.height = 32;
 				image.mouseEnabled = false;
@@ -239,13 +264,22 @@ package com.cleartext.ximpp.views.common
 		private function delete_clickHandler(event:MouseEvent):void
 		{
 			event.stopImmediatePropagation();
-			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.DELETE_GROUP_WINDOW, text));
+			if(buddy)
+			{
+				buddy.microBlogging = false;
+				xmpp.modifyRosterItem(buddy);
+			}
+			else
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.DELETE_GROUP_WINDOW, text));
 		}
 		
 		private function edit_clickHandler(event:MouseEvent):void
 		{
 			event.stopImmediatePropagation();
-			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_GROUP_WINDOW, text));
+			if(buddy)
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW, "", buddy));
+			else
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_GROUP_WINDOW, text));
 		}
 		
 		override protected function commitProperties():void
@@ -253,23 +287,51 @@ package com.cleartext.ximpp.views.common
 			super.commitProperties();
 			
 			textField.styleName = "dGreyBold";
-			textField.setActualSize(textField.textWidth+10, textField.textHeight+10);
-			
-			textField.x = (exandRight) ? 42 : (-10 -textField.width);
-			
-			editButton.move(textField.textWidth + 56, 8);
-			deleteButton.move(textField.textWidth + 78, 8);
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
+			textField.setActualSize(textField.textWidth+10, textField.textHeight+10);
+
+			var xVal:Number = 0;
+			
+			if(textField.visible)
+			{
+				xVal = (expandRight) ? 42 : (-textField.width-5);
+				textField.move(xVal, 9);
+			}
+			
+			if(editButton.visible)
+			{
+				xVal = (expandRight) ? textField.textWidth + 56 : - textField.textWidth - 43;
+				editButton.move(xVal, 8);
+			}
+	
+			if(deleteButton.visible)
+			{
+				xVal = (expandRight) ? textField.textWidth + 78 : - textField.textWidth - 65;
+				deleteButton.move(xVal, 8);
+			}
+			
+			var wVal:Number = 0;
+			
+			if(hover)
+			{
+				wVal = textField.textWidth + 55;
+				if(showEditButton)
+					wVal += 46;
+			}
+			else
+			{
+				wVal = (selected) ? SELECTED_WIDTH : NORMAL_WIDTH;
+			}
+
+			xVal = (expandRight) ? 0 : - wVal + NORMAL_WIDTH;
+			
 			var g:Graphics = graphics;
 			g.clear();
-			
-			var xVal:Number = exandRight ? 0 : (-textField.width -10);
-			var wVal:Number = unscaledWidth + ((deleteButton.visible) ? 35 : 0);
 			
 			if(selected)
 			{
@@ -291,8 +353,8 @@ package com.cleartext.ximpp.views.common
 			if(deleteButton.visible)
 			{
 				g.beginFill(0x000000, 0.35);
-				g.drawRect(wVal - 25, 5, 1, unscaledHeight-10);
-				g.drawRect(wVal - 48, 5, 1, unscaledHeight-10);
+				g.drawRect((expandRight) ? (wVal - 25) : (-wVal + 54), 5, 1, unscaledHeight-10);
+				g.drawRect((expandRight) ? (wVal - 48) : (-wVal + 77), 5, 1, unscaledHeight-10);
 			}
 		}
 	}

@@ -129,11 +129,11 @@ package com.cleartext.ximpp.models.valueObjects
 					return 2;
 				case EXTENDED_AWAY :
 					return 3;
-				case UNSUBSCRIBED :
-					return 4;
-				case UNKNOWN :
-					return 5;
 				case ERROR :
+					return 4;
+				case UNSUBSCRIBED :
+					return 5;
+				case UNKNOWN :
 					return 6;
 				default :
 					return 7;
@@ -142,7 +142,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public function isOffline():Boolean
 		{
-			return sortNumber() > 3;
+			return sortNumber() > 5;
 		}
 	}
 }

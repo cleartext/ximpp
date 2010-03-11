@@ -22,8 +22,8 @@ package com.cleartext.ximpp.events
 		public static const DELETE_GROUP_WINDOW:String = "deleteGroupWindow";
 
 		public static const ADD_MICRO_BLOGGING_WINDOW:String = "addMicroBloggingWindow";
-		public static const EDIT_MICRO_BLOGGING_WINDOW:String = "editMicroBloggingWindow";
-		public static const DELETE_MICRO_BLOGGING_WINDOW:String = "deleteMicroBloggingWindow";
+//		public static const EDIT_MICRO_BLOGGING_WINDOW:String = "editMicroBloggingWindow";
+//		public static const DELETE_MICRO_BLOGGING_WINDOW:String = "deleteMicroBloggingWindow";
 		
 		public var dataString:String;
 		public var buddy:Buddy;

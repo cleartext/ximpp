@@ -3,6 +3,7 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.StatusEvent;
 	import com.cleartext.ximpp.models.AvatarUtils;
+	import com.cleartext.ximpp.models.BuddyModel;
 	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
@@ -14,6 +15,8 @@ package com.cleartext.ximpp.models.valueObjects
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IXimppValueObject
 	{
+		public static const ALL_MICRO_BLOGGING_JID:String = "Micro Blogging";
+		public static const ALL_MICRO_BLOGGING_BUDDY:Buddy = new Buddy(ALL_MICRO_BLOGGING_JID);
 
 		public function Buddy(jid:String)
 		{
@@ -61,7 +64,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public function set jid(value:String):void
 		{
 			_jid = value;
-			isGateway = _jid && _jid.indexOf("@") == -1;
+			_isGateway = _jid && _jid.indexOf("@") == -1;
 		}
 		
 		private var _nickName:String;
@@ -145,25 +148,22 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 
-		private var _microBlogging:Boolean = false;
 		[Bindable (event="buddyChanged")]
 		public function get microBlogging():Boolean
 		{
-			return _microBlogging;
+			return (jid == ALL_MICRO_BLOGGING_JID || groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP) != -1);
 		}
 		public function set microBlogging(value:Boolean):void
 		{
-			if(_microBlogging != value)
+			if(microBlogging != value)
 			{
-				_microBlogging = value;
-				
 				// find if we already have the correct group
 				var index:int = groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP);
 				
 				// add or remove the group value as required
-				if(index!=-1 && !microBlogging)
+				if(index!=-1 && !value)
 					groups.splice(index,1);
-				else if(index==-1 && microBlogging)
+				else if(index==-1 && value)
 					groups.push(MicroBloggingTypes.MICRO_BLOGGING_GROUP);
 				
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
@@ -201,14 +201,21 @@ package com.cleartext.ximpp.models.valueObjects
 		public var tempAvatarHash:String;
 		// don't store this in the database as it is easier to set
 		// in the set jid(value:String) method
-		public var isGateway:Boolean = false;
+		private var _isGateway:Boolean = false;
+		public function get isGateway():Boolean
+		{
+			return _isGateway;
+		}
 		// flag used by the roster handler in xmppModel to refresh the
 		// buddy list
 		public var used:Boolean = false;
 
 		private var _status:Status = new Status(Status.OFFLINE);
+		[Bindable("buddyChanged")]
 		public function get status():Status
 		{
+			if(jid == ALL_MICRO_BLOGGING_JID)
+				_status.value = Status.AVAILABLE;
 			return _status;
 		}
 			

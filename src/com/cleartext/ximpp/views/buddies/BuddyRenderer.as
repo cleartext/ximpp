@@ -5,6 +5,7 @@ package com.cleartext.ximpp.views.buddies
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
@@ -14,9 +15,11 @@ package com.cleartext.ximpp.views.buddies
 	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
+	import flash.utils.Timer;
 	
 	import mx.core.UITextField;
 	import mx.effects.Tween;
@@ -38,6 +41,8 @@ package com.cleartext.ximpp.views.buddies
 
 		private static const PADDING:Number = 3;
 		
+		private var previousStatus:String = Status.OFFLINE;
+		private var statusTimer:Timer;
 		private var over:Boolean = false;
 		
 		//---------------------------------------
@@ -89,6 +94,14 @@ package com.cleartext.ximpp.views.buddies
 			customContextMenu.addEventListener(Event.DISPLAYING, displayContextMenu);
 			
 			contextMenu = customContextMenu;
+			
+			statusTimer = new Timer(60000);
+			statusTimer.addEventListener(TimerEvent.TIMER, statusTimerHandler);
+		}
+		
+		private function statusTimerHandler(event:TimerEvent):void
+		{
+			invalidateProperties();
 		}
 		
 		private function displayContextMenu(event:Event):void
@@ -131,12 +144,24 @@ package com.cleartext.ximpp.views.buddies
 			{
 				avatar.data = null;
 			}
-
-			invalidateProperties();
+			
+			buddyChangedHandler(null);
 		}
 		
 		private function buddyChangedHandler(event:BuddyEvent):void
 		{
+			if(!buddy || buddy.status.isOffline())
+			{
+				statusTimer.reset();
+				previousStatus = Status.OFFLINE;
+			}
+			else if(buddy.status.value != previousStatus)
+			{
+				statusTimer.reset();
+				statusTimer.start();
+				previousStatus = buddy.status.value;
+			}
+			
 			invalidateProperties();
 			invalidateDisplayList();
 		}
@@ -223,14 +248,36 @@ package com.cleartext.ximpp.views.buddies
 		
 		override protected function commitProperties():void
 		{
+			super.commitProperties();
+
 			if(!buddy)
 				return;
 	
 			// set values
 			customStatusLabel.text = buddy.customStatus;
 			nameLabel.text = buddy.nickName;
-			statusLabel.text = buddy.status.value;
 			statusIcon.status.value = buddy.status.value;
+			
+			if(buddy.status.isOffline())
+			{
+				statusLabel.text = buddy.status.value;
+			}
+			else
+			{
+				var extraText:String = " for ";
+				var mins:int = statusTimer.currentCount;
+				
+				if(mins == 0)
+					extraText += " < 1 minute";
+				else if(mins < 60)
+					extraText += mins + " minutes";
+				else if(mins < 1440)
+					extraText += Math.floor(mins/60) + " hours";
+				else
+					extraText += Math.floor(mins/1400) + " days";
+				
+				statusLabel.text = buddy.status.value + extraText;
+			}
 			
 			// What height we should be depends if there is a custom
 			// status to show. If there is no custom status, then make
@@ -284,7 +331,7 @@ package com.cleartext.ximpp.views.buddies
 				alpha = 1;
 			}
 
-			statusIcon.x = width - PADDING - StatusIcon.SIZE;
+			statusIcon.x = width - 2*PADDING - StatusIcon.SIZE;
 			
 			var maxWidth:Number = width - AVATAR_SIZE - StatusIcon.SIZE - 4*PADDING - LEFT_PADDING;
 			nameLabel.setActualSize(maxWidth, nameLabel.textHeight);
