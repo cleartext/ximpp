@@ -13,6 +13,7 @@
 <applications>
 <application path="ximpp.mxml"/>
 <application path="com/cleartext/ximpp/tests/VariableList.mxml"/>
+<application path="LinkTest.mxml"/>
 </applications>
 <modules/>
 <buildCSSFiles/>

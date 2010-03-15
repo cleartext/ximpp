@@ -9,6 +9,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Status;
+			import mx.formatters.SwitchSymbolFormatter;
 			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import mx.controls.Alert;
@@ -39,6 +41,17 @@
 				
 				xmpp.modifyRosterItem(buddy);
 				
+				if(subscribeYes.selected && !buddy.subscribedTo)
+					// start subscribing
+					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
+				else if(subscribeNo.selected && buddy.subscribedTo)
+					// stop subscribing
+					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBE);
+				
+				if(publishNo.selected && buddy.publishTo)
+					// stop publishing
+					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBED);
+				
 				closeWindow();
 			}
 			
@@ -53,10 +66,24 @@
 				jid.text = buddy.jid;
 				nickname.text = buddy.nickName;
 				avatar.data = buddy;
-				subscription.text = buddy.subscription;
 				groups.enabled = !buddy.isGateway && !buddy.microBlogging;
-				groups.selectedItems = buddy.groups;
+				if(!buddy.microBlogging)
+					groups.selectedItems = buddy.groups;
 				avatar.buttonMode = (buddy.avatarHash == "" || buddy.avatarHash == null);
+				
+				if(buddy.subscribedTo)
+					subscribeYes.selected = true;
+				else
+					subscribeNo.selected = true;
+				
+				if(buddy.publishTo)
+					publishYes.selected = true;
+				else
+				{
+					publishYes.enabled = false;
+					publishYes.toolTip = "they have to request to see you online";
+					publishNo.selected = true;
+				}
 			}
 			
 			private function changeAvatar():void
@@ -102,12 +129,27 @@
 			<mx:Label id="jid" />
 		</mx:FormItem>
 		
+		<mx:FormItem label="nickname:">
+			<mx:TextInput id="nickname" />
+		</mx:FormItem>
+
 		<mx:FormItem label="avatar:">
 			<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editClicked="changeAvatar()"/>
 		</mx:FormItem>
 
 		<mx:FormItem label="subscription:">
-			<mx:Label id="subscription" />
+			<mx:HBox>
+				<mx:RadioButtonGroup id="subscribe" />
+				<mx:RadioButton id="subscribeYes" label="yes" groupName="subscribe" paddingTop="0"/>
+				<mx:RadioButton id="subscribeNo" label="no"  groupName="subscribe" paddingTop="0"/>
+				<mx:Label text="ask to see when they are online" />
+			</mx:HBox>
+			<mx:HBox>
+				<mx:RadioButtonGroup id="publish" />
+				<mx:RadioButton id="publishYes" label="yes" groupName="publish" paddingTop="0"/>
+				<mx:RadioButton id="publishNo" label="no"  groupName="publish" paddingTop="0"/>
+				<mx:Label text="let them see when you are online" />
+			</mx:HBox>
 		</mx:FormItem>
 
 		<mx:FormItem label="groups:">
@@ -117,10 +159,6 @@
 				allowMultipleSelection="true" 
 				dataProvider="{buddies.groups}" 
 				width="210" height="120"/>
-		</mx:FormItem>
-
-		<mx:FormItem label="nickname:">
-			<mx:TextInput id="nickname" />
 		</mx:FormItem>
 
 	</mx:Form>

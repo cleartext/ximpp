@@ -26,20 +26,13 @@ package com.universalsprout.flex.components.list
 		}
 		
 		public var animate:Boolean = true;
+		public var virtualList:Boolean = true;
 		
 		protected var collection:ListCollectionView;
-	
 		protected var list:IList;
-		
 		protected var itemRenderersByDataUid:Dictionary = new Dictionary();
 	
 		protected var resetItemRenderers:Boolean = true;
-		
-		protected var previousWidth:Number = 0;
-		
-		protected var highlightChanged:Boolean = false;
-		
-		public var virtualList:Boolean = true;
 		
 		protected var bottomOfListComponent:UIComponent;
 		
@@ -119,21 +112,14 @@ package com.universalsprout.flex.components.list
 		protected function listChangedHandler(event:Event):void
 		{
 			if(list)
-				list.removeEventListener(CollectionEvent.COLLECTION_CHANGE, listCollectionChangeHandler);
+				list.removeEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler);
 			
 			list = collection.list;
 			
 			if(list)
-				list.addEventListener(CollectionEvent.COLLECTION_CHANGE, listCollectionChangeHandler, false, 0, true);
+				list.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler, false, 0, true);
 		}
 	
-	   /**
-		 *  Handles CollectionEvents dispatched from the data provider
-		 *  as the data changes.
-		 *  Updates the renderers, selected indices and scrollbars as needed.
-		 *
-		 *  @param event The CollectionEvent.
-		 */
 		protected function collectionChangeHandler(event:CollectionEvent):void
 		{
 			if(event.kind == CollectionEventKind.RESET)
@@ -146,20 +132,7 @@ package com.universalsprout.flex.components.list
 				invalidateDisplayList();
 			}
 		}
-		
-		protected function listCollectionChangeHandler(event:CollectionEvent):void
-		{
-			if(event.kind == CollectionEventKind.RESET)
-			{
-				resetItemRenderers = true;
-				invalidateProperties();
-			}
-			else
-			{
-				invalidateDisplayList();
-			}
-		}
-		
+				
 		override protected function createChildren():void
 		{
 			super.createChildren();
@@ -178,14 +151,11 @@ package com.universalsprout.flex.components.list
 		{
 			super.commitProperties();
 			
-			var item:ISproutListItem;
-			var data:ISproutListData;
-
 			if(resetItemRenderers)
 			{
 				resetItemRenderers = false;
 				
-				for each(item in itemRenderersByDataUid)
+				for each(var item:ISproutListItem in itemRenderersByDataUid)
 				{
 					delete itemRenderersByDataUid[item.data.uid];
 					item.removeEventListener(ResizeEvent.RESIZE, itemsResizeHandler);
@@ -196,7 +166,7 @@ package com.universalsprout.flex.components.list
 			}
 		}
 		
-		private function itemsResizeHandler(event:ResizeEvent):void
+		protected function itemsResizeHandler(event:ResizeEvent):void
 		{
 			invalidateDisplayList();
 		}

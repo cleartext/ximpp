@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.views.common
 {
-	import com.adobe.protocols.dict.events.ConnectedEvent;
+	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.XMPPModel;
@@ -48,18 +48,27 @@ package com.cleartext.ximpp.views.common
 		{
 			if(_data != value)
 			{
+				if(buddy)
+					buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				
 				_data = value;
 				
 				if(buddy)
 				{
+					buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
 					if(buddy.avatar && image)
 						image.source = new Bitmap(buddy.avatar);
 					else
 						icon = Constants.DefaultGroupIcon;
 					
-					text = buddy.nickName;
+					buddyChangedHandler(null);
 				}
 			}
+		}
+
+		private function buddyChangedHandler(event:BuddyEvent):void
+		{
+			text = buddy.nickName;
 		}
 
 		public function get buddy():Buddy

@@ -1,13 +1,12 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.models.ApplicationModel;
+	import com.cleartext.ximpp.models.LinkUitls;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
-	
-	import flash.utils.getTimer;
 	
 	import mx.core.UITextField;
 	import mx.formatters.DateFormatter;
@@ -67,7 +66,7 @@ package com.cleartext.ximpp.views.messages
 				dateTextField.width = dateTextField.textWidth + padding*2;
 				dateTextField.styleName = (fromThisUser) ? "lGreySmall" : "blackSmall";
 
-				bodyTextField.text = message.body;
+				bodyTextField.htmlText = LinkUitls.createLinks(message.body);
 				bodyTextField.styleName = (fromThisUser) ? "lGreyNormal" : "blackNormal";
 			}
 					

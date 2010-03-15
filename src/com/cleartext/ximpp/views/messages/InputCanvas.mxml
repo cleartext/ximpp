@@ -4,6 +4,12 @@
 	clipContent="false">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.UrlShortener;
+			import com.cleartext.ximpp.models.DatabaseModel;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.ShortenURL;
+			import com.cleartext.ximpp.models.LinkResult;
+			import com.cleartext.ximpp.models.LinkUitls;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.events.SendButtonEvent;
@@ -21,9 +27,20 @@
 			[Bindable]
 			public var buddy:Buddy;
 			
+			[Bindable]
+			public var shortening:Boolean = false;
+			
 			[Autowire]
 			[Bindable]
 			public var xmpp:XMPPModel;
+			
+			[Autowire]
+			[Bindable]
+			public var settings:SettingsModel;
+			
+			[Autowire]
+			[Bindable]
+			public var database:DatabaseModel;
 			
 			private function input_keyDownHandler(event:KeyboardEvent):void
 			{ 	
@@ -71,6 +88,47 @@
 				if(inputTextArea.enabled)
 					inputTextArea.setFocus();
 			}
+
+			private function shorten(str:String=" "):void
+			{
+				if(!shortenUrls.selected || shortening || (str.length==1 && str != " "))
+					return;
+				
+				var results:Array = LinkUitls.findLinks(LinkUitls.escapeHTML(inputTextArea.text + str));
+				for each(var lr:LinkResult in results)
+				{
+					if(lr.validLink.indexOf("http://" + settings.global.urlShortener) != 0)
+					{
+						shortening = true;
+						var shortener:UrlShortener = new UrlShortener();
+						shortener.shorten(lr.validLink, settings.global.urlShortener, 
+							function(shortURL:String):void
+							{
+								if(!shortening)
+									return;
+
+								shortening = false;
+ 								inputTextArea.text = inputTextArea.text.substr(0, lr.index) + shortURL + inputTextArea.text.substr(lr.index + lr.originalLink.length);
+								var lengthChange:int = shortURL.length - lr.originalLink.length;
+								inputTextArea.setSelection(inputTextArea.selectionBeginIndex+lengthChange, inputTextArea.selectionEndIndex+lengthChange);
+								shorten();
+							});
+						return;
+					}
+				}
+			}
+			
+			private function shortenURLsClickHandler():void
+			{
+				settings.global.autoShortenUrls = shortenUrls.selected;
+				database.saveGlobalSettings();
+				
+				if(shortenUrls.selected)
+					shorten();
+				else
+					// cancel any shortening that has started
+					shortening = false;
+			}
 			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
@@ -102,17 +160,39 @@
 		]]>
 	</mx:Script>
 	
-	<common:StatusIcon statusString="{buddy.status.value}" x="10" y="6"  visible="{!buddy.isTyping}"/>
+	<common:StatusIcon
+		statusString="{buddy.status.value}" 
+		x="10" y="6"  
+		visible="{!buddy.isTyping}"/>
 	
-	<mx:Image source="{Constants.IsTyping}" x="10" y="6" visible="{buddy.isTyping}"/>
+	<mx:Image 
+		source="{Constants.IsTyping}" 
+		x="10" y="6" 
+		visible="{buddy.isTyping}"/>
 	
-	<mx:Label text="{buddy.nickName}" x="28" y="6" styleName="blackBold"/>
+	<mx:Label 
+		text="{buddy.nickName}" 
+		x="28" y="6" 
+		styleName="blackBold"/>
 	
+	<mx:Label
+		text="shortening.." 
+		right="266" y="6" 
+		styleName="dGreyNormal" 
+		visible="{shortening}"/>
+
+	<mx:VRule right="258" height="17" y="4" visible="{buddy.microBlogging}"/>		
+
 	<mx:CheckBox 
 		label="auto-shorten urls" 
 		id="shortenUrls" 
-		y="6" right="130" 
+		y="11" right="130"
+		selected="{settings.global.autoShortenUrls}"
+		click="shortenURLsClickHandler()"
+		paddingTop="-8" 
 		visible="{buddy.microBlogging}"/>
+		
+	<mx:VRule right="122" height="17" y="4" visible="{buddy.microBlogging}"/>		
 
 	<mx:Label
 		text="{inputTextArea.text.length + ' Characters'}" 
@@ -128,6 +208,7 @@
 		enabled="{!(!buddy || !xmpp.connected || buddy.status.isOffline())}"
 		focusRoundedCorners="bl br" 
 		cornerRadius="{CORNER_RADIUS}"
+		textInput="shorten(event.text)" 
 		paddingRight="20"
 		paddingLeft="10"
 		paddingBottom="3"

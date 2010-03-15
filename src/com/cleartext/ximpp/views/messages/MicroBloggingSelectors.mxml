@@ -6,6 +6,9 @@
 	creationComplete="init()">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Chat;
+			import com.cleartext.ximpp.events.ChatEvent;
+			import mx.collections.ArrayCollection;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import mx.events.CollectionEvent;
@@ -36,7 +39,6 @@
 			private function init():void
 			{
 				buddies.microBloggingBuddies.addEventListener(CollectionEvent.COLLECTION_CHANGE, microBloggingChanged);
-//				microBlogging.buddies.addEventListener(CollectionEvent.COLLECTION_CHANGE, microBloggingChanged);
 				microBloggingChanged(null);
 			}
 			
@@ -44,11 +46,12 @@
 			{
 				var button:SideButton;
 				
-				for each(button in mbButtons)
-				{
-					button.visible = button.includeInLayout = false;
-				}
+				var buttonsToRemove:Dictionary = new Dictionary();
 				
+				for each(button in mbButtons)
+					buttonsToRemove[button.uid] = button;
+				
+				var childIndex:int = 1;
 				for each(var buddy:Buddy in buddies.microBloggingBuddies)
 				{
 					button = mbButtons[buddy.jid] as SideButton;
@@ -60,28 +63,28 @@
 						button.expandRight = false;
 						button.data = buddy;
 						button.addEventListener(MouseEvent.CLICK, clickHandler);
-						addChildAt(button, numChildren-1);
+						addChildAt(button, childIndex);
 					}
 					else
 					{
-						button.visible = button.includeInLayout = true;
+						delete buttonsToRemove[button.uid];
+						setChildIndex(button, childIndex);
 					}
+					childIndex++;
 				}
 
-				for each(button in mbButtons)
+				for each(button in buttonsToRemove)
 				{
-					if(!button.visible)
-					{
-						removeChild(button);
-						delete mbButtons[button.data.jid];
-					}
+					removeChild(button);
+					delete mbButtons[button.data.jid];
 				}
 			}
 			
 			private function clickHandler(event:MouseEvent):void
 			{
 				var buddy:Buddy = event.target.data as Buddy;
-				appModel.getChat(buddy);
+				var chat:Chat = appModel.getChat(buddy);
+				Swiz.dispatchEvent(new ChatEvent(ChatEvent.SELECT_CHAT, chat));
 			}
 
 		]]>

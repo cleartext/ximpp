@@ -200,20 +200,14 @@ package com.cleartext.ximpp.models
 			return buddies.getBuddyByJid(jid);
 		}
 				
-		public function getChat(buddy:Buddy, select:Boolean=true):Chat
+		public function getChat(buddy:Buddy):Chat
 		{
 			if(!buddy)
 				return null;
 			
 			for each(var c:Chat in chats)
-			{
 				if(c.buddy.jid == buddy.jid)
-				{
-					if(select)
-						Swiz.dispatchEvent(new ChatEvent(ChatEvent.SELECT_CHAT, c));
 					return c;
-				}
-			}
 
 			var chat:Chat = new Chat(buddy);
 			chat.messages = database.loadMessages(buddy);

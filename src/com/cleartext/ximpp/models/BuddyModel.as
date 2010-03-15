@@ -106,8 +106,11 @@ package com.cleartext.ximpp.models
 			microBloggingBuddies.sort = sort;
 			microBloggingBuddies.refresh();
 			
-			groups.sort = new Sort();
+			sort = new Sort();
+			sort.fields = [new SortField("toString",true)];
+			groups.sort = sort;
 			groups.refresh();
+			
 		}
 		
 		public function addBuddy(buddy:Buddy):void

@@ -36,11 +36,12 @@
 			{
 				var button:SideButton;
 				
-				for each(button in groupButtons)
-				{
-					button.visible = button.includeInLayout = false;
-				}
+				var buttonsToRemove:Dictionary = new Dictionary();
 				
+				for each(button in groupButtons)
+					buttonsToRemove[button.text] = button;
+				
+				var childIndex:int = 3;
 				for each(var group:String in buddies.groups)
 				{
 					button = groupButtons[group] as SideButton;
@@ -52,21 +53,20 @@
 						button.text = group;
 						button.icon = Constants.DefaultGroupIcon;
 						button.addEventListener(MouseEvent.CLICK, clickHandler);
-						addChildAt(button, numChildren-3);
+						addChildAt(button, childIndex);
 					}
 					else
 					{
-						button.visible = button.includeInLayout = true;
+						setChildIndex(button, childIndex);
+						delete buttonsToRemove[button.text];
 					}
+					childIndex++;
 				}
 
-				for each(button in groupButtons)
+				for each(button in buttonsToRemove)
 				{
-					if(!button.visible)
-					{
-						removeChild(button);
-						delete groupButtons[button.text];
-					}
+					removeChild(button);
+					delete groupButtons[button.text];
 				}
 			}
 			

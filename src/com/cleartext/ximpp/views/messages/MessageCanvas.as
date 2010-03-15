@@ -159,12 +159,12 @@ package com.cleartext.ximpp.views.messages
 				message.body = messageString;
 				message.timestamp = new Date();
 				
-				var c:Chat = appModel.getChat(buddy, false);
+				var c:Chat = appModel.getChat(buddy);
 				c.messages.addItemAt(message,0);
 				
 				if(buddy.microBlogging)
 				{
-					c = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, false);
+					c = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
 					c.messages.addItemAt(message,0);
 				}
 
@@ -392,7 +392,7 @@ package com.cleartext.ximpp.views.messages
 			
 		private function avatarClickHandler(event:MouseEvent):void
 		{
-			setCurrentChat((event.target as AvatarTab).chat);
+			setCurrentChat((event.currentTarget as AvatarTab).chat);
 		}
 		
 		private function moveAvatar(avatarIndex:int, position:int, animate:Boolean=true):void

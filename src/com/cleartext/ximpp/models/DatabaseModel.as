@@ -358,7 +358,8 @@ package com.cleartext.ximpp.models
 				firstTemp.refresh();
 				
 				var secondTemp:ArrayCollection = new ArrayCollection();
-				for(var index:int=0; index<settings.global.numTimelineMessages; index++)
+				var numTimeline:int = Math.min(firstTemp.length, settings.global.numTimelineMessages);
+				for(var index:int=0; index<numTimeline; index++)
 					secondTemp.addItem(firstTemp.getItemAt(index));
 				
 				return secondTemp;

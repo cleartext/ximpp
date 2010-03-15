@@ -22,6 +22,9 @@ package com.cleartext.ximpp.models.valueObjects
 		public var showOfflineBuddies:Boolean;
 		
 		[Bindable]
+		public var autoShortenUrls:Boolean;
+
+		[Bindable]
 		public var animateBuddyList:Boolean;
 
 		[Bindable]
@@ -43,6 +46,7 @@ package com.cleartext.ximpp.models.valueObjects
 			{
 				var xml:XML = new XML(obj["xml"] as String);
 				newGlobalSettings.autoConnect = xml.@autoConnect == "true";
+				newGlobalSettings.autoShortenUrls = xml.@autoShortenUrls == "true";
 				newGlobalSettings.urlShortener = xml.@urlShortener;
 				newGlobalSettings.animateBuddyList = xml.@animateBuddyList == "true";
 				newGlobalSettings.animateMessageList = xml.@animateMessageList == "true";
@@ -55,6 +59,7 @@ package com.cleartext.ximpp.models.valueObjects
 			else
 			{
 				newGlobalSettings.autoConnect = true;
+				newGlobalSettings.autoShortenUrls = true;
 				newGlobalSettings.animateBuddyList = true;
 				newGlobalSettings.animateMessageList = true;
 				newGlobalSettings.showOfflineBuddies = true;
@@ -82,6 +87,7 @@ package com.cleartext.ximpp.models.valueObjects
 			var xml:XML = <globalSettings
 				autoConnect={autoConnect} 
 				urlShortener={urlShortener} 
+				autoShortenUrls={autoShortenUrls}
 				animateBuddyList={animateBuddyList} 
 				animateMessageList={animateMessageList} 
 				numChatMessages={numChatMessages} 

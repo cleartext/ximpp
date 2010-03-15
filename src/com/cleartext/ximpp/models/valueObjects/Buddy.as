@@ -3,7 +3,6 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.StatusEvent;
 	import com.cleartext.ximpp.models.AvatarUtils;
-	import com.cleartext.ximpp.models.BuddyModel;
 	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
@@ -191,6 +190,18 @@ package com.cleartext.ximpp.models.valueObjects
 				_unreadMessageCount = value;
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
+		}
+		
+		// are we subscribed to this buddies status updates?
+		public function get subscribedTo():Boolean
+		{
+			return (subscription==SubscriptionTypes.TO || subscription==SubscriptionTypes.BOTH); 
+		}
+		
+		// are we publishing our status updates to this buddy?
+		public function get publishTo():Boolean
+		{
+			return (subscription==SubscriptionTypes.FROM || subscription==SubscriptionTypes.BOTH); 
 		}
 		
 		// the current resource this buddy is using

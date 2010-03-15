@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="nativeWindow.maximize(); process()">
+	<mx:Script>
+		<![CDATA[
+			import com.seesmic.as3.xmpp.StreamEvent;
+			import com.cleartext.ximpp.models.ShortenURL;
+			import com.cleartext.ximpp.models.LinkResult;
+
+			import com.cleartext.ximpp.models.LinkUitls;
+			
+			[Bindable]
+			public var shortening:Boolean = false;
+			
+			private function process():void
+			{
+				var linkText:String = LinkUitls.createLinks(input.text);
+				console.text = linkText;
+				output.htmlText = linkText;
+			}
+			
+			private function shorten(str:String=" "):void
+			{
+				if(!autoShorten.selected || shortening || (str.length==1 && str != " "))
+					return;
+				
+				var results:Array = LinkUitls.findLinks(LinkUitls.escapeHTML(input.text + str));
+				for each(var lr:LinkResult in results)
+				{
+					if(lr.validLink.indexOf("http://bit.ly") != 0)
+					{
+						shortening = true;
+						var s:ShortenURL = new ShortenURL();
+						s.call(lr.validLink,
+							function(shortURL:String):void
+							{
+								if(!shortening)
+									return;
+
+								shortening = false;
+ 								input.text = input.text.substr(0, lr.index) + shortURL + input.text.substr(lr.index + lr.originalLink.length);
+								var lengthChange:int = shortURL.length - lr.originalLink.length;
+								input.setSelection(input.selectionBeginIndex+lengthChange, input.selectionEndIndex+lengthChange);
+								input.dispatchEvent(new Event(Event.CHANGE));
+								shorten();
+							});
+						return;
+					}
+				}
+			}
+
+		]]>
+	</mx:Script>
+
+	<mx:VDividedBox top="10" bottom="10" left="10" right="10">
+		
+	<mx:Canvas height="100%" width="100%">
+		<mx:Label text="input"/>
+		<mx:CheckBox id="autoShorten" label="auto-shorten urls?" labelPlacement="right" x="60" change="shorten()"/>
+		<mx:Label text="shortening..." x="200" visible="{shortening}"/>
+		<mx:TextArea id="input" y="30" height="100%" width="100%" textInput="shorten(event.text)" change="process()" text="a few bits of text then a link.com and an ftp://www.ftp.com and an https://mysecurething.com.au/page.html?p=32#anchor then some more text." />
+	</mx:Canvas>
+
+	<mx:Canvas height="100%" width="100%">
+		<mx:Label text="trace html text"/>
+		<mx:TextArea id="console" y="30" height="100%" width="100%" />
+	</mx:Canvas>
+
+	<mx:Canvas height="100%" width="100%">
+		<mx:Label text="display text"/>
+		<mx:TextArea id="output" y="30" height="100%" width="100%" />
+	</mx:Canvas>
+
+	</mx:VDividedBox>
+
+</mx:WindowedApplication>

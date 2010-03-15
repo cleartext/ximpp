@@ -203,13 +203,13 @@ package com.cleartext.ximpp.models
 			buddy.resource = event.stanza.from.resource;
 			buddy.unreadMessageCount++;
 
-			var chat:Chat = appModel.getChat(buddy, false);
+			var chat:Chat = appModel.getChat(buddy);
 			chat.messages.addItemAt(message,0);
 			
 			if(buddy.microBlogging)
 			{
 				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessageCount++;
-				chat = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, false);
+				chat = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
 				chat.messages.addItemAt(message, 0);
 			}
 
