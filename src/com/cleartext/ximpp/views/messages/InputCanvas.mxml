@@ -205,7 +205,7 @@
 		defaultText="type message here..."
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
 		keyDown="input_keyDownHandler(event)"
-		enabled="{!(!buddy || !xmpp.connected || buddy.status.isOffline())}"
+		enabled="{!(!buddy || !xmpp.connected)}"
 		focusRoundedCorners="bl br" 
 		cornerRadius="{CORNER_RADIUS}"
 		textInput="shorten(event.text)" 

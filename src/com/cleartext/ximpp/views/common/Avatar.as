@@ -134,7 +134,7 @@ package com.cleartext.ximpp.views.common
 		
 		private var showEditIcon:Boolean = false;
 		private var buttonModeChanged:Boolean = false;
-		
+		[Inspectable]
 		override public function get buttonMode():Boolean
 		{
 			return super.buttonMode;

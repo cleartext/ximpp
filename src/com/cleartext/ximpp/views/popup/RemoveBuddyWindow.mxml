@@ -22,7 +22,7 @@
 			
 			override protected function submit(event:Event):void
 			{
-				xmpp.removeFromRoster(buddy.jid, stopPublishingStatus.selected)
+				xmpp.removeFromRoster(buddy.jid, (buddy.subscribedTo && stopPublishingStatus.selected) ? SubscriptionTypes.UNSUBSCRIBED : null)
 				closeWindow();
 			}
 			
@@ -35,9 +35,8 @@
 		<mx:FormItem>
 			<mx:CheckBox
 				id="stopPublishingStatus"
-				visible="{buddy.subscription == SubscriptionTypes.BOTH || buddy.subscription == SubscriptionTypes.FROM}"
 				selected="true" 
-				label="{'don\'t allow them to see when you are online?'}" 
+				label="{'don\'t allow ' + buddy.nickName + ' to see when you are online'}" 
 				labelPlacement="right"/>
 		</mx:FormItem>
 

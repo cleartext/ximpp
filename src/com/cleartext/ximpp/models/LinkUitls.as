@@ -62,7 +62,7 @@ package com.cleartext.ximpp.models
 			// find at least 2 non-whitespace chars, then a "." then a valid tld
 			// then either an end of word, or a "/" followed by any amount of 
 			// non-whitespace chars 
-			var regex:RegExp = new RegExp('\\b[^\\s]{1,}\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b',"ig");
+			var regex:RegExp = new RegExp('\\b[^\\s]{1,}\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b/?',"ig");
 			// $& returns the match from the regex
 			var linkText:String = plainText.replace(regex, startTag + '$&">$&' + endTag);
 			

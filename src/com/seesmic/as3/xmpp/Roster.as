@@ -32,10 +32,21 @@ package com.seesmic.as3.xmpp
 		}
 		
 		public function updatePresence(jid:JID, type:String, status:String='', priority:String=null):void {
+			
+			/**
+			 * astewart@cleartext.com
+			 * needs to find bareJid before calling items.hasOwnProperty(bareJid);
+			 * Old:
+				if(!items.hasOwnProperty(barejid)) {
+					newItem(jid);
+				}
+				var barejid:String = jid.getBareJID();
+			 */
+
+			var barejid:String = jid.getBareJID();
 			if(!items.hasOwnProperty(barejid)) {
 				newItem(jid);
 			}
-			var barejid:String = jid.getBareJID();
 			var resource:String = jid.getResource();
 			items[barejid]['presence'][resource] = new Dictionary();
 			items[barejid]['presence'][resource]['type'] = type;

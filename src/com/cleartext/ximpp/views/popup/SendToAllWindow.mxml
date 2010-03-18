@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Confirm Post To All Micro Blogging"
+	submitButtonLabel="Send"
+	isValid="true">
+	
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
+			import com.cleartext.ximpp.models.BuddyModel;
+			import com.cleartext.ximpp.models.types.SubscriptionTypes;
+			import mx.events.CloseEvent;
+			import com.cleartext.ximpp.models.XMPPModel;
+			import com.cleartext.ximpp.models.DatabaseModel;
+			import com.cleartext.ximpp.models.SettingsModel;
+			import com.cleartext.ximpp.models.ApplicationModel;
+
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			override protected function submit(event:Event):void
+			{
+				closeWindow();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Form>
+		<mx:Text text="send to the following services:" />
+		
+		<mx:FormItem label="services:">
+			<mx:Label text="use ctrl/cmd to select more than one" />
+			<mx:List id="groups" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
+		</mx:FormItem>
+	</mx:Form>
+	
+	<mx:ControlBar />
+
+</popup:PopupWindowBase>

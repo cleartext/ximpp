@@ -1,10 +1,12 @@
 package com.cleartext.ximpp.views.buddies
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
@@ -58,7 +60,8 @@ package com.cleartext.ximpp.views.buddies
 			addEventListener(MouseEvent.DOUBLE_CLICK,
 				function():void
 				{
-					appModel.getChat(buddy);
+					var chat:Chat = appModel.getChat(buddy);
+					Swiz.dispatchEvent(new ChatEvent(ChatEvent.SELECT_CHAT, chat));
 				});
 			addEventListener(MouseEvent.ROLL_OUT,
 				function():void
@@ -139,10 +142,6 @@ package com.cleartext.ximpp.views.buddies
 				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
 				if(avatar)
 					avatar.data = buddy;
-			}
-			else
-			{
-				avatar.data = null;
 			}
 			
 			buddyChangedHandler(null);
@@ -269,6 +268,8 @@ package com.cleartext.ximpp.views.buddies
 				
 				if(mins == 0)
 					extraText += " < 1 minute";
+				else if(mins == 1)
+					extraText += " 1 minute";
 				else if(mins < 60)
 					extraText += mins + " minutes";
 				else if(mins < 1440)

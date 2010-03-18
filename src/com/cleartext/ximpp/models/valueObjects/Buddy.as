@@ -7,7 +7,8 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
-	import flash.display.BitmapData;;
+	import flash.display.BitmapData;
+	import flash.events.Event;;
 
 	[Event(name="changed", type="com.cleartext.ximpp.events.BuddyEvent")]		
 
@@ -169,9 +170,23 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 
+		private var _subscription:String = SubscriptionTypes.NONE;
+		[Bindable(event="buddyChanged")]
+		public function get subscription():String
+		{
+			return _subscription;
+		}
+		public function set subscription(value:String):void
+		{
+			_subscription = value;
+			if(!subscribedTo)
+				status.value = Status.UNSUBSCRIBED;
+			
+			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+		}
+			
 		public var avatarHash:String;
 		public var groups:Array = new Array();
-		public var subscription:String = SubscriptionTypes.NONE;
 		
 		//------------------------------------
 		// not storred in database 

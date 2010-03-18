@@ -142,7 +142,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public function isOffline():Boolean
 		{
-			return sortNumber() > 5;
+			return sortNumber() > 4;
 		}
 	}
 }

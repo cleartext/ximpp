@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.BuddyNotInRosterWindow;
 			import com.cleartext.ximpp.views.popup.AddMicroBloggingWindow;
 			import com.cleartext.ximpp.views.popup.AddGatewayWindow;
 			import com.cleartext.ximpp.views.popup.AddBuddyWindow;
@@ -75,7 +76,7 @@
 			public function showRemoveGroupWindow(event:PopUpEvent):void
 			{
 				var window:RemoveGroupWindow = new RemoveGroupWindow();
-				window.groupName = event.dataString;
+				window.groupName = event.group;
 				initializePopUp(window);
 			}
 
@@ -83,19 +84,24 @@
 			public function showEditGroupWindow(event:PopUpEvent):void
 			{
 				var window:EditGroupWindow = new EditGroupWindow();
-				window.groupName = event.dataString;
+				window.groupName = event.group;
 				initializePopUp(window);
 			}
 
 			[Mediate(event="PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW")]
 			public function showSubscriptionRequest(event:PopUpEvent):void
 			{
-				var buddyExists:Boolean = buddies.containsJid(event.dataString);
-
 				var window:SubscriptionRequestWindow = new SubscriptionRequestWindow();
-				window.fromJid = event.dataString;
-				window.addToRoster = !buddyExists;
 				initializePopUp(window);
+				window.buddy = event.buddy;
+			}
+
+			[Mediate(event="PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW")]
+			public function showBuddyNotInRostert(event:PopUpEvent):void
+			{
+				var window:BuddyNotInRosterWindow = new BuddyNotInRosterWindow();
+				initializePopUp(window);
+				window.buddy = event.buddy;
 			}
 
 			[Mediate(event="PopUpEvent.EDIT_BUDDY_WINDOW")]

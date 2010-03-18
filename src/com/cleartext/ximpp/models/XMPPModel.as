@@ -193,9 +193,7 @@ package com.cleartext.ximpp.models
 			if(!buddy)
 			{
 				buddy = new Buddy(message.sender);
-				buddies.addBuddy(buddy);
-				
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW, null, buddy));
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW, null, buddy));
 			}
 			
 			buddy.lastSeen = message.timestamp;
@@ -237,6 +235,7 @@ package com.cleartext.ximpp.models
 
 			var stanza:PresenceStanza = event.stanza as PresenceStanza;
 			var fromJid:String = stanza.from.getBareJID();
+			var buddy:Buddy = appModel.getBuddyByJid(fromJid);
 			
 			if(fromJid == settings.userAccount.jid)
 			{
@@ -246,15 +245,15 @@ package com.cleartext.ximpp.models
 			// "subscribed" are handled below
 			else if(stanza.type == SubscriptionTypes.SUBSCRIBE)
 			{
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW, fromJid));
+				if(!buddy)
+					buddy = new Buddy(fromJid);
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW, null, buddy));
 			}
 			else
 			{
-				var buddy:Buddy = appModel.getBuddyByJid(fromJid);
-				
 				if(!buddy)
 				{
-					appModel.log("Received presence of type " + stanza.type + " from " + fromJid + " but buddy does not exist.");	
+					Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW, null, new Buddy(fromJid)));
 					return;
 				}
 				
@@ -291,7 +290,7 @@ package com.cleartext.ximpp.models
 			if(connected && !gotRosterList)
 				return;
 			
-			appModel.log("rosterListChangedHandler");
+			appModel.log("rosterListChangeHandler");
 			
 			var jid:String = event.stanza["jid"];
 
@@ -480,30 +479,30 @@ package com.cleartext.ximpp.models
 		// ADD TO ROSTER 
 		//-------------------------------
 		
-		public function addToRoster(toJid:String, subscribeToStatus:Boolean, groups:Array):void
+		public function addToRoster(toJid:String, nickName:String, groups:Array, newSubscription:String):void
 		{
 			sendIq(settings.userAccount.jid,
 					IQTypes.SET,
-					IQTypes.addRemoveRosterItem(toJid, false, groups),
+					IQTypes.addRemoveRosterItem(toJid, nickName, groups, false),
 					modifyRosterHandler);
 
-			if(subscribeToStatus)
-				sendSubscribe(toJid, SubscriptionTypes.SUBSCRIBE);
+			if(newSubscription)
+				sendSubscribe(toJid, newSubscription);
 		}
 		
 		//-------------------------------
 		// REMOVE FROM ROSTER
 		//-------------------------------
 		
-		public function removeFromRoster(toJid:String, stopPublishingStatus:Boolean):void
+		public function removeFromRoster(toJid:String, newSubscription:String):void
 		{
 			sendIq(settings.userAccount.jid, 
 					IQTypes.SET,
-					IQTypes.addRemoveRosterItem(toJid, true),
+					IQTypes.addRemoveRosterItem(toJid, null, null, true),
 					modifyRosterHandler);
 					
-			if(stopPublishingStatus)
-				sendSubscribe(toJid, SubscriptionTypes.UNSUBSCRIBED);
+			if(newSubscription)
+				sendSubscribe(toJid, newSubscription);
 		}
 
 		//-------------------------------

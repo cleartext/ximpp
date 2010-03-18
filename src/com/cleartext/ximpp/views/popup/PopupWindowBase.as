@@ -95,7 +95,7 @@ package com.cleartext.ximpp.views.popup
 			// override me
 		}
 		
-		protected function validateInput(event:Event, message:String="cannot be empty"):void
+		public function validateInput(event:Event, message:String="can not be empty"):void
 		{
 			var target:UIComponent = event.currentTarget as UIComponent;
 			

@@ -11,6 +11,8 @@ package com.cleartext.ximpp.events
 
 		public static const SUBSCRIPTION_REQUEST_WINDOW:String = "subscriptionRequestWindow";
 
+		public static const BUDDY_NOT_IN_ROSTER_WINDOW:String = "buddyNotInRosterWindow";
+
 		public static const ADD_GATEWAY_WINDOW:String = "addGatewayWindow";
 
 		public static const ADD_BUDDY_WINDOW:String = "addBuddyWindow";
@@ -22,22 +24,20 @@ package com.cleartext.ximpp.events
 		public static const DELETE_GROUP_WINDOW:String = "deleteGroupWindow";
 
 		public static const ADD_MICRO_BLOGGING_WINDOW:String = "addMicroBloggingWindow";
-//		public static const EDIT_MICRO_BLOGGING_WINDOW:String = "editMicroBloggingWindow";
-//		public static const DELETE_MICRO_BLOGGING_WINDOW:String = "deleteMicroBloggingWindow";
 		
-		public var dataString:String;
+		public var group:String;
 		public var buddy:Buddy;
 		
-		public function PopUpEvent(type:String, dataString:String="", buddy:Buddy=null, bubbles:Boolean=false, cancelable:Boolean=false)
+		public function PopUpEvent(type:String, group:String="", buddy:Buddy=null, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
-			this.dataString = dataString;
+			this.group = group;
 			this.buddy = buddy;
 		}
 		
 		override public function clone():Event
 		{
-			return new PopUpEvent(type, dataString, buddy, bubbles, cancelable);
+			return new PopUpEvent(type, group, buddy, bubbles, cancelable);
 		}
 	}
 }

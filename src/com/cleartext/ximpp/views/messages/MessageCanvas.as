@@ -148,9 +148,6 @@ package com.cleartext.ximpp.views.messages
 
 			for each(var buddy:Buddy in buddiesToSendTo)
 			{
-				if(buddy.status.isOffline())
-					continue;
-
 				xmpp.sendMessage(buddy.fullJid, messageString);
 				
 				var message:Message = new Message();
