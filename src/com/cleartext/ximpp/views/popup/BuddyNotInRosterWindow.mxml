@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Message;
 			import flash.sampler.NewObjectSample;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.models.BuddyModel;
@@ -29,8 +30,6 @@
 			override protected function submit(event:Event):void
 			{
 				buddy.nickName = nickname.text;
-				if(!buddy.microBlogging)
-					buddy.groups = groups.selectedItems;
 				buddies.addBuddy(buddy);
 				buddies.refresh();
 				
@@ -50,14 +49,42 @@
 			public function set buddy(value:Buddy):void
 			{
 				_buddy = value;
-				explanationText.text = "You have received a message from " + buddy.nickName + ", do you want to add them to your buddy list?"
 				jid.text = buddy.jid;
 				nickname.text = buddy.nickName;
-				groups.enabled = !buddy.isGateway && !buddy.microBlogging;
-				if(!buddy.microBlogging)
-					groups.selectedItems = buddy.groups;
 
 				subscriptionPanel.buddy = buddy;
+				subscriptionPanel.subscribeYes.selected = true;
+				invalidateProperties();
+			}
+			
+			private var _messageString:String;
+			public function get messageString():String
+			{
+				return _messageString;
+			}
+			public function set messageString(value:String):void
+			{
+				_messageString = value;
+				invalidateProperties();
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if(!buddy)
+					return;
+				
+				if(messageString)
+				{
+					explanationText.text = "You have received a presence stanza from " + 
+						buddy.nickName + " of type " + messageString + ", do you want to add them to your buddy list?";
+				}
+				else
+				{
+					explanationText.text = "You have received a message from " + 
+						buddy.nickName + ", do you want to add them to your buddy list?";
+				}
 			}
 			
 		]]>
@@ -65,7 +92,7 @@
 	
 	<mx:Form>
 
-		<mx:Text id="explanationText" />
+		<mx:Text id="explanationText"  width="450"/>
 		
 		<mx:FormItem label="jid:">
 			<mx:Label id="jid" />
@@ -77,11 +104,6 @@
 
 		<popup:SubscirptionPanel id="subscriptionPanel" showPublish="false" />
 		
-		<mx:FormItem label="groups:">
-			<mx:Label text="use ctrl/cmd to select more than one" />
-			<mx:List id="groups" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
-		</mx:FormItem>
-
 	</mx:Form>
 	
 	<mx:ControlBar />

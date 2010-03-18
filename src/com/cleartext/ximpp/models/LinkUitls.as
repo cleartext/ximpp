@@ -78,7 +78,7 @@ package com.cleartext.ximpp.models
 			// look for the start of the string or a space followed by at least 2
 			// now whitespace chars, then a "." then a valid tld then a space or a
 			// "/" followed by any amount of non-whitespace chars, then a space
-			var regex:RegExp = new RegExp('\\b[^\\s]{1,}\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b',"ig");
+			var regex:RegExp = new RegExp('\\b[^\\s]{1,}\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b/?',"ig");
 			var results:Array = new Array();
 			var temp:Object = regex.exec(plainText);
 			while (temp)

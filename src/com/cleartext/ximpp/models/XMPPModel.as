@@ -19,6 +19,8 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XMPP;
 	import com.seesmic.as3.xmpp.XMPPEvent;
 	
+	import flash.desktop.NativeApplication;
+	
 	import org.swizframework.Swiz;
 	
 	public class XMPPModel
@@ -213,6 +215,8 @@ package com.cleartext.ximpp.models
 
 			database.saveMessage(message);
 			database.saveBuddy(buddy);
+			
+//			NativeApplication.nativeApplication.icon.
 		}
 		
 		private function chatStateHandler(event:XMPPEvent):void
@@ -253,7 +257,7 @@ package com.cleartext.ximpp.models
 			{
 				if(!buddy)
 				{
-					Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW, null, new Buddy(fromJid)));
+					Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW, stanza.type, new Buddy(fromJid)));
 					return;
 				}
 				
@@ -496,13 +500,13 @@ package com.cleartext.ximpp.models
 		
 		public function removeFromRoster(toJid:String, newSubscription:String):void
 		{
+			if(newSubscription)
+				sendSubscribe(toJid, newSubscription);
+
 			sendIq(settings.userAccount.jid, 
 					IQTypes.SET,
 					IQTypes.addRemoveRosterItem(toJid, null, null, true),
 					modifyRosterHandler);
-					
-			if(newSubscription)
-				sendSubscribe(toJid, newSubscription);
 		}
 
 		//-------------------------------

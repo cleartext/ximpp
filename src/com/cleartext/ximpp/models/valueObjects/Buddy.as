@@ -179,8 +179,16 @@ package com.cleartext.ximpp.models.valueObjects
 		public function set subscription(value:String):void
 		{
 			_subscription = value;
+			
 			if(!subscribedTo)
 				status.value = Status.UNSUBSCRIBED;
+			else if(status.value == Status.UNSUBSCRIBED)
+			{
+				// hack cause we can't set an unsubscribed
+				// status to offline
+				status.value = Status.UNKNOWN;
+				status.value = Status.OFFLINE;
+			}
 			
 			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 		}

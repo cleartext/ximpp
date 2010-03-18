@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.charts.BubbleChart;
 			import flash.sampler.NewObjectSample;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.models.BuddyModel;
@@ -28,40 +29,63 @@
 			
 			override protected function submit(event:Event):void
 			{
-				if(addUser.selected)
-					xmpp.addToRoster(buddy.jid, nickname.text, groupList.selectedItems, subscriptionPanel.newSubscribe);
+				if(buddies.containsJid(buddy.jid))
+				{
+					buddy.nickName = nickname.text;
+					buddies.addBuddy(buddy);
+					buddies.refresh();
+					
+					xmpp.modifyRosterItem(buddy);
+				}
+				else if(addUser.selected)
+				{
+					xmpp.addToRoster(buddy.jid, nickname.text, null, subscriptionPanel.newSubscribe);
+				}
 				
 				if(subscriptionPanel.newPublish == SubscriptionTypes.SUBSCRIBED)
 					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
 				else
 					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBED);
 				
-				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				closeWindow();
 			}
 			
-			[Bindable]
-			public var buddy:Buddy;
+			private var _buddy:Buddy;
+			public function get buddy():Buddy
+			{
+				return _buddy;
+			}
+			public function set buddy(value:Buddy):void
+			{
+				_buddy = value;
+				
+				labelText.text= buddy.nickName + ' wants to know when you are online.';
+
+				nickname.text = buddy.nickName;
+				
+				addUserItem.visible = addUserItem.includeInLayout = !buddies.containsJid(buddy.jid);
+				
+				subscriptionPanel.buddy = buddy;
+				subscriptionPanel.subscribeYes.selected = true;
+				subscriptionPanel.publishYes.selected = true;
+			}
 			
 		]]>
 	</mx:Script>
 	
 	<mx:Form>
-		<mx:Text text="{buddy.nickName + ' wants to know when you are online.'}" />
+		<mx:Text id="labelText" />
 		
 		<mx:FormItem label="nickname:">
-			<mx:TextInput id="nickname" text="{buddy.nickName}"/>
+			<mx:TextInput id="nickname"/>
 		</mx:FormItem>
 
-		<mx:FormItem includeInLayout="{!buddies.containsJid(buddy.jid)}" visible="{!buddies.containsJid(buddy.jid)}" >
+		<mx:FormItem id="addUserItem" >
 			<mx:CheckBox id="addUser" selected="true" label="add to buddy list?" />
 		</mx:FormItem>
 		
-		<popup:SubscirptionPanel showSubscribe="{addUser.selected}" id="subscriptionPanel" buddy="{buddy}"/>
+		<popup:SubscirptionPanel showSubscribe="{addUser.selected}" id="subscriptionPanel"/>
 		
-		<mx:FormItem label="groups:">
-			<mx:Label text="use ctrl/cmd to select more than one" />
-			<mx:List id="groupList" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
-		</mx:FormItem>
 	</mx:Form>
 	
 	<mx:ControlBar />

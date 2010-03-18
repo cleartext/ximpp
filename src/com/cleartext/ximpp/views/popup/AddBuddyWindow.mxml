@@ -29,7 +29,6 @@
 			
 			override protected function init(event:FlexEvent):void
 			{
-				gatewayComboBox.dataProvider = buddies.gatewayNames;
 				groupList.dataProvider = buddies.groups;
 				subscriptionPanel.subscribeYes.selected = true;
 			}
@@ -49,10 +48,6 @@
 	</mx:Script>
 	
     <mx:Form>
-		<mx:FormItem label="gateway:" >
-			<mx:ComboBox id="gatewayComboBox"/>
-		</mx:FormItem>
-		
 		<mx:FormItem label="buddy id:">
 			<mx:VBox>
 				<mx:TextInput id="newJid" change="validateInput(event, 'jid can not be empty')" focusOut="validateInput(event, 'jid can not be empty')"/>

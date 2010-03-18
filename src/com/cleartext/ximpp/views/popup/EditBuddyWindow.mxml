@@ -58,6 +58,7 @@
 				nickname.text = buddy.nickName;
 				avatar.data = buddy;
 				groups.enabled = !buddy.isGateway && !buddy.microBlogging;
+				
 				if(!buddy.microBlogging)
 					groups.selectedItems = buddy.groups;
 				

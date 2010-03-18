@@ -102,6 +102,7 @@
 				var window:BuddyNotInRosterWindow = new BuddyNotInRosterWindow();
 				initializePopUp(window);
 				window.buddy = event.buddy;
+				window.messageString = event.group;
 			}
 
 			[Mediate(event="PopUpEvent.EDIT_BUDDY_WINDOW")]
