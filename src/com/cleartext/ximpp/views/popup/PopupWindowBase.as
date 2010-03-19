@@ -1,5 +1,7 @@
 package com.cleartext.ximpp.views.popup
 {
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
@@ -72,6 +74,7 @@ package com.cleartext.ximpp.views.popup
 					sumbitButton.label = submitButtonLabel;
 					sumbitButton.enabled = isValid;
 					cb.addChild(sumbitButton);
+					defaultButton = sumbitButton;
 				}
 				
 				if(!cancelButton)
@@ -105,7 +108,7 @@ package com.cleartext.ximpp.views.popup
 			var toolTip:ToolTip = errorMessageToolTips[target.name] as ToolTip;
 			
 			if(target is TextInput && (target as TextInput).text == "" ||
-				target is List && (target as List).selectedItems.length < 1)
+				target is List && getSelected(target as List).length < 1)
 			{
 				if (toolTip)
 				{
@@ -129,6 +132,32 @@ package com.cleartext.ximpp.views.popup
 			
 			validateForm();
  		}
+ 		
+		public function getSelected(list:List):Array
+		{
+			var result:Array = new Array();
+			for each(var o:Object in list.dataProvider)
+			{
+				if(o.selected)
+					result.push(o.data);
+			}
+			return result;
+		}
+		
+		public function wrapArray(array:Array):Array
+		{
+			var result:Array = new Array();
+			for each(var d:Object in array)
+			{
+				var o:Object = new Object();
+				o.selected = false;
+				o.data = d;
+				if(d is Buddy)
+					o.nickName = d.nickName;
+				result.push(o);
+			}
+			return result;
+		}
  		
  		public function hideErrors():void
  		{

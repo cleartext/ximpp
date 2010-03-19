@@ -9,6 +9,9 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.PopupWindowBase;
+			import mx.core.UIComponent;
+			import com.cleartext.ximpp.views.popup.SendToAllWindow;
 			import com.cleartext.ximpp.views.popup.BuddyNotInRosterWindow;
 			import com.cleartext.ximpp.views.popup.AddMicroBloggingWindow;
 			import com.cleartext.ximpp.views.popup.AddGatewayWindow;
@@ -137,6 +140,14 @@
 				initializePopUp(new AddMicroBloggingWindow());
 			}
 
+			[Mediate(event="PopUpEvent.SEND_TO_ALL_MICRO_BLOGGING_WINDOW")]
+			public function showSendToAllWindow(event:PopUpEvent):void
+			{
+				var window:SendToAllWindow = new SendToAllWindow();
+				initializePopUp(window);
+				window.message = event.group;
+			}
+
 			
 			private function initializePopUp(window:IFlexDisplayObject):void
 			{
@@ -147,6 +158,7 @@
 					});
 				PopUpManager.addPopUp(window, this, true);
 				PopUpManager.centerPopUp(window);
+				((window as PopupWindowBase).defaultButton as Button).setFocus();
 			}
 			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void

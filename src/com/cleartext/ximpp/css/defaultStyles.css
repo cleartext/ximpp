@@ -70,6 +70,13 @@
 	font-weight: bold;
 }
 
+.blackBoldBig
+{
+	color: #000000;
+	font-size: 14;
+	font-weight: bold;
+}
+
 TitleWindow
 {
 	borderAlpha: 0.8;

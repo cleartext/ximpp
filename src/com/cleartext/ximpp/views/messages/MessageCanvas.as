@@ -136,37 +136,8 @@ package com.cleartext.ximpp.views.messages
 		
 		public function sendMessage(messageString:String):void
 		{
-			var chat:Chat = avatarByIndex(index).chat;
-			chat.chatState = ChatStateTypes.ACTIVE;
-			
-			var buddiesToSendTo:Array;
-			
-			if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
-				buddiesToSendTo = buddies.microBloggingBuddies.toArray();
-			else
-				buddiesToSendTo = [chat.buddy];
-
-			for each(var buddy:Buddy in buddiesToSendTo)
-			{
-				xmpp.sendMessage(buddy.fullJid, messageString);
-				
-				var message:Message = new Message();
-				message.sender = settings.userAccount.jid;
-				message.recipient = buddy.jid;
-				message.body = messageString;
-				message.timestamp = new Date();
-				
-				var c:Chat = appModel.getChat(buddy);
-				c.messages.addItemAt(message,0);
-				
-				if(buddy.microBlogging)
-				{
-					c = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
-					c.messages.addItemAt(message,0);
-				}
-
-				database.saveMessage(message);
-			}
+			var buddy:Buddy = avatarByIndex(index).buddy;
+			appModel.sendMessageTo(buddy, messageString);
 		}
 		
 		public function numChats():int

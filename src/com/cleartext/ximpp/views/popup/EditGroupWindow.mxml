@@ -31,20 +31,19 @@
 			override protected function init(event:FlexEvent):void
 			{
 				groupNameInput.text = groupName;
-				var realPeople:Array = buddies.realPeople;
-				var haveGroup:Array = new Array();
+				
+				var realPeople:Array = wrapArray(buddies.realPeople);
 
-				for each(var buddy:Buddy in realPeople)
-					if(buddy.groups.indexOf(groupName)!=-1)
-						haveGroup.push(buddy);
+				for each(var b:Object in realPeople)
+					b.selected = b.data.groups.indexOf(groupName)!=-1;
 
-				buddyList.dataProvider = realPeople;
-				buddyList.selectedItems = haveGroup;
+				list.dataProvider = realPeople;
 			}
 			
 			override protected function submit(event:Event):void
 			{
 				var newGroupName:String = groupNameInput.text;
+				var selectedBuddies:Array = getSelected(list);
 				
 				for each(var buddy:Buddy in buddies.buddies.source)
 				{
@@ -53,7 +52,7 @@
 					if(index != -1)
 					{
 						// if we don't want the buddy, remove the group
-						if(buddyList.selectedItems.indexOf(buddy)==-1)
+						if(selectedBuddies.indexOf(buddy)==-1)
 						{
 							buddy.groups.splice(index, 1);
 							xmpp.modifyRosterItem(buddy);
@@ -67,7 +66,7 @@
 					}
 					// if the buddy doesn't have the group and it is selected
 					// then add it
-					else if(buddyList.selectedItems.indexOf(buddy)!=-1)
+					else if(selectedBuddies.indexOf(buddy)!=-1)
 					{
 						buddy.groups.push(newGroupName);
 						xmpp.modifyRosterItem(buddy);
@@ -79,7 +78,7 @@
 			
 			override protected function validateForm():void
 			{
-				isValid = groupNameInput.text != "" && buddyList.selectedItems.length > 0;
+				isValid = groupNameInput.text != "" && getSelected(list).length > 0;
 			}
 		]]>
 	</mx:Script>
@@ -94,11 +93,14 @@
 		</mx:FormItem>
 
 		<mx:FormItem label="buddies:">
-			<mx:VBox>
-				<mx:Label text="use ctrl/cmd - click to deselect and to select more than one" />
-				<mx:List id="buddyList" allowMultipleSelection="true" labelField="nickName" width="300" height="300"
-					 change="validateInput(event,'need to select at least one buddy')" focusOut="validateInput(event, 'need to select at least one buddy')"/>
-			</mx:VBox>
+			<mx:List id="list" width="250" labelField="nickName" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
+				click="validateInput(event,'need to select at least one buddy')" focusOut="validateInput(event, 'need to select at least one buddy')">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox focusEnabled="false" selectedField="selected" change="data.selected = !data.selected"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:List>
 		</mx:FormItem>
 		
     </mx:Form>

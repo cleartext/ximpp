@@ -1,10 +1,10 @@
 package com.cleartext.ximpp.models
 {
-	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	
 	import flash.desktop.NativeApplication;
@@ -213,6 +213,35 @@ package com.cleartext.ximpp.models
 			chat.messages = database.loadMessages(buddy);
 			chats.addItem(chat);
 			return chat;
+		}
+		
+		public function sendMessageTo(buddy:Buddy, messageString:String):void
+		{
+			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			{
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SEND_TO_ALL_MICRO_BLOGGING_WINDOW, messageString));
+			}
+			else
+			{
+				xmpp.sendMessage(buddy.fullJid, messageString);
+				
+				var message:Message = new Message();
+				message.sender = settings.userAccount.jid;
+				message.recipient = buddy.jid;
+				message.body = messageString;
+				message.timestamp = new Date();
+				
+				var c:Chat = getChat(buddy);
+				c.messages.addItemAt(message,0);
+				
+				if(buddy.microBlogging)
+				{
+					c = getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
+					c.messages.addItemAt(message,0);
+				}
+
+				database.saveMessage(message);
+			}
 		}
 	}
 }

@@ -2,12 +2,14 @@
 <popup:PopupWindowBase
 	xmlns:popup="com.cleartext.ximpp.views.popup.*"
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
-	title="Confirm Post To All Micro Blogging"
-	submitButtonLabel="Send"
+	title="Post To..."
+	submitButtonLabel="Post"
 	isValid="true">
 	
 	<mx:Script>
 		<![CDATA[
+			import flash.sampler.NewObjectSample;
+			import mx.controls.CheckBox;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
@@ -19,28 +21,42 @@
 
 			[Autowire]
 			[Bindable]
-			public var xmpp:XMPPModel;
-
+			public var appModel:ApplicationModel;
+			
 			[Autowire]
 			[Bindable]
 			public var buddies:BuddyModel;
 			
+			public var message:String;
+			
 			override protected function submit(event:Event):void
 			{
+				for each(var buddy:Buddy in list.dataProvider)
+				{
+					if(buddy.sendTo)
+						appModel.sendMessageTo(buddy, message);
+				}
+
 				closeWindow();
 			}
 			
 		]]>
 	</mx:Script>
 	
-	<mx:Form>
-		<mx:Text text="send to the following services:" />
-		
-		<mx:FormItem label="services:">
-			<mx:Label text="use ctrl/cmd to select more than one" />
-			<mx:List id="groups" allowMultipleSelection="true" dataProvider="{buddies.groups}" width="190" height="80"/>
-		</mx:FormItem>
-	</mx:Form>
+	<mx:Text text="send to the following services:" selectable="false"/>
+	<mx:List id="list" dataProvider="{buddies.microBloggingBuddies}"
+		width="250" rowCount="8" labelField="nickName" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]">
+		<mx:itemRenderer>
+			<mx:Component>
+				<mx:CheckBox
+					focusEnabled="false" 
+					alpha="{(data.status.isOffline()) ? 0.5 : 1}" 
+					enabled="{!data.status.isOffline()}"
+					selected="{!(data.status.isOffline() || !data.sendTo)}" 
+					change="data.sendTo = !data.sendTo" />
+			</mx:Component>
+		</mx:itemRenderer>
+	</mx:List>
 	
 	<mx:ControlBar />
 

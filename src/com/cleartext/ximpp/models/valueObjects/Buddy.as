@@ -242,7 +242,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		// flag used by the roster handler in xmppModel to refresh the
 		// buddy list
-		public var used:Boolean = false;
+		public var sendTo:Boolean = true;
 
 		private var _status:Status = new Status(Status.OFFLINE);
 		[Bindable("buddyChanged")]

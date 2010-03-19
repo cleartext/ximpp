@@ -19,7 +19,7 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XMPP;
 	import com.seesmic.as3.xmpp.XMPPEvent;
 	
-	import flash.desktop.NativeApplication;
+	import flash.utils.Dictionary;
 	
 	import org.swizframework.Swiz;
 	
@@ -194,6 +194,18 @@ package com.cleartext.ximpp.models
 			
 			if(!buddy)
 			{
+				for each(var c:Chat in appModel.chats)
+				{
+					if(c.buddy.jid == message.sender)
+					{
+						buddy = chat.buddy;
+						break;
+					}
+				}
+			}
+
+			if(!buddy)
+			{
 				buddy = new Buddy(message.sender);
 				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW, null, buddy));
 			}
@@ -215,8 +227,6 @@ package com.cleartext.ximpp.models
 
 			database.saveMessage(message);
 			database.saveBuddy(buddy);
-			
-//			NativeApplication.nativeApplication.icon.
 		}
 		
 		private function chatStateHandler(event:XMPPEvent):void
@@ -245,6 +255,7 @@ package com.cleartext.ximpp.models
 			{
 				return;
 			}
+
 			// note this is just for type "subscribe" - "unsubscribed" and
 			// "subscribed" are handled below
 			else if(stanza.type == SubscriptionTypes.SUBSCRIBE)
@@ -257,7 +268,7 @@ package com.cleartext.ximpp.models
 			{
 				if(!buddy)
 				{
-					Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW, stanza.type, new Buddy(fromJid)));
+					// we don't care about you if you aren't in our roster list
 					return;
 				}
 				
@@ -327,8 +338,11 @@ package com.cleartext.ximpp.models
 		{
 			appModel.log("getRosterHandler");
 			
-			for each(var b1:Buddy in buddies.buddies)
-				b1.used = false;
+			var buddy:Buddy;
+			var buddiesToDelete:Dictionary = new Dictionary();
+			
+			for each(buddy in buddies.buddies)
+				buddiesToDelete[buddy.jid] = buddy;
 
 			namespace rosterns = "jabber:iq:roster";
 			for each(var item:XML in stanza.query.rosterns::item)
@@ -355,15 +369,14 @@ package com.cleartext.ximpp.models
 				
 				// flag used to delete buddies that are no longer in
 				// the roster list
-				buddy.used = true;
+				delete buddiesToDelete[buddy.jid];
 				
 				// this adds, saves and adds an event listener to the buddy
 				buddies.addBuddy(buddy);
 			}
 			
-			for each(var b2:Buddy in buddies.buddies)
-				if(!b2.used)
-					buddies.removeBuddy(b2);
+			for each(buddy in buddiesToDelete)
+				buddies.removeBuddy(buddy);
 
 			gotRosterList = true;
 		}
