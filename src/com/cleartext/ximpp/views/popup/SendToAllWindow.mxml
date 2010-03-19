@@ -31,11 +31,9 @@
 			
 			override protected function submit(event:Event):void
 			{
-				for each(var buddy:Buddy in list.dataProvider)
-				{
+				for each(var buddy:Buddy in buddies.microBloggingBuddies)
 					if(buddy.sendTo)
 						appModel.sendMessageTo(buddy, message);
-				}
 
 				closeWindow();
 			}
@@ -50,9 +48,7 @@
 			<mx:Component>
 				<mx:CheckBox
 					focusEnabled="false" 
-					alpha="{(data.status.isOffline()) ? 0.5 : 1}" 
-					enabled="{!data.status.isOffline()}"
-					selected="{!(data.status.isOffline() || !data.sendTo)}" 
+					selected="{data.sendTo}" 
 					change="data.sendTo = !data.sendTo" />
 			</mx:Component>
 		</mx:itemRenderer>
