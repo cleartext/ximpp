@@ -4,14 +4,12 @@
 	xmlns:common="com.cleartext.ximpp.views.common.*">
 	<mx:Script>
 		<![CDATA[
-			import com.cleartext.ximpp.models.Constants;
+			import com.cleartext.ximpp.assets.Constants;
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
 			import com.cleartext.ximpp.events.UserAccountEvent;
 			import com.cleartext.ximpp.events.BuddyEvent;
-			import mx.binding.utils.ChangeWatcher;
-			import mx.binding.utils.BindingUtils;
 			import com.cleartext.ximpp.models.SettingsModel;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import com.cleartext.ximpp.models.valueObjects.Status;
@@ -26,7 +24,7 @@
 				
 				var matr1:Matrix = new Matrix();
 				matr1.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2, 0, 0);
-				graphics.beginGradientFill(GradientType.LINEAR, [0x3e443f, 0x000000], [1, 1], [0x00, 0xFF], matr1);  
+				graphics.beginGradientFill(GradientType.LINEAR, [Constants.BACKGROUND_ACCENT, Constants.BACKGROUND_COLOUR], [1, 1], [0x00, 0xFF], matr1);  
 				graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			}
 			
@@ -39,7 +37,7 @@
 		upIcon="{Constants.HelpUp}"
 		overIcon="{Constants.HelpOver}"
 		downIcon="{Constants.HelpUp}"
-		click="Alert.show('help me please', 'Help Menu');"
+		click="navigateToURL(new URLRequest('http://help.cleartext.net/esm'), '_blank');"
 		skin="{null}"
 		toolTip="help"
 		right="75" y="8" />

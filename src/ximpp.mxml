@@ -6,9 +6,10 @@
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
 	xmlns:views="com.cleartext.ximpp.views.*"
-	themeColor="#f7a136">
+	themeColor="{Constants.THEME_COLOUR}">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.assets.Constants;
 			import mx.managers.ToolTipManager;
 			
 			private function applicationCompleteHandler():void

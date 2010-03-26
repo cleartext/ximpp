@@ -1,17 +1,11 @@
 package com.cleartext.ximpp.views.messages
 {
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
-	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.universalsprout.flex.components.list.ISproutListData;
-	import com.universalsprout.flex.components.list.ISproutListItem;
 	import com.universalsprout.flex.components.list.SproutList;
 	
-	import flash.events.Event;
-	import flash.utils.getTimer;
-	import flash.utils.setTimeout;
-	
 	import mx.core.ClassFactory;
-	import mx.events.ResizeEvent;
 
 	public class MessageSproutList extends SproutList
 	{
@@ -27,7 +21,9 @@ package com.cleartext.ximpp.views.messages
 			if(chat)
 			{
 				dataProvider = chat.messages;
-				if(chat.microBlogging)
+				if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					itemRenderer = new ClassFactory(AllMicroBloggingRenderer);
+				else if(chat.microBlogging)
 					itemRenderer = new ClassFactory(MicroBloggingRenderer);
 				else
 					itemRenderer = new ClassFactory(ChatRenderer);
@@ -39,9 +35,9 @@ package com.cleartext.ximpp.views.messages
 			super();
 		}
 		
-		override protected function commitProperties():void
+		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-			super.commitProperties();
+			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
 			if(chat && !chat.microBlogging)
 			{

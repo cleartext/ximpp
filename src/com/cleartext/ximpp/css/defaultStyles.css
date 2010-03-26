@@ -97,24 +97,24 @@ Application
 }
 
 @font-face {
-    src:local("helvetica");
+    src:local("Helvetica");
     fontFamily: myFont;
 }
 
 @font-face {
-    src:local("helvetica");
+    src:local("Helvetica");
     fontWeight: bold;
     fontFamily: myFont;
 }
 
 @font-face {
-    src:local("helvetica");
+    src:local("Helvetica");
     font-style: italic;
     fontFamily: myFont;
 }
 
 @font-face {
-    src:local("helvetica");
+    src:local("Helvetica");
     fontWeight: bold;
     font-style: italic;
     fontFamily: myFont;

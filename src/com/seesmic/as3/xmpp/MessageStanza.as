@@ -27,7 +27,10 @@ package com.seesmic.as3.xmpp
 		public var body:String;
 		public var subject:String;
 		namespace jc = 'jabber:client';
+		namespace htmlns = "http://jabber.org/protocol/xhtml-im";
+		namespace w3ns = "http://www.w3.org/1999/xhtml";
 		default xml namespace = 'jabber:client';
+		
 		
 		/**
 		 * modified by astewart@cleartext.com
@@ -57,7 +60,7 @@ package com.seesmic.as3.xmpp
 			 * modified by astewart@cleartext.com
 			 * html property added
 			 */
-			this.html = xml.html.text();
+			this.html = xml.htmlns::html.w3ns::body.toXMLString();
 			
 			chatState = "";
 			for each(var possibleState:String in states)
@@ -125,7 +128,7 @@ package com.seesmic.as3.xmpp
 			 */
 			if(html) {
 				var htmlx:XML = new XML();
-				htmlx = <html>{html}</html>;
+				htmlx = <html xmlns="http://jabber.org/protocol/xhtml-im">{html}</html>;
 				xml.appendChild(htmlx);
 			}
 			
@@ -133,7 +136,7 @@ package com.seesmic.as3.xmpp
 				xml.appendChild(new XML("<" + chatState + " xmlns='http://jabber.org/protocol/chatstates'/>"));
 			}
 			else {
-				xml.appendChild(new XML("<active xmlns='http://jabber.org/protocol/chatstates'/>"));
+				xml.appendChild(<active xmlns='http://jabber.org/protocol/chatstates'/>);
 			}
 			/**/
 		}

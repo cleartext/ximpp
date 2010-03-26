@@ -1,4 +1,4 @@
-package com.cleartext.ximpp.models
+package com.cleartext.ximpp.models.utils
 {
 	import mx.messaging.AbstractConsumer;
 	
@@ -44,7 +44,29 @@ package com.cleartext.ximpp.models
 			str = str.replace(/&/g, "&amp;");
 			str = str.replace(/</g, "&lt;");
 			str = str.replace(/>/g, "&gt;");
+//			str = str.replace(new RegExp('"', "g"), "&quot;");
 			return str;
+		}
+		
+		public static function unescapeHTML(str:String):String
+		{
+//			str = str.replace(/&amp;/g, "&");
+//			str = str.replace(/&lt;/g, "<");
+//			str = str.replace(/&gt;/g, ">");
+//			str = str.replace(/&quot;/g, "&quot;");
+			return str;
+		}
+		
+		public static function getStartTag(linkColour:uint=0x0033ff):String
+		{
+			// this is the start of the text that we want to insert round the link
+			// it will look something lke <U><FONT COLOR="#0033FF"><A HREF="
+            return '<U><FONT COLOR="#' + String("000000" + linkColour.toString(16).toUpperCase()).substr(-6) + '"><A HREF="';
+		}
+
+		public static function get endTag():String
+		{
+			return '</A></FONT></U>';
 		}
 
 		public static function createLinks(plainText:String, escapeHtmlChars:Boolean=true, linkColour:uint=0x0033ff):String
@@ -52,23 +74,25 @@ package com.cleartext.ximpp.models
 			if(escapeHtmlChars)
 				plainText = escapeHTML(plainText);
 			
-			// this is the start of the text that we want to insert round the link
-			// it will look something lke <U><FONT COLOR="#0033FF"><A HREF="
-            var startTag:String = '<U><FONT COLOR="#' + String("000000" + linkColour.toString(16).toUpperCase()).substr(-6) + '"><A HREF="';
+			var startTag:String = getStartTag(linkColour);
 			
-			var endTag:String = '</A></FONT></U>';
+			//escape double quotes
+			var linkText:String = plainText;
 			
 			// find any valid urls, this regex will probably produce false positives
 			// find at least 2 non-whitespace chars, then a "." then a valid tld
 			// then either an end of word, or a "/" followed by any amount of 
 			// non-whitespace chars 
-			var regex:RegExp = new RegExp('\\b[^\\s]{1,}\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b/?',"ig");
+			var regex:RegExp = new RegExp('\\b[^\\s]+?\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b/?',"ig");
 			// $& returns the match from the regex
-			var linkText:String = plainText.replace(regex, startTag + '$&">$&' + endTag);
+			linkText = linkText.replace(regex, startTag + '$&">$&' + endTag);
 			
 			// if the links created don't have a protocol, then give it an http://
 			regex = new RegExp(startTag + '(?!(' + protocols.join('|') + ')://)', 'ig');
 			linkText = linkText.replace(regex, startTag + 'http://');
+
+//			if(escapeHtmlChars)
+//				linkText = unescapeHTML(linkText);
 
 			return linkText;
 		}

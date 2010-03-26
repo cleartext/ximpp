@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.views.popup.PopupWindowBase;
 			import mx.core.UIComponent;
 			import com.cleartext.ximpp.views.popup.SendToAllWindow;
@@ -24,7 +25,6 @@
 			import com.cleartext.ximpp.events.SendButtonEvent;
 			import org.swizframework.Swiz;
 			import com.cleartext.ximpp.models.BuddyModel;
-			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.views.popup.PreferenceWindow;
 			import mx.core.IFlexDisplayObject;
 			import com.cleartext.ximpp.views.popup.EditBuddyWindow;
@@ -168,23 +168,23 @@
 				var g:Graphics = graphics;
 				g.clear();
 	
-				g.beginFill(0x000000);
+				g.beginFill(Constants.BACKGROUND_COLOUR);
 				g.drawRect(0, 0, unscaledWidth, unscaledHeight);
 	
 				var matrix:Matrix = new Matrix();
 
-				var w:Number = unscaledWidth/2 - 50;
+				var w:Number = unscaledWidth/2 - 100;
 				var r:Number = Math.tan(Math.atan(w/50) - Math.atan(50/w)) * w;
-				matrix.createGradientBox(unscaledWidth, 50, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT + headerCanvas.height + 10);
-				g.beginGradientFill(GradientType.LINEAR, [0x000000, 0x3e443f], [0.8, 0.8], [0, 255], matrix);
+				matrix.createGradientBox(unscaledWidth, 100, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT+headerCanvas.height);
+				g.beginGradientFill(GradientType.LINEAR, [Constants.BACKGROUND_COLOUR, Constants.BACKGROUND_ACCENT], [0.8, 0.8], [0, 255], matrix);
 				g.drawCircle(unscaledWidth/2, Constants.TOP_BAR_HEIGHT+headerCanvas.height+5-r, r+50);
 
 				matrix.createGradientBox(50, unscaledHeight);
-				g.beginGradientFill(GradientType.LINEAR, [0x3e443f, 0x000000], [1.0, 1.0], [0, 255], matrix);
+				g.beginGradientFill(GradientType.LINEAR, [Constants.BACKGROUND_ACCENT, Constants.BACKGROUND_COLOUR], [1.0, 1.0], [0, 255], matrix);
 				g.drawRect(0, 0, 50, unscaledHeight);
 				
 				matrix.createGradientBox(50, unscaledHeight, Math.PI, unscaledWidth-50);
-				g.beginGradientFill(GradientType.LINEAR, [0x3e443f, 0x000000], [1.0, 1.0], [0, 255], matrix);
+				g.beginGradientFill(GradientType.LINEAR, [Constants.BACKGROUND_ACCENT, Constants.BACKGROUND_COLOUR], [1.0, 1.0], [0, 255], matrix);
 				g.drawRect(unscaledWidth-50, 0, 50, unscaledHeight);
 			}
 

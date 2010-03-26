@@ -1,8 +1,8 @@
 package com.cleartext.ximpp.views.messages
 {
+	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.BuddyEvent;
-	import com.cleartext.ximpp.events.ChatEvent;
-	import com.cleartext.ximpp.models.Constants;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.views.common.Avatar;
 	
@@ -100,19 +100,21 @@ package com.cleartext.ximpp.views.messages
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
+			
+			var chatBuddy:Buddy = buddy as Buddy;
 
-			if(buddy && unreadMessageCount)
+			if(chatBuddy && unreadMessageCount)
 			{
-				if(buddy.unreadMessageCount > 0)
+				if(chatBuddy.unreadMessageCount > 0)
 				{
 					if(selected)
 					{
-						buddy.unreadMessageCount = 0;
+						chatBuddy.unreadMessageCount = 0;
 						return;
 					}
 
 					unreadMessageCount.visible = true;
-					unreadMessageCount.text = buddy.unreadMessageCount.toString();
+					unreadMessageCount.text = chatBuddy.unreadMessageCount.toString();
 					unreadMessageCount.width = unreadMessageCount.textWidth + 4;
 					invalidateDisplayList();
 				}

@@ -44,7 +44,7 @@
 					
 					var message:Message = new Message();
 					message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
-					message.body = randomString(10,140,4);
+					message.displayMessage = randomString(10,140,4);
 					messageData.addItem(message);
 				}
 				
@@ -68,7 +68,7 @@
 			
 			private function messageFilter(message:Message):Boolean
 			{
-				return message.body.indexOf(seachText.text) != -1;
+				return message.displayMessage.indexOf(seachText.text) != -1;
 			}
 		
 			private function init():void
@@ -96,7 +96,7 @@
 						
 						var message:Message = new Message();
 						message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
-						message.body = randomString(40,140,4);
+						message.displayMessage = randomString(40,140,4);
 						messageData.addItemAt(message,0);
 						
 						if(messageData.length > maxMessages+1)

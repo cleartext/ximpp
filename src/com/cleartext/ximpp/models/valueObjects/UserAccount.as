@@ -1,14 +1,13 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.models.AvatarUtils;
+	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	
-	public class UserAccount extends Buddy implements IXimppValueObject
+	public class UserAccount extends Buddy
 	{
 		public static const CREATE_USER_ACCOUNTS_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS userAccounts (" +
 			"userId INTEGER PRIMARY KEY AUTOINCREMENT, " +
 			"accountName TEXT DEFAULT 'default account', " +
-			"timestamp DATE, " +
 			"jid TEXT, " +
 			"nickname TEXT, " +
 			"password TEXT, " +
@@ -29,7 +28,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public var password:String;
 		public var server:String;
 		
-		public static function createFromDB(obj:Object):IXimppValueObject
+		public static function createFromDB(obj:Object):UserAccount
 		{
 			var newUserAccount:UserAccount = new UserAccount();
 			
@@ -55,7 +54,6 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return [
 				new DatabaseValue("accountName", accountName),
-				new DatabaseValue("timestamp", new Date()),
 				new DatabaseValue("jid", jid),
 				new DatabaseValue("nickname", nickName),
 				new DatabaseValue("password", password),

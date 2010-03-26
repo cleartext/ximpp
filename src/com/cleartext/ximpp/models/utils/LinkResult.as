@@ -1,4 +1,4 @@
-package com.cleartext.ximpp.models
+package com.cleartext.ximpp.models.utils
 {
 	public class LinkResult
 	{

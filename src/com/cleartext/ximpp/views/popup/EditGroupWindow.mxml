@@ -9,7 +9,6 @@
 		<![CDATA[
 			import mx.events.FlexEvent;
 			import mx.collections.ArrayCollection;
-			import de.polygonal.ds.Array3;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import mx.events.CloseEvent;

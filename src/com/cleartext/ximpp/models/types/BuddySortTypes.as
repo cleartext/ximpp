@@ -1,4 +1,4 @@
-package com.cleartext.ximpp.models.valueObjects
+package com.cleartext.ximpp.models.types
 {
 	public class BuddySortTypes
 	{

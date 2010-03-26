@@ -1,7 +1,7 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.models.ApplicationModel;
-	import com.cleartext.ximpp.models.LinkUitls;
+	import com.cleartext.ximpp.models.utils.LinkUitls;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
@@ -19,7 +19,7 @@ package com.cleartext.ximpp.views.messages
 		[Autowire(bean="settings", property="userAccount")]
 		public var userAccount:UserAccount;
 		
-		private var df:DateFormatter;
+		protected var df:DateFormatter;
 
 		protected var avatar:Avatar;
 		protected var nameTextField:UITextField;
@@ -49,8 +49,6 @@ package com.cleartext.ximpp.views.messages
 		
 		override protected function commitProperties():void
 		{
-			super.commitProperties();
-			
 			if(message)
 			{
 				var fromBuddy:Buddy = appModel.getBuddyByJid(message.sender);
@@ -66,7 +64,7 @@ package com.cleartext.ximpp.views.messages
 				dateTextField.width = dateTextField.textWidth + padding*2;
 				dateTextField.styleName = (fromThisUser) ? "lGreySmall" : "blackSmall";
 
-				bodyTextField.htmlText = LinkUitls.createLinks(message.body);
+				bodyTextField.htmlText = message.displayMessage;
 				bodyTextField.styleName = (fromThisUser) ? "lGreyNormal" : "blackNormal";
 			}
 					

@@ -70,6 +70,13 @@
 	font-weight: bold;
 }
 
+.blackBoldBig
+{
+	color: #000000;
+	font-size: 14;
+	font-weight: bold;
+}
+
 TitleWindow
 {
 	borderAlpha: 0.8;
@@ -90,24 +97,24 @@ Application
 }
 
 @font-face {
-    src:local("helvetica");
+    src:local("Helvetica");
     fontFamily: myFont;
 }
 
 @font-face {
-    src:local("helvetica");
+    src:local("Helvetica");
     fontWeight: bold;
     fontFamily: myFont;
 }
 
 @font-face {
-    src:local("helvetica");
+    src:local("Helvetica");
     font-style: italic;
     fontFamily: myFont;
 }
 
 @font-face {
-    src:local("helvetica");
+    src:local("Helvetica");
     fontWeight: bold;
     font-style: italic;
     fontFamily: myFont;

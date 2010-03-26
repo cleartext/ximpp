@@ -4,8 +4,8 @@ package com.cleartext.ximpp.views.common
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	
-	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
@@ -49,14 +49,15 @@ package com.cleartext.ximpp.views.common
 				
 				if(buddy)
 					buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler, false, 0, true);
+
+				buddyChangedHandler(null);
 			}
-			buddyChangedHandler(null);
 		}
 		
-		public function get buddy():Buddy
+		public function get buddy():IBuddy
 		{
-			if(data is Buddy)
-				return data as Buddy;
+			if(data is IBuddy)
+				return data as IBuddy;
 			
 			if(data is Chat)
 				return (data as Chat).buddy;
@@ -82,10 +83,18 @@ package com.cleartext.ximpp.views.common
 			}
 		}
 		
-		private var bitmapData:BitmapData;
-		public function getBitmapData():BitmapData
+		private var _bitmapData:BitmapData;
+		public function get bitmapData():BitmapData
 		{
-			return bitmapData;
+			return _bitmapData;
+		}
+		public function set bitmapData(value:BitmapData):void
+		{
+			if(value != _bitmapData)
+			{
+				_bitmapData = value;
+				invalidateDisplayList();
+			}
 		}
 		
 		private var _border:Boolean = true;

@@ -14,12 +14,11 @@
 			import com.cleartext.ximpp.models.DatabaseModel;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.events.CustomStatusEvent;
-			import com.cleartext.ximpp.models.valueObjects.BuddySortTypes;
+			import com.cleartext.ximpp.models.types.BuddySortTypes;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import com.cleartext.ximpp.events.UserAccountEvent;
-			import de.polygonal.ds.NullIterator;
 			import com.cleartext.ximpp.models.SettingsModel;
-			import com.cleartext.ximpp.models.Constants;
+			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;

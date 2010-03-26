@@ -1,8 +1,8 @@
 package com.cleartext.ximpp.views.common
 {
+	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
-	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	

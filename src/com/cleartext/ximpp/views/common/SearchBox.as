@@ -1,7 +1,7 @@
 package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.events.SearchBoxEvent;
-	import com.cleartext.ximpp.models.Constants;
+	import com.cleartext.ximpp.assets.Constants;
 	
 	import flash.display.Graphics;
 	import flash.events.KeyboardEvent;

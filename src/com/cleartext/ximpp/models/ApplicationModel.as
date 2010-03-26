@@ -2,6 +2,7 @@ package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
+	import com.cleartext.ximpp.models.utils.LinkUitls;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -36,6 +37,10 @@ package com.cleartext.ximpp.models
 		[Autowire]
 		[Bindable]
 		public var buddies:BuddyModel;
+		
+		[Autowire]
+		[Bindable]
+		public var mBlogBuddies:MicroBloggingModel;
 		
 		[Bindable]
 		public var microBloggingMessages:ArrayCollection = new ArrayCollection();
@@ -228,7 +233,8 @@ package com.cleartext.ximpp.models
 				var message:Message = new Message();
 				message.sender = settings.userAccount.jid;
 				message.recipient = buddy.jid;
-				message.body = messageString;
+				message.plainMessage = messageString;
+				message.displayMessage = LinkUitls.createLinks(messageString);
 				message.timestamp = new Date();
 				
 				var c:Chat = getChat(buddy);

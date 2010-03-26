@@ -7,5 +7,7 @@ package com.cleartext.ximpp.models.types
 		public static const UNKNOWN_TYPE:String = "unknownType";
 		public static const TWEET_SENT:String = "tweetSent";
 		public static const TWEET_RECEIVED:String = "tweetReceived";
+		public static const RETWEET_SENT:String = "retweetSent";
+		public static const RETWEET_RECEIVED:String = "retweetReceived";
 	}
 }

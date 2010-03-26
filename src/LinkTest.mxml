@@ -2,11 +2,10 @@
 <mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="nativeWindow.maximize(); process()">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.UrlShortener;
+			import com.cleartext.ximpp.models.utils.LinkUitls;
+			import com.cleartext.ximpp.models.utils.LinkResult;
 			import com.seesmic.as3.xmpp.StreamEvent;
-			import com.cleartext.ximpp.models.ShortenURL;
-			import com.cleartext.ximpp.models.LinkResult;
-
-			import com.cleartext.ximpp.models.LinkUitls;
 			
 			[Bindable]
 			public var shortening:Boolean = false;
@@ -29,8 +28,8 @@
 					if(lr.validLink.indexOf("http://bit.ly") != 0)
 					{
 						shortening = true;
-						var s:ShortenURL = new ShortenURL();
-						s.call(lr.validLink,
+						var s:UrlShortener = new UrlShortener();
+						s.shorten(lr.validLink, "bit.ly",
 							function(shortURL:String):void
 							{
 								if(!shortening)
@@ -57,7 +56,7 @@
 		<mx:Label text="input"/>
 		<mx:CheckBox id="autoShorten" label="auto-shorten urls?" labelPlacement="right" x="60" change="shorten()"/>
 		<mx:Label text="shortening..." x="200" visible="{shortening}"/>
-		<mx:TextArea id="input" y="30" height="100%" width="100%" textInput="shorten(event.text)" change="process()" text="a few bits of text then a link.com and an ftp://www.ftp.com and an https://mysecurething.com.au/page.html?p=32#anchor then some more text." />
+		<mx:TextArea id="input" y="30" height="100%" width="100%" textInput="shorten(event.text)" change="process()" text="{'a few bits of text then a link.com and an ftp://www.ftp.com and an https://mysecurething.com.au/page.html?p=32#anchorampp=32 then some more text.'}" />
 	</mx:Canvas>
 
 	<mx:Canvas height="100%" width="100%">

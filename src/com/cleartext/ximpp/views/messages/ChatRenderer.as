@@ -6,6 +6,7 @@ package com.cleartext.ximpp.views.messages
 	
 	public class ChatRenderer extends MessageRendererBase
 	{
+		private var showTopRowChanged:Boolean = false;
 		private var _showTopRow:Boolean = true;
 		public function get showTopRow():Boolean
 		{
@@ -15,6 +16,7 @@ package com.cleartext.ximpp.views.messages
 		{
 			if(_showTopRow != value)
 			{
+				showTopRowChanged = true;
 				_showTopRow = value;
 				invalidateProperties();
 			}
@@ -47,6 +49,17 @@ package com.cleartext.ximpp.views.messages
 			return heightTo;
 		}
 		
+		override public function set yTo(value:Number):void
+		{
+			if(showTopRowChanged)
+			{
+				move(0, value);
+				showTopRowChanged = false;
+			}
+			else
+				super.yTo = value;
+		}
+		
 		override protected function createChildren():void
 		{
 			super.createChildren();
@@ -58,6 +71,7 @@ package com.cleartext.ximpp.views.messages
 			nameTextField.x = avatarSize + 5*padding;
 
 			dateTextField.y = padding + 2;
+			dateTextField.x = width - dateTextField.width - 2*padding;	
 
 			bodyTextField.x = avatarSize + 5*padding;
 		}

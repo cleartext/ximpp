@@ -12,7 +12,7 @@
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import mx.events.FlexEvent;
-			import com.cleartext.ximpp.models.AvatarUtils;
+			import com.cleartext.ximpp.models.utils.AvatarUtils;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
 			import mx.events.CloseEvent;

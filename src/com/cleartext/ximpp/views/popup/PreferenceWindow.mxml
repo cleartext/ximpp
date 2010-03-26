@@ -17,7 +17,7 @@
 			import com.cleartext.ximpp.models.BuddyModel;
 			import com.adobe.crypto.SHA1;
 			import com.cleartext.ximpp.models.valueObjects.Status;
-			import com.cleartext.ximpp.models.AvatarUtils;
+			import com.cleartext.ximpp.models.utils.AvatarUtils;
 			import com.cleartext.ximpp.events.BuddyEvent;
 			import mx.events.CollectionEvent;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -124,7 +124,7 @@
 				{
 					previousAccount.accountName = accountName.text;
 					previousAccount.nickName = nickName.text;
-					previousAccount.avatar = avatar.getBitmapData();
+					previousAccount.avatar = avatar.bitmapData;
 					previousAccount.jid = jid.text;
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;

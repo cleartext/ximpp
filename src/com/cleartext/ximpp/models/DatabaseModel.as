@@ -1,24 +1,32 @@
 package com.cleartext.ximpp.models
 {
+	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.Message;
+	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
+	import com.cleartext.ximpp.views.common.Avatar;
 	
 	import flash.data.SQLConnection;
 	import flash.data.SQLMode;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
+	import flash.geom.Matrix;
+	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
+	import mx.controls.Image;
 	
 	public class DatabaseModel extends EventDispatcher
 	{
@@ -27,6 +35,8 @@ package com.cleartext.ximpp.models
 		 */
 		private var syncConn:SQLConnection;
 		private var asyncConn:SQLConnection;
+		
+		private var imageQueue:Dictionary = new Dictionary();
 		
 		[Autowire]
 		[Bindable]
@@ -40,6 +50,11 @@ package com.cleartext.ximpp.models
 		private function get buddies():BuddyModel
 		{
 			return appModel.buddies;
+		}
+		
+		private function get mBlogBuddies():MicroBloggingModel
+		{
+			return appModel.mBlogBuddies;
 		}
 				
 		public function close():void
@@ -127,17 +142,24 @@ package com.cleartext.ximpp.models
 				stmt.execute();
 
 				/*
-				 * create the messages table
+				 * create messages table
 				 */
 				appModel.log("Creating messages table");
 				stmt.text = Message.CREATE_MESSAGES_TABLE;
 				stmt.execute();
 				
 				/*
-				 * Create entitites table
+				 * Create buddy table
 				 */
 				appModel.log("Creating buddy table");
 				stmt.text = Buddy.CREATE_BUDDIES_TABLE;
+				stmt.execute();
+				
+				/*
+				 * Create imageCache table
+				 */
+				appModel.log("Creating microBloggingBuddiesTable table");
+				stmt.text = MicroBloggingBuddy.CREATE_MICRO_BLOGGING_BUDDIES_TABLE;
 				stmt.execute();
 				
 				syncConn.commit();
@@ -174,13 +196,12 @@ package com.cleartext.ximpp.models
 			    syncConn.commit();
 				appModel.log("User settings loaded ");
 
-				settings.userAccount = UserAccount.createFromDB(result.data[0]) as UserAccount;
+				settings.userAccount = UserAccount.createFromDB(result.data[0]);
 			}
 			else
 			{
 				appModel.fatalError("no user account with id: " + newUserId);
 			}
-			
 		}
 		
 		/**
@@ -234,7 +255,7 @@ package com.cleartext.ximpp.models
 				
 				if(result && result.data)
 					for(var i:int=result.data.length-1; i>=0; i--)
-						buddies.addBuddy(Buddy.createFromDB(result.data[i]) as Buddy);
+						buddies.addBuddy(Buddy.createFromDB(result.data[i]));
 	
 			    // if we've got to this point without errors, commit the transaction 
 				appModel.log("Buddy list loaded");
@@ -321,6 +342,11 @@ package com.cleartext.ximpp.models
 			return id;
 		}
 
+		public function saveMicroBloggingBuddy(buddy:MicroBloggingBuddy):void
+		{
+			updateStmt("microBloggingBuddies", buddy.toDatabaseValues(), [new DatabaseValue("microBloggingBuddyId", buddy.microBloggingBuddyId)]);
+		}
+
 		public function removeBuddy(buddyId:int):void
 		{
 			syncConn.begin(); 
@@ -378,8 +404,8 @@ package com.cleartext.ximpp.models
 					+ " ORDER BY timestamp DESC "
 					+ "LIMIT 0," + settings.global.numChatMessages;
 				stmt.execute();
-				
 				var result:SQLResult = stmt.getResult();
+			    syncConn.commit(); 
 	
 				var messages:ArrayCollection = new ArrayCollection();
 				
@@ -387,10 +413,9 @@ package com.cleartext.ximpp.models
 				{
 					var len:int = result.data.length;
 					for(var i:int=0; i<len; i++)
-						messages.addItem(Message.createFromDB(result.data[i]));
+						messages.addItem(Message.createFromDB(result.data[i], mBlogBuddies));
 				}
 			    // if we've got to this point without errors, commit the transaction 
-			    syncConn.commit(); 
 				appModel.log("Messages loaded");
 				return messages;
 			}
@@ -507,6 +532,39 @@ package com.cleartext.ximpp.models
 			}
 		}
 		
+		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null):MicroBloggingBuddy
+		{
+			syncConn.begin(); 
+			appModel.log("Loading microBloggingBuddy: " + idOrUserName);
+			
+			var stmt:SQLStatement = new SQLStatement();
+			stmt.sqlConnection = syncConn;
+			stmt.text = "Select * from microBloggingBuddies WHERE ";
+			
+			if(!gatewayJid)
+				stmt.text += "microBloggingBuddyId=" + idOrUserName;
+			else
+				stmt.text += "userName='" + idOrUserName + "' AND gatewayJid='" + gatewayJid + "'";
+		
+			stmt.execute();
+			var result:SQLResult = stmt.getResult();
+		    // if we've got to this point without errors, commit the transaction 
+		    syncConn.commit(); 
+
+			if(result && result.data && result.data.length > 0)
+				return MicroBloggingBuddy.createFromDB(result.data[0]);
+			
+			// now we have to create the new buddy
+			if(!gatewayJid)
+				throw new Error("need a gatewayJid");
+
+			var buddy:MicroBloggingBuddy = new MicroBloggingBuddy();
+			buddy.userName = idOrUserName as String;
+			buddy.gatewayJid = gatewayJid;
+			buddy.microBloggingBuddyId = insertStmt("microBloggingBuddies", buddy.toDatabaseValues());
+			
+			return buddy;
+		}
+
 	}
-	
 }

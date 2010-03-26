@@ -14,7 +14,7 @@
 			import mx.events.CollectionEvent;
 			import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 			import mx.core.UIComponent;
-			import com.cleartext.ximpp.models.Constants;
+			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
 			import com.cleartext.ximpp.views.common.SideButton;

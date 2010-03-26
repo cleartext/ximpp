@@ -4,17 +4,16 @@
 	clipContent="false">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.assets.Constants;
+			import com.cleartext.ximpp.models.utils.LinkResult;
+			import com.cleartext.ximpp.models.utils.LinkUitls;
 			import com.cleartext.ximpp.models.valueObjects.UrlShortener;
 			import com.cleartext.ximpp.models.DatabaseModel;
 			import com.cleartext.ximpp.models.SettingsModel;
-			import com.cleartext.ximpp.models.ShortenURL;
-			import com.cleartext.ximpp.models.LinkResult;
-			import com.cleartext.ximpp.models.LinkUitls;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.events.SendButtonEvent;
 			import com.cleartext.ximpp.events.CustomStatusEvent;
-			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import com.cleartext.ximpp.models.valueObjects.Message;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -91,7 +90,7 @@
 
 			private function shorten(str:String=" "):void
 			{
-				if(!shortenUrls.selected || shortening || (str.length==1 && str != " "))
+				if(!buddy.microBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
 					return;
 				
 				var results:Array = LinkUitls.findLinks(LinkUitls.escapeHTML(inputTextArea.text + str));
@@ -161,9 +160,9 @@
 	</mx:Script>
 	
 	<common:StatusIcon
+		visible="{!(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY || buddy.isTyping)}"
 		statusString="{buddy.status.value}" 
-		x="10" y="6"  
-		visible="{!buddy.isTyping}"/>
+		x="10" y="6"/>
 	
 	<mx:Image 
 		source="{Constants.IsTyping}" 

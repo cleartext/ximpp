@@ -8,10 +8,9 @@ package com.cleartext.ximpp.events
 	{
 		public static const MESSAGE_STATUS_CHANGED:String = "messageStatusChanged";
 		
-		public static const TWITTER_RETWEET:String = "twitterRetweet";
-		public static const TWITTER_REPLY:String = "twitterReply";
-		public static const TWITTER_DIRECT_MESSAGE:String = "twitterDirectMessage";
-		public static const TWITTER_DELETE:String = "twitterDelete";
+		public static const RETWEET:String = "retweet";
+		public static const REPLY:String = "reply";
+		public static const DIRECT_MESSAGE:String = "directMessage";
 		
 		public var message:Message;
 		

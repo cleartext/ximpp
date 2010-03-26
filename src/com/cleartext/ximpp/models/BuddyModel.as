@@ -3,7 +3,7 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.BuddyModelEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
-	import com.cleartext.ximpp.models.valueObjects.BuddySortTypes;
+	import com.cleartext.ximpp.models.types.BuddySortTypes;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;

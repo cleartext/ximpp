@@ -10,7 +10,6 @@ package com.cleartext.ximpp.models
 	
 	public class SettingsModel extends EventDispatcher
 	{
-		
 		[Autowire]
 		[Bindable]
 		public var appModel:ApplicationModel;

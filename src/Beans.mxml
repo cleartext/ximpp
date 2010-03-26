@@ -10,6 +10,8 @@
 	<models:XMPPModel id="xmpp" />
 
 	<models:BuddyModel id="buddies" />
+	
+	<models:MicroBloggingModel id="microBlogging" />
 
 	<models:ApplicationModel id="appModel" />
 

@@ -3,9 +3,11 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
+	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
+	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	import com.hurlant.crypto.tls.TLSConfig;
@@ -42,6 +44,11 @@ package com.cleartext.ximpp.models
 		private function get buddies():BuddyModel
 		{
 			return appModel.buddies;
+		}
+		
+		private function get mBlogBuddies():MicroBloggingModel
+		{
+			return appModel.mBlogBuddies;
 		}
 		
 		[Bindable]
@@ -188,7 +195,10 @@ package com.cleartext.ximpp.models
 		 */
 		private function messageHandler(event:XMPPEvent):void
 		{
-			var message:Message = Message.createFromStanza(event.stanza);
+			var message:Message = Message.createFromStanza(event.stanza, mBlogBuddies);
+			
+			if(message.sender == "twitter.cleartext.com" && message.plainMessage == "The message has been sent")
+				return;
 
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			
@@ -351,7 +361,7 @@ package com.cleartext.ximpp.models
 				
 				// if we already have the buddy, then we just want to
 				// update the values, otherwise create a new buddy
-				var buddy:Buddy = appModel.getBuddyByJid(jid);
+				buddy = appModel.getBuddyByJid(jid);
 				if(!buddy)
 					buddy = new Buddy(jid);
 				
@@ -556,5 +566,21 @@ package com.cleartext.ximpp.models
 			xmpp.send('<presence to="' + toJid + '" type="' + type + '" />');
 		}
 		
+		public function getAvatarForMBlogBuddy(jid:String):void
+		{
+			sendIq(jid, 'get', <vCard xmlns='vcard-temp'/>, mBlogVCardHandler);
+		}
+		
+		private function mBlogVCardHandler(stanza:IqStanza):void
+		{
+			namespace vCardTemp = "vcard-temp";
+			var xml:XML = stanza.getXML();
+			
+			var buddyJid:String = stanza.from;
+			
+			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
+			var buddy:MicroBloggingBuddy = mBlogBuddies.getBuddyByJid(buddyJid);
+			AvatarUtils.stringToAvatar(avatarString, buddy);
+		}
 	}
 }

@@ -2,18 +2,17 @@ package com.cleartext.ximpp.models.valueObjects
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.StatusEvent;
-	import com.cleartext.ximpp.models.AvatarUtils;
 	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
+	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
-	import flash.display.BitmapData;
-	import flash.events.Event;;
+	import flash.display.BitmapData;;
 
 	[Event(name="changed", type="com.cleartext.ximpp.events.BuddyEvent")]		
 
 	[Bindable]
-	public class Buddy extends SproutListDataBase implements IXimppValueObject
+	public class Buddy extends SproutListDataBase implements IBuddy
 	{
 		public static const ALL_MICRO_BLOGGING_JID:String = "Micro Blogging";
 		public static const ALL_MICRO_BLOGGING_BUDDY:Buddy = new Buddy(ALL_MICRO_BLOGGING_JID);
@@ -40,6 +39,7 @@ package com.cleartext.ximpp.models.valueObjects
 			"subscription TEXT," +
 			"avatar TEXT, " + 
 			"avatarHash TEXT, " + 
+			"sendTo BOOLEAN, " + 
 			"customStatus TEXT);";
 			
 		// storred in database		
@@ -193,6 +193,23 @@ package com.cleartext.ximpp.models.valueObjects
 			dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 		}
 			
+		// flag used by the roster handler in xmppModel to refresh the
+		// buddy list
+		private var _sendTo:Boolean = true;
+		[Bindable("buddyChanged")]
+		public function get sendTo():Boolean
+		{
+			return _sendTo;
+		}
+		public function set sendTo(value:Boolean):void
+		{
+			if(_sendTo != value)
+			{
+				_sendTo = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
+		}
+
 		public var avatarHash:String;
 		public var groups:Array = new Array();
 		
@@ -240,9 +257,6 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return _isGateway;
 		}
-		// flag used by the roster handler in xmppModel to refresh the
-		// buddy list
-		public var sendTo:Boolean = true;
 
 		private var _status:Status = new Status(Status.OFFLINE);
 		[Bindable("buddyChanged")]
@@ -253,7 +267,7 @@ package com.cleartext.ximpp.models.valueObjects
 			return _status;
 		}
 			
-		public static function createFromDB(obj:Object):IXimppValueObject
+		public static function createFromDB(obj:Object):Buddy
 		{
 			var jid:String = obj["jid"];
 			var newBuddy:Buddy = new Buddy(jid);
@@ -267,6 +281,7 @@ package com.cleartext.ximpp.models.valueObjects
 			if(groups.length == 1 && groups[0] == "")
 				groups = [];
 			newBuddy.groups = groups;
+			newBuddy.sendTo = obj["sendTo"];
 			newBuddy.microBlogging = (groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP) != -1);
 			newBuddy.avatarHash = obj["avatarHash"];
 			newBuddy.subscription = obj["subscription"];
@@ -286,6 +301,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("subscription", subscription),
 				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),
 				new DatabaseValue("customStatus", customStatus),
+				new DatabaseValue("sendTo", sendTo),
 				new DatabaseValue("avatarHash", avatarHash)];
 		}
 		

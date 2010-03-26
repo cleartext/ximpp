@@ -1,10 +1,10 @@
 package com.cleartext.ximpp.views.messages
 {
+	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.events.SearchBoxEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.BuddyModel;
-	import com.cleartext.ximpp.models.Constants;
 	import com.cleartext.ximpp.models.DatabaseModel;
 	import com.cleartext.ximpp.models.SettingsModel;
 	import com.cleartext.ximpp.models.XMPPModel;
@@ -136,7 +136,7 @@ package com.cleartext.ximpp.views.messages
 		
 		public function sendMessage(messageString:String):void
 		{
-			var buddy:Buddy = avatarByIndex(index).buddy;
+			var buddy:Buddy = avatarByIndex(index).buddy as Buddy;
 			appModel.sendMessageTo(buddy, messageString);
 		}
 		
@@ -355,7 +355,7 @@ package com.cleartext.ximpp.views.messages
 
 		private function filterMessages(message:Message):Boolean
 		{
-			return message.body.toLowerCase().indexOf(searchString.toLowerCase()) != -1;
+			return message.plainMessage.toLowerCase().indexOf(searchString.toLowerCase()) != -1;
 		}
 			
 		private function avatarClickHandler(event:MouseEvent):void
@@ -373,7 +373,7 @@ package com.cleartext.ximpp.views.messages
 
 			if(position == 1)
 			{
-				avatar.buddy.unreadMessageCount = 0;
+				(avatar.buddy as Buddy).unreadMessageCount = 0;
 				newX += SELECTOR_WIDTH;
 			}
 			else if(position >1)

@@ -6,9 +6,9 @@
 	height="100%">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.assets.Constants;
 			import mx.events.CollectionEvent;
 			import mx.core.UIComponent;
-			import com.cleartext.ximpp.models.Constants;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
 			import com.cleartext.ximpp.views.common.SideButton;

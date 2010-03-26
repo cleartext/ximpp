@@ -1,8 +1,10 @@
 package com.cleartext.ximpp.models.valueObjects
 {
+	import com.cleartext.ximpp.models.types.BuddySortTypes;
+	
 	import flash.events.EventDispatcher;
 
-	public class GlobalSettings extends EventDispatcher implements IXimppValueObject
+	public class GlobalSettings extends EventDispatcher
 	{
 		public static const CREATE_GLOBAL_SETTINGS_TABLE:String =
 				"CREATE TABLE IF NOT EXISTS globalSettings (" +
