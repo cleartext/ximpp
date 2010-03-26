@@ -64,7 +64,11 @@ package com.cleartext.ximpp.views.messages
 				dateTextField.width = dateTextField.textWidth + padding*2;
 				dateTextField.styleName = (fromThisUser) ? "lGreySmall" : "blackSmall";
 
-				bodyTextField.htmlText = message.displayMessage;
+				if(message.displayMessage)
+					bodyTextField.htmlText = message.displayMessage;
+				else
+					bodyTextField.text = message.plainMessage;
+
 				bodyTextField.styleName = (fromThisUser) ? "lGreyNormal" : "blackNormal";
 			}
 					

@@ -1,14 +1,19 @@
 package com.cleartext.ximpp.views.messages
 {
+	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.MicroBloggingMessageEvent;
+	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	
+	import flash.display.DisplayObject;
 	import flash.display.GradientType;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
+	
+	import mx.controls.Button;
 	
 	import org.swizframework.Swiz;
 	
@@ -19,120 +24,6 @@ package com.cleartext.ximpp.views.messages
 		
 		private var chatBuddy:Buddy;
 		private var mBlogSender:MicroBloggingBuddy;
-		
-//		private var _messageType:String = MicroBloggingTypes.UNKNOWN_TYPE;
-//		public function get messageType():String
-//		{
-//			return _messageType;
-//		}
-//		public function set messageType(value:String):void
-//		{
-//			if(value != _messageType)
-//			{
-//				_messageType = value;
-//				
-//				// remove all existing buttons
-//				for each(var button:DisplayObject in buttons)
-//					removeChild(button);
-//				buttons = new Array();
-//				
-//				switch(_messageType)
-//				{
-//					case MicroBloggingTypes.TWEET_SENT :
-//						
-//						var statusImage:Image = new Image();
-//						statusImage.width = 16;
-//						statusImage.height = 16;
-//						statusImage.x = padding;
-//						statusImage.y = padding;
-//						buttons.push(statusImage);
-//						addChild(statusImage);
-//						
-//						var deleteButton:Button = new Button();
-//						deleteButton.data = MicroBloggingMessageEvent.TWITTER_DELETE;
-//						deleteButton.addEventListener(MouseEvent.CLICK, button_clickHandler);
-//						deleteButton.toolTip = "delete";
-//						deleteButton.setStyle("skin", null);
-//						deleteButton.setStyle("upIcon", Constants.DeleteUp);
-//						deleteButton.setStyle("overIcon", Constants.DeleteOver);
-//						deleteButton.setStyle("downIcon", Constants.DeleteUp);
-//						deleteButton.width = 16;
-//						deleteButton.height = 16;
-//						deleteButton.y = 1.5*padding + 16;
-//						deleteButton.x = padding;
-//						deleteButton.buttonMode = true;
-//						buttons.push(deleteButton);
-//						addChild(deleteButton);
-//
-//						break;
-//
-//					case MicroBloggingTypes.TWEET_RECEIVED :
-//						var reply:Button = new Button();
-//						reply.data = MicroBloggingMessageEvent.TWITTER_REPLY;
-//						reply.addEventListener(MouseEvent.CLICK, button_clickHandler);
-//						reply.toolTip = "reply";
-//						reply.setStyle("skin", null);
-//						reply.setStyle("upIcon", Constants.ReplyUp);
-//						reply.setStyle("overIcon", Constants.ReplyOver);
-//						reply.setStyle("downIcon", Constants.ReplyUp);
-//						reply.width = 16;
-//						reply.height = 16;
-//						reply.y = padding;
-//						reply.x = padding;
-//						reply.buttonMode = true;
-//						buttons.push(reply);
-//						addChild(reply);
-//
-//						var retweet:Button = new Button();
-//						retweet.data = MicroBloggingMessageEvent.TWITTER_RETWEET;
-//						retweet.addEventListener(MouseEvent.CLICK, button_clickHandler);
-//						retweet.toolTip = "retweet";
-//						retweet.setStyle("skin", null);
-//						retweet.setStyle("upIcon", Constants.RetweetUp);
-//						retweet.setStyle("overIcon", Constants.RetweetOver);
-//						retweet.setStyle("downIcon", Constants.RetweetUp);
-//						retweet.width = 16;
-//						retweet.height = 16;
-//						retweet.y = 1.5*padding + 16;
-//						retweet.x = padding;
-//						retweet.buttonMode = true;
-//						buttons.push(retweet);
-//						addChild(retweet);
-//
-//						var directMessage:Button = new Button();
-//						directMessage.data = MicroBloggingMessageEvent.TWITTER_DIRECT_MESSAGE;
-//						directMessage.addEventListener(MouseEvent.CLICK, button_clickHandler);
-//						directMessage.toolTip = "direct message";
-//						directMessage.setStyle("skin", null);
-//						directMessage.setStyle("upIcon", Constants.DirectMessageUp);
-//						directMessage.setStyle("overIcon", Constants.DirectMessageOver);
-//						directMessage.setStyle("downIcon", Constants.DirectMessageUp);
-//						directMessage.width = 16;
-//						directMessage.height = 16;
-//						directMessage.y = 2*padding + 32;
-//						directMessage.x = padding;
-//						directMessage.buttonMode = true;
-//						buttons.push(directMessage);
-//						addChild(directMessage);
-//
-//						break;
-//
-//					default :
-//						break;
-//				}
-//			}
-//		}
-		
-		override public function set data(value:Object):void
-		{
-//			if(message)
-//				message.removeEventListener(MicroBloggingMessageEvent.MESSAGE_STATUS_CHANGED, messageStatusChangeHandler);
-			
-			super.data = value;
-			
-//			if(message)
-//				message.addEventListener(MicroBloggingMessageEvent.MESSAGE_STATUS_CHANGED, messageStatusChangeHandler);
-		}	
 			
 		public function MicroBloggingRenderer()
 		{
@@ -143,32 +34,69 @@ package com.cleartext.ximpp.views.messages
 			padding = 8;
 		}
 
-//		private function messageStatusChangeHandler(event:MicroBloggingMessageEvent):void
-//		{
-//			if(buttons.length > 0)
-//			{
-//				var statusImage:Image = buttons[0] as Image;
-//				if(statusImage)
-//				{
-//					switch(message.status)
-//					{
-//						case MessageStatusTypes.ERROR :
-//							statusImage.source = Constants.Error;
-//							break;
-//						case MessageStatusTypes.PENDING :
-//							statusImage.source = Constants.Pending;
-//							break;
-//						case MessageStatusTypes.SUCCESS :
-//							statusImage.source = Constants.Sucess;
-//							break;
-//						default :
-//							statusImage.source = null;
-//							break;
-//					}
-//				}
-//			}
-//
-//		}
+		public function createButtons(type:String):void
+		{
+			// remove all existing buttons
+			for each(var button:DisplayObject in buttons)
+				removeChild(button);
+			buttons = new Array();
+			
+			switch(type)
+			{
+				case MicroBloggingTypes.RECEIVED :
+					var reply:Button = new Button();
+					reply.data = MicroBloggingMessageEvent.REPLY;
+					reply.addEventListener(MouseEvent.CLICK, button_clickHandler);
+					reply.toolTip = "reply";
+					reply.setStyle("skin", null);
+					reply.setStyle("upIcon", Constants.ReplyUp);
+					reply.setStyle("overIcon", Constants.ReplyOver);
+					reply.setStyle("downIcon", Constants.ReplyUp);
+					reply.width = 16;
+					reply.height = 16;
+					reply.y = padding;
+					reply.x = padding;
+					reply.buttonMode = true;
+					buttons.push(reply);
+					addChild(reply);
+
+					var retweet:Button = new Button();
+					retweet.data = MicroBloggingMessageEvent.RETWEET;
+					retweet.addEventListener(MouseEvent.CLICK, button_clickHandler);
+					retweet.toolTip = "retweet";
+					retweet.setStyle("skin", null);
+					retweet.setStyle("upIcon", Constants.RetweetUp);
+					retweet.setStyle("overIcon", Constants.RetweetOver);
+					retweet.setStyle("downIcon", Constants.RetweetUp);
+					retweet.width = 16;
+					retweet.height = 16;
+					retweet.y = 1.5*padding + 16;
+					retweet.x = padding;
+					retweet.buttonMode = true;
+					buttons.push(retweet);
+					addChild(retweet);
+
+					var directMessage:Button = new Button();
+					directMessage.data = MicroBloggingMessageEvent.DIRECT_MESSAGE;
+					directMessage.addEventListener(MouseEvent.CLICK, button_clickHandler);
+					directMessage.toolTip = "direct message";
+					directMessage.setStyle("skin", null);
+					directMessage.setStyle("upIcon", Constants.DirectMessageUp);
+					directMessage.setStyle("overIcon", Constants.DirectMessageOver);
+					directMessage.setStyle("downIcon", Constants.DirectMessageUp);
+					directMessage.width = 16;
+					directMessage.height = 16;
+					directMessage.y = 2*padding + 32;
+					directMessage.x = padding;
+					directMessage.buttonMode = true;
+					buttons.push(directMessage);
+					addChild(directMessage);
+					break;
+
+				default :
+					break;
+			}
+		}
 
 		private function button_clickHandler(event:MouseEvent):void
 		{
@@ -219,7 +147,14 @@ package com.cleartext.ximpp.views.messages
 						mBlogSender = message.mBlogSender;
 	
 						if(mBlogSender)
+						{
 							mBlogSender.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler, false, 0, true);
+							createButtons(MicroBloggingTypes.RECEIVED);
+						}
+						else
+						{
+							createButtons(null);
+						}
 	
 						avatar.data = mBlogSender;
 					}
@@ -238,21 +173,16 @@ package com.cleartext.ximpp.views.messages
 				dateTextField.width = dateTextField.textWidth + padding*2;
 				dateTextField.styleName = (fromThisUser) ? "lGreySmall" : "blackSmall";
 				
-				bodyTextField.htmlText = message.displayMessage;
+				if(message.displayMessage)
+					bodyTextField.htmlText = message.displayMessage;
+				else
+					bodyTextField.text = message.plainMessage;
+
 				bodyTextField.styleName = (fromThisUser) ? "lGreyNormal" : "blackNormal";
 			}
 					
 			heightInvalid = true;
 			calculateHeight();
-
-//			if(message.sender == "twitter.cleartext.com")
-//				messageType = MicroBloggingTypes.TWEET_RECEIVED;
-//			
-//			if(fromThisUser)
-//			{
-//				messageType = MicroBloggingTypes.TWEET_SENT;
-//				message.status = MessageStatusTypes.SUCCESS;
-//			}
 		}
 		
 		override protected function createChildren():void

@@ -20,7 +20,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public static const CREATE_MICRO_BLOGGING_BUDDIES_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS microBloggingBuddies (" +
 			"microBloggingBuddyId INTEGER PRIMARY KEY AUTOINCREMENT, " +
-			"diplayName TEXT, " +
+			"displayName TEXT, " +
 			"userName TEXT, " +
 			"jid TEXT, " + 
 			"avatarUrl TEXT, " +
@@ -152,7 +152,7 @@ package com.cleartext.ximpp.models.valueObjects
 			return [
 				new DatabaseValue("displayName", displayName),
 				new DatabaseValue("userName", userName),
-				new DatabaseValue("jid", jid),
+				new DatabaseValue("jid", _jid),
 				new DatabaseValue("avatarUrl", avatarUrl),
 				new DatabaseValue("avatarHash", avatarHash),
 				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),

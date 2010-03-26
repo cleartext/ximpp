@@ -6,6 +6,8 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.models.utils.LinkUitls;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
+	import mx.utils.StringUtil;
+	
 	public class Message extends SproutListDataBase
 	{
 		
@@ -114,14 +116,14 @@ package com.cleartext.ximpp.models.valueObjects
 			newMessage.plainMessage = stanza.body;
 			newMessage.rawXML = stanza.xml.toXMLString();
 			
-			if(stanza.html && newMessage.sender == "twitter.cleartext.com")
+			if(stanza.html)
 			{
 				var regexp:RegExp = new RegExp("<img src=\"(.*?)\"[\\s\\S]*?<a.*?>(.*?)<[\\s\\S]*?\\((.*?)\\): ([\\s\\S]*?)</span>", "ig");
 				var result:Array = regexp.exec(stanza.html);
 
 				if(result && result.length > 0)
 				{
-					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[3], "twitter.cleartext.com", result[2], result[1]);
+					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[3], newMessage.recipient, result[2], result[1]);
 					var messageString:String = String(result[4]);
 					newMessage.plainMessage = messageString;
 					
@@ -135,6 +137,8 @@ package com.cleartext.ximpp.models.valueObjects
 					// find @ links
 					var regExp1:RegExp = new RegExp("@(\\w+?)\\b", "ig");
 					messageString = messageString.replace(regExp1, LinkUitls.getStartTag() + "http://twitter.com/$1\">$&" + LinkUitls.endTag);
+					
+					messageString = StringUtil.trim(messageString);
 					
 					newMessage.displayMessage = messageString;
 					return newMessage;
