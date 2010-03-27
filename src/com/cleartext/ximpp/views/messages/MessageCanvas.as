@@ -349,13 +349,23 @@ package com.cleartext.ximpp.views.messages
 		
 		private function doSearch(event:SearchBoxEvent):void
 		{
-			searchString = event.searchString;
+			searchString = event.searchString.toLocaleLowerCase();
 			avatarByIndex(index).chat.messages.refresh();
 		}
 
 		private function filterMessages(message:Message):Boolean
 		{
-			return message.plainMessage.toLowerCase().indexOf(searchString.toLowerCase()) != -1;
+			if(message.mBlogSender)
+			{
+				if(message.mBlogSender.userName.toLowerCase().indexOf(searchString) != -1)
+					return true;
+				if(message.mBlogSender.displayName.toLowerCase().indexOf(searchString) != -1)
+					return true;
+			}
+			if(message.plainMessage.toLocaleLowerCase().indexOf(searchString) != -1)
+				return true;
+
+			return false;
 		}
 			
 		private function avatarClickHandler(event:MouseEvent):void
