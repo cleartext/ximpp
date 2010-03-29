@@ -16,6 +16,7 @@ package com.cleartext.ximpp.models
 	import com.hurlant.crypto.tls.TLSSocket;
 	import com.seesmic.as3.xmpp.IdHandler;
 	import com.seesmic.as3.xmpp.IqStanza;
+	import com.seesmic.as3.xmpp.MessageStanza;
 	import com.seesmic.as3.xmpp.PresenceStanza;
 	import com.seesmic.as3.xmpp.StreamEvent;
 	import com.seesmic.as3.xmpp.XMPP;
@@ -195,7 +196,7 @@ package com.cleartext.ximpp.models
 		 */
 		private function messageHandler(event:XMPPEvent):void
 		{
-			var message:Message = Message.createFromStanza(event.stanza, mBlogBuddies);
+			var message:Message = Message.createFromStanza(event.stanza as MessageStanza, mBlogBuddies);
 			
 			if(message.sender == "twitter.cleartext.com" && message.plainMessage == "The message has been sent")
 				return;
@@ -220,7 +221,7 @@ package com.cleartext.ximpp.models
 				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW, null, buddy));
 			}
 			
-			buddy.lastSeen = message.timestamp;
+			buddy.lastSeen = message.utcTimestamp;
 			buddy.isTyping = false;
 			buddy.resource = event.stanza.from.resource;
 			buddy.unreadMessageCount++;
@@ -497,9 +498,9 @@ package com.cleartext.ximpp.models
 		// SEND MESSAGE
 		//-------------------------------
 		
-		public function sendMessage(toJid:String, body:String, subject:String=null, type:String='chat', chatState:String=null):void
+		public function sendMessage(toJid:String, body:String, subject:String=null, type:String='chat', chatState:String=null, customTags:Array=null):MessageStanza
 		{
-			xmpp.sendMessage(toJid, body, subject, type, chatState);
+			return xmpp.sendMessage(toJid, body, subject, type, chatState, customTags);
 		}
 		
 		//-------------------------------

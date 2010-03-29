@@ -379,7 +379,7 @@ package com.cleartext.ximpp.models
 				}
 				
 				var sort:Sort = new Sort();
-				sort.fields = [new SortField("timestamp", false, true)];
+				sort.fields = [new SortField("utcTimestamp", false, true)];
 				firstTemp.sort = sort;
 				firstTemp.refresh();
 				

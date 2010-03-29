@@ -171,7 +171,7 @@
 	
 	<mx:Label 
 		text="{buddy.nickName}" 
-		x="28" y="6" 
+		x="{buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY ? 10 : 28}" y="6" 
 		styleName="blackBold"/>
 	
 	<mx:Label

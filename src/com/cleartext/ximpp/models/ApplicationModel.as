@@ -2,11 +2,11 @@ package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
-	import com.cleartext.ximpp.models.utils.LinkUitls;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.Status;
+	import com.seesmic.as3.xmpp.MessageStanza;
 	
 	import flash.desktop.NativeApplication;
 	import flash.events.Event;
@@ -42,9 +42,6 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var mBlogBuddies:MicroBloggingModel;
 		
-		[Bindable]
-		public var microBloggingMessages:ArrayCollection = new ArrayCollection();
-
 		[Bindable]
 		public var chats:ArrayCollection = new ArrayCollection();
 		
@@ -228,14 +225,26 @@ package com.cleartext.ximpp.models
 			}
 			else
 			{
-				xmpp.sendMessage(buddy.fullJid, messageString);
-				
-				var message:Message = new Message();
-				message.sender = settings.userAccount.jid;
-				message.recipient = buddy.jid;
-				message.plainMessage = messageString;
-				message.displayMessage = LinkUitls.createLinks(messageString);
-				message.timestamp = new Date();
+				var customTags:Array = new Array();
+
+				if(buddy.microBlogging)
+				{
+					var userName:String = settings.userAccount.jid;
+					userName = userName.substr(0, userName.indexOf("@"));
+					var x:XML = <x xmlns='http://cleartext.net/mblog'/>;
+					var b:XML = <buddy type='sender'/>;
+					b.appendChild(<displayName>{settings.userAccount.nickName}</displayName>);
+					b.appendChild(<userName>{userName}</userName>);
+					b.appendChild(<jid>{settings.userAccount.jid}</jid>);
+					if(settings.userAccount.avatarHash)
+						b.appendChild(<avatar type='hash'>{settings.userAccount.avatarHash}</avatar>);
+					b.appendChild(<serviceJid>{buddy.jid}</serviceJid>);
+					x.appendChild(b);
+					customTags.push(x);
+				}
+
+				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, 'chat', null, customTags);
+				var message:Message = Message.createFromStanza(messageStanza, mBlogBuddies);
 				
 				var c:Chat = getChat(buddy);
 				c.messages.addItemAt(message,0);

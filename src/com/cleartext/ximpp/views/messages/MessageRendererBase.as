@@ -39,7 +39,7 @@ package com.cleartext.ximpp.views.messages
 			super(NaN, 32);
 
 			df = new DateFormatter();
-			df.formatString = "EEE MMM D YYYY at L:NN A";
+			df.formatString = "EEE MMM D YYYY at L:NN:SS A";
 		}
 
 		public function get message():Message

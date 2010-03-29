@@ -4,13 +4,13 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.models.MicroBloggingModel;
 	import com.cleartext.ximpp.models.types.MessageStatusTypes;
 	import com.cleartext.ximpp.models.utils.LinkUitls;
+	import com.seesmic.as3.xmpp.MessageStanza;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
 	import mx.utils.StringUtil;
 	
 	public class Message extends SproutListDataBase
 	{
-		
 		public static const CREATE_MESSAGES_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS messages (" +
 			"messageId INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -28,6 +28,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public var messageId:int = -1;
 		
+		public var utcTimestamp:Date;
 		public var timestamp:Date;
 		public var sender:String;
 		
@@ -67,7 +68,6 @@ package com.cleartext.ximpp.models.valueObjects
 			var newMessage:Message = new Message();
 			
 			newMessage.messageId = obj["messageId"];
-			newMessage.timestamp = new Date(obj["timestamp"]);
 			newMessage.sender = obj["sender"];
 			newMessage.recipient = obj["recipient"];
 			newMessage.subject = obj["subject"];
@@ -77,6 +77,10 @@ package com.cleartext.ximpp.models.valueObjects
 			newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(obj["originalSenderId"]);
 			newMessage.rawXML = obj["rawXML"];
 			
+			var date:Date = new Date(obj["timestamp"]);
+			newMessage.utcTimestamp = date;
+			newMessage.timestamp = new Date(Date.UTC(date.fullYear, date.month, date.date, date.hours, date.minutes, date.seconds, date.milliseconds));			
+
 			return newMessage;
 		}
 		
@@ -85,7 +89,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			var result:Array = [
 				new DatabaseValue("userId", userId),
-				new DatabaseValue("timestamp", timestamp),
+				new DatabaseValue("timestamp", utcTimestamp),
 				new DatabaseValue("sender", sender),
 				new DatabaseValue("recipient", recipient),
 				new DatabaseValue("type", type),
@@ -104,10 +108,9 @@ package com.cleartext.ximpp.models.valueObjects
 			return result;
 		}
 		
-		public static function createFromStanza(stanza:Object, mBlogBuddies:MicroBloggingModel):Message
+		public static function createFromStanza(stanza:MessageStanza, mBlogBuddies:MicroBloggingModel):Message
 		{
 			var newMessage:Message = new Message();
-			newMessage.timestamp = new Date();
 
 			newMessage.sender = stanza.from.getBareJID();
 			newMessage.recipient = stanza.to.getBareJID();
@@ -115,8 +118,33 @@ package com.cleartext.ximpp.models.valueObjects
 			newMessage.subject = stanza.subject;
 			newMessage.plainMessage = stanza.body;
 			newMessage.rawXML = stanza.xml.toXMLString();
+			var date:Date = stanza.utcTimestamp;
+			newMessage.utcTimestamp = date;
+			newMessage.timestamp = new Date(Date.UTC(date.fullYear, date.month, date.date, date.hours, date.minutes, date.seconds, date.milliseconds));
 			
-			if(stanza.html)
+			var valuesSet:Boolean = false;
+
+			var customTags:Array = stanza.customTags;
+			if(customTags.length > 0)
+			{
+				for each(var x:XML in customTags)
+				{
+					for each(var n:Namespace in x.namespaceDeclarations())
+					{
+						if(n.uri == "http://cleartext.net/mblog")
+						{
+							var sBuddy:Object = x.*::buddy.(@type=="sender");
+							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
+									String(sBuddy.*::userName), sBuddy.*::serviceJid, 
+									sBuddy.*::displayName, null, sBuddy.*::jid, 
+									sBuddy.*::avatar.(@type=='hash'));
+						}
+						valuesSet = true;
+					}
+				}
+			}
+			
+			if(!valuesSet && stanza.html)
 			{
 				var regexp:RegExp = new RegExp("<img src=\"(.*?)\"[\\s\\S]*?<a.*?>(.*?)<[\\s\\S]*?\\((.*?)\\): ([\\s\\S]*?)</span>", "ig");
 				var result:Array = regexp.exec(stanza.html);

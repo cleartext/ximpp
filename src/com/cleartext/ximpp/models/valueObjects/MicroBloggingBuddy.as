@@ -14,9 +14,6 @@ package com.cleartext.ximpp.models.valueObjects
 	
 	public class MicroBloggingBuddy extends EventDispatcher implements IBuddy
 	{
-		[Autowire]
-		public var xmpp:XMPPModel;
-		
 		public static const CREATE_MICRO_BLOGGING_BUDDIES_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS microBloggingBuddies (" +
 			"microBloggingBuddyId INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -119,7 +116,7 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 		
-		public function setJidAndHash(newJid:String, hash:String):void
+		public function setJidAndHash(newJid:String, hash:String, xmpp:XMPPModel):void
 		{
 			jid = newJid;
 

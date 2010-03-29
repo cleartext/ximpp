@@ -10,6 +10,9 @@ package com.cleartext.ximpp.models
 		[Autowire]
 		public var database:DatabaseModel;
 		
+		[Autowire]
+		public var xmpp:XMPPModel;
+		
 		private var buddiesById:Dictionary = new Dictionary();
 		
 		public function MicroBloggingModel()
@@ -56,8 +59,8 @@ package com.cleartext.ximpp.models
 			if(avatarUrl)
 				buddy.setAvatarUrl(avatarUrl);
 				
-			if(jid || avatarHash)
-				buddy.setJidAndHash(jid, avatarHash);
+			if(jid)
+				buddy.setJidAndHash(jid, avatarHash, xmpp);
 
 			return buddy;
 		}

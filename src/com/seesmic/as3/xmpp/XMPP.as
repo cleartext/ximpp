@@ -320,14 +320,17 @@ package com.seesmic.as3.xmpp
 			disconnect();
 		}
 		
-		public function sendMessage(tojid:String, msg:String, subject:String=null, type:String='chat', chatStatus:String=null):void {
+		public function sendMessage(tojid:String, msg:String, subject:String=null, type:String='chat', chatStatus:String=null, customTags:Array=null):MessageStanza {
 			var nmsg:MessageStanza = new MessageStanza(this);
 			nmsg.setTo(tojid);
 			nmsg.setFrom(fulljid.toString());
 			nmsg.setBody(msg);
 			nmsg.setType(type);
 			nmsg.setChatState(chatStatus);
+			for each(var x:XML in customTags)
+				nmsg.addCustomTag(x);
 			nmsg.send();
+			return nmsg;
 			//send("<message type='" + type + "' from='" + fulljid.toString() + "' to='" + tojid + "'><body>" + msg + "</body></message>");
 		}
 		
