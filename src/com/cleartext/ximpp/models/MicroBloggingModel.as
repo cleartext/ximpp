@@ -2,6 +2,7 @@ package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
+	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
 	import flash.utils.Dictionary;
 	
@@ -12,6 +13,10 @@ package com.cleartext.ximpp.models
 		
 		[Autowire]
 		public var xmpp:XMPPModel;
+		
+		[Bindable]
+		[Autowire (bean="settings", property="userAccount")]
+		public var userAccount:UserAccount;
 		
 		private var buddiesById:Dictionary = new Dictionary();
 		

@@ -1,7 +1,5 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.models.BuddyModel;
-	import com.cleartext.ximpp.models.XMPPModel;
 	
 	import flash.events.EventDispatcher;
 	
@@ -9,9 +7,6 @@ package com.cleartext.ximpp.models.valueObjects
 	
 	public class Chat extends EventDispatcher
 	{
-		[Autowire]
-		public var xmppModel:XMPPModel;
-		
 		public var buddy:Buddy;
 		public var used:Boolean = true;
 		public var messages:ArrayCollection = new ArrayCollection();

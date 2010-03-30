@@ -229,7 +229,7 @@ package com.cleartext.ximpp.views.messages
 			if(chat.chatState != newState)
 			{
 				chat.chatState = newState;
-				if(sendStanza && xmpp.connected)
+				if(sendStanza && xmpp.connected && !chat.buddy.microBlogging)
 					xmpp.sendMessage(chat.buddy.fullJid, null, null, 'chat', newState);
 			}
 		}

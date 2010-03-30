@@ -125,7 +125,7 @@ package com.cleartext.ximpp.models.valueObjects
 			var valuesSet:Boolean = false;
 
 			var customTags:Array = stanza.customTags;
-			if(customTags.length > 0)
+			if(customTags && customTags.length > 0)
 			{
 				for each(var x:XML in customTags)
 				{
@@ -134,12 +134,26 @@ package com.cleartext.ximpp.models.valueObjects
 						if(n.uri == "http://cleartext.net/mblog")
 						{
 							var sBuddy:Object = x.*::buddy.(@type=="sender");
-							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
-									String(sBuddy.*::userName), sBuddy.*::serviceJid, 
-									sBuddy.*::displayName, null, sBuddy.*::jid, 
-									sBuddy.*::avatar.(@type=='hash'));
+
+							if(sBuddy.*::jid != mBlogBuddies.userAccount.jid)
+							{
+								newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
+										String(sBuddy.*::userName), sBuddy.*::serviceJid, 
+										sBuddy.*::displayName, sBuddy.*::avatar.(@type=='url'),
+										sBuddy.*::jid, sBuddy.*::avatar.(@type=='hash'));
+							}
+							
+							var osBuddy:Object = x.*::buddy.(@type=="originalSender");
+
+							if(osBuddy)
+							{
+								newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(
+										String(osBuddy.*::userName), osBuddy.*::serviceJid, 
+										osBuddy.*::displayName, osBuddy.*::avatar.(@type=='url'),
+										osBuddy.*::jid, osBuddy.*::avatar.(@type=='hash'));
+							}
+							valuesSet = true;
 						}
-						valuesSet = true;
 					}
 				}
 			}
@@ -176,6 +190,5 @@ package com.cleartext.ximpp.models.valueObjects
 			newMessage.displayMessage = LinkUitls.createLinks(newMessage.plainMessage);
 			return newMessage;
 		}
-		
 	}
 }

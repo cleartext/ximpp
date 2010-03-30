@@ -196,11 +196,13 @@ package com.cleartext.ximpp.models
 		 */
 		private function messageHandler(event:XMPPEvent):void
 		{
-			var message:Message = Message.createFromStanza(event.stanza as MessageStanza, mBlogBuddies);
+			var messageStanza:MessageStanza = event.stanza as MessageStanza;
 			
-			if(message.sender == "twitter.cleartext.com" && message.plainMessage == "The message has been sent")
+			if(messageStanza.hasCustomTagWithNamespace("http://process-one.net/threads") &&
+				messageStanza.body == "The message has been sent.")
 				return;
-
+			
+			var message:Message = Message.createFromStanza(messageStanza, mBlogBuddies);
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			
 			if(!buddy)

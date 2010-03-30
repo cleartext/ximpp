@@ -86,6 +86,8 @@ package com.seesmic.as3.xmpp
 			/**/
 		}
 		
+		/** start **/
+		
 		public function parseDate(str:String):Date {
 			var year:Number;
 			var month:Number;
@@ -125,6 +127,18 @@ package com.seesmic.as3.xmpp
 				pad(date.minutes) + ":" + 
 				pad(date.seconds) + "Z";
 		}
+
+		public function hasCustomTagWithNamespace(uri:String):Boolean
+		{
+			for each(var x:XML in customTags)
+				for each(var ns:Namespace in x.namespaceDeclarations())
+					if(ns.uri == uri)
+						return true;
+
+			return false;
+		}
+		
+		/**/
 		
 		public function setTo(nto:String):void {
 			this.to.fromString(nto);
