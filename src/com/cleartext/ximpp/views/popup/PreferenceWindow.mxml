@@ -294,6 +294,41 @@
 		<mx:Text text="please log off to edit account settings" textAlign="center" horizontalCenter="0" verticalCenter="0"/>
 	</mx:Canvas>
 	
+	<mx:Label x="10" y="500" styleName="blackBoldBig" text="Micro Blogging Settings" />
+
+	<mx:HRule left="10" right="10" y="525" />
+
+<!--	<mx:Canvas x="10" y="535">
+		<mx:Form>
+			<mx:FormItem label="nick name:">
+				<mx:VBox>
+					<mx:TextInput id="displayName" change="changesMade = true;" />
+				</mx:VBox>
+			</mx:FormItem>
+			<mx:FormItem label="nick name:">
+				<mx:TextInput id="nickName" change="changesMade = true;" />
+			</mx:FormItem>
+			<mx:FormItem label="profile picture:" direction="horizontal">
+				<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
+			</mx:FormItem>
+			<mx:FormItem label="jid:">
+				<mx:VBox>
+					<mx:TextInput id="jid" change="changesMade = true; validateInput(event, 'jid can not be empty');" focusOut="validateInput(event, 'jid can not be empty'); " />
+				</mx:VBox>
+			</mx:FormItem>
+			<mx:FormItem label="password:">
+				<mx:VBox>
+					<mx:TextInput id="password" displayAsPassword="true" change="changesMade = true; validateInput(event, 'password can not be empty');" focusOut="validateInput(event, 'password can not be empty'); " />
+				</mx:VBox>
+			</mx:FormItem>
+			<mx:FormItem label="server:">
+				<mx:VBox>
+					<mx:TextInput id="server" change="changesMade = true; validateInput(event, 'server can not be empty');" focusOut="validateInput(event, 'server can not be empty'); "  />
+				</mx:VBox>
+			</mx:FormItem>
+		</mx:Form>
+	</mx:Canvas>
+-->
 	<mx:ControlBar/>
 
 </popup:PopupWindowBase>

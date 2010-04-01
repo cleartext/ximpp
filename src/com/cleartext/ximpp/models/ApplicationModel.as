@@ -69,6 +69,9 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var showConsole:Boolean = false;
 
+		[Bindable]
+		public var xmlConsoleText:String = "";
+
 		[Bindable (event="logTextChanged")]
 		public var logText:String = "";
 		public function log(toLog:Object):void

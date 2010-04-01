@@ -205,17 +205,34 @@
 				id="chatCanvas"
 				width="75%"/>
 		</mx:HDividedBox>
-		<mx:TextArea
-			id="console"
-			backgroundColor="0xffffff"
-			width="100%" height="200"
-			text="{appModel.logText}"
-			editable="false"
-			updateComplete="console.verticalScrollPosition = console.maxVerticalScrollPosition"
-			verticalScrollPolicy="on"
-			includeInLayout="{appModel.showConsole}"
-			visible="{appModel.showConsole}"
-			/>
+		<mx:HDividedBox 
+				width="100%" height="200"
+				includeInLayout="{appModel.showConsole}"
+				visible="{appModel.showConsole}">
+			<mx:Canvas
+					backgroundColor="0xffffff"
+					width="100%" height="100%"
+					>
+				<mx:Label text=""
+				<mx:TextArea
+					id="logConsole"
+					width="100%" height="100%"
+					text="{appModel.logText}"
+					editable="false"
+					updateComplete="logConsole.verticalScrollPosition = logConsole.maxVerticalScrollPosition"
+					verticalScrollPolicy="on"
+					/>
+			</mx:Canvas>
+			<mx:TextArea
+				id="xmlConsole"
+				backgroundColor="0xffffff"
+				width="100%" height="100%"
+				text="{appModel.xmlConsoleText}"
+				editable="false"
+				updateComplete="xmlConsole.verticalScrollPosition = xmlConsole.maxVerticalScrollPosition"
+				verticalScrollPolicy="on"
+				/>
+		</mx:HDividedBox>
 	</mx:VDividedBox>
 
 	<mx:Button

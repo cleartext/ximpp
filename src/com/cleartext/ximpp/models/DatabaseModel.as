@@ -196,7 +196,7 @@ package com.cleartext.ximpp.models
 			    syncConn.commit();
 				appModel.log("User settings loaded ");
 
-				settings.userAccount = UserAccount.createFromDB(result.data[0]);
+				settings.userAccount = UserAccount.createFromDB(result.data[0], mBlogBuddies);
 			}
 			else
 			{
@@ -284,7 +284,7 @@ package com.cleartext.ximpp.models
 			{
 				var len:int = result.data.length;
 				for(var i:int=0; i<len; i++)
-					accounts.addItem(UserAccount.createFromDB(result.data[i]));
+					accounts.addItem(UserAccount.createFromDB(result.data[i], mBlogBuddies));
 			}
 			
 		    // if we've got to this point without errors, commit the transaction 

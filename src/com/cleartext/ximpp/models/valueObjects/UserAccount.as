@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.models.valueObjects
 {
+	import com.cleartext.ximpp.models.MicroBloggingModel;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	
 	public class UserAccount extends Buddy
@@ -14,7 +15,8 @@ package com.cleartext.ximpp.models.valueObjects
 			"server TEXT, " +
 			"customStatus TEXT, " +
 			"avatar TEXT, " + 
-			"avatarHash TEXT);";
+			"avatarHash TEXT, " + 
+			"mBlogBuddyId INTEGER);";
 		
 		public function UserAccount()
 		{
@@ -27,8 +29,9 @@ package com.cleartext.ximpp.models.valueObjects
 		public var accountName:String = "new account";
 		public var password:String;
 		public var server:String;
+		public var mBlogBuddy:MicroBloggingBuddy;
 		
-		public static function createFromDB(obj:Object):UserAccount
+		public static function createFromDB(obj:Object, mBlogBuddies:MicroBloggingModel):UserAccount
 		{
 			var newUserAccount:UserAccount = new UserAccount();
 			
@@ -40,6 +43,8 @@ package com.cleartext.ximpp.models.valueObjects
 			newUserAccount.server = obj["server"];
 			newUserAccount.customStatus = obj["customStatus"];
 			newUserAccount.avatarHash = obj["avatarHash"];
+
+			mBlogBuddies.getMicroBloggingBuddy(obj["mBlogBuddyId"] as int);
 			AvatarUtils.stringToAvatar(obj["avatar"], newUserAccount);
 			
 			return newUserAccount;
@@ -60,6 +65,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("avatarHash", avatarHash),
+				new DatabaseValue("mBlogBuddyId", (mBlogBuddy) ? mBlogBuddy.microBloggingBuddyId : null),
 				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar))
 				];			
 		}

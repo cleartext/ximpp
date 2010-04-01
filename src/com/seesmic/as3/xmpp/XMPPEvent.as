@@ -48,5 +48,11 @@ package com.seesmic.as3.xmpp
 			super(type, bubbles, cancelable);
 		}
 		
+		// astewart@cleartext.com
+		override public function clone():Event
+		{
+			return new XMPPEvent(type, bubbles, cancelable, stanza);
+		}
+		
 	}
 }

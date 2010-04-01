@@ -22,6 +22,7 @@ package com.seesmic.as3.xmpp
 
 	import com.seesmic.as3.xmpp.xep.Plugin;
 	
+	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
@@ -104,6 +105,16 @@ package com.seesmic.as3.xmpp
 			setup(this.server, 5222);
 			socket.addEventListener(StreamEvent.DISCONNECTED, handleDisconnected);
 			socket.addEventListener(StreamEvent.CONNECT_FAILED, handleConnectFailed);
+			socket.addEventListener(StreamEvent.COMM_IN,
+				function(e:StreamEvent):void
+				{
+					dispatchEvent(e);
+				});
+			socket.addEventListener(StreamEvent.COMM_OUT,
+				function(e:Event):void
+				{
+					dispatchEvent(e);
+				});
 			reset();
 			return this;
 		}

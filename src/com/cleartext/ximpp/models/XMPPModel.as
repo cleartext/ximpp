@@ -23,6 +23,7 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XMPPEvent;
 	
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 	
 	import org.swizframework.Swiz;
 	
@@ -69,6 +70,10 @@ package com.cleartext.ximpp.models
 		public function XMPPModel()
 		{
 			xmpp = new XMPP();
+			
+			// stream event listeners 
+			xmpp.addEventListener(StreamEvent.COMM_IN, consoleHandler);
+			xmpp.addEventListener(StreamEvent.COMM_OUT, consoleHandler);
 			
 			// event listeners for starting session (this is the order in which
 			// the events are dispatched
@@ -172,6 +177,25 @@ package com.cleartext.ximpp.models
 		public function logHandler(event:Event):void
 		{
 			appModel.log(event);
+		}
+		
+		//-------------------------------
+		// CONSOLE HANDLER
+		//-------------------------------
+		
+		public function consoleHandler(event:StreamEvent):void
+		{
+			if(event.data == "")
+				return;
+
+			appModel.xmlConsoleText += getTimer() + " " ;
+			
+			if(event.type == StreamEvent.COMM_OUT)
+				appModel.xmlConsoleText += "OUT :";
+			else
+				appModel.xmlConsoleText += "IN :";
+			
+			appModel.xmlConsoleText += "\n" + event.data + "\n\n";
 		}
 		
 		//-------------------------------
