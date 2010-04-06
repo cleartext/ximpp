@@ -74,6 +74,11 @@ package com.cleartext.ximpp.models
 
 		[Bindable (event="logTextChanged")]
 		public var logText:String = "";
+		public function resetLog():void
+		{
+			logText = "";
+			dispatchEvent(new Event("logTextChanged"));
+		}
 		public function log(toLog:Object):void
 		{
 			var str:String = getTimer() + " : ";

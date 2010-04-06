@@ -7,14 +7,14 @@ package com.cleartext.ximpp.assets
 		 */
 		
 		// default 0xf7a136
-		public static const THEME_COLOUR:uint = 0xf6971d;
+		public static const THEME_COLOUR:uint = 0xf7a136;
 		// default 0x000000
-		public static const BACKGROUND_COLOUR:uint = 0x006f89;
+		public static const BACKGROUND_COLOUR:uint = 0x000000;
 		// default 0x3e443f
-		public static const BACKGROUND_ACCENT:uint = 0xc7dee8;
+		public static const BACKGROUND_ACCENT:uint = 0x3e443f;
 		
 		// default com/cleartext/ximpp/assets/logo.png ideal height: 30 px
-		[Embed (source="/Users/andy/Downloads/logo.gif")]
+		[Embed (source="com/cleartext/ximpp/assets/logo.png")]
 		public static const Logo:Class;
 		
 		/**

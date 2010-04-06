@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.XmlInputWindow;
 			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.views.popup.PopupWindowBase;
 			import mx.core.UIComponent;
@@ -148,6 +149,11 @@
 				window.message = event.group;
 			}
 
+			[Mediate(event="PopUpEvent.XML_INPUT_WINDOW")]
+			public function showXmlInputWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new XmlInputWindow());
+			}
 			
 			private function initializePopUp(window:IFlexDisplayObject):void
 			{
@@ -205,6 +211,7 @@
 				id="chatCanvas"
 				width="75%"/>
 		</mx:HDividedBox>
+		
 		<mx:HDividedBox 
 				width="100%" height="200"
 				includeInLayout="{appModel.showConsole}"
@@ -213,9 +220,11 @@
 					backgroundColor="0xffffff"
 					width="100%" height="100%"
 					>
-				<mx:Label text=""
+				<mx:Label text="Application Log"/>
+				<mx:Button label="clear" right="10" click="appModel.resetLog()" />
 				<mx:TextArea
 					id="logConsole"
+					y="30"
 					width="100%" height="100%"
 					text="{appModel.logText}"
 					editable="false"
@@ -223,15 +232,23 @@
 					verticalScrollPolicy="on"
 					/>
 			</mx:Canvas>
-			<mx:TextArea
-				id="xmlConsole"
-				backgroundColor="0xffffff"
-				width="100%" height="100%"
-				text="{appModel.xmlConsoleText}"
-				editable="false"
-				updateComplete="xmlConsole.verticalScrollPosition = xmlConsole.maxVerticalScrollPosition"
-				verticalScrollPolicy="on"
-				/>
+			<mx:Canvas
+					backgroundColor="0xffffff"
+					width="100%" height="100%"
+					>
+				<mx:Label text="XML Console"/>
+				<mx:Button label="xml input" right="65" click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.XML_INPUT_WINDOW))"/>
+				<mx:Button label="clear" right="10" click="appModel.xmlConsoleText=''" />
+				<mx:TextArea
+					id="xmlConsole"
+					y="30"
+					width="100%" height="100%"
+					text="{appModel.xmlConsoleText}"
+					editable="false"
+					updateComplete="xmlConsole.verticalScrollPosition = xmlConsole.maxVerticalScrollPosition"
+					verticalScrollPolicy="on"
+					/>
+			</mx:Canvas>
 		</mx:HDividedBox>
 	</mx:VDividedBox>
 

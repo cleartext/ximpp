@@ -2,6 +2,7 @@
 <popup:PopupWindowBase
 	xmlns:popup="com.cleartext.ximpp.views.popup.*"
 	width="500" height="100%"
+	horizontalScrollPolicy="off"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	title="User Preferences"
 	layout="absolute"
@@ -32,6 +33,8 @@
 			import mx.collections.ArrayCollection;
 			
 			public var changesMade:Boolean = false;
+			
+			private static const TEXT_INPUT_WIDTH:Number = 160;
 			
 			private var previousAccount:UserAccount;
 			private function get accountCollection():ArrayCollection
@@ -84,9 +87,6 @@
 					}
 				}
 				
-				if(appModel.serverSideStatus.value == Status.CONNECTING)
-					accountHBox.enabled = false;
-	
 				selectedAccountChanged();
 			}
 		
@@ -128,6 +128,21 @@
 					previousAccount.jid = jid.text;
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
+
+					previousAccount.mBlogPrivateJid = keepJidPrivate.selected;
+					previousAccount.mBlogDisplayName = displayName.text;
+					
+					if(useChatAvatar.selected)
+					{
+						previousAccount.mBlogUseChatAvatar = true;
+						previousAccount.mBlogAvatarUrl = "";
+						previousAccount.mBlogAvatar = null;
+					}
+					else
+					{
+						previousAccount.mBlogUseChatAvatar = false;
+						previousAccount.mBlogAvatarUrl = avatarUrl.text;
+					}
 				}
 				
 				previousAccount = accountList.selectedItem as UserAccount;
@@ -140,6 +155,21 @@
 					jid.text = previousAccount.jid;
 					password.text = previousAccount.password;
 					server.text = previousAccount.server;
+					
+					keepJidPrivate.selected = previousAccount.mBlogPrivateJid;
+					displayName.text = previousAccount.mBlogDisplayName;
+					
+					if(previousAccount.mBlogUseChatAvatar)
+					{
+						useChatAvatar.selected = true;
+						avatarUrl.text = "";
+						avatar.data = null;
+					}
+					else
+					{
+						useChatAvatar.selected = false;
+						avatarUrl.text = previousAccount.mBlogAvatarUrl;
+					}
 				}
 				else
 				{
@@ -218,6 +248,11 @@
 				}
 			}
 			
+			private function getAvatarByUrl():void
+			{
+				
+			}
+			
 			
 		]]>
 	</mx:Script>
@@ -226,109 +261,96 @@
 
 	<mx:HRule left="10" right="10" y="35" />
 
-	<mx:Canvas x="10" y="45">
+	<mx:Canvas left="10" y="45" right="10">
 		<mx:CheckBox label="auto connect" id="autoConnectCheckBox"/>
 		<mx:CheckBox y="30" label="show offline buddies" id="showOfflineBuddiesCheckBox"/>
 		<mx:CheckBox y="60" label="animate buddy list" id="animateBuddyListCheckBox"/>
 		<mx:CheckBox y="90" label="animate message list" id="animateMessageListCheckBox"/>
 	
-		<mx:Canvas x="195">
-			<mx:NumericStepper maximum="1000" minimum="0" id="numTimelineMessages" />
-			<mx:Label x="78" text="max timeline messages" />
-		</mx:Canvas>
-		<mx:Canvas x="195" y="30">
-			<mx:NumericStepper maximum="1000" minimum="0" id="numChatMessages" />
-			<mx:Label x="78" text="max chat messages" />
-		</mx:Canvas>
-		<mx:Canvas x="195" y="60">
-			<mx:ComboBox id="urlShortenComboBox" dataProvider="{UrlShortener.types}"/>
-			<mx:Label x="{urlShortenComboBox.width+4}" text="url shorten service:" y="4"/>
-		</mx:Canvas>
+		<mx:Label right="78" text="max timeline messages" y="4"/>
+		<mx:NumericStepper right="0" maximum="1000" minimum="0" id="numTimelineMessages" />
+
+		<mx:Label right="78" y="34" text="max chat messages" />
+		<mx:NumericStepper right="0" y="30" maximum="1000" minimum="0" id="numChatMessages" />
+
+		<mx:Label right="86" y="64" text="url shortening"/>
+		<mx:ComboBox right="0" width="82" id="urlShortenComboBox" y="60" dataProvider="{UrlShortener.types}"/>
+
 	</mx:Canvas>
 
 	<mx:Label x="10" y="180" styleName="blackBoldBig" text="Account Settings" />
 	
 	<mx:HRule left="10" right="10" y="205" />
 
-	<mx:Canvas id="accountHBox" y="215" right="10" left="10" height="240" enabled="{!xmpp.connected}">
-		<mx:List id="accountList" top="10" bottom="40" width="180" horizontalScrollPolicy="off" labelField="accountName" change="selectedAccountChanged()"/>
-		<popup:AddRemoveButton
-			bottom="15"
-			width="180"
-			addButtonClicked="addAccount()"
-			removeButtonClicked="removeAccount()"/>
+	<mx:Canvas y="215" right="10" left="10" >
 		
-		<mx:Form right="0" height="100%">
+		<mx:List 
+			id="accountList" 
+			top="10" bottom="45" 
+			width="170" 
+			horizontalScrollPolicy="off" 
+			labelField="accountName" 
+			change="selectedAccountChanged()" enabled="false"/>
+
+		<popup:AddRemoveButton
+			bottom="20"
+			width="170"
+			addButtonClicked="addAccount()"
+			removeButtonClicked="removeAccount()" enabled="false" toolTip="multiple accounts comming soon"/>
+		
+		<mx:Form right="0">
 			<mx:FormItem label="account name:">
 				<mx:VBox>
-					<mx:TextInput id="accountName"
+					<mx:TextInput id="accountName" width="{TEXT_INPUT_WIDTH}"
 						focusOut="validateInput(event, 'account name can not be empty')" 
 						change="changesMade = true; validateInput(event, 'account name can not be empty'); if(previousAccount) { previousAccount.accountName = accountName.text; accountCollection.refresh(); }"/>
 				</mx:VBox>
 			</mx:FormItem>
 			<mx:FormItem label="nick name:">
-				<mx:TextInput id="nickName" change="changesMade = true;" />
+				<mx:TextInput id="nickName" change="changesMade = true;" width="{TEXT_INPUT_WIDTH}" />
 			</mx:FormItem>
 			<mx:FormItem label="profile picture:" direction="horizontal">
 				<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
 			</mx:FormItem>
+
 			<mx:FormItem label="jid:">
 				<mx:VBox>
-					<mx:TextInput id="jid" change="changesMade = true; validateInput(event, 'jid can not be empty');" focusOut="validateInput(event, 'jid can not be empty'); " />
+					<mx:TextInput id="jid" enabled="{!xmpp.connected}" toolTip="{!xmpp.connected ? '' : 'log off to make changes'}" change="changesMade = true; validateInput(event, 'jid can not be empty');" focusOut="validateInput(event, 'jid can not be empty'); " width="{TEXT_INPUT_WIDTH}" />
 				</mx:VBox>
 			</mx:FormItem>
 			<mx:FormItem label="password:">
 				<mx:VBox>
-					<mx:TextInput id="password" displayAsPassword="true" change="changesMade = true; validateInput(event, 'password can not be empty');" focusOut="validateInput(event, 'password can not be empty'); " />
+					<mx:TextInput id="password" enabled="{!xmpp.connected}" toolTip="{!xmpp.connected ? '' : 'log off to make changes'}" displayAsPassword="true" change="changesMade = true; validateInput(event, 'password can not be empty');" focusOut="validateInput(event, 'password can not be empty'); " width="{TEXT_INPUT_WIDTH}" />
 				</mx:VBox>
 			</mx:FormItem>
 			<mx:FormItem label="server:">
 				<mx:VBox>
-					<mx:TextInput id="server" change="changesMade = true; validateInput(event, 'server can not be empty');" focusOut="validateInput(event, 'server can not be empty'); "  />
+					<mx:TextInput id="server" enabled="{!xmpp.connected}" toolTip="{!xmpp.connected ? '' : 'log off to make changes'}" change="changesMade = true; validateInput(event, 'server can not be empty');" focusOut="validateInput(event, 'server can not be empty'); " width="{TEXT_INPUT_WIDTH}" />
 				</mx:VBox>
+			</mx:FormItem>
+			
+			<mx:FormHeading label="Micro Blogging Settings" paddingTop="7"/>
+
+			<mx:FormItem height="10">
+				<mx:HRule width="100%" />
+			</mx:FormItem>
+
+			<mx:FormItem label="keep jid private?:" >
+				<mx:CheckBox id="keepJidPrivate" />
+			</mx:FormItem>
+			<mx:FormItem label="display name:">
+				<mx:TextInput id="displayName" change="changesMade = true;" width="{TEXT_INPUT_WIDTH}" />
+			</mx:FormItem>
+			<mx:FormItem label="url:">
+				<mx:TextInput id="avatarUrl" width="{TEXT_INPUT_WIDTH}" enabled="{!useChatAvatar.selected}"/>
+				<mx:CheckBox id="useChatAvatar" label="use default avatar?" />
 			</mx:FormItem>
 		</mx:Form>
+
+		<common:Avatar id="mBlogAvatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" bottom="20" x="190"/>
+
 	</mx:Canvas>
 	
-	<mx:Canvas visible="{!accountHBox.enabled}" width="210" horizontalCenter="0" y="280" height="50" backgroundColor="0xffffff" borderStyle="solid" borderColor="0x444444">
-		<mx:Text text="please log off to edit account settings" textAlign="center" horizontalCenter="0" verticalCenter="0"/>
-	</mx:Canvas>
-	
-	<mx:Label x="10" y="500" styleName="blackBoldBig" text="Micro Blogging Settings" />
-
-	<mx:HRule left="10" right="10" y="525" />
-
-<!--	<mx:Canvas x="10" y="535">
-		<mx:Form>
-			<mx:FormItem label="nick name:">
-				<mx:VBox>
-					<mx:TextInput id="displayName" change="changesMade = true;" />
-				</mx:VBox>
-			</mx:FormItem>
-			<mx:FormItem label="nick name:">
-				<mx:TextInput id="nickName" change="changesMade = true;" />
-			</mx:FormItem>
-			<mx:FormItem label="profile picture:" direction="horizontal">
-				<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
-			</mx:FormItem>
-			<mx:FormItem label="jid:">
-				<mx:VBox>
-					<mx:TextInput id="jid" change="changesMade = true; validateInput(event, 'jid can not be empty');" focusOut="validateInput(event, 'jid can not be empty'); " />
-				</mx:VBox>
-			</mx:FormItem>
-			<mx:FormItem label="password:">
-				<mx:VBox>
-					<mx:TextInput id="password" displayAsPassword="true" change="changesMade = true; validateInput(event, 'password can not be empty');" focusOut="validateInput(event, 'password can not be empty'); " />
-				</mx:VBox>
-			</mx:FormItem>
-			<mx:FormItem label="server:">
-				<mx:VBox>
-					<mx:TextInput id="server" change="changesMade = true; validateInput(event, 'server can not be empty');" focusOut="validateInput(event, 'server can not be empty'); "  />
-				</mx:VBox>
-			</mx:FormItem>
-		</mx:Form>
-	</mx:Canvas>
--->
 	<mx:ControlBar/>
 
 </popup:PopupWindowBase>

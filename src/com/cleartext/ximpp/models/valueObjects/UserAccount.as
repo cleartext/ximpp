@@ -3,6 +3,8 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.models.MicroBloggingModel;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	
+	import flash.display.BitmapData;
+	
 	public class UserAccount extends Buddy
 	{
 		public static const CREATE_USER_ACCOUNTS_TABLE:String =
@@ -16,7 +18,11 @@ package com.cleartext.ximpp.models.valueObjects
 			"customStatus TEXT, " +
 			"avatar TEXT, " + 
 			"avatarHash TEXT, " + 
-			"mBlogBuddyId INTEGER);";
+			"mBlogDisplayName TEXT, " + 
+			"mBlogPrivateJid BOOLEAN, " + 
+			"mBlogUseChatAvatar BOOLEAN, " + 
+			"mBlogAvatar TEXT, " + 
+			"mBlogAvatarUrl TEXT);";
 		
 		public function UserAccount()
 		{
@@ -29,7 +35,12 @@ package com.cleartext.ximpp.models.valueObjects
 		public var accountName:String = "new account";
 		public var password:String;
 		public var server:String;
-		public var mBlogBuddy:MicroBloggingBuddy;
+		
+		public var mBlogDisplayName:String;
+		public var mBlogPrivateJid:Boolean;
+		public var mBlogUseChatAvatar:Boolean;
+		public var mBlogAvatarUrl:String;
+		public var mBlogAvatar:BitmapData;
 		
 		public static function createFromDB(obj:Object, mBlogBuddies:MicroBloggingModel):UserAccount
 		{
@@ -43,9 +54,13 @@ package com.cleartext.ximpp.models.valueObjects
 			newUserAccount.server = obj["server"];
 			newUserAccount.customStatus = obj["customStatus"];
 			newUserAccount.avatarHash = obj["avatarHash"];
+			
+			newUserAccount.mBlogDisplayName = obj["mBlogDisplayName"];
+			newUserAccount.mBlogPrivateJid = obj["mBlogPrivateJid"];
+			newUserAccount.mBlogUseChatAvatar = obj["mBlogUseChatAvatar"];
+			newUserAccount.mBlogAvatarUrl = obj["mBlogAvatarUrl"];
 
-			mBlogBuddies.getMicroBloggingBuddy(obj["mBlogBuddyId"] as int);
-			AvatarUtils.stringToAvatar(obj["avatar"], newUserAccount);
+			AvatarUtils.stringToAvatar(obj["mBlogAvatar"], newUserAccount, "mBlogAvatar");
 			
 			return newUserAccount;
 		}
@@ -65,8 +80,12 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("avatarHash", avatarHash),
-				new DatabaseValue("mBlogBuddyId", (mBlogBuddy) ? mBlogBuddy.microBloggingBuddyId : null),
-				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar))
+				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),
+				new DatabaseValue("mBlogAvatar", AvatarUtils.avatarToString(mBlogAvatar)),
+				new DatabaseValue("mBlogUseChatAvatar", mBlogUseChatAvatar),
+				new DatabaseValue("mBlogPrivateJid", mBlogPrivateJid),
+				new DatabaseValue("mBlogAvatarUrl", mBlogAvatarUrl),
+				new DatabaseValue("mBlogDisplayName", mBlogDisplayName)
 				];			
 		}
 		

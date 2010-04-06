@@ -464,7 +464,7 @@ package com.cleartext.ximpp.models
 			{
 				var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
 				var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
-				AvatarUtils.stringToAvatar(avatarString, buddy);
+				AvatarUtils.stringToAvatar(avatarString, buddy, "avatar");
 			}
 		}
 		
@@ -607,7 +607,12 @@ package com.cleartext.ximpp.models
 			
 			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
 			var buddy:MicroBloggingBuddy = mBlogBuddies.getBuddyByJid(buddyJid);
-			AvatarUtils.stringToAvatar(avatarString, buddy);
+			AvatarUtils.stringToAvatar(avatarString, buddy, "avatar");
+		}
+		
+		public function sendXmlString(xmlString:String):void
+		{
+			xmpp.send(xmlString);
 		}
 	}
 }

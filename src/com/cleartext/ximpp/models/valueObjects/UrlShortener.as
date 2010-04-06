@@ -6,10 +6,20 @@ package com.cleartext.ximpp.models.valueObjects
 	public class UrlShortener
 	{
 		
+		public static const CTR_IM:String = "ctr.im";
 		public static const BIT_LY:String = "bit.ly";
 		public static const IS_GD:String = "is.gd";
 		
-		public static const types:Array = [BIT_LY, IS_GD];
+		public static const types:Array = [CTR_IM, BIT_LY, IS_GD];
+		
+		public static function isLong(url:String):Boolean
+		{
+			for each(var type:String in types)
+				if(url.indexOf("http://" + type) == 0)
+					return false;
+
+			return true;
+		}
 		
 		public var longURL:String = ''
 		public var resultHandler:Function;
@@ -30,7 +40,7 @@ package com.cleartext.ximpp.models.valueObjects
 
 			switch (service)
 			{
-				case BIT_LY :
+				case CTR_IM :
 					srv.method = 'GET';
 					srv.resultFormat = 'array';
 					srv.url = 'http://api.bit.ly/shorten';
@@ -38,6 +48,21 @@ package com.cleartext.ximpp.models.valueObjects
 					params.longUrl = longUrl;
 					params.login = "cleartext";
 					params.apiKey = "R_98fd2ecec7f11a6697af48f3207bd073";
+					params.version = "2.0.1";
+					params.format = 'xml';
+					 
+					srv.addEventListener(ResultEvent.RESULT, callResultHandler);
+					srv.send(params);
+					return;
+
+				case BIT_LY :
+					srv.method = 'GET';
+					srv.resultFormat = 'array';
+					srv.url = 'http://api.bit.ly/shorten';
+					 
+					params.longUrl = longUrl;
+					params.login = "cleartext2";
+					params.apiKey = "R_cd4b248031048fdf982829e9b43138c5";
 					params.version = "2.0.1";
 					params.format = 'xml';
 					 
@@ -57,21 +82,33 @@ package com.cleartext.ximpp.models.valueObjects
 
 		private function callResultHandler(event:ResultEvent):String
 		{
+			var shortUrl:String;
+
 			switch(service)
 			{
-				case BIT_LY :
-					var shortXML:XML = new XML(event.message.body);
-					if(shortXML.child("errorCode").toString() == 0)
-						return resultHandler(shortXML.child("results").child('nodeKeyVal').child("shortUrl").toString());
+				case CTR_IM :
+					var shortCtrimXML:XML = new XML(event.message.body);
+					if(shortCtrimXML.child("errorCode").toString() == 0)
+						shortUrl = shortCtrimXML.child("results").child('nodeKeyVal').child("shortUrl").toString();
 					break;
+
+				case BIT_LY :
+					var shortXML:XMLList = new XML(event.message.body).child("results").child('nodeKeyVal');
+					if(shortXML.child("errorCode").toString() == 0)
+						shortUrl = shortXML.child("shortUrl").toString();
+					break;
+
 				case IS_GD :
-					var shortURL:String = event.message.body.toString();
-					if(shortURL.indexOf("Error: ") != 0)
-						return resultHandler(shortURL);
+					var tempStr:String = event.message.body.toString();
+					if(tempStr.indexOf("Error: ") != 0)
+						shortUrl = tempStr;
 					break;
 			}
 			
-			return resultHandler(longURL); 
+			if(shortUrl)
+				return resultHandler(shortUrl);
+			else
+				return resultHandler(longURL); 
 		}
 	}
 }

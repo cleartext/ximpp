@@ -139,7 +139,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newMicroBloggingBuddy.avatarUrl = obj["avatarUrl"];
 			newMicroBloggingBuddy.avatarHash = obj["avatarHash"];
 			newMicroBloggingBuddy.gatewayJid = obj["gatewayJid"];
-			AvatarUtils.stringToAvatar(obj["avatar"], newMicroBloggingBuddy);
+			AvatarUtils.stringToAvatar(obj["avatar"], newMicroBloggingBuddy, "avatar");
 			
 			return newMicroBloggingBuddy;
 		}

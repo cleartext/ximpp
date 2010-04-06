@@ -285,7 +285,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newBuddy.microBlogging = (groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP) != -1);
 			newBuddy.avatarHash = obj["avatarHash"];
 			newBuddy.subscription = obj["subscription"];
-			AvatarUtils.stringToAvatar(obj["avatar"], newBuddy);
+			AvatarUtils.stringToAvatar(obj["avatar"], newBuddy, "avatar");
 
 			return newBuddy;
 		}

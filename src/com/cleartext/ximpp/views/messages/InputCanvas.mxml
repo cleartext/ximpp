@@ -96,7 +96,7 @@
 				var results:Array = LinkUitls.findLinks(LinkUitls.escapeHTML(inputTextArea.text + str));
 				for each(var lr:LinkResult in results)
 				{
-					if(lr.validLink.indexOf("http://" + settings.global.urlShortener) != 0)
+					if(UrlShortener.isLong(lr.validLink))
 					{
 						shortening = true;
 						var shortener:UrlShortener = new UrlShortener();
