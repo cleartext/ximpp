@@ -71,28 +71,22 @@ package com.cleartext.ximpp.models.utils
 
 		public static function createLinks(plainText:String, escapeHtmlChars:Boolean=true, linkColour:uint=0x0033ff):String
 		{
-			if(escapeHtmlChars)
-				plainText = escapeHTML(plainText);
-			
 			var startTag:String = getStartTag(linkColour);
 			
 			//escape double quotes
 			var linkText:String = plainText;
 			
 			// find any valid urls, this regex will probably produce false positives
-			// find at least 2 non-whitespace chars, then a "." then a valid tld
-			// then either an end of word, or a "/" followed by any amount of 
-			// non-whitespace chars 
-			var regex:RegExp = new RegExp('\\b[^\\s]+?\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b/?',"ig");
+			// find at least 1 non-whitespace char that isn't a " (greedy to get 
+			// .com.au and not just .com), then a "." then a valid tld then either 
+			// an end of word, or a "/" followed by any amount of non-whitespace chars 
+			var regex:RegExp = new RegExp('\\b[^\\s"\']+\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b/?',"ig");
 			// $& returns the match from the regex
 			linkText = linkText.replace(regex, startTag + '$&">$&' + endTag);
 			
 			// if the links created don't have a protocol, then give it an http://
 			regex = new RegExp(startTag + '(?!(' + protocols.join('|') + ')://)', 'ig');
 			linkText = linkText.replace(regex, startTag + 'http://');
-
-//			if(escapeHtmlChars)
-//				linkText = unescapeHTML(linkText);
 
 			return linkText;
 		}

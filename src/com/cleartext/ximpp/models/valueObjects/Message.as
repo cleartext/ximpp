@@ -160,17 +160,29 @@ package com.cleartext.ximpp.models.valueObjects
 			
 			if(!valuesSet && stanza.html)
 			{
-				var regexp:RegExp = new RegExp("<img src=\"(.*?)\"[\\s\\S]*?<a.*?>(.*?)<[\\s\\S]*?\\((.*?)\\): ([\\s\\S]*?)</span>", "ig");
+				var regexpString:String =
+					"<img src=('|\")" + 		// open img tag with src=" or src='
+					"(.*?)" + 					// image url - result[2]
+					"\\1" +			 			// the closing " or '
+					"[\\s\\S]*?" + 				// a lazy amount of any chars
+					"<a.*?>" + 					// a open a tag with any kind of href 
+					"(.*?)<" + 					// the text within the a tag - the display name - result[3]
+					"[\\s\\S]*?" + 				// a lazy amount of any chars
+					"\\((.*?)\\): " + 			// text within (): - the user id - result[4]
+					"([\\s\\S]*?)" + 			// a lazy amount of any chars - the message - result[5]
+					"</span>";					// the closing span tag
+				
+				var regexp:RegExp = new RegExp(regexpString, "ig");
 				var result:Array = regexp.exec(stanza.html);
 
 				if(result && result.length > 0)
 				{
-					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[3], newMessage.recipient, result[2], result[1]);
-					var messageString:String = String(result[4]);
+					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[4], newMessage.recipient, result[3], result[2]);
+					var messageString:String = String(result[5]);
 					newMessage.plainMessage = messageString;
 					
-					// remove <a/> tags
-					messageString = messageString.replace(new RegExp("\\s*<a.*?>(.*?)</a>\\s*", "ig"), " $1 ");
+					// remove all html tags tags
+					messageString = messageString.replace(new RegExp("\\s*<([A-Z][A-Z0-9]*)\\b[^>]*>(.*?)</\\1>\\s*", "ig"), " $2 ");
 					// create links
 					messageString = LinkUitls.createLinks(messageString);
 					// find # links avoiding the # already in font color tags
