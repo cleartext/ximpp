@@ -106,9 +106,15 @@
 			private function userPresenceChangeHandler():void
 			{
 				appModel.setUserPresence(statusComboBox.selectedLabel, customStatusInput.text);
+				// reset the list so there is no item selected in the list
+				statusComboBox.selectedItem = null;
+				// make sure the label is displaying the current status
+				// (it will want to display the value just selected)
+				statusComboBox.text = appModel.serverSideStatus.value;
+				
 				if(xmppModel.connected && microBloggingCheckBox.selected && customStatusInput.text != "")
 				{
-					appModel.getChat(new Buddy("Micro Blogging"));
+					appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
 					Swiz.dispatchEvent(new CustomStatusEvent(CustomStatusEvent.CUSTOM_STATUS_CHANGE, customStatusInput.text));
 				}
 			}
@@ -146,11 +152,9 @@
 		<mx:ComboBox
 			id="statusComboBox"
 			dataProvider="{Status.USER_TYPES}"
-			selectedIndex="{Status.USER_TYPES.indexOf(appModel.localStatus.value)}"
 			change="userPresenceChangeHandler()"
 			right="5" y="3" width="110"
 			text="{appModel.serverSideStatus.value}"
-			creationComplete="statusComboBox.text=appModel.serverSideStatus.value"
 			alpha="0.9"
 			/>
 			

@@ -4,6 +4,7 @@
 	clipContent="false">
 	<mx:Script>
 		<![CDATA[
+			import mx.utils.StringUtil;
 			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.models.utils.LinkResult;
 			import com.cleartext.ximpp.models.utils.LinkUitls;
@@ -43,23 +44,17 @@
 			
 			private function input_keyDownHandler(event:KeyboardEvent):void
 			{ 	
-				event.stopPropagation();
-
 				if(event.keyCode==Keyboard.ENTER)
 				{
-					// if some muppet decides to carry on pressing the enter key
-					// they will start sending blank messages, the inputTextArea.text
-					// length will be 0 becaues the enter hasn't yet been appended to
-					// the text. Use call later to allow the enter to be appended, then
-					// force a reset.
-					if(inputTextArea.text.length == 0)
-						callLater(inputTextArea.reset, [true, false]);
+					if(event.altKey)
+					{
+						var startStr:String = inputTextArea.text.substr(0, inputTextArea.selectionBeginIndex);
+						var endStr:String = inputTextArea.text.substr(inputTextArea.selectionEndIndex);
+						inputTextArea.text = startStr + "\n" + endStr;
+						inputTextArea.setSelection(inputTextArea.selectionBeginIndex + 1, inputTextArea.selectionBeginIndex + 1);
+					}
 					else
 						send();
-				}
-				else
-				{
-					dispatchEvent(event);
 				}
 			}
 			
@@ -72,20 +67,21 @@
 			
 			private function send():void
 			{
-				if(inputTextArea.text.length != 0)
-				{
-					messageCanvas.sendMessage(inputTextArea.text);
-					callLater(inputTextArea.reset, [true, false]);
-				}
+				var trimedText:String = StringUtil.trim(inputTextArea.text);
+				if(trimedText.length != 0)
+					messageCanvas.sendMessage(trimedText);
+
+				callLater(inputTextArea.reset, [true, false]);
 			}
 			
 			[Mediate(event="CustomStatusEvent.CUSTOM_STATUS_CHANGE")]
 			public function setInputField(event:CustomStatusEvent):void
 			{
-				inputTextArea.text = event.customStatus;
-
 				if(inputTextArea.enabled)
+				{
+					inputTextArea.text = event.customStatus;
 					inputTextArea.setFocus();
+				}
 			}
 
 			private function shorten(str:String=" "):void
@@ -201,10 +197,10 @@
 
 	<common:DefaultTextInput
 		id="inputTextArea"
-		defaultText="type message here..."
+		defaultText="Type message here..."
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
-		keyDown="input_keyDownHandler(event)"
 		enabled="{!(!buddy || !xmpp.connected)}"
+		keyDown="input_keyDownHandler(event)"
 		focusRoundedCorners="bl br" 
 		cornerRadius="{CORNER_RADIUS}"
 		textInput="shorten(event.text)" 

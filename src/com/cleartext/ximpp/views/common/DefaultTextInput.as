@@ -5,6 +5,7 @@ package com.cleartext.ximpp.views.common
 	import flash.events.KeyboardEvent;
 	
 	import mx.controls.TextArea;
+	import mx.utils.StringUtil;
 
 	public class DefaultTextInput extends TextArea
 	{

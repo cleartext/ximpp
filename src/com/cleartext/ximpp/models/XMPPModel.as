@@ -138,7 +138,7 @@ package com.cleartext.ximpp.models
 		 		(appModel.localStatus.value == Status.OFFLINE) ? 
 		 		Status.OFFLINE : Status.ERROR;
 
-	 		for each(var buddy:Buddy in buddies.buddies)
+	 		for each(var buddy:Buddy in buddies.buddies.source)
 	 			buddy.status.value = Status.OFFLINE;
 		}
 
@@ -185,17 +185,7 @@ package com.cleartext.ximpp.models
 		
 		public function consoleHandler(event:StreamEvent):void
 		{
-			if(event.data == "")
-				return;
-
-			appModel.xmlConsoleText += getTimer() + " " ;
-			
-			if(event.type == StreamEvent.COMM_OUT)
-				appModel.xmlConsoleText += "OUT :";
-			else
-				appModel.xmlConsoleText += "IN :";
-			
-			appModel.xmlConsoleText += "\n" + event.data + "\n\n";
+			appModel.xmlStreamHandler(event);
 		}
 		
 		//-------------------------------

@@ -83,7 +83,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		
 		// find a status value from what the xmpp libray tells us
-		public function setFromStanzaType(type:String):Boolean
+		public function setFromStanzaType(type:String):void
 		{
 			switch(type)
 			{
@@ -97,10 +97,10 @@ package com.cleartext.ximpp.models.valueObjects
 				case "dnd":				value = BUSY; break;
 				case "inactive" :		value = EXTENDED_AWAY; break;
 				case "xa":				value = EXTENDED_AWAY; break;
-				case "error":			value = ERROR; return true;
+				case "error":			value = UNKNOWN; return;
 				default:				value = UNKNOWN + ": " + type;
 			}
-			return false;
+			return;
 		}
 		
 		// generate something the xmpp library will understand
@@ -129,12 +129,10 @@ package com.cleartext.ximpp.models.valueObjects
 					return 2;
 				case EXTENDED_AWAY :
 					return 3;
-				case ERROR :
+				case UNKNOWN :
 					return 4;
 				case UNSUBSCRIBED :
 					return 5;
-				case UNKNOWN :
-					return 6;
 				default :
 					return 7;
 			}

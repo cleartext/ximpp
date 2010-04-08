@@ -41,8 +41,6 @@ package com.cleartext.ximpp.views.common
 			status.addEventListener(StatusEvent.STATUS_CHANGED, statusChanged);
 		}
 		
-//		private var textArea:UITextField;
-		
 		private var _status:Status = new Status();
 		public function get status():Status
 		{
@@ -85,17 +83,6 @@ package com.cleartext.ximpp.views.common
 					break;
 			}
 			
-//			if(status.numUnread > 0)
-//			{
-//				textArea.text = status.numUnread.toString();
-//				textArea.visible = true;
-//			}
-//			else
-//			{
-//				textArea.text = "";
-//				textArea.visible = false;
-//			}
-			
 			invalidateDisplayList();
 		}
 		
@@ -103,91 +90,11 @@ package com.cleartext.ximpp.views.common
 		{
 			_status.value = statusString;
 		}
-
-		override protected function createChildren():void
-		{
-			super.createChildren();
-			
-//			if(!textArea)
-//			{
-//				textArea = new UITextField();
-//				textArea.visible = false;
-//				textArea.width = SIZE;
-//				textArea.height = SIZE;
-//				addChild(textArea);
-//			}
-			
-		}
 		
-		private var showCloseIcon:Boolean = false;
-		private var buttonModeChanged:Boolean = false;
-		
-		override public function get buttonMode():Boolean
-		{
-			return super.buttonMode;
-		}
-		override public function set buttonMode(value:Boolean):void
-		{
-			if(super.buttonMode != value)
-			{
-				super.buttonMode = value;
-				buttonModeChanged = true;
-				invalidateProperties();
-			}
-		}
-		
-		override protected function commitProperties():void
-		{
-			super.commitProperties();
-			
-			if(buttonModeChanged)
-			{
-				if(buttonMode)
-				{
-					trace("adding listeners");
-					addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
-					addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
-					addEventListener(MouseEvent.CLICK, clickHandler);
-				}
-				else
-				{
-					removeEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
-					removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
-					removeEventListener(MouseEvent.CLICK, clickHandler);
-				}
-				buttonModeChanged = false;
-			}
-		}
-		
-		private function rollOverHandler(event:MouseEvent):void
-		{
-			trace("over 1");
-			showCloseIcon = true;
-			invalidateDisplayList();
-		}
-		
-		private function rollOutHandler(event:MouseEvent):void
-		{
-			trace("over 2");
-			showCloseIcon = false;
-			invalidateDisplayList();
-		}
-		
-		private function clickHandler(event:MouseEvent):void
-		{
-			trace("click");
-//			dispatchEvent(new StatusEvent(AvatarEvent.EDIT_CLICKED));
-		}
-
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			var g:Graphics = graphics;
 			g.clear();
-
-//			var matr2:Matrix = new Matrix();
-//			matr2.createGradientBox(SIZE, SIZE/6, 0, 0, SIZE*11/12);
-//			g.beginGradientFill(GradientType.RADIAL, [SHADDOW, SHADDOW], [0.3, 0], [0x77, 0xFF], matr2);  
-//			g.drawEllipse(0, SIZE*11/12, SIZE, SIZE/6);
 
 			var matr1:Matrix = new Matrix();
 			matr1.createGradientBox(SIZE, SIZE, Math.PI/2, 0, 0);
@@ -197,22 +104,6 @@ package com.cleartext.ximpp.views.common
 			g.beginGradientFill(GradientType.LINEAR, [0x636363, 0xe5e5e5], [1, 1], [0x00, 0xFF], matr1);
 			g.drawCircle(SIZE/2, SIZE/2, SIZE/2);
 			g.drawCircle(SIZE/2, SIZE/2, SIZE/2-1);
-			
-//			if(status.edit)
-//			{
-//				var editBitmapData:BitmapData = new EditIcon().bitmapData;
-//				var scale1:Number = SIZE / Math.max(editBitmapData.width, editBitmapData.height);
-//				g.beginBitmapFill(editBitmapData, new Matrix(scale1, 0, 0, scale1));
-//				g.drawRect(0,0,SIZE,SIZE);
-//			}
-//			
-//			if(showCloseIcon)
-//			{
-//				var closeBitmapData:BitmapData = new CloseIcon().bitmapData;
-//				var scale2:Number = (SIZE-2) / Math.max(closeBitmapData.width, closeBitmapData.height);
-//				g.beginBitmapFill(closeBitmapData, new Matrix(scale2, 0, 0, scale2, 1, 1));
-//				g.drawRect(1,1,SIZE-2,SIZE-2);
-//			}
 		}
 
 	}

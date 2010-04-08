@@ -221,6 +221,7 @@
 					width="100%" height="100%"
 					>
 				<mx:Label text="Application Log"/>
+				<mx:CheckBox x="105" label="enabled" selected="{appModel.logEnabled}" change="appModel.logEnabled = !appModel.logEnabled" />
 				<mx:Button label="clear" right="10" click="appModel.resetLog()" />
 				<mx:TextArea
 					id="logConsole"
@@ -237,8 +238,9 @@
 					width="100%" height="100%"
 					>
 				<mx:Label text="XML Console"/>
+				<mx:CheckBox x="85" label="enabled" selected="{appModel.xmlConsoleEnabled}" change="appModel.xmlConsoleEnabled = !appModel.xmlConsoleEnabled" />
 				<mx:Button label="xml input" right="65" click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.XML_INPUT_WINDOW))"/>
-				<mx:Button label="clear" right="10" click="appModel.xmlConsoleText=''" />
+				<mx:Button label="clear" right="10" click="appModel.resetXmlConsole()" />
 				<mx:TextArea
 					id="xmlConsole"
 					y="30"

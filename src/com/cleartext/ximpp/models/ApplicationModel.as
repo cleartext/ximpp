@@ -7,6 +7,7 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.seesmic.as3.xmpp.MessageStanza;
+	import com.seesmic.as3.xmpp.StreamEvent;
 	
 	import flash.desktop.NativeApplication;
 	import flash.events.Event;
@@ -69,8 +70,34 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var showConsole:Boolean = false;
 
-		[Bindable]
+		[Bindable (event="xmlConsoleTextChanged")]
 		public var xmlConsoleText:String = "";
+		public function resetXmlConsole():void
+		{
+			xmlConsoleText = "";
+			dispatchEvent(new Event("xmlConsoleTextChanged"));
+		}
+		public function xmlStreamHandler(event:StreamEvent):void
+		{
+			if(!xmlConsoleEnabled || event.data == "")
+				return;
+			
+			xmlConsoleText += getTimer() + " " ;
+			
+			if(event.type == StreamEvent.COMM_OUT)
+				xmlConsoleText += "OUT :";
+			else
+				xmlConsoleText += "IN :";
+			
+			xmlConsoleText += "\n" + event.data + "\n\n";
+			dispatchEvent(new Event("xmlConsoleTextChanged"));
+		}
+		
+		[Bindable]
+		public var xmlConsoleEnabled:Boolean = false;
+
+		[Bindable]
+		public var logEnabled:Boolean = false;
 
 		[Bindable (event="logTextChanged")]
 		public var logText:String = "";
@@ -82,25 +109,33 @@ package com.cleartext.ximpp.models
 		public function log(toLog:Object):void
 		{
 			var str:String = getTimer() + " : ";
+			var traceStr:String = getTimer() + " : ";
+
 			if(toLog is String)
 			{
 				str += toLog;
-				logText += str + "\n";
-				trace(str);
+				traceStr += toLog;
 			}
 			else if(toLog is Event)
 			{
 				var event:Event = toLog as Event;
-				logText += str + event.type + "\n\t";
-				trace(str + event);
+				str += event.type;
+				traceStr += event.toString();
 			}
 			else if(toLog is Error)
 			{
 				var error:Error = toLog as Error;
-				logText += str + error.name + "\n\t";
-				trace(str + error);
+				str += error.name;
+				traceStr += error.toString();
 			}
-			dispatchEvent(new Event("logTextChanged"));
+
+			if(logEnabled)
+			{
+				logText += str + "\n";
+				dispatchEvent(new Event("logTextChanged"));
+			}
+
+			trace(traceStr);
 		}
 		
 		public function ApplicationModel()
@@ -130,20 +165,26 @@ package com.cleartext.ximpp.models
 			
 		public function setUserPresence(statusString:String, customStatus:String):void
 		{
+			// check this is a value that can be set by a user 
+			// (ie. OFFLINE, AVAILABLE, BUSY, AWAY)
 			if(Status.USER_TYPES.indexOf(statusString) != -1)
 				localStatus.value = statusString;
 	
+			// if there is no user account, or there is no change
+			// in the status or customStatus, then return
 			if(!settings.userAccount ||
 				localStatus.value == serverSideStatus.value && 
 				customStatus == settings.userAccount.customStatus)
 				return;
 			
+			// save the customStatus
 			if(customStatus != settings.userAccount.customStatus)
 			{
 				settings.userAccount.customStatus = customStatus;
 				database.saveUserAccount(settings.userAccount);
 			}
 
+			// send the presence stanza
 			xmpp.sendPresence();
 		}
 
