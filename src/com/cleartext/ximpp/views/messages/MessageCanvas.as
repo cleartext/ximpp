@@ -367,7 +367,7 @@ package com.cleartext.ximpp.views.messages
 
 			return false;
 		}
-			
+		
 		private function avatarClickHandler(event:MouseEvent):void
 		{
 			setCurrentChat((event.currentTarget as AvatarTab).chat);

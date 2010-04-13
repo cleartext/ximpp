@@ -3,6 +3,7 @@ package com.cleartext.ximpp.views.messages
 	import flash.display.GradientType;
 	import flash.display.Graphics;
 	import flash.geom.Matrix;
+	import flash.text.TextFieldAutoSize;
 	
 	public class ChatRenderer extends MessageRendererBase
 	{
@@ -71,7 +72,8 @@ package com.cleartext.ximpp.views.messages
 			nameTextField.x = avatarSize + 5*padding;
 
 			dateTextField.y = padding + 2;
-			dateTextField.x = width - dateTextField.width - 2*padding;	
+			dateTextField.x = width - dateTextField.width - 2*padding;
+			dateTextField.autoSize = TextFieldAutoSize.RIGHT;
 
 			bodyTextField.x = avatarSize + 5*padding;
 		}

@@ -74,6 +74,7 @@
 				showOfflineBuddiesCheckBox.selected = settings.global.showOfflineBuddies;
 				numTimelineMessages.value = settings.global.numTimelineMessages;
 				numChatMessages.value = settings.global.numChatMessages;
+				messageSortComboBox.selectedItem = (settings.global.sortByTimestamp) ? "date sent" : "date received";
 				
 				// load user accounts
 				accountList.dataProvider = database.getAllUserAccounts();
@@ -102,6 +103,7 @@
 				settings.global.showOfflineBuddies = showOfflineBuddiesCheckBox.selected;
 				settings.global.numTimelineMessages = numTimelineMessages.value;
 				settings.global.numChatMessages = numChatMessages.value;
+				settings.global.sortByTimestamp = (messageSortComboBox.selectedItem == "date sent");
 				
 				for each(var userId:int in accountsToDelete)
 					database.removeAccount(userId);
@@ -129,20 +131,20 @@
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
 
-					previousAccount.mBlogPrivateJid = keepJidPrivate.selected;
-					previousAccount.mBlogDisplayName = displayName.text;
-					
-					if(useChatAvatar.selected)
-					{
-						previousAccount.mBlogUseChatAvatar = true;
-						previousAccount.mBlogAvatarUrl = "";
-						previousAccount.mBlogAvatar = null;
-					}
-					else
-					{
-						previousAccount.mBlogUseChatAvatar = false;
-						previousAccount.mBlogAvatarUrl = avatarUrl.text;
-					}
+//					previousAccount.mBlogPrivateJid = keepJidPrivate.selected;
+//					previousAccount.mBlogDisplayName = displayName.text;
+//					
+//					if(useChatAvatar.selected)
+//					{
+//						previousAccount.mBlogUseChatAvatar = true;
+//						previousAccount.mBlogAvatarUrl = "";
+//						previousAccount.mBlogAvatar = null;
+//					}
+//					else
+//					{
+//						previousAccount.mBlogUseChatAvatar = false;
+//						previousAccount.mBlogAvatarUrl = avatarUrl.text;
+//					}
 				}
 				
 				previousAccount = accountList.selectedItem as UserAccount;
@@ -156,20 +158,20 @@
 					password.text = previousAccount.password;
 					server.text = previousAccount.server;
 					
-					keepJidPrivate.selected = previousAccount.mBlogPrivateJid;
-					displayName.text = previousAccount.mBlogDisplayName;
-					
-					if(previousAccount.mBlogUseChatAvatar)
-					{
-						useChatAvatar.selected = true;
-						avatarUrl.text = "";
-						avatar.data = null;
-					}
-					else
-					{
-						useChatAvatar.selected = false;
-						avatarUrl.text = previousAccount.mBlogAvatarUrl;
-					}
+//					keepJidPrivate.selected = previousAccount.mBlogPrivateJid;
+//					displayName.text = previousAccount.mBlogDisplayName;
+//					
+//					if(previousAccount.mBlogUseChatAvatar)
+//					{
+//						useChatAvatar.selected = true;
+//						avatarUrl.text = "";
+//						avatar.data = null;
+//					}
+//					else
+//					{
+//						useChatAvatar.selected = false;
+//						avatarUrl.text = previousAccount.mBlogAvatarUrl;
+//					}
 				}
 				else
 				{
@@ -266,15 +268,18 @@
 		<mx:CheckBox y="30" label="show offline buddies" id="showOfflineBuddiesCheckBox"/>
 		<mx:CheckBox y="60" label="animate buddy list" id="animateBuddyListCheckBox"/>
 		<mx:CheckBox y="90" label="animate message list" id="animateMessageListCheckBox"/>
+
+		<mx:Label right="106" y="4" text="sort messages by:"/>
+		<mx:ComboBox right="0" width="102" id="messageSortComboBox" dataProvider="{['date sent', 'date received']}"/>
 	
-		<mx:Label right="78" text="max timeline messages" y="4"/>
-		<mx:NumericStepper right="0" maximum="1000" minimum="0" id="numTimelineMessages" />
+		<mx:Label right="78" y="34" text="max timeline messages"/>
+		<mx:NumericStepper right="0" y="30" maximum="1000" minimum="0" id="numTimelineMessages" />
 
-		<mx:Label right="78" y="34" text="max chat messages" />
-		<mx:NumericStepper right="0" y="30" maximum="1000" minimum="0" id="numChatMessages" />
+		<mx:Label right="78" y="64" text="max chat messages" />
+		<mx:NumericStepper right="0" y="60" maximum="1000" minimum="0" id="numChatMessages" />
 
-		<mx:Label right="86" y="64" text="url shortening"/>
-		<mx:ComboBox right="0" width="82" id="urlShortenComboBox" y="60" dataProvider="{UrlShortener.types}"/>
+		<mx:Label right="86" y="94" text="url shortening"/>
+		<mx:ComboBox right="0" width="82" id="urlShortenComboBox" y="90" dataProvider="{UrlShortener.types}"/>
 
 	</mx:Canvas>
 
@@ -329,7 +334,7 @@
 				</mx:VBox>
 			</mx:FormItem>
 			
-			<mx:FormHeading label="Micro Blogging Settings" paddingTop="7"/>
+			<!--<mx:FormHeading label="Micro Blogging Settings" paddingTop="7"/>
 
 			<mx:FormItem height="10">
 				<mx:HRule width="100%" />
@@ -344,10 +349,10 @@
 			<mx:FormItem label="url:">
 				<mx:TextInput id="avatarUrl" width="{TEXT_INPUT_WIDTH}" enabled="{!useChatAvatar.selected}"/>
 				<mx:CheckBox id="useChatAvatar" label="use default avatar?" />
-			</mx:FormItem>
+			</mx:FormItem>-->
 		</mx:Form>
 
-		<common:Avatar id="mBlogAvatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" bottom="20" x="190"/>
+		<!--<common:Avatar id="mBlogAvatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" bottom="20" x="190"/>-->
 
 	</mx:Canvas>
 	

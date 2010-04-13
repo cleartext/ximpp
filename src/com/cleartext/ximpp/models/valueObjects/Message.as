@@ -32,6 +32,13 @@ package com.cleartext.ximpp.models.valueObjects
 		public var timestamp:Date;
 		public var sender:String;
 		
+		public function get time():Number
+		{
+			if(utcTimestamp)
+				return utcTimestamp.time;
+			return 0;
+		}
+		
 		private var _status:String = MessageStatusTypes.UNKNOWN;
 		[Bindable(event="messageStatusChanged")]
 		public function get status():String
@@ -152,6 +159,11 @@ package com.cleartext.ximpp.models.valueObjects
 										osBuddy.*::displayName, osBuddy.*::avatar.(@type=='url'),
 										osBuddy.*::jid, osBuddy.*::avatar.(@type=='hash'));
 							}
+							
+							var text:String = x.*::text;
+							if(text)
+								newMessage.displayMessage = LinkUitls.createLinks(text);
+
 							valuesSet = true;
 						}
 					}
@@ -160,20 +172,23 @@ package com.cleartext.ximpp.models.valueObjects
 			
 			if(!valuesSet && stanza.html)
 			{
+				// condense whitespace
+				var htmlStanza:String = stanza.html.replace(new RegExp("\\s+", "ig"), " ");
+					
 				var regexpString:String =
 					"<img src=('|\")" + 		// open img tag with src=" or src='
 					"(.*?)" + 					// image url - result[2]
 					"\\1" +			 			// the closing " or '
 					"[\\s\\S]*?" + 				// a lazy amount of any chars
 					"<a.*?>" + 					// a open a tag with any kind of href 
-					"(.*?)<" + 					// the text within the a tag - the display name - result[3]
+					"([\\s\\S]*?)<" + 			// the text within the a tag - the display name - result[3]
 					"[\\s\\S]*?" + 				// a lazy amount of any chars
-					"\\((.*?)\\): " + 			// text within (): - the user id - result[4]
+					"\\((.*?)\\): ?" + 			// text within (): - the user id - result[4]
 					"([\\s\\S]*?)" + 			// a lazy amount of any chars - the message - result[5]
 					"</span>";					// the closing span tag
 				
 				var regexp:RegExp = new RegExp(regexpString, "ig");
-				var result:Array = regexp.exec(stanza.html);
+				var result:Array = regexp.exec(htmlStanza);
 
 				if(result && result.length > 0)
 				{
@@ -181,18 +196,29 @@ package com.cleartext.ximpp.models.valueObjects
 					var messageString:String = String(result[5]);
 					newMessage.plainMessage = messageString;
 					
-					// remove all html tags tags
-					messageString = messageString.replace(new RegExp("\\s*<([A-Z][A-Z0-9]*)\\b[^>]*>(.*?)</\\1>\\s*", "ig"), " $2 ");
+					// remove all tags apart from <b></b>		
+					var tmpStr:String;
+					while(tmpStr != messageString)
+					{
+						tmpStr = messageString;
+						messageString = messageString.replace(new RegExp("\\s*<([AC-Z][A-Z0-9]*)\\b[^>]*?>(.*?)</\\1>\\s*", "ig"), " $2 ");
+					}
+	
+					// condense whitespace
+					messageString = messageString.replace(new RegExp("\\s+", "ig"), " ");
+					// deal with special case with hashtags with bold tags
+					messageString = messageString.replace("# <b>", "#<b>");
+					// trim whitspace off the ends
+					messageString = StringUtil.trim(messageString);
+					
 					// create links
 					messageString = LinkUitls.createLinks(messageString);
 					// find # links avoiding the # already in font color tags
-					var regExp2:RegExp = new RegExp("((?<!<FONT COLOR=\")#|^#)(\\w+?)\\b", "ig");
+					var regExp2:RegExp = new RegExp("((?<!<FONT COLOR=\")#|^#)([\\w<>]+?)\\b", "ig");
 					messageString = messageString.replace(regExp2, LinkUitls.getStartTag() + "http://twitter.com/search?q=%23$2\">$&" + LinkUitls.endTag);
 					// find @ links
 					var regExp1:RegExp = new RegExp("@(\\w+?)\\b", "ig");
 					messageString = messageString.replace(regExp1, LinkUitls.getStartTag() + "http://twitter.com/$1\">$&" + LinkUitls.endTag);
-					
-					messageString = StringUtil.trim(messageString);
 					
 					newMessage.displayMessage = messageString;
 					return newMessage;

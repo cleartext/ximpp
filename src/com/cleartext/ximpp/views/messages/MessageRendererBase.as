@@ -1,12 +1,14 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.models.ApplicationModel;
-	import com.cleartext.ximpp.models.utils.LinkUitls;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.universalsprout.flex.components.list.SproutListItemBase;
+	
+	import flash.text.TextFieldAutoSize;
+	import flash.text.TextFieldType;
 	
 	import mx.core.UITextField;
 	import mx.formatters.DateFormatter;
@@ -116,22 +118,39 @@ package com.cleartext.ximpp.views.messages
 				addChild(avatar);
 			}
 			
-			if(!nameTextField)
-			{
-				nameTextField = new UITextField();
-				addChild(nameTextField);
-			}
-
 			if(!dateTextField)
 			{
 				dateTextField = new UITextField();
+				dateTextField.autoSize = TextFieldAutoSize.NONE;
+				dateTextField.ignorePadding = true;
+				dateTextField.multiline = false;
+				dateTextField.selectable = true;
+				dateTextField.type = TextFieldType.DYNAMIC;
+				dateTextField.wordWrap = false;
 				addChild(dateTextField);
+			}
+
+			if(!nameTextField)
+			{
+				nameTextField = new UITextField();
+				nameTextField.autoSize = TextFieldAutoSize.NONE;
+				nameTextField.ignorePadding = true;
+				nameTextField.multiline = false;
+				nameTextField.selectable = true;
+				nameTextField.type = TextFieldType.DYNAMIC;
+				nameTextField.wordWrap = false;
+				addChild(nameTextField);
 			}
 
 			if(!bodyTextField)
 			{
 				bodyTextField = new UITextField();
+				bodyTextField.autoSize = TextFieldAutoSize.NONE;
+				bodyTextField.ignorePadding = true;
+				bodyTextField.multiline = true;
 				bodyTextField.selectable = true;
+				bodyTextField.type = TextFieldType.DYNAMIC;
+				bodyTextField.wordWrap = true;
 				addChild(bodyTextField);
 			}
 		}

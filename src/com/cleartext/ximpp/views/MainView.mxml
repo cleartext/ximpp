@@ -260,6 +260,7 @@
 		downIcon="{Constants.SendUp}"
 		disabledIcon="{Constants.SendDisabled}"
 		toolTip="send message"
+		focusEnabled="false"
 		enabled="{xmppConnected}"
 		right="10" y="{30 + headerCanvas.height}"
 		width="50" height="50"

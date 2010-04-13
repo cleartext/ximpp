@@ -59,13 +59,7 @@
 			}
 			
 			[Mediate(event="SendButtonEvent.SEND_CLICKED")]
-			public function send_clickHandler(event:SendButtonEvent):void
-			{
-				inputTextArea.setFocus();
-				send();
-			}
-			
-			private function send():void
+			private function send(event:SendButtonEvent=null):void
 			{
 				var trimedText:String = StringUtil.trim(inputTextArea.text);
 				if(trimedText.length != 0)

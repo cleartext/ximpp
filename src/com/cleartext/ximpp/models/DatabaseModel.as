@@ -1,32 +1,26 @@
 package com.cleartext.ximpp.models
 {
-	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
-	import com.cleartext.ximpp.views.common.Avatar;
 	
 	import flash.data.SQLConnection;
 	import flash.data.SQLMode;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.SQLErrorEvent;
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
-	import flash.geom.Matrix;
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
-	import mx.controls.Image;
 	
 	public class DatabaseModel extends EventDispatcher
 	{
@@ -369,56 +363,45 @@ package com.cleartext.ximpp.models
 		
 		public function loadMessages(buddy:Buddy):ArrayCollection
 		{
-			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			var sortType:String = (settings.global.sortByTimestamp) ? "timestamp" : "messageId";
+
+			// start a transaction 
+			syncConn.begin(); 
+			appModel.log("Loading messages with " + buddy.jid);
+			
+			var stmt:SQLStatement = new SQLStatement();
+			stmt.sqlConnection = syncConn;
+			var sql:String = "Select * from messages WHERE userid=" + settings.userId
+				+ " AND (";
+			
+			var buddyArray:Array = (buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? buddies.microBloggingBuddies.toArray() : [buddy];
+			for each(var b:Buddy in buddyArray)
+				sql += "sender='" + b.jid + "' OR recipient='" + b.jid + "' OR ";
+
+			sql = sql.substr(0, sql.length-4);
+			sql += ") ORDER BY " + sortType + " DESC "
+					+ "LIMIT 0," + 
+					((buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? settings.global.numTimelineMessages : settings.global.numChatMessages);
+			stmt.text = sql;
+			stmt.execute();
+			var result:SQLResult = stmt.getResult();
+		    syncConn.commit(); 
+
+			var messages:ArrayCollection = new ArrayCollection();
+			
+			if(result && result.data)
 			{
-				var firstTemp:ArrayCollection = new ArrayCollection();
-				for each(var buddy:Buddy in buddies.microBloggingBuddies)
-				{
-					for each(var message:Message in loadMessages(buddy))
-						firstTemp.addItem(message);
-				}
-				
-				var sort:Sort = new Sort();
-				sort.fields = [new SortField("utcTimestamp", false, true)];
-				firstTemp.sort = sort;
-				firstTemp.refresh();
-				
-				var secondTemp:ArrayCollection = new ArrayCollection();
-				var numTimeline:int = Math.min(firstTemp.length, settings.global.numTimelineMessages);
-				for(var index:int=0; index<numTimeline; index++)
-					secondTemp.addItem(firstTemp.getItemAt(index));
-				
-				return secondTemp;
+				var len:int = result.data.length;
+				for(var i:int=0; i<len; i++)
+					messages.addItem(Message.createFromDB(result.data[i], mBlogBuddies));
 			}
-			else
-			{
-				// start a transaction 
-				syncConn.begin(); 
-				appModel.log("Loading messages with " + buddy.jid);
-				
-				var stmt:SQLStatement = new SQLStatement();
-				stmt.sqlConnection = syncConn;
-				stmt.text = "Select * from messages WHERE userid=" + settings.userId
-					+ " AND (sender='" + buddy.jid + "'"
-					+ " OR recipient='" + buddy.jid + "')"
-					+ " ORDER BY timestamp DESC "
-					+ "LIMIT 0," + settings.global.numChatMessages;
-				stmt.execute();
-				var result:SQLResult = stmt.getResult();
-			    syncConn.commit(); 
-	
-				var messages:ArrayCollection = new ArrayCollection();
-				
-				if(result && result.data)
-				{
-					var len:int = result.data.length;
-					for(var i:int=0; i<len; i++)
-						messages.addItem(Message.createFromDB(result.data[i], mBlogBuddies));
-				}
-			    // if we've got to this point without errors, commit the transaction 
-				appModel.log("Messages loaded");
-				return messages;
-			}
+		    // if we've got to this point without errors, commit the transaction 
+			appModel.log("Messages loaded");
+
+			var sort:Sort = new Sort();
+			sort.fields = [new SortField(sortType, false, true)];
+			messages.sort = sort;
+			return messages;
 		}
 		
 		private function insertStmt(table:String, values:Array):int

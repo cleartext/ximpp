@@ -212,8 +212,7 @@ package com.cleartext.ximpp.models
 		{
 			var messageStanza:MessageStanza = event.stanza as MessageStanza;
 			
-			if(messageStanza.hasCustomTagWithNamespace("http://process-one.net/threads") &&
-				messageStanza.body == "The message has been sent.")
+			if(messageStanza.body == "The message has been sent.")
 				return;
 			
 			var message:Message = Message.createFromStanza(messageStanza, mBlogBuddies);
@@ -250,6 +249,7 @@ package com.cleartext.ximpp.models
 				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessageCount++;
 				chat = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
 				chat.messages.addItemAt(message, 0);
+				chat.messages.refresh();
 			}
 
 			database.saveMessage(message);
