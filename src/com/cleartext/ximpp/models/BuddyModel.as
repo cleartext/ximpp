@@ -2,8 +2,8 @@ package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.BuddyModelEvent;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.types.BuddySortTypes;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -19,7 +19,8 @@ package com.cleartext.ximpp.models
 		
 		[Autowire]
 		public var settings:SettingsModel;
-		
+
+		public static const MICRO_BLOGGING_GROUP:String = "Social";
 		public static const GATEWAY_GROUP:String = "Gateways";
 		public static const ALL_BUDDIES_GROUP:String = "All Buddies";
 		public static const UNASIGNED:String = "No Group";
@@ -89,28 +90,26 @@ package com.cleartext.ximpp.models
 		{
 			super();
 
+			_buddies = new ArrayCollection();
+			buddiesByJid = new Dictionary();
+
 			groups = new ArrayCollection();
 			microBloggingBuddies = new ArrayCollection();
-			
-			buddiesByJid = new Dictionary();
-			
-			_buddies = new ArrayCollection();
+
 			buddies.filterFunction = buddyFilter;
 			var sort:Sort = new Sort();
 			sort.compareFunction = buddySort;
 			buddies.sort = sort;
-			buddies.refresh();
 			
 			sort = new Sort();
 			sort.fields = [new SortField("nickName")];
 			microBloggingBuddies.sort = sort;
-			microBloggingBuddies.refresh();
 			
 			sort = new Sort();
 			sort.fields = [new SortField("toString",true)];
 			groups.sort = sort;
-			groups.refresh();
-			
+
+			buddies.addItem(Buddy.ALL_MICRO_BLOGGING_BUDDY);
 		}
 		
 		public function addBuddy(buddy:Buddy):void
@@ -121,12 +120,13 @@ package com.cleartext.ximpp.models
 				buddiesByJid[buddy.jid] = buddy;
 				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
 			}
-			refresh();
-			database.saveBuddy(buddy);
 		}
 		
 		public function removeBuddy(buddy:Buddy):void
 		{
+			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				return;
+			
 			var index:int = buddies.getItemIndex(buddy);
 			if(index != -1)
 			{
@@ -135,13 +135,6 @@ package com.cleartext.ximpp.models
 				buddies.removeItemAt(index);
 				delete buddiesByJid[buddy.jid];
 			}
-			refresh();
-		}
-
-		public function reset():void
-		{
-			buddies.removeAll();
-			buddiesByJid = new Dictionary();
 			refresh();
 		}
 
@@ -160,17 +153,16 @@ package com.cleartext.ximpp.models
 			if(!settings.global.showOfflineBuddies && buddy.status.isOffline())
 				return false;
 			
-			if(buddy.microBlogging)
-				return false;
-			
 			if(searchString != "" && 
 					(buddy.nickName.toLowerCase().search(searchString.toLowerCase()) == -1 && 
 					buddy.jid.toLowerCase().search(searchString.toLowerCase()) == -1))
 				return false; 
 			
-			if(buddy.isGateway)
+			if(buddy.microBlogging)
+				return groupName == MICRO_BLOGGING_GROUP;
+			else if(buddy.isGateway)
 				return groupName == GATEWAY_GROUP;
-			else if(groupName == ALL_BUDDIES_GROUP && !buddy.isGateway)
+			else if(groupName == ALL_BUDDIES_GROUP)
 				return true;
 			else if(groupName == UNASIGNED && buddy.groups.length == 0)
 				return true;
@@ -224,6 +216,9 @@ package com.cleartext.ximpp.models
 			
 			for each(var buddy:Buddy in buddies.source)
 			{
+				if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					continue;
+				
 				if(buddy.microBlogging)
 					microBloggingTemp.addItem(buddy);
 

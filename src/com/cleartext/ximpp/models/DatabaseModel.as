@@ -329,6 +329,9 @@ package com.cleartext.ximpp.models
 		
 		public function saveBuddy(buddy:Buddy):int
 		{
+			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				return -1;
+			
 			var criteria:Array = [new DatabaseValue("jid", buddy.jid)];
 			var id:int = updateOrInsert("buddies", buddy.toDatabaseValues(settings.userId), criteria);
 			if(id != -1)
@@ -363,6 +366,10 @@ package com.cleartext.ximpp.models
 		
 		public function loadMessages(buddy:Buddy):ArrayCollection
 		{
+			var buddyArray:Array = (buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? buddies.microBloggingBuddies.toArray() : [buddy];
+			if(buddyArray.length == 0)
+				return new ArrayCollection();;
+
 			var sortType:String = (settings.global.sortByTimestamp) ? "timestamp" : "messageId";
 
 			// start a transaction 
@@ -374,7 +381,6 @@ package com.cleartext.ximpp.models
 			var sql:String = "Select * from messages WHERE userid=" + settings.userId
 				+ " AND (";
 			
-			var buddyArray:Array = (buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? buddies.microBloggingBuddies.toArray() : [buddy];
 			for each(var b:Buddy in buddyArray)
 				sql += "sender='" + b.jid + "' OR recipient='" + b.jid + "' OR ";
 
@@ -383,6 +389,7 @@ package com.cleartext.ximpp.models
 					+ "LIMIT 0," + 
 					((buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? settings.global.numTimelineMessages : settings.global.numChatMessages);
 			stmt.text = sql;
+			trace(sql);
 			stmt.execute();
 			var result:SQLResult = stmt.getResult();
 		    syncConn.commit(); 

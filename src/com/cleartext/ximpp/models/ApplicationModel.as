@@ -13,6 +13,7 @@ package com.cleartext.ximpp.models
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.utils.getTimer;
+	import flash.utils.setTimeout;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
@@ -237,7 +238,7 @@ package com.cleartext.ximpp.models
 		{
 			chats.removeAll();
 			database.loadBuddyData();
-			getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
+			setTimeout(getChat, 1, Buddy.ALL_MICRO_BLOGGING_BUDDY);
 		}
 		
 		public function getBuddyByJid(jid:String):Buddy

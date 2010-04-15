@@ -1,6 +1,8 @@
 package com.cleartext.ximpp.models
 {
+	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
@@ -39,6 +41,11 @@ package com.cleartext.ximpp.models
 				var event:UserAccountEvent = new UserAccountEvent(UserAccountEvent.CHANGED, previousUserAccount);
 				Swiz.dispatchEvent(event);
 				dispatchEvent(event);
+			}
+			
+			if(userAccount)
+			{
+				Swiz.dispatchEvent(new UserAccountEvent(UserAccountEvent.REFRESH, null));
 			}
 		}
 		

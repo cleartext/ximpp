@@ -79,6 +79,9 @@ package com.cleartext.ximpp.assets
 		[Embed (source="com/cleartext/ximpp/assets/consoleOver.png")]
 		public static const ConsoleOver:Class;
 
+		[Embed (source="com/cleartext/ximpp/assets/allSocial.png")]
+		public static const AllSocial:Class;
+
 		[Embed (source="com/cleartext/ximpp/assets/allBuddies.png")]
 		public static const AllBuddies:Class;
 

@@ -205,6 +205,7 @@ package com.universalsprout.flex.components.list
 					item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
 					itemRenderersByDataUid[data.uid] = item;
 					addChild(item as UIComponent);
+					callLater(invalidateDisplayList);
 					newItem = true;
 				}
 

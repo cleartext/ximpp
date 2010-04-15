@@ -88,11 +88,16 @@ package com.cleartext.ximpp.views.buddies
 			deleteItem = new ContextMenuItem("delete");
 			deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteHandler);
 			
+			socialItem = new ContextMenuItem("");
+			socialItem.separatorBefore = true;
+			socialItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, socialHandler);
+			
 			var customContextMenu:ContextMenu = new ContextMenu();
 			customContextMenu.hideBuiltInItems();
 			customContextMenu.customItems.push(contextMenuLabel);
 			customContextMenu.customItems.push(editItem);
 			customContextMenu.customItems.push(deleteItem);
+			customContextMenu.customItems.push(socialItem);
 			
 			customContextMenu.addEventListener(Event.DISPLAYING, displayContextMenu);
 			
@@ -109,15 +114,32 @@ package com.cleartext.ximpp.views.buddies
 		
 		private function displayContextMenu(event:Event):void
 		{
+			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			{
+				contextMenuLabel.label = "can not edit";
+				editItem.enabled = false;
+				deleteItem.enabled = false;
+				socialItem.enabled = false;
+				return;
+			}
+			
 			contextMenuLabel.label = (buddy && xmpp.connected) ? buddy.nickName : "go online to edit";
+			socialItem.label = (buddy && buddy.microBlogging) ? "remove from social group" : "make social contact";
 			
 			editItem.enabled = xmpp.connected;
 			deleteItem.enabled = xmpp.connected;
+			socialItem.enabled = xmpp.connected;
 		}
 
 		private function editHandler(event:ContextMenuEvent):void
 		{
 			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW, null, buddy));
+		}
+
+		private function socialHandler(event:ContextMenuEvent):void
+		{
+			buddy.microBlogging = !buddy.microBlogging;
+			xmpp.modifyRosterItem(buddy);
 		}
 
 		private function deleteHandler(event:ContextMenuEvent):void
@@ -184,6 +206,7 @@ package com.cleartext.ximpp.views.buddies
 		private var contextMenuLabel:ContextMenuItem;
 		private var editItem:ContextMenuItem;
 		private var deleteItem:ContextMenuItem;
+		private var socialItem:ContextMenuItem;
 		
 		//---------------------------------------
 		// Create Children

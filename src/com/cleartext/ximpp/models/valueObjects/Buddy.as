@@ -2,6 +2,7 @@ package com.cleartext.ximpp.models.valueObjects
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.StatusEvent;
+	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
@@ -14,7 +15,7 @@ package com.cleartext.ximpp.models.valueObjects
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IBuddy
 	{
-		public static const ALL_MICRO_BLOGGING_JID:String = "Micro Blogging";
+		public static const ALL_MICRO_BLOGGING_JID:String = "All Social";
 		public static const ALL_MICRO_BLOGGING_BUDDY:Buddy = new Buddy(ALL_MICRO_BLOGGING_JID);
 
 		public function Buddy(jid:String)
@@ -52,7 +53,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			if(_buddyId == -1)
 				_buddyId = value;
-			else
+			else if(this != ALL_MICRO_BLOGGING_BUDDY)
 				throw new Error();
 		}
 		

@@ -3,6 +3,7 @@ package com.cleartext.ximpp.models.utils
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
+	import flash.events.IOErrorEvent;
 	import flash.geom.Matrix;
 	import flash.utils.ByteArray;
 	
@@ -40,6 +41,12 @@ package com.cleartext.ximpp.models.utils
 			image.load(byteArray);
 			image.data = [host, propertyName];
 			image.addEventListener(Event.COMPLETE, imageCompleteHandler);
+			image.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+		}
+		
+		public static function ioErrorHandler(event:IOErrorEvent):void
+		{
+			// do nothing
 		}
 		
 		public static function imageCompleteHandler(event:Event):void

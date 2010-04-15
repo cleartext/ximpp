@@ -91,6 +91,8 @@
 		]]>
 	</mx:Script>
 	
+	<common:SideButton text="{BuddyModel.MICRO_BLOGGING_GROUP}" click="clickHandler(event)" icon="{Constants.AllSocial}" showEditButton="false"/>
+
 	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}" showEditButton="false"/>
 
 	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" icon="{Constants.Gateways}" showEditButton="false"/>

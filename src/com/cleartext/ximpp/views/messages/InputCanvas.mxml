@@ -4,6 +4,7 @@
 	clipContent="false">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.InputTextEvent;
 			import mx.utils.StringUtil;
 			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.models.utils.LinkResult;
@@ -59,13 +60,20 @@
 			}
 			
 			[Mediate(event="SendButtonEvent.SEND_CLICKED")]
-			private function send(event:SendButtonEvent=null):void
+			public function send(event:SendButtonEvent=null):void
 			{
 				var trimedText:String = StringUtil.trim(inputTextArea.text);
 				if(trimedText.length != 0)
 					messageCanvas.sendMessage(trimedText);
 
 				callLater(inputTextArea.reset, [true, false]);
+			}
+			
+			[Mediate(event="InputTextEvent.INSERT_TEXT")]
+			public function insertText(event:InputTextEvent):void
+			{
+				if(xmpp.connected)
+					inputTextArea.htmlText = event.text;
 			}
 			
 			[Mediate(event="CustomStatusEvent.CUSTOM_STATUS_CHANGE")]

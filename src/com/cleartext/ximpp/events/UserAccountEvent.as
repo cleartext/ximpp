@@ -7,6 +7,7 @@ package com.cleartext.ximpp.events
 	public class UserAccountEvent extends Event
 	{
 		public static const CHANGED:String = "userAccountChanged";
+		public static const REFRESH:String = "userAccountRefresh";
 		
 		public var previousUserAccount:UserAccount;
 		

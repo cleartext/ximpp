@@ -268,8 +268,5 @@
 
 	<buddies:GroupSelectors
 		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
-	
-	<messages:MicroBloggingSelectors
-		x="{width-41}" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
-	
+		
 </mx:Canvas>

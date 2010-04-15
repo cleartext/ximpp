@@ -93,7 +93,7 @@
 		
 			override protected function submit(event:Event):void
 			{
-				selectedAccountChanged();
+//				selectedAccountChanged();
 				
 				// commit global values
 				settings.global.autoConnect = autoConnectCheckBox.selected;
@@ -111,7 +111,14 @@
 				for each(var userAccount:UserAccount in accountList.dataProvider)
 					database.saveUserAccount(userAccount);
 				
-				settings.userAccount = accountList.selectedItem as UserAccount;
+				settings.userAccount.accountName = accountName.text;
+				settings.userAccount.nickName = nickName.text;
+				settings.userAccount.avatar = avatar.bitmapData;
+				settings.userAccount.jid = jid.text;
+				settings.userAccount.password = password.text;
+				settings.userAccount.server = server.text;
+
+//				settings.userAccount = previousAccount;
 				
 				database.saveGlobalSettings();
 

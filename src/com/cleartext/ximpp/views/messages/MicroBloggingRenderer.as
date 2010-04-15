@@ -2,7 +2,7 @@ package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.BuddyEvent;
-	import com.cleartext.ximpp.events.MicroBloggingMessageEvent;
+	import com.cleartext.ximpp.events.InputTextEvent;
 	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
@@ -45,7 +45,7 @@ package com.cleartext.ximpp.views.messages
 			{
 				case MicroBloggingTypes.RECEIVED :
 					var reply:Button = new Button();
-					reply.data = MicroBloggingMessageEvent.REPLY;
+					reply.data = "reply";
 					reply.addEventListener(MouseEvent.CLICK, button_clickHandler);
 					reply.toolTip = "reply";
 					reply.setStyle("skin", null);
@@ -61,7 +61,7 @@ package com.cleartext.ximpp.views.messages
 					addChild(reply);
 
 					var retweet:Button = new Button();
-					retweet.data = MicroBloggingMessageEvent.RETWEET;
+					retweet.data = "retweet";
 					retweet.addEventListener(MouseEvent.CLICK, button_clickHandler);
 					retweet.toolTip = "retweet";
 					retweet.setStyle("skin", null);
@@ -77,7 +77,7 @@ package com.cleartext.ximpp.views.messages
 					addChild(retweet);
 
 					var directMessage:Button = new Button();
-					directMessage.data = MicroBloggingMessageEvent.DIRECT_MESSAGE;
+					directMessage.data = "direct";
 					directMessage.addEventListener(MouseEvent.CLICK, button_clickHandler);
 					directMessage.toolTip = "direct message";
 					directMessage.setStyle("skin", null);
@@ -100,8 +100,24 @@ package com.cleartext.ximpp.views.messages
 
 		private function button_clickHandler(event:MouseEvent):void
 		{
-			var type:String = event.target.data;
-			Swiz.dispatchEvent(new MicroBloggingMessageEvent(type, message));
+			switch(event.target.data)
+			{
+				case "reply" :
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "@" + message.mBlogSender.userName + " "));
+					break;
+				case "retweet" :
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + message.mBlogSender.userName + " : " + bodyTextField.text));
+					break;
+				case "direct" :
+					var buddy:Buddy = appModel.getBuddyByJid(message.mBlogSender.jid);
+					if(!buddy)
+					{
+						buddy = new Buddy(message.mBlogSender.jid);
+						appModel.buddies.addBuddy(buddy);
+					}
+					appModel.getChat(buddy);
+					break;
+			}
 		}
 
 		override protected function get bodyTextWidth():Number

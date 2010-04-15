@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox 
 	clipContent="false"
-	creationComplete="init()"
+	creationComplete="userAccountChanged(null)"
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	xmlns:buddies="com.cleartext.ximpp.views.buddies.*"
 	width="100%" height="100%"
@@ -11,6 +11,7 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.BuddyEvent;
 			import com.cleartext.ximpp.models.DatabaseModel;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.events.CustomStatusEvent;
@@ -119,13 +120,8 @@
 				}
 			}
 			
-			private function init():void
-			{
-				settings.addEventListener(UserAccountEvent.CHANGED, userAccountChanged);
-				userAccountChanged(null);
-			}
-			
-			private function userAccountChanged(event:UserAccountEvent):void
+			[Mediate (event="UserAccountEvent.REFRESH")]
+			public function userAccountChanged(event:UserAccountEvent):void
 			{
 				avatar.data = settings.userAccount;
 			}

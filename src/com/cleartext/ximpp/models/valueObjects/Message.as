@@ -192,7 +192,7 @@ package com.cleartext.ximpp.models.valueObjects
 
 				if(result && result.length > 0)
 				{
-					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[4], newMessage.recipient, result[3], result[2]);
+					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[4], newMessage.sender, result[3], result[2]);
 					var messageString:String = String(result[5]);
 					newMessage.plainMessage = messageString;
 					

@@ -2,9 +2,9 @@ package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.IBuddy;
+	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
