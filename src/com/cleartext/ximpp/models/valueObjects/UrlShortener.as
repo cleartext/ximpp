@@ -1,26 +1,34 @@
 package com.cleartext.ximpp.models.valueObjects
 {
+	import com.seesmic.as3.xmpp.StreamEvent;
+	
+	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	
 	public class UrlShortener
 	{
 		
+		public static var errors:Object = new Object();
+		
+		public static function isError(url:String):Boolean
+		{
+			if(!url)
+				return true;
+				
+			return errors.hasOwnProperty(url);
+		}
+		public static function addError(url:String):void
+		{
+			errors[url] = true;
+		}
+		
 		public static const CTR_IM:String = "ctr.im";
 		public static const BIT_LY:String = "bit.ly";
 		public static const IS_GD:String = "is.gd";
 		
 		public static const types:Array = [CTR_IM, BIT_LY, IS_GD];
-		
-		public static function isLong(url:String):Boolean
-		{
-			for each(var type:String in types)
-				if(url.indexOf("http://" + type) == 0)
-					return false;
-
-			return true;
-		}
-		
+				
 		public var longURL:String = ''
 		public var resultHandler:Function;
 		public var service:String;
@@ -31,6 +39,9 @@ package com.cleartext.ximpp.models.valueObjects
 
 		public function shorten(longUrl:String, service:String, resultHandler:Function):void
 		{
+			if(UrlShortener.isError(longUrl))
+				resultHandler(longUrl, true);
+			
 			this.service = service;
 			this.resultHandler = resultHandler;
 			this.longURL = longUrl;
@@ -67,6 +78,7 @@ package com.cleartext.ximpp.models.valueObjects
 					params.format = 'xml';
 					 
 					srv.addEventListener(ResultEvent.RESULT, callResultHandler);
+					srv.addEventListener(FaultEvent.FAULT, faultHandler);
 					srv.send(params);
 					return;
 
@@ -74,10 +86,17 @@ package com.cleartext.ximpp.models.valueObjects
 					srv.method = 'GET';
 					srv.url = 'http://is.gd/api.php?longurl=' + longUrl;
 					srv.addEventListener(ResultEvent.RESULT, callResultHandler);
+					srv.addEventListener(FaultEvent.FAULT, faultHandler);
 					srv.send();
 					return;
 					
 			}
+		}
+		
+		private function faultHandler(event:FaultEvent):String
+		{
+			UrlShortener.addError(longURL);
+			return resultHandler(longURL, true); 
 		}
 
 		private function callResultHandler(event:ResultEvent):String
@@ -87,15 +106,9 @@ package com.cleartext.ximpp.models.valueObjects
 			switch(service)
 			{
 				case CTR_IM :
-					var shortCtrimXML:XML = new XML(event.message.body);
-					if(shortCtrimXML.child("errorCode").toString() == 0)
-						shortUrl = shortCtrimXML.child("results").child('nodeKeyVal').child("shortUrl").toString();
-					break;
-
 				case BIT_LY :
-					var shortXML:XMLList = new XML(event.message.body).child("results").child('nodeKeyVal');
-					if(shortXML.child("errorCode").toString() == 0)
-						shortUrl = shortXML.child("shortUrl").toString();
+					var shortXML:Object = new XML(event.message.body);
+					shortUrl = shortXML.child("results").child('nodeKeyVal').child('shortUrl').toString();
 					break;
 
 				case IS_GD :
@@ -106,9 +119,14 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 			
 			if(shortUrl)
+			{
 				return resultHandler(shortUrl);
+			}
 			else
-				return resultHandler(longURL); 
+			{
+				UrlShortener.addError(longURL);
+				return resultHandler(longURL, true); 
+			}
 		}
 	}
 }

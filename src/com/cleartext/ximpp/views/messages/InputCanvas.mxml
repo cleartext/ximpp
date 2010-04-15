@@ -94,20 +94,25 @@
 				var results:Array = LinkUitls.findLinks(LinkUitls.escapeHTML(inputTextArea.text + str));
 				for each(var lr:LinkResult in results)
 				{
-					if(UrlShortener.isLong(lr.validLink))
+					if(!UrlShortener.isError(lr.validLink))
 					{
 						shortening = true;
 						var shortener:UrlShortener = new UrlShortener();
 						shortener.shorten(lr.validLink, settings.global.urlShortener, 
-							function(shortURL:String):void
+							function(shortURL:String, error:Boolean=false):void
 							{
 								if(!shortening)
 									return;
-
+	
 								shortening = false;
- 								inputTextArea.text = inputTextArea.text.substr(0, lr.index) + shortURL + inputTextArea.text.substr(lr.index + lr.originalLink.length);
-								var lengthChange:int = shortURL.length - lr.originalLink.length;
-								inputTextArea.setSelection(inputTextArea.selectionBeginIndex+lengthChange, inputTextArea.selectionEndIndex+lengthChange);
+								
+								if(!error)
+								{
+	 								inputTextArea.text = inputTextArea.text.substr(0, lr.index) + shortURL + inputTextArea.text.substr(lr.index + lr.originalLink.length);
+									var lengthChange:int = shortURL.length - lr.originalLink.length;
+									inputTextArea.setSelection(inputTextArea.selectionBeginIndex+lengthChange, inputTextArea.selectionEndIndex+lengthChange);
+								}
+								
 								shorten();
 							});
 						return;

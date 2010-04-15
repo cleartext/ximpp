@@ -174,6 +174,11 @@ package com.cleartext.ximpp.models
 		
 		private function buddySort(buddy1:Buddy, buddy2:Buddy, fields:Object=null):int
 		{
+			if(buddy1 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				return -1;
+			else if(buddy2 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				return 1;
+
 			switch(sortType)
 			{
 				case BuddySortTypes.ALPHABETICAL :
