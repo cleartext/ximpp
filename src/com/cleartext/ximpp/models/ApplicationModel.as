@@ -191,13 +191,7 @@ package com.cleartext.ximpp.models
 
 		public function init():void
 		{
-			database.addEventListener(Event.COMPLETE, databaseCompleteHandler);
 			database.createDatabase();
-		}
-		
-		private function databaseCompleteHandler(event:Event):void
-		{
-			database.removeEventListener(Event.COMPLETE, databaseCompleteHandler);
 
 			// if this changes the userId, it will reload all the data from the database
 			database.loadGlobalSettings();
@@ -216,6 +210,9 @@ package com.cleartext.ximpp.models
 			{
 				setUserPresence(Status.AVAILABLE, settings.userAccount.customStatus);
 			}
+			
+			buddies.buddies.addItem(Buddy.ALL_MICRO_BLOGGING_BUDDY);
+			buddies.refresh();
 		}
 		
 		public function shutDown():void

@@ -28,7 +28,6 @@ package com.cleartext.ximpp.models
 		 * synchronous and asynchronous database connections
 		 */
 		private var syncConn:SQLConnection;
-		private var asyncConn:SQLConnection;
 		
 		private var imageQueue:Dictionary = new Dictionary();
 		
@@ -53,9 +52,6 @@ package com.cleartext.ximpp.models
 				
 		public function close():void
 		{
-			appModel.log("Closing async database connection")
-			asyncConn.close();
-
 			appModel.log("Closing sync database connection")
 			syncConn.close();
 		}
@@ -71,33 +67,17 @@ package com.cleartext.ximpp.models
 				
 				// create the local database file
 				var dbName:String = "ximpp.db";
-				// dbName = new Date().time + ".db";
+				dbName = new Date().time + ".db";
 				
 				var dbFile:File = File.applicationStorageDirectory.resolvePath(dbName);
 				appModel.log("DB Location: " + dbFile.nativePath);
 				
-				appModel.log("Openning async database connection")
-				asyncConn = new SQLConnection();
-				asyncConn.addEventListener(SQLErrorEvent.ERROR, appModel.log, false, 0, true);
-				asyncConn.addEventListener(SQLEvent.OPEN, createTables, false, 0, true);
-				asyncConn.openAsync(dbFile);
-
 				// link the sync connection to the file
 				appModel.log("Opening sync database connection")
 				syncConn = new SQLConnection();
-				syncConn.open(dbFile, SQLMode.UPDATE);
+				syncConn.open(dbFile, SQLMode.CREATE);
 				syncConn.addEventListener(SQLErrorEvent.ERROR, appModel.log, false, 0, true);
-			}
-			catch(error:Error)
-			{
-				appModel.log(error);
-				appModel.fatalError("Could not create local database file.");
-			}
-		}			
-		private function createTables(event:SQLEvent):void
-		{
-			try
-			{
+
 				// start a transaction
 				syncConn.begin();
 				var stmt:SQLStatement = new SQLStatement();
@@ -159,12 +139,11 @@ package com.cleartext.ximpp.models
 				syncConn.commit();
 				appModel.log("Database created");
 				
-				dispatchEvent(new Event(Event.COMPLETE));
 			}
 			catch (error:Error)
 			{
 				appModel.log(error);
-				appModel.fatalError("Could not create database tables.");
+				appModel.fatalError("Could not create database.");
 			}
 		}
 
@@ -544,7 +523,7 @@ package com.cleartext.ximpp.models
 			if(result && result.data && result.data.length > 0)
 				return MicroBloggingBuddy.createFromDB(result.data[0]);
 			
-			// now we have to create the new buddy
+			// now we have to create a new buddy
 			if(!gatewayJid)
 				throw new Error("need a gatewayJid");
 

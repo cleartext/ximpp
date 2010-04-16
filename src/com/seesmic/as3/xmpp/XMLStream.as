@@ -165,7 +165,9 @@ package com.seesmic.as3.xmpp
 
 		public function disconnect():void {
 			state['disconnect_called'] = true;
-			socket.socket.close();
+			// astewart@cleartext.com
+			if(state['connected'])
+				socket.socket.close();
 			state['connected'] = false;
 		}
 	}
