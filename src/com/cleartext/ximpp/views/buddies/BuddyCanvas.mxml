@@ -11,6 +11,7 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.InputTextEvent;
 			import com.cleartext.ximpp.events.BuddyEvent;
 			import com.cleartext.ximpp.models.DatabaseModel;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -116,7 +117,7 @@
 				if(xmppModel.connected && microBloggingCheckBox.selected && customStatusInput.text != "")
 				{
 					appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
-					Swiz.dispatchEvent(new CustomStatusEvent(CustomStatusEvent.CUSTOM_STATUS_CHANGE, customStatusInput.text));
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, customStatusInput.text));
 				}
 			}
 			

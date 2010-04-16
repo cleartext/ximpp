@@ -24,6 +24,8 @@ package com.seesmic.as3.xmpp
 	{
 		public var conn:Object;
 		public var xml:XML;
+		// astewart@cleartext.com
+		public var xmlstring:String;
 		public var ns:String;
 		public var tagName:String;
 		public var parent:Stanza;
@@ -35,7 +37,9 @@ package com.seesmic.as3.xmpp
 			this.parent = parent;
 		}
 		
-		public function fromXML(inxml:XML):void {
+		// astewart@cleartext.com added xmlstring porperty
+		public function fromXML(inxml:XML, xmlstring:String):void {
+			this.xmlstring = xmlstring;
 			this.xml = inxml;
 			var tmp:Object;
 			if(!parent) {

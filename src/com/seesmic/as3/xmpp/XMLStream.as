@@ -133,7 +133,7 @@ package com.seesmic.as3.xmpp
 			} else {
 				currentStanza = new Stanza(getInstance());
 			}
-			currentStanza.fromXML(xml);
+			currentStanza.fromXML(xml, xmlstring);
 			var matched:Boolean = false;
 			var idx:int = 0;
 			for each(var handler:XMLHandler in handlers) {

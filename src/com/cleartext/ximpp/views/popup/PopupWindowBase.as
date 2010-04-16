@@ -80,7 +80,7 @@ package com.cleartext.ximpp.views.popup
 				if(!cancelButton)
 				{
 					cancelButton = new Button();
-					cancelButton.addEventListener(MouseEvent.CLICK, closeWindow);
+					cancelButton.addEventListener(MouseEvent.CLICK, cancelHandler);
 					cancelButton.label = "cancel";
 					cb.addChild(cancelButton);
 				}
@@ -170,7 +170,12 @@ package com.cleartext.ximpp.views.popup
  			// override me
  		}
  		
- 		public function closeWindow(event:Event=null):void
+ 		protected function cancelHandler(event:Event):void
+ 		{
+ 			closeWindow();
+ 		}
+ 		
+ 		public function closeWindow():void
  		{
  			for each(var toolTip:ToolTip in errorMessageToolTips)
 				ToolTipManager.destroyToolTip(toolTip);

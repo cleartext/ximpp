@@ -33,7 +33,7 @@ package com.seesmic.as3.xmpp
 			super(connection, parent);
 		}
 		
-		override public function fromXML(inxml:XML):void {
+		override public function fromXML(inxml:XML, xmlstring:String):void {
 			
 			this.xml = inxml;
 			this.from = xml.@from;

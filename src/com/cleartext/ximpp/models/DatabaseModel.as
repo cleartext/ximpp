@@ -71,7 +71,7 @@ package com.cleartext.ximpp.models
 				
 				// create the local database file
 				var dbName:String = "ximpp.db";
-				//dbName = new Date().time + ".db";
+				// dbName = new Date().time + ".db";
 				
 				var dbFile:File = File.applicationStorageDirectory.resolvePath(dbName);
 				appModel.log("DB Location: " + dbFile.nativePath);

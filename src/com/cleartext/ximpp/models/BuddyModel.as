@@ -110,6 +110,8 @@ package com.cleartext.ximpp.models
 			groups.sort = sort;
 
 			buddies.addItem(Buddy.ALL_MICRO_BLOGGING_BUDDY);
+			
+			refresh();
 		}
 		
 		public function addBuddy(buddy:Buddy):void
@@ -150,7 +152,7 @@ package com.cleartext.ximpp.models
 
 		private function buddyFilter(buddy:Buddy):Boolean
 		{
-			if(!settings.global.showOfflineBuddies && buddy.status.isOffline())
+			if(!settings || !settings.global.showOfflineBuddies && buddy.status.isOffline())
 				return false;
 			
 			if(searchString != "" && 

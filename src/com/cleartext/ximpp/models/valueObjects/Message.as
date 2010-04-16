@@ -22,8 +22,8 @@ package com.cleartext.ximpp.models.valueObjects
 			"subject TEXT, " +
 			"plainMessage TEXT, " +
 			"displayMessage TEXT, " + 
-			"senderId INTEGER " +
-			"originalSenderId INTEGER " +
+			"senderId INTEGER, " +
+			"originalSenderId INTEGER, " +
 			"rawxml TEXT);"; 
 		
 		public var messageId:int = -1;
@@ -124,7 +124,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newMessage.type = stanza.type;
 			newMessage.subject = stanza.subject;
 			newMessage.plainMessage = stanza.body;
-			newMessage.rawXML = stanza.xml.toXMLString();
+			newMessage.rawXML = stanza.xmlstring;
 			var date:Date = stanza.utcTimestamp;
 			newMessage.utcTimestamp = date;
 			newMessage.timestamp = new Date(Date.UTC(date.fullYear, date.month, date.date, date.hours, date.minutes, date.seconds, date.milliseconds));
@@ -172,23 +172,20 @@ package com.cleartext.ximpp.models.valueObjects
 			
 			if(!valuesSet && stanza.html)
 			{
-				// condense whitespace
-				var htmlStanza:String = stanza.html.replace(new RegExp("\\s+", "ig"), " ");
-					
 				var regexpString:String =
 					"<img src=('|\")" + 		// open img tag with src=" or src='
-					"(.*?)" + 					// image url - result[2]
+					"([\\s\\S]*?)" + 			// image url - result[2]
 					"\\1" +			 			// the closing " or '
 					"[\\s\\S]*?" + 				// a lazy amount of any chars
-					"<a.*?>" + 					// a open a tag with any kind of href 
+					"<a[\\s\\S]*?>" + 			// a open a tag with any kind of href 
 					"([\\s\\S]*?)<" + 			// the text within the a tag - the display name - result[3]
 					"[\\s\\S]*?" + 				// a lazy amount of any chars
-					"\\((.*?)\\): ?" + 			// text within (): - the user id - result[4]
+					"\\(([\\s\\S]*?)\\): ?" + 	// text within (): - the user id - result[4]
 					"([\\s\\S]*?)" + 			// a lazy amount of any chars - the message - result[5]
 					"</span>";					// the closing span tag
 				
 				var regexp:RegExp = new RegExp(regexpString, "ig");
-				var result:Array = regexp.exec(htmlStanza);
+				var result:Array = regexp.exec(stanza.html);
 
 				if(result && result.length > 0)
 				{
@@ -196,18 +193,14 @@ package com.cleartext.ximpp.models.valueObjects
 					var messageString:String = String(result[5]);
 					newMessage.plainMessage = messageString;
 					
-					// remove all tags apart from <b></b>		
+					// remove all tags	
 					var tmpStr:String;
 					while(tmpStr != messageString)
 					{
 						tmpStr = messageString;
-						messageString = messageString.replace(new RegExp("\\s*<([AC-Z][A-Z0-9]*)\\b[^>]*?>(.*?)</\\1>\\s*", "ig"), " $2 ");
+						messageString = messageString.replace(new RegExp("<([A-Z][A-Z0-9]*)\\b[^>]*?>([\\s\\S]*?)</\\1>", "ig"), "$2");
 					}
 	
-					// condense whitespace
-					messageString = messageString.replace(new RegExp("\\s+", "ig"), " ");
-					// deal with special case with hashtags with bold tags
-					messageString = messageString.replace("# <b>", "#<b>");
 					// trim whitspace off the ends
 					messageString = StringUtil.trim(messageString);
 					
@@ -221,6 +214,7 @@ package com.cleartext.ximpp.models.valueObjects
 					messageString = messageString.replace(regExp1, LinkUitls.getStartTag() + "http://twitter.com/$1\">$&" + LinkUitls.endTag);
 					
 					newMessage.displayMessage = messageString;
+					trace(messageString);
 					return newMessage;
 				}
 			}

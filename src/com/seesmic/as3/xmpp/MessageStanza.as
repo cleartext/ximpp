@@ -50,8 +50,8 @@ package com.seesmic.as3.xmpp
 			super(connection, parent);
 		}
 		
-		override public function fromXML(inxml:XML):void {
-			super.fromXML(inxml);
+		override public function fromXML(inxml:XML, xmlstring:String):void {
+			super.fromXML(inxml, xmlstring);
 			default xml namespace = "jabber:client";
 			from.fromString(xml.@from);
 			to.fromString(xml.@to);
@@ -62,8 +62,16 @@ package com.seesmic.as3.xmpp
 			/**
 			 * modified by astewart@cleartext.com
 			 * html property added
-			 */
-			this.html = xml.htmlns::html.w3ns::body.toXMLString();
+			 */ 
+			 
+			// we need to get the html string from the original xmlstring to
+			// preserve whitespace
+			var result:Array = new RegExp("<html\\b[^>]*?>([\\s\\S]*?)</html>", "ig").exec(xmlstring);
+			if(result && result.length > 1)
+			{
+				this.html = result[1];
+				trace(result[1]);
+			}
 			
 			chatState = "";
 			for each(var possibleState:String in states)

@@ -66,26 +66,19 @@
 				if(trimedText.length != 0)
 					messageCanvas.sendMessage(trimedText);
 
-				callLater(inputTextArea.reset, [true, false]);
+				callLater(function():void{inputTextArea.text = ""});
 			}
 			
 			[Mediate(event="InputTextEvent.INSERT_TEXT")]
 			public function insertText(event:InputTextEvent):void
 			{
 				if(xmpp.connected)
-					inputTextArea.htmlText = event.text;
-			}
-			
-			[Mediate(event="CustomStatusEvent.CUSTOM_STATUS_CHANGE")]
-			public function setInputField(event:CustomStatusEvent):void
-			{
-				if(inputTextArea.enabled)
 				{
-					inputTextArea.text = event.customStatus;
-					inputTextArea.setFocus();
+					inputTextArea.text = event.text;
+					callLater(inputTextArea.setFocus);
 				}
 			}
-
+			
 			private function shorten(str:String=" "):void
 			{
 				if(!buddy.microBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
@@ -220,6 +213,8 @@
 		backgroundAlpha="0"
 		wordWrap="true"
 		borderStyle="none"
-		focusAlpha="0.5" />
+		focusAlpha="0.5"
+		color="0x000000"
+		 />
 
 </mx:Canvas>

@@ -42,8 +42,8 @@ package com.seesmic.as3.xmpp
 			super(connection, parent);
 		}
 		
-		override public function fromXML(inxml:XML):void {
-			super.fromXML(inxml);
+		override public function fromXML(inxml:XML, xmlstring:String):void {
+			super.fromXML(inxml, xmlstring);
 			default xml namespace = "jabber:client";
 			from.fromString(xml.@from);
 			to.fromString(xml.@to);

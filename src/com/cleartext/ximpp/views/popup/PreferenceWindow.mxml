@@ -108,8 +108,8 @@
 				for each(var userId:int in accountsToDelete)
 					database.removeAccount(userId);
 				
-				for each(var userAccount:UserAccount in accountList.dataProvider)
-					database.saveUserAccount(userAccount);
+//				for each(var userAccount:UserAccount in accountList.dataProvider)
+//					database.saveUserAccount(userAccount);
 				
 				settings.userAccount.accountName = accountName.text;
 				settings.userAccount.nickName = nickName.text;
@@ -117,6 +117,8 @@
 				settings.userAccount.jid = jid.text;
 				settings.userAccount.password = password.text;
 				settings.userAccount.server = server.text;
+				
+				database.saveUserAccount(settings.userAccount);
 
 //				settings.userAccount = previousAccount;
 				

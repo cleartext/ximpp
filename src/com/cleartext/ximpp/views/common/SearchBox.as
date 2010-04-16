@@ -37,7 +37,7 @@ package com.cleartext.ximpp.views.common
 			{
 				textInput = new DefaultTextInput();
 				textInput.defaultText = "Search...";
-				textInput.multiLine = false;
+				textInput.multiline = false;
 				textInput.addEventListener(KeyboardEvent.KEY_UP, textInputHandler);
 				textInput.setStyle("cornerRadius", 12);
 				textInput.setStyle("paddingTop", 5);
@@ -68,16 +68,16 @@ package com.cleartext.ximpp.views.common
 		private function textInputHandler(event:KeyboardEvent):void
 		{
 			if(event.keyCode == Keyboard.ESCAPE)
-				textInput.reset(true, false);
+				textInput.text = "";
 			else
-				textInput.multiLine = false;
+				textInput.multiline = false;
 	
 			setSearchString();
 		}
 		
 		private function resetButtonHandler(event:MouseEvent):void
 		{
-			textInput.reset(true);
+			textInput.text = "";
 			setSearchString();
 		}
 		

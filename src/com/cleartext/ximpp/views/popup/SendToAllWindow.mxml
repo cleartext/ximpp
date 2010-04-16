@@ -8,6 +8,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.InputTextEvent;
+			import org.swizframework.Swiz;
 			import flash.sampler.NewObjectSample;
 			import mx.controls.CheckBox;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
@@ -36,6 +38,13 @@
 						appModel.sendMessageTo(buddy, message);
 
 				closeWindow();
+			}
+			
+			override protected function cancelHandler(event:Event):void
+			{
+				super.cancelHandler(event);
+				
+				Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, message));
 			}
 			
 		]]>

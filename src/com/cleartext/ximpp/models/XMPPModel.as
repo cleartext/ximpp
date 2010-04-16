@@ -129,9 +129,9 @@ package com.cleartext.ximpp.models
 				connected = false;
 		 		appModel.log("Disconnecting from XMPP server");
 				xmpp.send("<presence from='" + xmpp.fulljid.toString() + "' type='unavailable' status='Logged out' />");
-		 		xmpp.disconnect();
 		 	}
 		 	
+	 		xmpp.disconnect();
 			xmpp.auto_reconnect = false;
 
 		 	appModel.serverSideStatus.value = 
@@ -488,8 +488,8 @@ package com.cleartext.ximpp.models
 			var status:Status = appModel.localStatus;
 			var customStatus:String = settings.userAccount.customStatus;
 
-			// if we are connected and want to go offline, then disconnect
-			if(connected && status.value == Status.OFFLINE)
+			// if we want to go offline, then disconnect
+			if(status.value == Status.OFFLINE)
 			{
 				disconnect();
 			}
@@ -504,7 +504,7 @@ package com.cleartext.ximpp.models
 			
 			// if we want to connect, then try to connect, if we are successful, then
 			// we will send the presence once the session is established
-			else if(status.value != Status.OFFLINE)
+			else
 			{
 				connect();
 			}	

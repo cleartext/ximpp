@@ -190,12 +190,10 @@ package com.universalsprout.flex.components.list
 			var yCounter:Number = 0;
 			var vGap:Number = getStyle("verticalGap");
 
-			var numDrawn:int = 0;
+			var childIndex:int = 0;
 
 			for each(var data:ISproutListData in collection)
 			{
-				numDrawn++;
-
 				var newItem:Boolean = false;
 				var item:ISproutListItem = itemRenderersByDataUid[data.uid]; 
 				if(!item)
@@ -204,7 +202,7 @@ package com.universalsprout.flex.components.list
 					item.data = data;
 					item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
 					itemRenderersByDataUid[data.uid] = item;
-					addChild(item as UIComponent);
+					addChildAt(DisplayObject(item), childIndex);
 					callLater(invalidateDisplayList);
 					newItem = true;
 				}
@@ -213,6 +211,7 @@ package com.universalsprout.flex.components.list
 				{
 					item.setVisible(true, true);
 					item.setIncludeInLayout(true, true);
+					setChildIndex(DisplayObject(item), childIndex);
 					invalidateDisplayList();
 				}
 
@@ -226,13 +225,16 @@ package com.universalsprout.flex.components.list
 				if(virtualList && (yCounter > verticalScrollPosition + unscaledHeight))
 					extraRenderers--;
 				
+				childIndex++;
+
 				if(extraRenderers < 1)
 				{
-					var estimatedHeight:Number = (yCounter+vGap)/numDrawn * collection.length;
+					var estimatedHeight:Number = (yCounter+vGap)/childIndex * collection.length;
 					bottomOfListComponent.includeInLayout = true;
 					bottomOfListComponent.move(0, estimatedHeight-10);
 					return;
 				}
+
 			}
 
 			bottomOfListComponent.includeInLayout = false;
