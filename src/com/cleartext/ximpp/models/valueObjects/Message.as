@@ -139,6 +139,7 @@ package com.cleartext.ximpp.models.valueObjects
 				{
 					for each(var n:Namespace in x.namespaceDeclarations())
 					{
+						// first check if it has the cleartext custom tags
 						if(n.uri == "http://cleartext.net/mblog")
 						{
 							var sBuddy:Object = x.*::buddy.(@type=="sender");
@@ -167,6 +168,8 @@ package com.cleartext.ximpp.models.valueObjects
 
 							valuesSet = true;
 						}
+						
+						// if it has an atom, then it is probably jaiku or identi.ca
 						if(n.uri == "http://www.w3.org/2005/Atom")
 						{
 							namespace atom = "http://www.w3.org/2005/Atom";
@@ -198,11 +201,13 @@ package com.cleartext.ximpp.models.valueObjects
 							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(idString, newMessage.sender, displayName, avatarUrl);
 							valuesSet = true;
 
+							// if there is a title on the atom, then it should be just the plain message
 							if(x.atom::title)
 							{
 								messageString = x.atom::title;
 								newMessage.plainMessage = messageString;
 								
+								// if we know this message is from jaiku or identi.ca, then we can to some link parsing 
 								if(newMessage.sender == "jaiku@jaiku.com" || newMessage.sender == "update@identi.ca")
 								{
 									// remove all tags
