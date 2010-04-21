@@ -23,7 +23,6 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XMPPEvent;
 	
 	import flash.utils.Dictionary;
-	import flash.utils.getTimer;
 	
 	import org.swizframework.Swiz;
 	
@@ -240,16 +239,16 @@ package com.cleartext.ximpp.models
 			buddy.isTyping = false;
 			buddy.resource = event.stanza.from.resource;
 			buddy.unreadMessageCount++;
-
-			var chat:Chat = appModel.getChat(buddy);
-			chat.messages.addItemAt(message,0);
 			
+			var chat:Chat = appModel.getChat(buddy);
+			var limit:int = (buddy.microBlogging) ? settings.global.numTimelineMessages : settings.global.numChatMessages;
+			chat.addMessage(message, limit);
+
 			if(buddy.microBlogging)
 			{
 				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessageCount++;
 				chat = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
-				chat.messages.addItemAt(message, 0);
-				chat.messages.refresh();
+				chat.addMessage(message, limit);
 			}
 
 			database.saveMessage(message);

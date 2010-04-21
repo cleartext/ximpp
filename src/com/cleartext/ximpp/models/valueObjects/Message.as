@@ -117,6 +117,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public static function createFromStanza(stanza:MessageStanza, mBlogBuddies:MicroBloggingModel):Message
 		{
+			var messageString:String
 			var newMessage:Message = new Message();
 
 			newMessage.sender = stanza.from.getBareJID();
@@ -166,6 +167,72 @@ package com.cleartext.ximpp.models.valueObjects
 
 							valuesSet = true;
 						}
+						if(n.uri == "http://www.w3.org/2005/Atom")
+						{
+							namespace atom = "http://www.w3.org/2005/Atom";
+							var idString:String;
+							var displayName:String;
+							var avatarUrl:String;
+							var list:XMLList;
+							
+							list = x.atom::author;
+							if(list && list.length()>0)
+								idString = list[0].atom::name;
+
+							list = x.atom::source;
+							if(list && list.length()>0)
+								avatarUrl = list[0].atom::icon;
+							// nasty hack cause jaiku gives us the WRONG url for the image
+							// we have to replace the _None.jpg with _f.jpg
+							if(avatarUrl.substr(-9,9) == "_None.jpg")
+								avatarUrl = avatarUrl.substr(0, avatarUrl.length-9) + "_f.jpg";
+							
+							list = x.*::actor;
+							if(list && list.length()>0)
+								displayName = list[0].atom::title;
+							// jaiku also doesn't give us a display name, so make sure it is an
+							// empty string and not null put an empty string in the db
+							if(!displayName)
+								displayName = "";
+								
+							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(idString, newMessage.sender, displayName, avatarUrl);
+							valuesSet = true;
+
+							if(x.atom::title)
+							{
+								messageString = x.atom::title;
+								newMessage.plainMessage = messageString;
+								
+								if(newMessage.sender == "jaiku@jaiku.com" || newMessage.sender == "update@identi.ca")
+								{
+									// remove all tags
+									messageString = LinkUitls.removeALlTags(messageString);
+									// trim whitspace off the ends
+									messageString = StringUtil.trim(messageString);
+									// create links
+									messageString = LinkUitls.createLinks(messageString);
+									
+									if(newMessage.sender == "jaiku@jaiku.com")
+									{
+										// find # links
+										messageString = LinkUitls.createHashTagLinks(messageString, "http://www.jaiku.com/channel/", "");
+										// find @ links
+										messageString = LinkUitls.createAtLinks(messageString, "http://", ".jaiku.com/");
+									}
+									else
+									{
+										// find # links
+										messageString = LinkUitls.createHashTagLinks(messageString, "http://identi.ca/tag/", "");
+										// find @ links
+										messageString = LinkUitls.createAtLinks(messageString, "http://identi.ca/", "");
+									}
+									
+									newMessage.displayMessage = messageString;
+									return newMessage;
+								}
+							}
+
+						}
 					}
 				}
 			}
@@ -190,31 +257,19 @@ package com.cleartext.ximpp.models.valueObjects
 				if(result && result.length > 0)
 				{
 					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[4], newMessage.sender, result[3], result[2]);
-					var messageString:String = String(result[5]);
+					messageString = String(result[5]);
 					newMessage.plainMessage = messageString;
-					
-					// remove all tags	
-					var tmpStr:String;
-					while(tmpStr != messageString)
-					{
-						tmpStr = messageString;
-						messageString = messageString.replace(new RegExp("<([A-Z][A-Z0-9]*)\\b[^>]*?>([\\s\\S]*?)</\\1>", "ig"), "$2");
-					}
-	
+					// remove all tags
+					messageString = LinkUitls.removeALlTags(messageString);
 					// trim whitspace off the ends
 					messageString = StringUtil.trim(messageString);
-					
 					// create links
 					messageString = LinkUitls.createLinks(messageString);
-					// find # links avoiding the # already in font color tags
-					var regExp2:RegExp = new RegExp("((?<!<FONT COLOR=\")#|^#)([\\w<>]+?)\\b", "ig");
-					messageString = messageString.replace(regExp2, LinkUitls.getStartTag() + "http://twitter.com/search?q=%23$2\">$&" + LinkUitls.endTag);
+					// find # links
+					messageString = LinkUitls.createHashTagLinks(messageString, "http://twitter.com/search?q=%23", "");
 					// find @ links
-					var regExp1:RegExp = new RegExp("@(\\w+?)\\b", "ig");
-					messageString = messageString.replace(regExp1, LinkUitls.getStartTag() + "http://twitter.com/$1\">$&" + LinkUitls.endTag);
-					
+					messageString = LinkUitls.createAtLinks(messageString, "http://twitter.com/", "");
 					newMessage.displayMessage = messageString;
-					trace(messageString);
 					return newMessage;
 				}
 			}

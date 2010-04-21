@@ -39,23 +39,23 @@ package com.cleartext.ximpp.models.utils
 			"XN--HLCJ6AYA9ESC7A","XN--JXALPDLP","XN--KGBECHTV",
 			"XN--ZCKZAH","YE","YT","YU","ZA","ZM","ZW"];
 		
-		public static function escapeHTML(str:String):String
-		{
-			str = str.replace(/&/g, "&amp;");
-			str = str.replace(/</g, "&lt;");
-			str = str.replace(/>/g, "&gt;");
-//			str = str.replace(new RegExp('"', "g"), "&quot;");
-			return str;
-		}
-		
-		public static function unescapeHTML(str:String):String
-		{
-//			str = str.replace(/&amp;/g, "&");
-//			str = str.replace(/&lt;/g, "<");
-//			str = str.replace(/&gt;/g, ">");
-//			str = str.replace(/&quot;/g, "&quot;");
-			return str;
-		}
+//		public static function escapeHTML(str:String):String
+//		{
+//			str = str.replace(/&/g, "&amp;");
+//			str = str.replace(/</g, "&lt;");
+//			str = str.replace(/>/g, "&gt;");
+////			str = str.replace(new RegExp('"', "g"), "&quot;");
+//			return str;
+//		}
+//		
+//		public static function unescapeHTML(str:String):String
+//		{
+////			str = str.replace(/&amp;/g, "&");
+////			str = str.replace(/&lt;/g, "<");
+////			str = str.replace(/&gt;/g, ">");
+////			str = str.replace(/&quot;/g, "&quot;");
+//			return str;
+//		}
 		
 		public static function getStartTag(linkColour:uint=0x0033ff):String
 		{
@@ -73,7 +73,6 @@ package com.cleartext.ximpp.models.utils
 		{
 			var startTag:String = getStartTag(linkColour);
 			
-			//escape double quotes
 			var linkText:String = plainText;
 			
 			// find any valid urls, this regex will probably produce false positives
@@ -123,6 +122,32 @@ package com.cleartext.ximpp.models.utils
 			}
 			return results;
 		}
+		
+		public static function removeALlTags(str:String):String
+		{
+			var tmpStr:String;
+			while(tmpStr != str)
+			{
+				tmpStr = str;
+				str = str.replace(new RegExp("<([A-Z][A-Z0-9]*)\\b[^>]*?>([\\s\\S]*?)</\\1>", "ig"), "$2");
+			}
+			return str;
+		}
+		
+		public static function createHashTagLinks(str:String, urlStart:String, urlEnd:String):String
+		{
+			// avoid the # already in font color tags
+			var regExp:RegExp = new RegExp("((?<!<FONT COLOR=\")#|^#)([\\w<>]+?)\\b", "ig");
+			return str.replace(regExp, getStartTag() + urlStart + "$2" + urlEnd + "\">$&" + endTag);
+		} 
+		
+		public static function createAtLinks(str:String, urlStart:String, urlEnd:String):String
+		{
+			// avoid the # already in font color tags
+			var regExp:RegExp = new RegExp("@(\\w+?)\\b", "ig");
+			return str.replace(regExp, getStartTag() + urlStart + "$1" + urlEnd + "\">$&" + endTag);
+		} 
+		
 	}
 }
 

@@ -58,10 +58,10 @@ package com.cleartext.ximpp.models
 				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
 			}
 			
-			if(displayName)
+			if(displayName != null)
 				buddy.displayName = displayName;
 			
-			if(avatarUrl)
+			if(avatarUrl != null)
 				buddy.setAvatarUrl(avatarUrl);
 				
 			if(jid)

@@ -1,5 +1,7 @@
 package com.cleartext.ximpp.assets
 {
+	import flash.display.BitmapData;
+	
 	public class Constants
 	{
 		/**
@@ -156,6 +158,16 @@ package com.cleartext.ximpp.assets
 
 		[Embed (source="com/cleartext/ximpp/assets/addGatewayOver.png")]
 		public static const AddGatewayOver:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/user.jpg")]
+		public static const DefaultAvatar:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/edit.png")]
+		public static const EditIcon:Class;
+		
+		public static const defaultAvatarBmd:BitmapData = new DefaultAvatar().bitmapData;
+
+		public static const editIconBmd:BitmapData = new EditIcon().bitmapData;
 
 	}
 }

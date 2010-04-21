@@ -88,6 +88,11 @@ package com.seesmic.as3.xmpp
 					customTags.push(x);
 			}
 
+			for each(var entry:XML in xml.*::entry)
+			{
+				customTags.push(entry);
+			}
+
 			if(!utcTimestamp)
 				setTimestamp();
 				

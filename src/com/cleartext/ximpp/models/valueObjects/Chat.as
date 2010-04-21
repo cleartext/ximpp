@@ -2,6 +2,7 @@ package com.cleartext.ximpp.models.valueObjects
 {
 	
 	import flash.events.EventDispatcher;
+	import flash.system.System;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
@@ -32,5 +33,14 @@ package com.cleartext.ximpp.models.valueObjects
 			messages.refresh()
 		}
 		
+		public function addMessage(message:Message, limit:int):void
+		{
+			messages.addItemAt(message, 0);
+			while(messages.length > limit)
+				messages.removeItemAt(messages.length-1);
+			messages.refresh();
+			
+			System.gc();
+		}
 	}
 }

@@ -22,7 +22,6 @@ package com.cleartext.ximpp.views.messages
 	import flash.geom.Matrix;
 	import flash.utils.Timer;
 	
-	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.containers.ViewStack;
@@ -33,6 +32,7 @@ package com.cleartext.ximpp.views.messages
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	import mx.events.FlexEvent;
+	import mx.utils.StringUtil;
 	
 	public class MessageCanvas extends Canvas
 	{
@@ -75,7 +75,7 @@ package com.cleartext.ximpp.views.messages
 		private var searchBox:SearchBox;
 		private var messageStack:ViewStack;
 
-		private var searchString:String="";
+		private var searchTerms:Array = [];
 		
 		private var isTypingTimer:Timer;
 		
@@ -202,7 +202,7 @@ package com.cleartext.ximpp.views.messages
 				avatarCanvas.addChildAt(avatar, 0);
 					
 				var sproutList:MessageSproutList = new MessageSproutList();
-				BindingUtils.bindProperty(sproutList, "animate", settings.global, "animateMessageList");
+				sproutList.animate = settings.global.animateMessageList;
 				sproutList.horizontalScrollPolicy = "off";
 				sproutList.data = chat;
 				messageStack.addChild(sproutList);
@@ -349,22 +349,32 @@ package com.cleartext.ximpp.views.messages
 		
 		private function doSearch(event:SearchBoxEvent):void
 		{
-			searchString = event.searchString.toLocaleLowerCase();
+			// get the search term, split it using one or more whitespace
+			// refresh the message collection
+			
+			var searchString:String = event.searchString.toLocaleLowerCase();
+			searchString = StringUtil.trim(searchString);
+			searchTerms = searchString.split(/\s+/);
 			avatarByIndex(index).chat.messages.refresh();
 		}
 
 		private function filterMessages(message:Message):Boolean
 		{
-			if(message.mBlogSender)
+			if(searchTerms.length == 0)
+				return true;
+			
+			for each(var searchTerm:String in searchTerms)
 			{
-				if(message.mBlogSender.userName.toLowerCase().indexOf(searchString) != -1)
-					return true;
-				if(message.mBlogSender.displayName.toLowerCase().indexOf(searchString) != -1)
+				if(message.mBlogSender)
+				{
+					if(message.mBlogSender.userName.toLowerCase().indexOf(searchTerm) != -1)
+						return true;
+					if(message.mBlogSender.displayName.toLowerCase().indexOf(searchTerm) != -1)
+						return true;
+				}
+				if(message.plainMessage.toLocaleLowerCase().indexOf(searchTerm) != -1)
 					return true;
 			}
-			if(message.plainMessage.toLocaleLowerCase().indexOf(searchString) != -1)
-				return true;
-
 			return false;
 		}
 		

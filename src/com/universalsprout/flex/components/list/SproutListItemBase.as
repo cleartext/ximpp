@@ -16,6 +16,7 @@ package com.universalsprout.flex.components.list
 		public function SproutListItemBase(initialWidth:Number=NaN, initialHeight:Number=NaN)
 		{
 			super(initialWidth, initialHeight);
+			addEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler);
 		}
 
 		protected var moveTween:Tween;
@@ -110,6 +111,10 @@ package com.universalsprout.flex.components.list
 		protected function onTweenEnd(value:Number):void
 		{
 			// do nothing
+		}
+
+		protected function removeFromStageHandler(event:Event):void
+		{
 		}
 	}
 }

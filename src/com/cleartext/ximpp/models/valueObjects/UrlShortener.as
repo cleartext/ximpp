@@ -1,7 +1,5 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.seesmic.as3.xmpp.StreamEvent;
-	
 	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
@@ -56,7 +54,7 @@ package com.cleartext.ximpp.models.valueObjects
 					srv.resultFormat = 'array';
 					srv.url = 'http://api.bit.ly/shorten';
 					 
-					params.longUrl = longUrl;
+					params.longUrl = escape(longUrl);
 					params.login = "cleartext";
 					params.apiKey = "R_98fd2ecec7f11a6697af48f3207bd073";
 					params.version = "2.0.1";
@@ -71,7 +69,7 @@ package com.cleartext.ximpp.models.valueObjects
 					srv.resultFormat = 'array';
 					srv.url = 'http://api.bit.ly/shorten';
 					 
-					params.longUrl = longUrl;
+					params.longUrl = escape(longUrl);
 					params.login = "cleartext2";
 					params.apiKey = "R_cd4b248031048fdf982829e9b43138c5";
 					params.version = "2.0.1";
@@ -84,7 +82,7 @@ package com.cleartext.ximpp.models.valueObjects
 
 				case IS_GD :
 					srv.method = 'GET';
-					srv.url = 'http://is.gd/api.php?longurl=' + longUrl;
+					srv.url = 'http://is.gd/api.php?longurl=' + escape(longUrl);
 					srv.addEventListener(ResultEvent.RESULT, callResultHandler);
 					srv.addEventListener(FaultEvent.FAULT, faultHandler);
 					srv.send();

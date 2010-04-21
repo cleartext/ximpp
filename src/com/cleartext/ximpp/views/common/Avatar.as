@@ -1,10 +1,10 @@
 package com.cleartext.ximpp.views.common
 {
+	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.IBuddy;
-	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
@@ -18,20 +18,12 @@ package com.cleartext.ximpp.views.common
 
 	public class Avatar extends UIComponent
 	{
-		[Embed (source="/com/cleartext/ximpp/assets/user.jpg")]
-		public static const DefaultAvatar:Class;
-
-		[Embed (source="/com/cleartext/ximpp/assets/edit.png")]
-		public static const EditIcon:Class;
-		
-		private var editBitmapData:BitmapData = new EditIcon().bitmapData;
-
-		private var defaultBitmapData:BitmapData = new DefaultAvatar().bitmapData;
-
 		public function Avatar()
 		{
 			super();
 		}
+		
+		protected var dirty:Boolean = true;
 		
 		private var _data:Object;
 		public function get data():Object
@@ -42,8 +34,7 @@ package com.cleartext.ximpp.views.common
 		{
 			if(_data != value)
 			{
-				if(buddy)
-					buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				dispose();
 				
 				_data = value;
 				
@@ -68,17 +59,10 @@ package com.cleartext.ximpp.views.common
 		protected function buddyChangedHandler(event:BuddyEvent):void
 		{
 			var bmd:BitmapData = (buddy) ? buddy.avatar : null;
-			
 			if(bmd != bitmapData)
 			{
-				if(bmd)
-				{
-					bitmapData = new BitmapData(bmd.width, bmd.height, bmd.transparent);
-					bitmapData.draw(bmd);
-				}
-				else
-					bitmapData = null;
-
+				_bitmapData = bmd;
+				dirty = true;
 				invalidateDisplayList();
 			}
 		}
@@ -87,14 +71,6 @@ package com.cleartext.ximpp.views.common
 		public function get bitmapData():BitmapData
 		{
 			return _bitmapData;
-		}
-		public function set bitmapData(value:BitmapData):void
-		{
-			if(value != _bitmapData)
-			{
-				_bitmapData = value;
-				invalidateDisplayList();
-			}
 		}
 		
 		private var _border:Boolean = true;
@@ -107,6 +83,7 @@ package com.cleartext.ximpp.views.common
 			if(_border != value)
 			{
 				_border = value;
+				dirty = true;
 				invalidateDisplayList();
 			}
 		}
@@ -122,7 +99,10 @@ package com.cleartext.ximpp.views.common
 			{
 				_borderColour = value;
 				if(border)
+				{
+					dirty = true;
 					invalidateDisplayList();
+				}
 			}
 		}
 		
@@ -137,7 +117,10 @@ package com.cleartext.ximpp.views.common
 			{
 				_borderThickness = value;
 				if(border)
+				{
+					dirty = true;
 					invalidateDisplayList();
+				}
 			}
 		}
 		
@@ -166,9 +149,9 @@ package com.cleartext.ximpp.views.common
 			{
 				if(buttonMode)
 				{
-					addEventListener(MouseEvent.ROLL_OVER, rollOverHandler);
-					addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
-					addEventListener(MouseEvent.CLICK, clickHandler);
+					addEventListener(MouseEvent.ROLL_OVER, rollOverHandler, false, 0, true);
+					addEventListener(MouseEvent.ROLL_OUT, rollOutHandler, false, 0, true);
+					addEventListener(MouseEvent.CLICK, clickHandler, false, 0, true);
 				}
 				else
 				{
@@ -183,12 +166,14 @@ package com.cleartext.ximpp.views.common
 		private function rollOverHandler(event:MouseEvent):void
 		{
 			showEditIcon = true;
+			dirty = true;
 			invalidateDisplayList();
 		}
 		
 		private function rollOutHandler(event:MouseEvent):void
 		{
 			showEditIcon = false;
+			dirty = true;
 			invalidateDisplayList();
 		}
 		
@@ -197,11 +182,20 @@ package com.cleartext.ximpp.views.common
 			dispatchEvent(new AvatarEvent(AvatarEvent.EDIT_CLICKED));
 		}
 		
+		public function dispose(input:*=null):void
+		{
+			if(buddy)
+				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+		}
+		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
+			if(!dirty)
+				return;
+				
 			var g:Graphics = graphics;
 			g.clear();
-			var bmd:BitmapData = (bitmapData) ? bitmapData : defaultBitmapData;
+			var bmd:BitmapData = (bitmapData) ? bitmapData : Constants.defaultAvatarBmd;
 
 			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 
 			var w:Number = bmd.width * scale;
@@ -228,12 +222,15 @@ package com.cleartext.ximpp.views.common
 			{
 				var transform:ColorTransform = new ColorTransform();
 				transform.alphaMultiplier = 0.85;
+				var editBitmapData:BitmapData = Constants.editIconBmd;
 				editBitmapData.colorTransform(editBitmapData.rect, transform);
 				
 				scale = Math.min(unscaledWidth/editBitmapData.width, unscaledHeight/editBitmapData.height);
 				g.beginBitmapFill(editBitmapData, new Matrix(scale, 0, 0, scale));
 				g.drawRect(0,0,unscaledWidth,unscaledHeight);
 			}
+			
+			dirty = false;
 		}
 	}
 }

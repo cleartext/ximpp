@@ -22,7 +22,7 @@
 				if(!autoShorten.selected || shortening || (str.length==1 && str != " "))
 					return;
 				
-				var results:Array = LinkUitls.findLinks(LinkUitls.escapeHTML(input.text + str));
+				var results:Array = LinkUitls.findLinks(input.text + str);
 				for each(var lr:LinkResult in results)
 				{
 					if(lr.validLink.indexOf("http://bit.ly") != 0)

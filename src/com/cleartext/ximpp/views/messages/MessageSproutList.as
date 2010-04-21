@@ -37,8 +37,6 @@ package com.cleartext.ximpp.views.messages
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-			super.updateDisplayList(unscaledWidth, unscaledHeight);
-			
 			if(chat && !chat.microBlogging)
 			{
 				var previousJid:String;
@@ -53,6 +51,7 @@ package com.cleartext.ximpp.views.messages
 					}
 				}
 			}
+			super.updateDisplayList(unscaledWidth, unscaledHeight);
 		}
 	}
 }

@@ -83,8 +83,8 @@
 			{
 				if(!buddy.microBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
 					return;
-				
-				var results:Array = LinkUitls.findLinks(LinkUitls.escapeHTML(inputTextArea.text + str));
+					
+				var results:Array = LinkUitls.findLinks(inputTextArea.text + str);
 				for each(var lr:LinkResult in results)
 				{
 					if(!UrlShortener.isError(lr.validLink))

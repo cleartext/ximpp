@@ -116,11 +116,13 @@ package com.cleartext.ximpp.views.messages
 					unreadMessageCount.visible = true;
 					unreadMessageCount.text = chatBuddy.unreadMessageCount.toString();
 					unreadMessageCount.width = unreadMessageCount.textWidth + 4;
+					dirty = true;
 					invalidateDisplayList();
 				}
 				else if(unreadMessageCount.visible)
 				{
 					unreadMessageCount.visible = false;
+					dirty = true;
 					invalidateDisplayList();
 				}
 			}
@@ -143,6 +145,7 @@ package com.cleartext.ximpp.views.messages
 			closeButton.visible = true;
 			filters = [dropShaddow];
 			alpha = OVER_ALPHA;
+			dirty = true;
 			invalidateDisplayList();
 		}
 		
@@ -152,6 +155,7 @@ package com.cleartext.ximpp.views.messages
 			closeButton.visible = false;
 			filters = [];
 			alpha = (selected) ? SELECTED_ALPHA : OUT_ALPHA;
+			dirty = true;
 			invalidateDisplayList();
 		}
 		

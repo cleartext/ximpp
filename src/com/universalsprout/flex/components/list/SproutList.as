@@ -2,6 +2,7 @@ package com.universalsprout.flex.components.list
 {
 	import flash.display.DisplayObject;
 	import flash.events.Event;
+	import flash.system.System;
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
