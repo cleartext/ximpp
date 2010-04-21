@@ -7,8 +7,6 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.seesmic.as3.xmpp.MessageStanza;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
-	import mx.utils.StringUtil;
-	
 	public class Message extends SproutListDataBase
 	{
 		public static const CREATE_MESSAGES_TABLE:String =
@@ -117,7 +115,6 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public static function createFromStanza(stanza:MessageStanza, mBlogBuddies:MicroBloggingModel):Message
 		{
-			var messageString:String
 			var newMessage:Message = new Message();
 
 			newMessage.sender = stanza.from.getBareJID();
@@ -204,37 +201,18 @@ package com.cleartext.ximpp.models.valueObjects
 							// if there is a title on the atom, then it should be just the plain message
 							if(x.atom::title)
 							{
-								messageString = x.atom::title;
-								newMessage.plainMessage = messageString;
+								var str:String = x.atom::title;
+								newMessage.plainMessage = str;
 								
-								// if we know this message is from jaiku or identi.ca, then we can to some link parsing 
-								if(newMessage.sender == "jaiku@jaiku.com" || newMessage.sender == "update@identi.ca")
-								{
-									// remove all tags
-									messageString = LinkUitls.removeALlTags(messageString);
-									// trim whitspace off the ends
-									messageString = StringUtil.trim(messageString);
-									// create links
-									messageString = LinkUitls.createLinks(messageString);
-									
-									if(newMessage.sender == "jaiku@jaiku.com")
-									{
-										// find # links
-										messageString = LinkUitls.createHashTagLinks(messageString, "http://www.jaiku.com/channel/", "");
-										// find @ links
-										messageString = LinkUitls.createAtLinks(messageString, "http://", ".jaiku.com/");
-									}
-									else
-									{
-										// find # links
-										messageString = LinkUitls.createHashTagLinks(messageString, "http://identi.ca/tag/", "");
-										// find @ links
-										messageString = LinkUitls.createAtLinks(messageString, "http://identi.ca/", "");
-									}
-									
-									newMessage.displayMessage = messageString;
-									return newMessage;
-								}
+								if(newMessage.sender == "jaiku@jaiku.com")
+									str = LinkUitls.createLinks(str, "http://www.jaiku.com/channel/", "", "http://", ".jaiku.com/");
+								else if(newMessage.sender == "update@identi.ca")
+									str = LinkUitls.createLinks(str, "http://identi.ca/tag/", "", "http://identi.ca/", "");
+								else
+									str = LinkUitls.createLinks(str);
+								
+								newMessage.displayMessage = str;
+								return newMessage;
 							}
 
 						}
@@ -262,19 +240,9 @@ package com.cleartext.ximpp.models.valueObjects
 				if(result && result.length > 0)
 				{
 					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[4], newMessage.sender, result[3], result[2]);
-					messageString = String(result[5]);
+					var messageString:String = String(result[5]);
 					newMessage.plainMessage = messageString;
-					// remove all tags
-					messageString = LinkUitls.removeALlTags(messageString);
-					// trim whitspace off the ends
-					messageString = StringUtil.trim(messageString);
-					// create links
-					messageString = LinkUitls.createLinks(messageString);
-					// find # links
-					messageString = LinkUitls.createHashTagLinks(messageString, "http://twitter.com/search?q=%23", "");
-					// find @ links
-					messageString = LinkUitls.createAtLinks(messageString, "http://twitter.com/", "");
-					newMessage.displayMessage = messageString;
+					newMessage.displayMessage = LinkUitls.createLinks(messageString, "http://twitter.com/search?q=%23", "", "http://twitter.com/", "");
 					return newMessage;
 				}
 			}

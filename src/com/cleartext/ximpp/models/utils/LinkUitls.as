@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.models.utils
 {
-	import mx.messaging.AbstractConsumer;
+	import mx.messaging.management.Attribute;
+	import mx.utils.StringUtil;
 	
 	public class LinkUitls
 	{
@@ -69,12 +70,18 @@ package com.cleartext.ximpp.models.utils
 			return '</A></FONT></U>';
 		}
 
-		public static function createLinks(plainText:String, escapeHtmlChars:Boolean=true, linkColour:uint=0x0033ff):String
+		public static function createLinks(plainText:String, hashUrlStart:String=null, hashUrlEnd:String=null, atUrlStart:String=null, atUrlEnd:String=null):String
 		{
-			var startTag:String = getStartTag(linkColour);
+			var startTag:String = getStartTag();
 			
 			var linkText:String = plainText;
 			
+			// remove any existing tags
+			linkText = LinkUitls.removeALlTags(linkText);
+
+			// trim whitspace off the ends
+			linkText = StringUtil.trim(linkText);
+
 			// find any valid urls, this regex will probably produce false positives
 			// find at least 1 non-whitespace char that isn't a " (greedy to get 
 			// .com.au and not just .com), then a "." then a valid tld then either 
@@ -86,6 +93,12 @@ package com.cleartext.ximpp.models.utils
 			// if the links created don't have a protocol, then give it an http://
 			regex = new RegExp(startTag + '(?!(' + protocols.join('|') + ')://)', 'ig');
 			linkText = linkText.replace(regex, startTag + 'http://');
+
+			if(hashUrlStart || hashUrlEnd)
+				linkText = createHashTagLinks(linkText, hashUrlStart, hashUrlEnd);
+
+			if(atUrlStart || atUrlEnd)
+				linkText = createAtLinks(linkText, atUrlStart, atUrlEnd);
 
 			return linkText;
 		}
