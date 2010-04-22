@@ -46,7 +46,7 @@ package com.cleartext.ximpp.views.messages
 				case MicroBloggingTypes.RECEIVED :
 					var reply:Button = new Button();
 					reply.data = "reply";
-					reply.addEventListener(MouseEvent.CLICK, button_clickHandler);
+					reply.addEventListener(MouseEvent.CLICK, button_clickHandler, false, 0, true);
 					reply.toolTip = "reply";
 					reply.setStyle("skin", null);
 					reply.setStyle("upIcon", Constants.ReplyUp);
@@ -62,7 +62,7 @@ package com.cleartext.ximpp.views.messages
 
 					var retweet:Button = new Button();
 					retweet.data = "retweet";
-					retweet.addEventListener(MouseEvent.CLICK, button_clickHandler);
+					retweet.addEventListener(MouseEvent.CLICK, button_clickHandler, false, 0, true);
 					retweet.toolTip = "retweet";
 					retweet.setStyle("skin", null);
 					retweet.setStyle("upIcon", Constants.RetweetUp);
@@ -78,7 +78,7 @@ package com.cleartext.ximpp.views.messages
 
 					var directMessage:Button = new Button();
 					directMessage.data = "direct";
-					directMessage.addEventListener(MouseEvent.CLICK, button_clickHandler);
+					directMessage.addEventListener(MouseEvent.CLICK, button_clickHandler, false, 0, true);
 					directMessage.toolTip = "direct message";
 					directMessage.setStyle("skin", null);
 					directMessage.setStyle("upIcon", Constants.DirectMessageUp);

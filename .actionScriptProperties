@@ -11,10 +11,10 @@
 </sourceAttachmentPath>
 </compiler>
 <applications>
+<application path="com/cleartext/ximpp/tests/RegexTest.mxml"/>
 <application path="ximpp.mxml"/>
 <application path="com/cleartext/ximpp/tests/VariableList.mxml"/>
-<application path="LinkTest.mxml"/>
-<application path="com/cleartext/ximpp/tests/RegexTest.mxml"/>
+<application path="com/cleartext/ximpp/tests/MemoryTest.mxml"/>
 </applications>
 <modules/>
 <buildCSSFiles/>

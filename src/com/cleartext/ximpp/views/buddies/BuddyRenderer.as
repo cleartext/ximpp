@@ -10,7 +10,7 @@ package com.cleartext.ximpp.views.buddies
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
-	import com.universalsprout.flex.components.list.SproutListItemBase;
+	import com.universalsprout.flex.components.list.SproutListRendererBase;
 	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
@@ -28,7 +28,7 @@ package com.cleartext.ximpp.views.buddies
 	
 	import org.swizframework.Swiz;
 
-	public class BuddyRenderer extends SproutListItemBase
+	public class BuddyRenderer extends SproutListRendererBase
 	{
 		[Autowire]
 		public var appModel:ApplicationModel;

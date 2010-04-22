@@ -18,8 +18,11 @@ package com.cleartext.ximpp.models.valueObjects
 		public static const ALL_MICRO_BLOGGING_JID:String = "All Social";
 		public static const ALL_MICRO_BLOGGING_BUDDY:Buddy = new Buddy(ALL_MICRO_BLOGGING_JID);
 
+		private var dispatcher:EventDispatcher;
+
 		public function Buddy(jid:String)
 		{
+			dispatcher = new EventDispatcher(this);
 			super();
 			this.jid = jid;
 			status.addEventListener(StatusEvent.STATUS_CHANGED,
@@ -311,9 +314,34 @@ package com.cleartext.ximpp.models.valueObjects
 			return jid + ((resource) ? "/" + resource : "");
 		}
 		
-		override public function toString():String
+		public function toString():String
 		{
 			return "jid:" + jid + " nickName:" + nickName + " lastSeen:" + lastSeen + " status:" + status + " customStatus:" + customStatus + " avatarHash:" + avatarHash;
+		}
+		   
+		public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = true):void
+		{
+			dispatcher.addEventListener(type, listener, useCapture, priority);
+		}
+		   
+		public function dispatchEvent(event:Event):Boolean
+		{
+			return dispatcher.dispatchEvent(event);
+		}
+		
+		public function hasEventListener(type:String):Boolean
+		{
+			return dispatcher.hasEventListener(type);
+		}
+		
+		public function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void
+		{
+			dispatcher.removeEventListener(type, listener, useCapture);
+		}
+		   
+		public function willTrigger(type:String):Boolean
+		{
+			return dispatcher.willTrigger(type);
 		}
 	}
 }

@@ -35,8 +35,8 @@
 				
 				xmpp.modifyRosterItem(buddy);
 				
-				if(subscriptionPanel.newSubscribe)
-					xmpp.sendSubscribe(buddy.jid, subscriptionPanel.newSubscribe);
+				if(subscriptionPanel.subscribeYes.selected)
+					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
 				
 				closeWindow();
 			}

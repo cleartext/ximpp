@@ -39,10 +39,10 @@
 				}
 				else if(addUser.selected)
 				{
-					xmpp.addToRoster(buddy.jid, nickname.text, null, subscriptionPanel.newSubscribe);
+					xmpp.addToRoster(buddy.jid, nickname.text, null);
 				}
 				
-				if(subscriptionPanel.newPublish == SubscriptionTypes.SUBSCRIBED)
+				if(subscriptionPanel.publishYes.selected)
 					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
 				else
 					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBED);
@@ -84,7 +84,7 @@
 			<mx:CheckBox id="addUser" selected="true" label="add to buddy list?" />
 		</mx:FormItem>
 		
-		<popup:SubscirptionPanel showSubscribe="{addUser.selected}" id="subscriptionPanel"/>
+		<popup:SubscirptionPanel showSubscribe="{addUser.selected}" id="subscriptionPanel" autoSend="false"/>
 		
 	</mx:Form>
 	

@@ -1,22 +1,23 @@
 package com.universalsprout.flex.components.list
 {
 	import flash.events.Event;
+	import flash.events.IEventDispatcher;
 	
 	import mx.core.IInvalidating;
 	import mx.effects.Tween;
 	import mx.events.PropertyChangeEvent;
 	import mx.events.ResizeEvent;
 	
-	public class SproutListItemBase extends NonInvalidatingUIComponent implements ISproutListItem
+	public class SproutListRendererBase extends NonInvalidatingUIComponent implements ISproutListRenderer
 	{
 		protected static const TWEEN_DURATION:Number = 500;
 		protected static const UITEXTFIELD_WIDTH_PADDING:Number = 5;
 		protected static const UITEXTFIELD_HEIGHT_PADDING:Number = 4;
 		
-		public function SproutListItemBase(initialWidth:Number=NaN, initialHeight:Number=NaN)
+		public function SproutListRendererBase(initialWidth:Number=NaN, initialHeight:Number=NaN)
 		{
 			super(initialWidth, initialHeight);
-			addEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler);
+			addEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler, false, 0, true);
 		}
 
 		protected var moveTween:Tween;
@@ -28,14 +29,14 @@ package com.universalsprout.flex.components.list
 		}
 		public function set data(value:Object):void
 		{
-			if(data)
-				(data as ISproutListData).removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, dataChangedHandler);
+			if(data is IEventDispatcher)
+				(data as IEventDispatcher).removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, dataChangedHandler);
 			
 			_data = value;
 			
-			if(data)
+			if(data is IEventDispatcher)
 			{
-				(data as ISproutListData).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, dataChangedHandler);
+				(data as IEventDispatcher).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, dataChangedHandler, false, 0, true);
 				invalidateProperties();
 			}
 		}
@@ -115,6 +116,13 @@ package com.universalsprout.flex.components.list
 
 		protected function removeFromStageHandler(event:Event):void
 		{
+			dispose();
+		}
+		
+		public function dispose():void
+		{
+//			removeEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler);
+//			(data as ISproutListData).removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, dataChangedHandler);
 		}
 	}
 }

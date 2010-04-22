@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="init()">
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.tests.simlpeObjects.EDispatcer;
+			import com.cleartext.ximpp.tests.simlpeObjects.Plain;
+			import mx.collections.ArrayCollection;
+
+			private var dp:ArrayCollection = new ArrayCollection();
+
+			private function init():void
+			{
+				
+				for(var i:int=1000; i>=0; i--)
+				{
+					dp.addItem(new Plain());
+					dp.addItem(new EDispatcer());
+				}
+			}
+		]]>
+	</mx:Script>
+</mx:WindowedApplication>

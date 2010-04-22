@@ -3,7 +3,7 @@ package com.universalsprout.flex.components.list
 	import mx.core.IDataRenderer;
 	import mx.core.IUIComponent;
 	
-	public interface ISproutListItem extends IDataRenderer, IUIComponent
+	public interface ISproutListRenderer extends IDataRenderer, IUIComponent, IDisposable
 	{
 		function get heightTo():Number;
 		function set heightTo(value:Number):void

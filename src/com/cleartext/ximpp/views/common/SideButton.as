@@ -48,33 +48,9 @@ package com.cleartext.ximpp.views.common
 		{
 			if(_data != value)
 			{
-				if(buddy)
-					buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
-				
 				_data = value;
-				
-				if(buddy)
-				{
-					buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
-					if(buddy.avatar && image)
-						image.source = new Bitmap(buddy.avatar);
-					else
-						icon = Constants.DefaultGroupIcon;
-					
-					buddyChangedHandler(null);
-				}
 			}
 		}
-
-		private function buddyChangedHandler(event:BuddyEvent):void
-		{
-			text = buddy.nickName;
-		}
-
-		public function get buddy():Buddy
-		{
-			return data as Buddy;
-		}		
 
 		private var _expandRight:Boolean = true;
 		public function get expandRight():Boolean
@@ -184,8 +160,8 @@ package com.cleartext.ximpp.views.common
 			}
 			else if(xmpp.connected)
 			{
-				editButton.toolTip = (buddy) ? "edit micro blogging" : "edit group";
-				deleteButton.toolTip = (buddy) ? "remove from micro blogging list" : "remove group";
+				editButton.toolTip = "edit group";
+				deleteButton.toolTip = "remove group";
 			}
 			else
 			{
@@ -226,13 +202,7 @@ package com.cleartext.ximpp.views.common
 			{
 				image = new RoundedImage();
 				image.radius = 10;
-				if(buddy && buddy.avatar)
-				{
-					image.source = new Bitmap(buddy.avatar);
-					image.alpha = 0.7;
-				}
-				else
-					image.source = icon;
+				image.source = icon;
 				image.width = 32;
 				image.height = 32;
 				image.mouseEnabled = false;
@@ -273,22 +243,13 @@ package com.cleartext.ximpp.views.common
 		private function delete_clickHandler(event:MouseEvent):void
 		{
 			event.stopImmediatePropagation();
-			if(buddy)
-			{
-				buddy.microBlogging = false;
-				xmpp.modifyRosterItem(buddy);
-			}
-			else
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.DELETE_GROUP_WINDOW, text));
+			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.DELETE_GROUP_WINDOW, text));
 		}
 		
 		private function edit_clickHandler(event:MouseEvent):void
 		{
 			event.stopImmediatePropagation();
-			if(buddy)
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW, "", buddy));
-			else
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_GROUP_WINDOW, text));
+			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_GROUP_WINDOW, text));
 		}
 		
 		override protected function commitProperties():void

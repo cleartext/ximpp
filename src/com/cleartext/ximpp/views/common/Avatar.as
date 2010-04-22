@@ -13,7 +13,7 @@ package com.cleartext.ximpp.views.common
 	import flash.geom.Matrix;
 	
 	import mx.core.UIComponent;
-
+	
 	[Event(name="editClicked", type="com.cleartext.ximpp.events.AvatarEvent")]
 
 	public class Avatar extends UIComponent

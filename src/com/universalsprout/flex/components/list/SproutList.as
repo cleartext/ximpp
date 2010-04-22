@@ -2,8 +2,8 @@ package com.universalsprout.flex.components.list
 {
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-	import flash.system.System;
 	import flash.utils.Dictionary;
+	import flash.utils.setTimeout;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
@@ -36,6 +36,8 @@ package com.universalsprout.flex.components.list
 		protected var resetItemRenderers:Boolean = true;
 		
 		protected var bottomOfListComponent:UIComponent;
+
+		private var addingItem:Boolean = false;
 		
 		private var _itemRenderer:IFactory;
 		public function get itemRenderer():IFactory
@@ -156,7 +158,7 @@ package com.universalsprout.flex.components.list
 			{
 				resetItemRenderers = false;
 				
-				for each(var item:ISproutListItem in itemRenderersByDataUid)
+				for each(var item:ISproutListRenderer in itemRenderersByDataUid)
 				{
 					delete itemRenderersByDataUid[item.data.uid];
 					item.removeEventListener(ResizeEvent.RESIZE, itemsResizeHandler);
@@ -175,6 +177,9 @@ package com.universalsprout.flex.components.list
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
+			
+			if(addingItem)
+				return;
 
 			for each(item in itemRenderersByDataUid)
 			{
@@ -195,9 +200,12 @@ package com.universalsprout.flex.components.list
 
 			for each(var data:ISproutListData in collection)
 			{
-				var newItem:Boolean = false;
-				var item:ISproutListItem = itemRenderersByDataUid[data.uid]; 
-				if(!item)
+				var item:ISproutListRenderer = itemRenderersByDataUid[data.uid]; 
+				if(item)
+				{
+					addingItem = false;
+				}
+				else
 				{
 					item = itemRenderer.newInstance();
 					item.data = data;
@@ -205,7 +213,8 @@ package com.universalsprout.flex.components.list
 					itemRenderersByDataUid[data.uid] = item;
 					addChildAt(DisplayObject(item), childIndex);
 					callLater(invalidateDisplayList);
-					newItem = true;
+					callLater(function():void { addingItem = false; });
+					addingItem = true;
 				}
 
 				if(!item.visible)
@@ -216,7 +225,7 @@ package com.universalsprout.flex.components.list
 					invalidateDisplayList();
 				}
 
-				if(animate && !newItem)
+				if(animate && !addingItem)
 					item.yTo = yCounter;
 				else
 					item.move(0, yCounter);
@@ -235,9 +244,7 @@ package com.universalsprout.flex.components.list
 					bottomOfListComponent.move(0, estimatedHeight-10);
 					return;
 				}
-
 			}
-
 			bottomOfListComponent.includeInLayout = false;
 		}
 	}

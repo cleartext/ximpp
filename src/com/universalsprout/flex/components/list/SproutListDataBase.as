@@ -6,14 +6,24 @@ package com.universalsprout.flex.components.list
 	
 	[Event(name="propertyChange", type="mx.events")]
 
-	public class SproutListDataBase extends EventDispatcher implements ISproutListData
+	public class SproutListDataBase implements ISproutListData
 	{
+		public function SproutListDataBase()
+		{
+			super();
+		}
+		
 		private var _uid:String;
 		public function get uid():String
 		{
 			if(!_uid)
 				_uid = UIDUtil.createUID();
 			return _uid;
+		}
+		
+		public function dispose():void
+		{
+			// override me
 		}
 	}
 }

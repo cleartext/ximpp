@@ -214,7 +214,7 @@ package com.cleartext.ximpp.models
 			if(messageStanza.body == "The message has been sent.")
 				return;
 			
-			var message:Message = Message.createFromStanza(messageStanza, mBlogBuddies);
+			var message:Message = appModel.createFromStanza(messageStanza);
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			
 			if(!buddy)
@@ -522,15 +522,12 @@ package com.cleartext.ximpp.models
 		// ADD TO ROSTER 
 		//-------------------------------
 		
-		public function addToRoster(toJid:String, nickName:String, groups:Array, newSubscription:String):void
+		public function addToRoster(toJid:String, nickName:String, groups:Array):void
 		{
 			sendIq(settings.userAccount.jid,
 					IQTypes.SET,
 					IQTypes.addRemoveRosterItem(toJid, nickName, groups, false),
 					modifyRosterHandler);
-
-			if(newSubscription)
-				sendSubscribe(toJid, newSubscription);
 		}
 		
 		//-------------------------------

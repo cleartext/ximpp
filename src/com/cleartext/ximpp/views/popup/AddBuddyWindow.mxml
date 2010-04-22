@@ -9,6 +9,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.seesmic.as3.xmpp.JID;
 			import mx.controls.CheckBox;
 			import mx.collections.ArrayCollection;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
@@ -37,7 +38,9 @@
 			
 			override protected function submit(event:Event):void
 			{
-				xmpp.addToRoster(newJid.text, nickname.text, getSelected(list), subscriptionPanel.newSubscribe);
+				xmpp.addToRoster(newJid.text, nickname.text, getSelected(list));
+				if(subscriptionPanel.subscribeYes.selected)
+					xmpp.sendSubscribe(newJid.text, SubscriptionTypes.SUBSCRIBE);
 				closeWindow();
 			}
 			
@@ -60,7 +63,7 @@
 			<mx:TextInput id="nickname" />
 		</mx:FormItem>
 
-		<popup:SubscirptionPanel id="subscriptionPanel" showPublish="false"/>
+		<popup:SubscirptionPanel id="subscriptionPanel" showPublish="false" autoSend="false"/>
 
 		<mx:FormItem label="groups:">
 			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >

@@ -48,7 +48,7 @@ package com.cleartext.ximpp.models.valueObjects
 			if(_status != value)
 			{
 				_status = value;
-				dispatchEvent(new MicroBloggingMessageEvent(MicroBloggingMessageEvent.MESSAGE_STATUS_CHANGED, this));
+//				dispatchEvent(new MicroBloggingMessageEvent(MicroBloggingMessageEvent.MESSAGE_STATUS_CHANGED, this));
 			}
 		}
 		
@@ -89,7 +89,6 @@ package com.cleartext.ximpp.models.valueObjects
 			return newMessage;
 		}
 		
-		
 		public function toDatabaseValues(userId:int):Array
 		{
 			var result:Array = [
@@ -101,9 +100,11 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("subject", subject),
 				new DatabaseValue("plainMessage", plainMessage),
 				new DatabaseValue("displayMessage", displayMessage),
-				new DatabaseValue("rawxml", rawXML),
 				];
 
+			if(rawXML)
+				result.push(new DatabaseValue("rawxml", rawXML));
+				
 			if(mBlogSender)
 				result.push(new DatabaseValue("senderId", mBlogSender.microBloggingBuddyId));
 
@@ -111,144 +112,6 @@ package com.cleartext.ximpp.models.valueObjects
 				result.push(new DatabaseValue("originalSenderId", mBlogOriginalSender.microBloggingBuddyId));
 			
 			return result;
-		}
-		
-		public static function createFromStanza(stanza:MessageStanza, mBlogBuddies:MicroBloggingModel):Message
-		{
-			var newMessage:Message = new Message();
-
-			newMessage.sender = stanza.from.getBareJID();
-			newMessage.recipient = stanza.to.getBareJID();
-			newMessage.type = stanza.type;
-			newMessage.subject = stanza.subject;
-			newMessage.plainMessage = stanza.body;
-			newMessage.rawXML = stanza.xmlstring;
-			var date:Date = stanza.utcTimestamp;
-			newMessage.utcTimestamp = date;
-			newMessage.timestamp = new Date(Date.UTC(date.fullYear, date.month, date.date, date.hours, date.minutes, date.seconds, date.milliseconds));
-			
-			var valuesSet:Boolean = false;
-
-			var customTags:Array = stanza.customTags;
-			if(customTags && customTags.length > 0)
-			{
-				for each(var x:XML in customTags)
-				{
-					for each(var n:Namespace in x.namespaceDeclarations())
-					{
-						// first check if it has the cleartext custom tags
-						if(n.uri == "http://cleartext.net/mblog")
-						{
-							var sBuddy:Object = x.*::buddy.(@type=="sender");
-
-							if(sBuddy.*::jid != mBlogBuddies.userAccount.jid)
-							{
-								newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
-										String(sBuddy.*::userName), sBuddy.*::serviceJid, 
-										sBuddy.*::displayName, sBuddy.*::avatar.(@type=='url'),
-										sBuddy.*::jid, sBuddy.*::avatar.(@type=='hash'));
-							}
-							
-							var osBuddy:Object = x.*::buddy.(@type=="originalSender");
-
-							if(osBuddy)
-							{
-								newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(
-										String(osBuddy.*::userName), osBuddy.*::serviceJid, 
-										osBuddy.*::displayName, osBuddy.*::avatar.(@type=='url'),
-										osBuddy.*::jid, osBuddy.*::avatar.(@type=='hash'));
-							}
-							
-							var text:String = x.*::text;
-							if(text)
-								newMessage.displayMessage = LinkUitls.createLinks(text);
-
-							valuesSet = true;
-						}
-						
-						// if it has an atom, then it is probably jaiku or identi.ca
-						if(n.uri == "http://www.w3.org/2005/Atom")
-						{
-							namespace atom = "http://www.w3.org/2005/Atom";
-							var idString:String;
-							var displayName:String;
-							var avatarUrl:String;
-							var list:XMLList;
-							
-							list = x.atom::author;
-							if(list && list.length()>0)
-								idString = list[0].atom::name;
-
-							list = x.atom::source;
-							if(list && list.length()>0)
-								avatarUrl = list[0].atom::icon;
-							// nasty hack cause jaiku gives us the WRONG url for the image
-							// we have to replace the _None.jpg with _f.jpg
-							if(avatarUrl.substr(-9,9) == "_None.jpg")
-								avatarUrl = avatarUrl.substr(0, avatarUrl.length-9) + "_f.jpg";
-							
-							list = x.*::actor;
-							if(list && list.length()>0)
-								displayName = list[0].atom::title;
-							// jaiku also doesn't give us a display name, so make sure it is an
-							// empty string and not null put an empty string in the db
-							if(!displayName)
-								displayName = "";
-								
-							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(idString, newMessage.sender, displayName, avatarUrl);
-							valuesSet = true;
-
-							// if there is a title on the atom, then it should be just the plain message
-							if(x.atom::title)
-							{
-								var str:String = x.atom::title;
-								newMessage.plainMessage = str;
-								
-								if(newMessage.sender == "jaiku@jaiku.com")
-									str = LinkUitls.createLinks(str, "http://www.jaiku.com/channel/", "", "http://", ".jaiku.com/");
-								else if(newMessage.sender == "update@identi.ca")
-									str = LinkUitls.createLinks(str, "http://identi.ca/tag/", "", "http://identi.ca/", "");
-								else
-									str = LinkUitls.createLinks(str);
-								
-								newMessage.displayMessage = str;
-								return newMessage;
-							}
-
-						}
-					}
-				}
-			}
-			
-			if(!valuesSet && stanza.html)
-			{
-				var regexpString:String =
-					"<img src=('|\")" + 		// open img tag with src=" or src='
-					"([\\s\\S]*?)" + 			// image url - result[2]
-					"\\1" +			 			// the closing " or '
-					"[\\s\\S]*?" + 				// a lazy amount of any chars
-					"<a[\\s\\S]*?>" + 			// a open a tag with any kind of href 
-					"([\\s\\S]*?)<" + 			// the text within the a tag - the display name - result[3]
-					"[\\s\\S]*?" + 				// a lazy amount of any chars
-					"\\(([\\s\\S]*?)\\): ?" + 	// text within (): - the user id - result[4]
-					"([\\s\\S]*?)" + 			// a lazy amount of any chars - the message - result[5]
-					"</span>";					// the closing span tag
-				
-				var regexp:RegExp = new RegExp(regexpString, "ig");
-				var result:Array = regexp.exec(stanza.html);
-
-				if(result && result.length > 0)
-				{
-					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[4], newMessage.sender, result[3], result[2]);
-					var messageString:String = String(result[5]);
-					newMessage.plainMessage = messageString;
-					newMessage.displayMessage = LinkUitls.createLinks(messageString, "http://twitter.com/search?q=%23", "", "http://twitter.com/", "");
-					return newMessage;
-				}
-			}
-			
-			newMessage.displayMessage = LinkUitls.createLinks(newMessage.plainMessage);
-			return newMessage;
 		}
 	}
 }

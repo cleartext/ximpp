@@ -5,7 +5,7 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	import com.cleartext.ximpp.views.common.Avatar;
-	import com.universalsprout.flex.components.list.SproutListItemBase;
+	import com.universalsprout.flex.components.list.SproutListRendererBase;
 	
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFieldType;
@@ -13,7 +13,7 @@ package com.cleartext.ximpp.views.messages
 	import mx.core.UITextField;
 	import mx.formatters.DateFormatter;
 
-	public class MessageRendererBase extends SproutListItemBase
+	public class MessageRendererBase extends SproutListRendererBase
 	{
 		[Autowire]
 		public var appModel:ApplicationModel;
