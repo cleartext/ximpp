@@ -34,6 +34,24 @@
 	<mx:Image y="6" x="8" source="{Constants.Logo}" height="30"/>
 
 	<mx:Button
+		upIcon="{Constants.SearchUp}"
+		overIcon="{Constants.SearchOver}"
+		downIcon="{Constants.SearchUp}"
+		click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SEARCH_WINDOW));"
+		skin="{null}"
+		toolTip="search local database"
+		right="135" y="8" />
+
+	<mx:Button
+		upIcon="{Constants.GetSatisfactionUp}"
+		overIcon="{Constants.GetSatisfactionOver}"
+		downIcon="{Constants.GetSatisfactionUp}"
+		click="navigateToURL(new URLRequest('http://getsatisfaction.com/cleartext'), '_blank');"
+		skin="{null}"
+		toolTip="online support and feature request"
+		right="105" y="8" />
+
+	<mx:Button
 		upIcon="{Constants.HelpUp}"
 		overIcon="{Constants.HelpOver}"
 		downIcon="{Constants.HelpUp}"

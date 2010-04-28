@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.SearchWindow;
 			import com.cleartext.ximpp.views.popup.XmlInputWindow;
 			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.views.popup.PopupWindowBase;
@@ -153,6 +154,14 @@
 			public function showXmlInputWindow(event:PopUpEvent):void
 			{
 				initializePopUp(new XmlInputWindow());
+			}
+			
+			[Mediate(event="PopUpEvent.SEARCH_WINDOW")]
+			public function showSearchWindow(event:PopUpEvent):void
+			{
+				var window:SearchWindow = new SearchWindow();
+				window.database = appModel.database;
+				window.open();
 			}
 			
 			private function initializePopUp(window:IFlexDisplayObject):void

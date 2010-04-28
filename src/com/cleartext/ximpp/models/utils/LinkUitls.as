@@ -1,6 +1,5 @@
 package com.cleartext.ximpp.models.utils
 {
-	import mx.messaging.management.Attribute;
 	import mx.utils.StringUtil;
 	
 	public class LinkUitls

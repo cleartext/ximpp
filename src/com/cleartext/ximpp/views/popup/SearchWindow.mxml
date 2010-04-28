@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Window
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Search Database" 
+	width="800" height="600" layout="absolute">
+	
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.ximpp.models.DatabaseModel;
+
+			public var database:DatabaseModel;
+			
+			private function doSearch():void
+			{
+				dataGrid.dataProvider = database.searchMessages(searchString.text.split(","));
+			}
+		
+		]]>
+	</mx:Script>
+	
+	<mx:TextInput id="searchString" left="10" top="10" right="50"/>
+	<mx:Button id="button" label="go" width="40" right="10" top="10" click="doSearch()"/>
+	<mx:DataGrid id="dataGrid" top="40" left="10" right="10" bottom="10"/>
+	
+</mx:Window>

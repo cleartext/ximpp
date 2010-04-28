@@ -159,6 +159,18 @@ package com.cleartext.ximpp.assets
 		[Embed (source="com/cleartext/ximpp/assets/addGatewayOver.png")]
 		public static const AddGatewayOver:Class;
 
+		[Embed (source="com/cleartext/ximpp/assets/getSatisfaction.png")]
+		public static const GetSatisfactionUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/getSatisfactionOver.png")]
+		public static const GetSatisfactionOver:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/searchUp.png")]
+		public static const SearchUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/searchOver.png")]
+		public static const SearchOver:Class;
+
 		[Embed (source="/com/cleartext/ximpp/assets/user.jpg")]
 		public static const DefaultAvatar:Class;
 

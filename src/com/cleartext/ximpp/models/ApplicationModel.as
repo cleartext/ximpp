@@ -370,7 +370,7 @@ package com.cleartext.ximpp.models
 							list = x.atom::author;
 							if(list && list.length()>0)
 								idString = list[0].atom::name;
-
+						
 							list = x.atom::source;
 							if(list && list.length()>0)
 								avatarUrl = list[0].atom::icon;
@@ -388,7 +388,7 @@ package com.cleartext.ximpp.models
 								displayName = "";
 								
 							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(idString, newMessage.sender, displayName, avatarUrl);
-
+						
 							// if there is a title on the atom, then it should be just the plain message
 							if(x.atom::title)
 							{

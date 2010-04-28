@@ -11,10 +11,8 @@ package com.cleartext.ximpp.models
 	import flash.data.SQLMode;
 	import flash.data.SQLResult;
 	import flash.data.SQLStatement;
-	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.SQLErrorEvent;
-	import flash.events.SQLEvent;
 	import flash.filesystem.File;
 	import flash.utils.Dictionary;
 	
@@ -534,6 +532,34 @@ package com.cleartext.ximpp.models
 			
 			return buddy;
 		}
+		
+		public function searchMessages(searchTerms:Array):Array
+		{
+			var sortType:String = (settings.global.sortByTimestamp) ? "timestamp" : "messageId";
 
+			// start a transaction 
+			syncConn.begin(); 
+			appModel.log("Loading messages with searchTerms " + searchTerms.join(", "));
+			
+			var stmt:SQLStatement = new SQLStatement();
+			stmt.sqlConnection = syncConn;
+			var sql:String = "Select recipient, sender, timestamp, plainMessage from messages WHERE userid=" + settings.userId
+				+ " AND (";
+			
+			for each(var s:String in searchTerms)
+				sql += "plainMessage LIKE '%" + s + "%' OR ";
+
+			sql = sql.substr(0, sql.length-4);
+			sql += ") ORDER BY " + sortType;
+			stmt.text = sql;
+			trace(sql);
+			stmt.execute();
+			var result:SQLResult = stmt.getResult();
+		    syncConn.commit(); 
+
+			if(result && result.data)
+				return result.data;
+			return null;
+		}
 	}
 }

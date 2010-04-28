@@ -20,6 +20,8 @@ package com.cleartext.ximpp.views.popup
 
 	public class PopupWindowBase extends TitleWindow
 	{
+		public var showCancelButton:Boolean = true;
+		
 		protected var errorMessageToolTips:Dictionary = new Dictionary();
 
 		private var _isValid:Boolean = false;
@@ -77,7 +79,7 @@ package com.cleartext.ximpp.views.popup
 					defaultButton = sumbitButton;
 				}
 				
-				if(!cancelButton)
+				if(!cancelButton && showCancelButton)
 				{
 					cancelButton = new Button();
 					cancelButton.addEventListener(MouseEvent.CLICK, cancelHandler);

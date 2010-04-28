@@ -28,6 +28,8 @@ package com.cleartext.ximpp.events
 
 		public static const XML_INPUT_WINDOW:String = "xmlInputWindow";
 		
+		public static const SEARCH_WINDOW:String = "searchWindow";
+		
 		public var group:String;
 		public var buddy:Buddy;
 		
