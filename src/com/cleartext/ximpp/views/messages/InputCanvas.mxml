@@ -87,7 +87,7 @@
 				var results:Array = LinkUitls.findLinks(inputTextArea.text + str);
 				for each(var lr:LinkResult in results)
 				{
-					if(!UrlShortener.isError(lr.validLink))
+					if(!UrlShortener.alreadyShortenend(lr.validLink))
 					{
 						shortening = true;
 						var shortener:UrlShortener = new UrlShortener();

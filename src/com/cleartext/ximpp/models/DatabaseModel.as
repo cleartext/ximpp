@@ -543,16 +543,15 @@ package com.cleartext.ximpp.models
 			
 			var stmt:SQLStatement = new SQLStatement();
 			stmt.sqlConnection = syncConn;
-			var sql:String = "Select recipient, sender, timestamp, plainMessage from messages WHERE userid=" + settings.userId
+			var sql:String = "Select * from messages WHERE userid=" + settings.userId
 				+ " AND (";
 			
 			for each(var s:String in searchTerms)
 				sql += "plainMessage LIKE '%" + s + "%' OR ";
 
 			sql = sql.substr(0, sql.length-4);
-			sql += ") ORDER BY " + sortType;
+			sql += ") ORDER BY timestamp";
 			stmt.text = sql;
-			trace(sql);
 			stmt.execute();
 			var result:SQLResult = stmt.getResult();
 		    syncConn.commit(); 

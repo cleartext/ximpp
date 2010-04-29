@@ -24,6 +24,7 @@ package com.cleartext.ximpp.views.messages
 		
 		private var chatBuddy:Buddy;
 		private var mBlogSender:MicroBloggingBuddy;
+		private var type:String = "";
 			
 		public function MicroBloggingRenderer()
 		{
@@ -36,6 +37,9 @@ package com.cleartext.ximpp.views.messages
 
 		public function createButtons(type:String):void
 		{
+			if(this.type == type)
+				return;
+			
 			// remove all existing buttons
 			for each(var button:DisplayObject in buttons)
 				removeChild(button);
@@ -179,7 +183,8 @@ package com.cleartext.ximpp.views.messages
 				else if(chatBuddy)
 				{
 					avatar.data = chatBuddy;
-					nameTextField.text = chatBuddy.nickName; 
+					nameTextField.text = chatBuddy.nickName;
+					createButtons(null); 
 				}
 				
 				nameTextField.width = nameTextField.textWidth + padding*4;

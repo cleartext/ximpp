@@ -2,24 +2,64 @@
 <mx:Window
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	title="Search Database" 
-	width="800" height="600" layout="absolute">
+	width="800" height="600" layout="absolute" xmlns:messages="com.cleartext.ximpp.views.messages.*" minHeight="400" minWidth="500" backgroundColor="{Constants.BACKGROUND_COLOUR}">
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.assets.Constants;
+			import com.cleartext.ximpp.models.ApplicationModel;
+			import com.cleartext.ximpp.models.MicroBloggingModel;
+			import com.cleartext.ximpp.models.valueObjects.Message;
 			import com.cleartext.ximpp.models.DatabaseModel;
 
-			public var database:DatabaseModel;
+			[Bindable]
+			public var appModel:ApplicationModel;
+			
+			[Bindable]
+			public var message:Message;
+			
+			private var background:Sprite;
 			
 			private function doSearch():void
 			{
-				dataGrid.dataProvider = database.searchMessages(searchString.text.split(","));
+				dataGrid.dataProvider = appModel.database.searchMessages(searchString.text.split(" "));
 			}
-		
+			
+			private function dataGridChangeHandler():void
+			{
+				var obj:Object = dataGrid.selectedItem;
+				message = Message.createFromDB(obj, appModel.mBlogBuddies);
+				callLater(canvas.invalidateDisplayList);
+			}
+			
+			override protected function createChildren():void
+			{
+				super.createChildren();
+				if(!background)
+				{
+					background = new Sprite();
+					rawChildren.addChildAt(background,1);
+				}
+			}
+					
 		]]>
 	</mx:Script>
 	
-	<mx:TextInput id="searchString" left="10" top="10" right="50"/>
-	<mx:Button id="button" label="go" width="40" right="10" top="10" click="doSearch()"/>
-	<mx:DataGrid id="dataGrid" top="40" left="10" right="10" bottom="10"/>
+	<mx:TextInput id="searchString" left="10" top="10" right="60" enter="doSearch()"/>
+	<mx:Button id="button" label="go" width="40" right="10" top="10" focusEnabled="false" click="doSearch()"/>
+	
+	<mx:VDividedBox top="40" left="10" right="10" bottom="10">
+		<mx:DataGrid id="dataGrid" change="dataGridChangeHandler()" width="100%" height="100%">
+			<mx:columns>
+				<mx:DataGridColumn dataField="timestamp" width="75" headerText="sent" />
+				<mx:DataGridColumn dataField="sender" width="100" headerText="from" />
+				<mx:DataGridColumn dataField="recipient" width="100" headerText="to" />
+				<mx:DataGridColumn dataField="plainMessage" headerText="message" />
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:Canvas id="canvas" backgroundColor="0xffffff" width="100%" height="120" verticalScrollPolicy="on">
+			<messages:AllMicroBloggingRenderer id="messageRenderer" left="0" right="0" data="{message}" appModel="{appModel}"/>
+		</mx:Canvas>
+	</mx:VDividedBox>
 	
 </mx:Window>

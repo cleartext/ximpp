@@ -160,7 +160,7 @@
 			public function showSearchWindow(event:PopUpEvent):void
 			{
 				var window:SearchWindow = new SearchWindow();
-				window.database = appModel.database;
+				window.appModel = appModel;
 				window.open();
 			}
 			
