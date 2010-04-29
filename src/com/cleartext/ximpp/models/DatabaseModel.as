@@ -19,6 +19,7 @@ package com.cleartext.ximpp.models
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
+	import mx.managers.CursorManager;
 	
 	public class DatabaseModel extends EventDispatcher
 	{
@@ -536,7 +537,7 @@ package com.cleartext.ximpp.models
 		public function searchMessages(searchTerms:Array):Array
 		{
 			var sortType:String = (settings.global.sortByTimestamp) ? "timestamp" : "messageId";
-
+			
 			// start a transaction 
 			syncConn.begin(); 
 			appModel.log("Loading messages with searchTerms " + searchTerms.join(", "));

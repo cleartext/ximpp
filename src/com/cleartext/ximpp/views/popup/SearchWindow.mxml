@@ -2,10 +2,16 @@
 <mx:Window
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	title="Search Database" 
-	width="800" height="600" layout="absolute" xmlns:messages="com.cleartext.ximpp.views.messages.*" minHeight="400" minWidth="500" backgroundColor="{Constants.BACKGROUND_COLOUR}">
+	width="800" height="600" 
+	layout="absolute" 
+	xmlns:messages="com.cleartext.ximpp.views.messages.*" 
+	minHeight="400" minWidth="500" 
+	backgroundColor="{Constants.BACKGROUND_COLOUR}">
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.utils.ObjectUtil;
 			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import com.cleartext.ximpp.models.MicroBloggingModel;
@@ -20,9 +26,17 @@
 			
 			private var background:Sprite;
 			
+			private function dateSort(itemA:Object, itemB:Object):int
+			{
+				return ObjectUtil.dateCompare(itemA.timestamp, itemB.timestamp);
+			}
+            
 			private function doSearch():void
 			{
+				cursorManager.setBusyCursor();
 				dataGrid.dataProvider = appModel.database.searchMessages(searchString.text.split(" "));
+				countLabel.text = "Num Results: " + dataGrid.dataProvider.length;
+				cursorManager.removeBusyCursor();
 			}
 			
 			private function dataGridChangeHandler():void
@@ -41,17 +55,28 @@
 					rawChildren.addChildAt(background,1);
 				}
 			}
+			
+			private function formatDate(item:Object, column:DataGridColumn):String
+			{
+				return df.format(item.timestamp);
+			}
 					
 		]]>
 	</mx:Script>
 	
+	<mx:DateFormatter id="df" formatString="EEE DD MMM YY, JJ:NN:SS" />
+	
 	<mx:TextInput id="searchString" left="10" top="10" right="60" enter="doSearch()"/>
 	<mx:Button id="button" label="go" width="40" right="10" top="10" focusEnabled="false" click="doSearch()"/>
 	
-	<mx:VDividedBox top="40" left="10" right="10" bottom="10">
-		<mx:DataGrid id="dataGrid" change="dataGridChangeHandler()" width="100%" height="100%">
+	<mx:Canvas x="10" y="40" backgroundColor="0xffffff">
+			<mx:Label id="countLabel" text="Num Results:"/>
+	</mx:Canvas>
+	
+	<mx:VDividedBox top="70" left="10" right="10" bottom="10">
+		<mx:DataGrid id="dataGrid" change="dataGridChangeHandler()" width="100%" height="100%" rowHeight="25">
 			<mx:columns>
-				<mx:DataGridColumn dataField="timestamp" width="75" headerText="sent" />
+				<mx:DataGridColumn dataField="timestamp" labelFunction="formatDate" width="75" headerText="sent" sortCompareFunction="dateSort"/>
 				<mx:DataGridColumn dataField="sender" width="100" headerText="from" />
 				<mx:DataGridColumn dataField="recipient" width="100" headerText="to" />
 				<mx:DataGridColumn dataField="plainMessage" headerText="message" />
