@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	applicationComplete="applicationCompleteHandler()"
+	creationComplete="applicationCompleteHandler()"
 	close="mainView.appModel.shutDown()"
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
@@ -16,6 +16,7 @@
 			{
 				ToolTipManager.showDelay=100;
 			}
+ 			
 		]]>
 	</mx:Script>
 	

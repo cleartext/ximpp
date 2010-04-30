@@ -1,5 +1,10 @@
 package com.cleartext.ximpp.models
 {
+	import air.update.ApplicationUpdaterUI;
+	import air.update.events.DownloadErrorEvent;
+	import air.update.events.StatusUpdateErrorEvent;
+	import air.update.events.UpdateEvent;
+	
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.utils.LinkUitls;
@@ -11,6 +16,7 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.StreamEvent;
 	
 	import flash.desktop.NativeApplication;
+	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.utils.getTimer;
@@ -192,6 +198,21 @@ package com.cleartext.ximpp.models
 
 		public function init():void
 		{
+			// check for updates
+			var updater:ApplicationUpdaterUI = new ApplicationUpdaterUI();
+			updater.updateURL = "http://esm.cleartext.net/update/update.xml";
+			updater.addEventListener(UpdateEvent.INITIALIZED, 
+				function(event:UpdateEvent):void
+				{
+					(event.target as ApplicationUpdaterUI).checkNow();
+				});
+			updater.isCheckForUpdateVisible = false;
+
+			updater.addEventListener(ErrorEvent.ERROR, log);
+			updater.addEventListener(DownloadErrorEvent.DOWNLOAD_ERROR, log);
+			updater.addEventListener(StatusUpdateErrorEvent.UPDATE_ERROR, log);
+			updater.initialize();
+			
 			database.createDatabase();
 
 			// if this changes the userId, it will reload all the data from the database
