@@ -16,6 +16,7 @@ package com.cleartext.ximpp.views.messages
 	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
+	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
@@ -109,6 +110,8 @@ package com.cleartext.ximpp.views.messages
 		{
 			super();
 			
+			horizontalScrollPolicy = "off";
+			verticalScrollPolicy = "off";
 			percentHeight = 100;
 			percentWidth = 100;
 			
@@ -257,16 +260,17 @@ package com.cleartext.ximpp.views.messages
 			{
 				avatarCanvas = new Canvas();
 				avatarCanvas.horizontalScrollPolicy = ScrollPolicy.OFF;
+				avatarCanvas.y = Constants.TOP_BAR_HEIGHT;
+				avatarCanvas.clipContent = false;
+				avatarCanvas.horizontalScrollPolicy = "off";
+				avatarCanvas.verticalScrollPolicy = "off";
 				addChild(avatarCanvas);
 			}
 			
 			if(!customScroll)
 			{
 				customScroll = new CustomScrollbar();
-				customScroll.setConstraintValue("right", 23);
-				customScroll.width = 400;
-				customScroll.height = 12;
-				customScroll.y = Constants.TOP_BAR_HEIGHT - 6;
+				customScroll.addEventListener("scrollChanged", scrollChangedHandler);
 				addChild(customScroll);
 			}
 			
@@ -288,7 +292,6 @@ package com.cleartext.ximpp.views.messages
 				messageStack.setStyle("backgroundColor", 0xffffff);
 				addChild(messageStack);
 			}
-			
 		}
 		
 		private function input_keyDownHandler(event:KeyboardEvent):void
@@ -312,12 +315,13 @@ package com.cleartext.ximpp.views.messages
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
+			customScroll.setRange(unscaledWidth, H_GAP + numChats() * (H_GAP + AVATAR_SIZE));
+			customScroll.setActualSize(unscaledWidth-216, 12);
+			customScroll.move(200, Constants.TOP_BAR_HEIGHT - 6);
+			
 			inputCanvas.move(0, 0);
 			inputCanvas.setActualSize(unscaledWidth, Constants.TOP_BAR_HEIGHT);
 			
-			avatarCanvas.move(0, Constants.TOP_BAR_HEIGHT);
-			avatarCanvas.setActualSize(unscaledWidth, AVATAR_SIZE + SELECTOR_WIDTH + TRIANGLE_HEIGHT);
-
 			messageStack.move(0, Constants.TOP_BAR_HEIGHT + SEARCH_BAR_HEIGHT + avatarCanvas.height);
 			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - avatarCanvas.height - SEARCH_BAR_HEIGHT);
 			
@@ -326,6 +330,7 @@ package com.cleartext.ximpp.views.messages
 			g.beginFill(0xffffff);
 			var xVal:Number = AVATAR_SIZE + 2*H_GAP;
 			var yVal:Number = 0;
+
 			// draw triangle
 			g.moveTo(xVal + SELECTOR_WIDTH + (AVATAR_SIZE - TRIANGLE_WIDTH)/2, yVal);
 			g.lineTo(xVal + SELECTOR_WIDTH + (AVATAR_SIZE + TRIANGLE_WIDTH)/2, yVal);
@@ -475,6 +480,11 @@ package com.cleartext.ximpp.views.messages
 		public function selectChatHandler(event:ChatEvent):void
 		{
 			setCurrentChat(event.chat);
+		}
+		
+		private function scrollChangedHandler(event:Event):void
+		{
+			avatarCanvas.x = -customScroll.value* (numChats() * (H_GAP + AVATAR_SIZE) + H_GAP - width);
 		}
 	}
 }
