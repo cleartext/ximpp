@@ -4,6 +4,7 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.BuddyModelEvent;
 	import com.cleartext.ximpp.models.types.BuddySortTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -113,12 +114,13 @@ package com.cleartext.ximpp.models
 		
 		public function addBuddy(buddy:Buddy):void
 		{
-			if(buddies.list.getItemIndex(buddy) == -1)
-			{
-				buddies.addItem(buddy);
-				buddiesByJid[buddy.jid] = buddy;
-				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
-			}
+			if(buddy is UserAccount || buddies.list.getItemIndex(buddy) != -1)
+				return;
+
+			buddies.addItem(buddy);
+			buddiesByJid[buddy.jid] = buddy;
+			buddy.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler, false, 0, true);
+			buddy.dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 		}
 		
 		public function removeBuddy(buddy:Buddy):void
@@ -126,12 +128,12 @@ package com.cleartext.ximpp.models
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				return;
 			
-			var index:int = buddies.getItemIndex(buddy);
+			var index:int = buddies.list.getItemIndex(buddy);
 			if(index != -1)
 			{
 				database.removeBuddy(buddy.buddyId);
 				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
-				buddies.removeItemAt(index);
+				buddies.list.removeItemAt(index);
 				delete buddiesByJid[buddy.jid];
 			}
 			refresh();

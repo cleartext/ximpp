@@ -19,7 +19,6 @@ package com.cleartext.ximpp.models
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
-	import mx.managers.CursorManager;
 	
 	public class DatabaseModel extends EventDispatcher
 	{
@@ -66,6 +65,7 @@ package com.cleartext.ximpp.models
 				
 				// create the local database file
 				var dbName:String = "ximpp.db";
+				// dbName = "ok-ximpp.db";
 				// dbName = new Date().time + ".db";
 				
 				var dbFile:File = File.applicationStorageDirectory.resolvePath(dbName);
@@ -307,7 +307,7 @@ package com.cleartext.ximpp.models
 		
 		public function saveBuddy(buddy:Buddy):int
 		{
-			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY || buddy is UserAccount)
 				return -1;
 			
 			var criteria:Array = [new DatabaseValue("jid", buddy.jid)];

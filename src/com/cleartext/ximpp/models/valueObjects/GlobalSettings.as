@@ -22,6 +22,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public var numChatMessages:uint;
 		public var numTimelineMessages:uint;
 		public var showOfflineBuddies:Boolean;
+		public var awayTimeout:int;
 		
 		public var sortByTimestamp:Boolean;
 		
@@ -60,6 +61,7 @@ package com.cleartext.ximpp.models.valueObjects
 				newGlobalSettings.sendStatusToMicroBlogging = xml.@sendStatusToMicroBlogging == "true";
 				newGlobalSettings.buddySortMethod = xml.@buddySortMethod;
 				newGlobalSettings.sortByTimestamp = xml.@sortByTimestamp;
+				newGlobalSettings.awayTimeout = xml.@awayTimeout;
 			}
 			else
 			{
@@ -102,6 +104,7 @@ package com.cleartext.ximpp.models.valueObjects
 				sendStatusToMicroBlogging={sendStatusToMicroBlogging} 
 				buddySortMethod={buddySortMethod}
 				sortByTimestamp={sortByTimestamp}
+				awayTimeout={awayTimeout}
 				/>;
 				
 			return [

@@ -367,7 +367,7 @@ package com.cleartext.ximpp.models
 			var buddy:Buddy;
 			var buddiesToDelete:Dictionary = new Dictionary();
 			
-			for each(buddy in buddies.buddies)
+			for each(buddy in buddies.buddies.source)
 				buddiesToDelete[buddy.jid] = buddy;
 
 			namespace rosterns = "jabber:iq:roster";

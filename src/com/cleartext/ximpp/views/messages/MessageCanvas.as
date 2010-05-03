@@ -74,6 +74,7 @@ package com.cleartext.ximpp.views.messages
 		private var avatarCanvas:Canvas;
 		private var searchBox:SearchBox;
 		private var messageStack:ViewStack;
+		private var customScroll:CustomScrollbar;
 
 		private var searchTerms:Array = [];
 		
@@ -259,6 +260,16 @@ package com.cleartext.ximpp.views.messages
 				addChild(avatarCanvas);
 			}
 			
+			if(!customScroll)
+			{
+				customScroll = new CustomScrollbar();
+				customScroll.setConstraintValue("right", 23);
+				customScroll.width = 400;
+				customScroll.height = 12;
+				customScroll.y = Constants.TOP_BAR_HEIGHT - 6;
+				addChild(customScroll);
+			}
+			
 			if(!searchBox)
 			{
 				searchBox = new SearchBox();
@@ -277,6 +288,7 @@ package com.cleartext.ximpp.views.messages
 				messageStack.setStyle("backgroundColor", 0xffffff);
 				addChild(messageStack);
 			}
+			
 		}
 		
 		private function input_keyDownHandler(event:KeyboardEvent):void
@@ -309,11 +321,11 @@ package com.cleartext.ximpp.views.messages
 			messageStack.move(0, Constants.TOP_BAR_HEIGHT + SEARCH_BAR_HEIGHT + avatarCanvas.height);
 			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - avatarCanvas.height - SEARCH_BAR_HEIGHT);
 			
-			var g:Graphics = graphics;
+			var g:Graphics = avatarCanvas.graphics;
 			g.clear();
 			g.beginFill(0xffffff);
 			var xVal:Number = AVATAR_SIZE + 2*H_GAP;
-			var yVal:Number = Constants.TOP_BAR_HEIGHT;
+			var yVal:Number = 0;
 			// draw triangle
 			g.moveTo(xVal + SELECTOR_WIDTH + (AVATAR_SIZE - TRIANGLE_WIDTH)/2, yVal);
 			g.lineTo(xVal + SELECTOR_WIDTH + (AVATAR_SIZE + TRIANGLE_WIDTH)/2, yVal);
@@ -323,7 +335,9 @@ package com.cleartext.ximpp.views.messages
 			g.drawRect(xVal, TRIANGLE_HEIGHT + yVal, AVATAR_SIZE + 2*SELECTOR_WIDTH, AVATAR_SIZE + SELECTOR_WIDTH);
 			// draw inner box
 			g.drawRect(xVal + SELECTOR_WIDTH, TRIANGLE_HEIGHT + SELECTOR_WIDTH + yVal, AVATAR_SIZE, AVATAR_SIZE);
-
+			
+			g = graphics;
+			g.clear();
 			g.beginFill(0xffffff);
 			g.drawRoundRect(
 				unscaledWidth - SEARCH_BAR_WIDTH - 23 - SEARCH_BAR_BORDER,

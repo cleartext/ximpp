@@ -149,10 +149,29 @@ package com.cleartext.ximpp.models
 		public function ApplicationModel()
 		{
 			super();
+		}
+		
+		public function setUserTimeout():void
+		{
 			var nApp:NativeApplication = NativeApplication.nativeApplication;
-			nApp.idleThreshold = 360;
-			nApp.addEventListener(Event.USER_IDLE, userHandler);
-			nApp.addEventListener(Event.USER_PRESENT, userHandler);
+			var seconds:int = settings.global.awayTimeout * 60;
+			
+			if(seconds == 0)
+			{
+				nApp.removeEventListener(Event.USER_IDLE, userHandler);
+				nApp.removeEventListener(Event.USER_PRESENT, userHandler);
+			}
+			else
+			{
+				// test for valid second value
+				seconds = Math.max(5, seconds);
+				seconds = Math.min(86400, seconds);
+
+				nApp.idleThreshold = seconds;
+
+				nApp.addEventListener(Event.USER_IDLE, userHandler);
+				nApp.addEventListener(Event.USER_PRESENT, userHandler);
+			}
 		}
 		
 		private function userHandler(event:Event):void
@@ -217,6 +236,7 @@ package com.cleartext.ximpp.models
 
 			// if this changes the userId, it will reload all the data from the database
 			database.loadGlobalSettings();
+			setUserTimeout();
 			if(!settings.userAccount.valid)
 			{
 				Alert.show(
