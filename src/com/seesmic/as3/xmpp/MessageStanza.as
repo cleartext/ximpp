@@ -28,6 +28,9 @@ package com.seesmic.as3.xmpp
 		public var type:String = 'chat';
 		public var body:String;
 		public var subject:String;
+		public var nick:String;
+		
+		namespace ni = 'http://jabber.org/protocol/nick';
 		namespace jc = 'jabber:client';
 		namespace htmlns = "http://jabber.org/protocol/xhtml-im";
 		namespace w3ns = "http://www.w3.org/1999/xhtml";
@@ -72,6 +75,8 @@ package com.seesmic.as3.xmpp
 				this.html = result[1];
 				trace(result[1]);
 			}
+			
+			nick = inxml.ni::nick;
 			
 			chatState = "";
 			for each(var possibleState:String in states)

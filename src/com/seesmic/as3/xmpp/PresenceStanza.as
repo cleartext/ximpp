@@ -27,6 +27,9 @@ package com.seesmic.as3.xmpp
 		public var status:String = '';
 		public var priority:String = '0';
 		public var category:String = 'available';
+		public var nick:String;
+		
+		namespace ni = 'http://jabber.org/protocol/nick';
 		namespace jc = 'jabber:client';
 		default xml namespace = 'jabber:client';
 
@@ -61,6 +64,9 @@ package com.seesmic.as3.xmpp
 			 * modified by astewart@cleartext.com
 			 * added avatarHash property
 			 */
+			
+			nick = inxml.ni::nick;
+			
 			namespace vcard = "vcard-temp:x:update";
 			this.avatarHash = xml.vcard::x.vcard::photo;
 			/**/

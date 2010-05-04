@@ -5,6 +5,7 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.views.common.Avatar;
+	import com.cleartext.ximpp.views.common.UnreadMessageBadge;
 	
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
@@ -12,7 +13,6 @@ package com.cleartext.ximpp.views.messages
 	
 	import mx.controls.Button;
 	import mx.core.Container;
-	import mx.core.UITextField;
 	import mx.effects.Fade;
 	import mx.events.CloseEvent;
 
@@ -24,7 +24,7 @@ package com.cleartext.ximpp.views.messages
 
 		private var closeButton:Button;
 		private var dropShaddow:DropShadowFilter = new DropShadowFilter(2);
-		private var unreadMessageCount:UITextField;
+		private var unreadMessageBadge:UnreadMessageBadge;
 		
 		private var over:Boolean = false;
 		
@@ -88,12 +88,10 @@ package com.cleartext.ximpp.views.messages
 				addChild(closeButton);
 			}
 			
-			if(!unreadMessageCount)
+			if(!unreadMessageBadge)
 			{
-				unreadMessageCount = new UITextField();
-				unreadMessageCount.styleName = "whiteBold";
-				unreadMessageCount.height = 16;
-				addChild(unreadMessageCount);
+				unreadMessageBadge = new UnreadMessageBadge();
+				addChild(unreadMessageBadge);
 			}
 		}
 		
@@ -103,7 +101,7 @@ package com.cleartext.ximpp.views.messages
 			
 			var chatBuddy:Buddy = buddy as Buddy;
 
-			if(chatBuddy && unreadMessageCount)
+			if(chatBuddy && unreadMessageBadge)
 			{
 				if(chatBuddy.unreadMessageCount > 0)
 				{
@@ -113,18 +111,10 @@ package com.cleartext.ximpp.views.messages
 						return;
 					}
 
-					unreadMessageCount.visible = true;
-					unreadMessageCount.text = chatBuddy.unreadMessageCount.toString();
-					unreadMessageCount.width = unreadMessageCount.textWidth + 4;
-					dirty = true;
-					invalidateDisplayList();
+					unreadMessageBadge.visible = true;
 				}
-				else if(unreadMessageCount.visible)
-				{
-					unreadMessageCount.visible = false;
-					dirty = true;
-					invalidateDisplayList();
-				}
+
+				unreadMessageBadge.count = chatBuddy.unreadMessageCount;
 			}
 		}
 		
@@ -163,7 +153,7 @@ package com.cleartext.ximpp.views.messages
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
-			unreadMessageCount.move(unscaledWidth - unreadMessageCount.width, -5);
+			unreadMessageBadge.move(unscaledWidth - unreadMessageBadge.width + 5, -unreadMessageBadge.height/2);
 			
 			var g:Graphics = graphics;
 
@@ -173,12 +163,6 @@ package com.cleartext.ximpp.views.messages
 				g.drawRect(48, 14, 12, 24);
 				g.beginFill(0xffffff);
 				g.drawCircle(60, 26, 12);
-			}
-			
-			if(unreadMessageCount.visible)
-			{
-				g.beginFill(0xff0000);
-				g.drawRoundRect(unscaledWidth - unreadMessageCount.width-2, -6, unreadMessageCount.width + 6, unreadMessageCount.height, unreadMessageCount.height);
 			}
 		}
 	}

@@ -3,12 +3,12 @@
 	xmlns:popup="com.cleartext.ximpp.views.popup.*"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:common="com.cleartext.ximpp.views.common.*"
-	title="Edit Buddy"
-	submitButtonLabel="done"
-	isValid="true">
+	title="Add Buddy"
+	submitButtonLabel="add">
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.ApplicationModel;
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import mx.events.FlexEvent;
@@ -27,23 +27,75 @@
 			[Bindable]
 			public var buddies:BuddyModel;
 			
+			[Autowire]
+			[Bindable]
+			public var appModel:ApplicationModel;
+			
+			private var _presenceRequest:Boolean = false;
+			public function get presenceRequest():Boolean
+			{
+				return _presenceRequest;
+			}
+			public function set presenceRequest(value:Boolean):void
+			{
+				_presenceRequest = value;
+				
+				if(presenceRequest)
+				{
+					title = "Buddy Request";
+					submitButton.label= "add";
+					cancelButton.label= "deny";
+					customLabel.text = buddy.nickName + " wants to be added to your buddy list.";
+				}
+			}
+			
+			public function set messageString(value:String):void
+			{
+				if(value)
+					customLabel.text += " They sent you the following message:\n\n" + value;
+			}
+			
 			override protected function submit(event:Event):void
 			{
-				buddy.nickName = nickname.text;
-
-				if(!buddy.microBlogging)
-				{
-					buddy.groups = getSelected(list);
-				}
-				buddies.addBuddy(buddy);
-				buddies.refresh();
+				if(!buddy)
+					// make sure we set the private var so we don't reset the other values
+					_buddy = new Buddy(jidTextInput.text);
 				
-				xmpp.modifyRosterItem(buddy);
+				buddy.nickName = nicknameTextInput.text;
+				buddy.microBlogging = mBlogCheckbox.selected;
+
+				buddy.avatar = avatarInput.bitmapData;
+				if(avatarInput.bitmapData == null)
+					buddy.avatarHash = null;
+
+				if(!buddy.microBlogging && !buddy.isGateway)
+					buddy.groups = getSelected(list);
+				
+				if(buddies.containsJid(buddy.jid))
+				{
+					xmpp.modifyRosterItem(buddy);
+				}
+				else
+				{
+					appModel.getChat(buddy);
+					buddies.addBuddy(buddy);
+					xmpp.addToRoster(buddy.jid, buddy.nickName, buddy.groups);
+				}
+				buddies.refresh();
 				
 				closeWindow();
 			}
 			
+			override protected function cancelHandler(event:Event):void
+			{
+				if(presenceRequest)
+					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBED);
+
+				closeWindow();
+			}
+			
 			private var _buddy:Buddy;
+			[Bindable(event="buddySet")]
 			public function get buddy():Buddy
 			{
 				return _buddy;
@@ -51,19 +103,25 @@
 			public function set buddy(value:Buddy):void
 			{
 				_buddy = value;
-				jid.text = buddy.jid;
-				nickname.text = buddy.nickName;
-				avatar.data = buddy;
-				list.enabled = !buddy.isGateway && !buddy.microBlogging;
+
+				if(!buddy)
+					return;
 				
-				subscriptionPanel.buddy = buddy;
-				
+				title = "Edit Buddy";
+				submitButton.label = "done";
+				isValid = true;
+						
+				jidTextInput.enabled = false;
+				jidTextInput.text = buddy.jid;
+				nicknameTextInput.text = buddy.nickName;
+				avatarInput.bitmapData = buddy.avatar;
+				mBlogCheckbox.selected = buddy.microBlogging;
+								
 				var groups:Array = wrapArray(buddies.groups.toArray());
 				for each(var g:Object in groups)
-				{
 					g.selected = !buddy.microBlogging && buddy.groups.indexOf(g.data) != -1;
-				}
 				list.dataProvider = groups;
+				dispatchEvent(new Event("buddySet"));
 			}
 			
 			private function changeAvatar():void
@@ -90,7 +148,7 @@
 									var tx:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
 									var ty:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-									buddy.avatar = newBitmapData;
+									avatarInput.bitmapData = newBitmapData;
 								});
 						});
 				}
@@ -99,30 +157,38 @@
 					Alert.show("Sorry, there was an error using that image, please try again.", "IMAGE ERROR");
 				}
 			}
-
+			
+			override protected function validateForm():void
+			{
+				isValid = jidTextInput.text.length > 0;
+			}
 		]]>
 	</mx:Script>
 	
+	<mx:Text id="customLabel" paddingLeft="20" width="400"/>
+	
 	<mx:Form>
-		
+
 		<mx:FormItem label="jid:">
-			<mx:Label id="jid" />
+			<mx:TextInput id="jidTextInput" change="validateInput(event, 'jid can not be empty')" focusOut="validateInput(event, 'jid can not be empty')"  width="250"/>
 		</mx:FormItem>
 		
 		<mx:FormItem label="nickname:">
-			<mx:TextInput id="nickname" />
+			<mx:TextInput id="nicknameTextInput" width="250"/>
 		</mx:FormItem>
 
 		<mx:FormItem label="avatar:">
 			<mx:HBox>
-				<common:Avatar id="avatar" buttonMode="true" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editClicked="changeAvatar()"/>
-				<mx:Button label="remove" click="buddy.avatar = null; buddy.avatarHash='' " />
+				<common:Avatar id="avatarInput" buttonMode="true" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editClicked="changeAvatar()"/>
+				<mx:Button label="remove" click="avatarInput.bitmapData=null" />
 			</mx:HBox>
 		</mx:FormItem>
+		
+		<mx:FormItem>
+			<mx:CheckBox label="micro-blogging buddy" id="mBlogCheckbox"/>
+		</mx:FormItem>
 
-		<popup:SubscirptionPanel id="subscriptionPanel" />
-
-		<mx:FormItem label="groups:">
+		<mx:FormItem label="groups:" enabled="{buddy.isGateway || !mBlogCheckbox.selected}">
 			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >
 				<mx:itemRenderer>
 					<mx:Component>

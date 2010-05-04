@@ -33,14 +33,11 @@
 			override protected function init(event:FlexEvent):void
 			{
 				list.dataProvider = wrapArray(buddies.groups.toArray());
-				subscriptionPanel.subscribeYes.selected = true;
 			}
 			
 			override protected function submit(event:Event):void
 			{
 				xmpp.addToRoster(newJid.text, nickname.text, getSelected(list));
-				if(subscriptionPanel.subscribeYes.selected)
-					xmpp.sendSubscribe(newJid.text, SubscriptionTypes.SUBSCRIBE);
 				closeWindow();
 			}
 			
@@ -62,8 +59,6 @@
 		<mx:FormItem label="nickname:">
 			<mx:TextInput id="nickname" />
 		</mx:FormItem>
-
-		<popup:SubscirptionPanel id="subscriptionPanel" showPublish="false" autoSend="false"/>
 
 		<mx:FormItem label="groups:">
 			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >

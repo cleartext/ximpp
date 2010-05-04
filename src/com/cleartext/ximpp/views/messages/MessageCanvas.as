@@ -204,13 +204,15 @@ package com.cleartext.ximpp.views.messages
 				avatars.addItemAt(avatar, index);
 				moveAvatar(index, 1, false);
 				avatarCanvas.addChildAt(avatar, 0);
-					
+				
 				var sproutList:MessageSproutList = new MessageSproutList();
 				sproutList.animate = settings.global.animateMessageList;
 				sproutList.horizontalScrollPolicy = "off";
 				sproutList.data = chat;
 				messageStack.addChild(sproutList);
 				messageStack.selectedChild = sproutList;
+				
+				chat.buddy.open = true;
 			}
 			
 			chat.messages.refresh();
@@ -226,6 +228,8 @@ package com.cleartext.ximpp.views.messages
 				moveAvatar(cursor, (j==avatars.length-1) ? 0 : j+1);
 				cursor++;
 			}
+			
+			customScroll.value = 0;
 		}
 		
 		private function setChatStateTo(chat:Chat, newState:String, sendStanza:Boolean=true):void
@@ -241,6 +245,7 @@ package com.cleartext.ximpp.views.messages
 		private function avatar_close(event:CloseEvent):void
 		{
 			var avatar:AvatarTab = event.target as AvatarTab;
+			avatar.chat.buddy.open = false;
 			appModel.chats.removeItemAt(appModel.chats.getItemIndex(avatar.chat));
 		}
 				

@@ -24,6 +24,7 @@ package com.cleartext.ximpp.models
 		public static const MICRO_BLOGGING_GROUP:String = "Social";
 		public static const GATEWAY_GROUP:String = "Gateways";
 		public static const ALL_BUDDIES_GROUP:String = "All Buddies";
+		public static const OPEN_TABS:String = "Open Tabs";
 		public static const UNASIGNED:String = "No Group";
 		
 		private var buddiesByJid:Dictionary;
@@ -159,6 +160,8 @@ package com.cleartext.ximpp.models
 					buddy.jid.toLowerCase().search(searchString.toLowerCase()) == -1))
 				return false; 
 			
+			if(groupName == OPEN_TABS)
+				return buddy.open;
 			if(buddy.microBlogging)
 				return groupName == MICRO_BLOGGING_GROUP;
 			else if(buddy.isGateway)
@@ -175,10 +178,13 @@ package com.cleartext.ximpp.models
 		
 		private function buddySort(buddy1:Buddy, buddy2:Buddy, fields:Object=null):int
 		{
-			if(buddy1 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
-				return -1;
-			else if(buddy2 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
-				return 1;
+			if(groupName == MICRO_BLOGGING_GROUP)
+			{
+				if(buddy1 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					return -1;
+				else if(buddy2 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					return 1;
+			}
 
 			switch(sortType)
 			{
@@ -196,6 +202,15 @@ package com.cleartext.ximpp.models
 					if(!date2)
 						return -1;
 					return clamp(date2.time - date1.time);
+
+				case BuddySortTypes.UNREAD_MESSAGES :
+					var unreadCompare:int = clamp(buddy2.unreadMessageCount - buddy1.unreadMessageCount);
+					if(unreadCompare != 0)
+						return unreadCompare;
+					var sCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());
+					if(sCompare != 0)
+						return sCompare;
+					return clamp(buddy1.nickName.localeCompare(buddy2.nickName));
 
 				case BuddySortTypes.STATUS :
 					var statusCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());

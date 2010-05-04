@@ -34,8 +34,8 @@ package com.cleartext.ximpp.views.popup
 			if(_isValid != value)
 			{
 				_isValid = value;
-				if(sumbitButton)
-					sumbitButton.enabled = isValid;
+				if(submitButton)
+					submitButton.enabled = isValid;
 			}
 		}
 		
@@ -49,8 +49,8 @@ package com.cleartext.ximpp.views.popup
 			_submitButtonLabel = value;
 		}
 		
-		private var sumbitButton:Button;
-		private var cancelButton:Button;
+		protected var submitButton:Button;
+		protected var cancelButton:Button;
 		
 		public function PopupWindowBase()
 		{
@@ -69,14 +69,14 @@ package com.cleartext.ximpp.views.popup
 			{
 				cb.setConstraintValue("horizontalAlign", "center");
 				
-				if(!sumbitButton)
+				if(!submitButton)
 				{
-					sumbitButton = new Button();
-					sumbitButton.addEventListener(MouseEvent.CLICK, submit);
-					sumbitButton.label = submitButtonLabel;
-					sumbitButton.enabled = isValid;
-					cb.addChild(sumbitButton);
-					defaultButton = sumbitButton;
+					submitButton = new Button();
+					submitButton.addEventListener(MouseEvent.CLICK, submit);
+					submitButton.label = submitButtonLabel;
+					submitButton.enabled = isValid;
+					cb.addChild(submitButton);
+					defaultButton = submitButton;
 				}
 				
 				if(!cancelButton && showCancelButton)

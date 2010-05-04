@@ -15,10 +15,7 @@
 			import com.cleartext.ximpp.views.popup.PopupWindowBase;
 			import mx.core.UIComponent;
 			import com.cleartext.ximpp.views.popup.SendToAllWindow;
-			import com.cleartext.ximpp.views.popup.BuddyNotInRosterWindow;
-			import com.cleartext.ximpp.views.popup.AddMicroBloggingWindow;
 			import com.cleartext.ximpp.views.popup.AddGatewayWindow;
-			import com.cleartext.ximpp.views.popup.AddBuddyWindow;
 			import com.cleartext.ximpp.views.popup.EditGroupWindow;
 			import com.cleartext.ximpp.views.popup.RemoveGroupWindow;
 			import mx.events.FlexEvent;
@@ -30,7 +27,6 @@
 			import com.cleartext.ximpp.views.popup.PreferenceWindow;
 			import mx.core.IFlexDisplayObject;
 			import com.cleartext.ximpp.views.popup.EditBuddyWindow;
-			import com.cleartext.ximpp.views.popup.SubscriptionRequestWindow;
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import com.cleartext.ximpp.views.popup.AddGroupWindow;
 			import com.cleartext.ximpp.models.ApplicationModel;
@@ -56,90 +52,15 @@
 			{
 				appModel.init();
 			}
-					
+			
+			//----------------------------------------------
+			// MISC WINDOWS
+			//----------------------------------------------
+				
 			[Mediate(event="PopUpEvent.PREFERENCES_WINDOW")]
 			public function showPreferencesWindow(event:PopUpEvent):void
 			{
 				initializePopUp(new PreferenceWindow());
-			}
-			
-			[Mediate(event="PopUpEvent.ADVANCED_SEARCH_WINDOW")]
-			public function showAdvancedSearchWindow(event:PopUpEvent):void
-			{
-				Alert.show("Advanced search is not currently implemented.","Advanced Search");
-			}
-			
-			[Mediate(event="PopUpEvent.DELETE_BUDDY_WINDOW")]
-			public function showRemoveBuddyWindow(event:PopUpEvent):void
-			{
-				var window:RemoveBuddyWindow = new RemoveBuddyWindow();
-				window.buddy = event.buddy;
-				initializePopUp(window);
-			}
-
-			[Mediate(event="PopUpEvent.DELETE_GROUP_WINDOW")]
-			public function showRemoveGroupWindow(event:PopUpEvent):void
-			{
-				var window:RemoveGroupWindow = new RemoveGroupWindow();
-				window.groupName = event.group;
-				initializePopUp(window);
-			}
-
-			[Mediate(event="PopUpEvent.EDIT_GROUP_WINDOW")]
-			public function showEditGroupWindow(event:PopUpEvent):void
-			{
-				var window:EditGroupWindow = new EditGroupWindow();
-				window.groupName = event.group;
-				initializePopUp(window);
-			}
-
-			[Mediate(event="PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW")]
-			public function showSubscriptionRequest(event:PopUpEvent):void
-			{
-				var window:SubscriptionRequestWindow = new SubscriptionRequestWindow();
-				initializePopUp(window);
-				window.buddy = event.buddy;
-			}
-
-			[Mediate(event="PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW")]
-			public function showBuddyNotInRostert(event:PopUpEvent):void
-			{
-				var window:BuddyNotInRosterWindow = new BuddyNotInRosterWindow();
-				initializePopUp(window);
-				window.buddy = event.buddy;
-				window.messageString = event.group;
-			}
-
-			[Mediate(event="PopUpEvent.EDIT_BUDDY_WINDOW")]
-			public function showEditBuddyWindow(event:PopUpEvent):void
-			{
-				var window:EditBuddyWindow = new EditBuddyWindow();
-				initializePopUp(window);
-				window.buddy = event.buddy;
-			}
-
-			[Mediate(event="PopUpEvent.ADD_GROUP_WINDOW")]
-			public function showAddGroupWindow(event:PopUpEvent):void
-			{
-				initializePopUp(new AddGroupWindow());
-			}
-
-			[Mediate(event="PopUpEvent.ADD_BUDDY_WINDOW")]
-			public function showAddBuddyWindow(event:PopUpEvent):void
-			{
-				initializePopUp(new AddBuddyWindow());
-			}
-
-			[Mediate(event="PopUpEvent.ADD_GATEWAY_WINDOW")]
-			public function showAddGatewayWindow(event:PopUpEvent):void
-			{
-				initializePopUp(new AddGatewayWindow());
-			}
-
-			[Mediate(event="PopUpEvent.ADD_MICRO_BLOGGING_WINDOW")]
-			public function showAddMicroBloggingWindow(event:PopUpEvent):void
-			{
-				initializePopUp(new AddMicroBloggingWindow());
 			}
 
 			[Mediate(event="PopUpEvent.SEND_TO_ALL_MICRO_BLOGGING_WINDOW")]
@@ -147,7 +68,8 @@
 			{
 				var window:SendToAllWindow = new SendToAllWindow();
 				initializePopUp(window);
-				window.message = event.group;
+
+				window.message = event.messageString;
 			}
 
 			[Mediate(event="PopUpEvent.XML_INPUT_WINDOW")]
@@ -162,6 +84,86 @@
 				var window:SearchWindow = new SearchWindow();
 				window.appModel = appModel;
 				window.open();
+			}
+
+			//----------------------------------------------
+			// BUDDY WINDOWS
+			//----------------------------------------------
+				
+			[Mediate(event="PopUpEvent.ADD_BUDDY_WINDOW")]
+			public function showAddBuddyWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new EditBuddyWindow());
+			}
+
+			[Mediate(event="PopUpEvent.EDIT_BUDDY_WINDOW")]
+			public function showEditBuddyWindow(event:PopUpEvent):void
+			{
+				var window:EditBuddyWindow = new EditBuddyWindow();
+				initializePopUp(window);
+
+				window.buddy = event.buddy;
+			}
+
+			[Mediate(event="PopUpEvent.DELETE_BUDDY_WINDOW")]
+			public function showRemoveBuddyWindow(event:PopUpEvent):void
+			{
+				var window:RemoveBuddyWindow = new RemoveBuddyWindow();
+				initializePopUp(window);
+
+				window.buddy = event.buddy;
+			}
+
+			[Mediate(event="PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW")]
+			public function showSubscriptionRequest(event:PopUpEvent):void
+			{
+				var window:EditBuddyWindow = new EditBuddyWindow();
+				initializePopUp(window);
+
+				// the order of the next three asignments is important to 
+				// set the correct values in the window - I know this is bad
+				// but it saves a lot of code.
+				window.buddy = event.buddy;
+				window.presenceRequest = event.presenceRequest;
+				window.messageString = event.messageString;
+			}
+
+			//----------------------------------------------
+			// GROUP WINDOWS
+			//----------------------------------------------
+				
+			[Mediate(event="PopUpEvent.ADD_GROUP_WINDOW")]
+			public function showAddGroupWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddGroupWindow());
+			}
+
+			[Mediate(event="PopUpEvent.EDIT_GROUP_WINDOW")]
+			public function showEditGroupWindow(event:PopUpEvent):void
+			{
+				var window:EditGroupWindow = new EditGroupWindow();
+				initializePopUp(window);
+
+				window.groupName = event.group;
+			}
+
+			[Mediate(event="PopUpEvent.DELETE_GROUP_WINDOW")]
+			public function showRemoveGroupWindow(event:PopUpEvent):void
+			{
+				var window:RemoveGroupWindow = new RemoveGroupWindow();
+				initializePopUp(window);
+
+				window.groupName = event.group;
+			}
+
+			//----------------------------------------------
+			// GATEWAY WINDOWS
+			//----------------------------------------------
+				
+			[Mediate(event="PopUpEvent.ADD_GATEWAY_WINDOW")]
+			public function showAddGatewayWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddGatewayWindow());
 			}
 			
 			private function initializePopUp(window:IFlexDisplayObject):void

@@ -204,7 +204,7 @@
 		<common:SearchBox width="{filterCanvas.width - 113}" height="24" x="8" y="32" search="buddies.searchString = event.searchString"/>
 		
 		<mx:Button
-			right="64" y="32"
+			right="75" y="32"
 			skin="{null}"
 			upSkin="{Constants.TimeUp}"
 			downSkin="{Constants.TimeUp}"
@@ -216,7 +216,7 @@
 			toolTip="sort by last seen"
 			/>
 		<mx:Button
-			right="36" y="32"
+			right="52" y="32"
 			skin="{null}"
 			upSkin="{Constants.StatusUp}"
 			downSkin="{Constants.StatusUp}"
@@ -228,7 +228,19 @@
 			toolTip="sort by status"
 			/>
 		<mx:Button
-			right="9" y="32"
+			right="29" y="32"
+			skin="{null}"
+			upSkin="{Constants.UnreadUp}"
+			downSkin="{Constants.UnreadUp}"
+			overSkin="{Constants.UnreadUp}"
+			disabledSkin="{Constants.UnreadSelected}"
+			enabled="{settings.global.buddySortMethod != BuddySortTypes.UNREAD_MESSAGES}"
+			click="buddies.sortType = BuddySortTypes.UNREAD_MESSAGES"
+			buttonMode="true"
+			toolTip="sort by un-read messages"
+			/>
+		<mx:Button
+			right="5" y="32"
 			skin="{null}"
 			upSkin="{Constants.AbcUp}"
 			downSkin="{Constants.AbcUp}"

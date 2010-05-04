@@ -15,7 +15,7 @@ package com.cleartext.ximpp.models.valueObjects
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IBuddy
 	{
-		public static const ALL_MICRO_BLOGGING_JID:String = "All Social";
+		public static const ALL_MICRO_BLOGGING_JID:String = "My Workstream";
 		public static const ALL_MICRO_BLOGGING_BUDDY:Buddy = new Buddy(ALL_MICRO_BLOGGING_JID);
 
 		private var dispatcher:EventDispatcher;
@@ -54,7 +54,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function set buddyId(value:int):void
 		{
-			if(_buddyId == -1)
+			if(buddyId == -1)
 				_buddyId = value;
 			else if(this != ALL_MICRO_BLOGGING_BUDDY)
 				throw new Error();
@@ -79,7 +79,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function set nickName(value:String):void
 		{
-			if(_nickName != value)
+			if(nickName != value)
 			{
 				_nickName = value;
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
@@ -94,7 +94,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function set isTyping(value:Boolean):void
 		{
-			if(_isTyping != value)
+			if(isTyping != value)
 			{
 				_isTyping = value;
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
@@ -109,7 +109,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function set lastSeen(value:Date):void
 		{
-			if(_lastSeen != value)
+			if(lastSeen != value)
 			{
 				_lastSeen = value;
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
@@ -124,7 +124,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function set customStatus(value:String):void
 		{
-			if(_customStatus != value)
+			if(customStatus != value)
 			{
 				_customStatus = value;
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
@@ -139,7 +139,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function set avatar(value:BitmapData):void
 		{
-			if(_avatar != value)
+			if(avatar != value)
 			{
 				if(tempAvatarHash)
 				{
@@ -207,9 +207,24 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 		public function set sendTo(value:Boolean):void
 		{
-			if(_sendTo != value)
+			if(sendTo != value)
 			{
 				_sendTo = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
+		}
+
+		private var _open:Boolean = false;
+		[Bindable("buddyChanged")]
+		public function get open():Boolean
+		{
+			return _open;
+		}
+		public function set open(value:Boolean):void
+		{
+			if(open != value)
+			{
+				_open = value;
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
 		}

@@ -171,6 +171,15 @@ package com.cleartext.ximpp.assets
 		[Embed (source="com/cleartext/ximpp/assets/searchOver.png")]
 		public static const SearchOver:Class;
 
+		[Embed (source="com/cleartext/ximpp/assets/tabs.png")]
+		public static const Tabs:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/unreadUp.png")]
+		public static const UnreadUp:Class;
+
+		[Embed (source="com/cleartext/ximpp/assets/unreadSelected.png")]
+		public static const UnreadSelected:Class;
+
 		[Embed (source="/com/cleartext/ximpp/assets/user.jpg")]
 		public static const DefaultAvatar:Class;
 

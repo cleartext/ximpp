@@ -10,6 +10,7 @@ package com.cleartext.ximpp.views.buddies
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
+	import com.cleartext.ximpp.views.common.UnreadMessageBadge;
 	import com.universalsprout.flex.components.list.SproutListRendererBase;
 	
 	import flash.display.GradientType;
@@ -124,7 +125,7 @@ package com.cleartext.ximpp.views.buddies
 			}
 			
 			contextMenuLabel.label = (buddy && xmpp.connected) ? buddy.nickName : "go online to edit";
-			socialItem.label = (buddy && buddy.microBlogging) ? "remove from social group" : "make social contact";
+			socialItem.label = (buddy && buddy.microBlogging) ? "remove from workstream" : "add to workstream";
 			
 			editItem.enabled = xmpp.connected;
 			deleteItem.enabled = xmpp.connected;
@@ -133,7 +134,9 @@ package com.cleartext.ximpp.views.buddies
 
 		private function editHandler(event:ContextMenuEvent):void
 		{
-			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW, null, buddy));
+			var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW);
+			popupEvent.buddy = buddy;
+			Swiz.dispatchEvent(popupEvent);
 		}
 
 		private function socialHandler(event:ContextMenuEvent):void
@@ -144,7 +147,9 @@ package com.cleartext.ximpp.views.buddies
 
 		private function deleteHandler(event:ContextMenuEvent):void
 		{
-			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.DELETE_BUDDY_WINDOW, null, buddy));
+			var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.DELETE_BUDDY_WINDOW);
+			popupEvent.buddy = buddy;
+			Swiz.dispatchEvent(popupEvent);
 		}
 
 		private function get buddy():Buddy
@@ -202,6 +207,7 @@ package com.cleartext.ximpp.views.buddies
 		private var nameLabel:UITextField;
 		private var statusLabel:UITextField;
 		private var customStatusLabel:UITextField
+		private var unreadMessageBadge:UnreadMessageBadge;
 		
 		private var contextMenuLabel:ContextMenuItem;
 		private var editItem:ContextMenuItem;
@@ -262,6 +268,15 @@ package com.cleartext.ximpp.views.buddies
 				customStatusLabel.visible = false;
 				addChild(customStatusLabel);
 			}
+
+			if(!unreadMessageBadge)
+			{
+				unreadMessageBadge = new UnreadMessageBadge();
+				unreadMessageBadge.y = 12;
+				unreadMessageBadge.alpha = 0.7;
+				unreadMessageBadge.visible = false;
+				addChild(unreadMessageBadge);
+			}
 		}
 		
 		//---------------------------------------
@@ -279,6 +294,11 @@ package com.cleartext.ximpp.views.buddies
 			customStatusLabel.text = buddy.customStatus;
 			nameLabel.text = buddy.nickName;
 			statusIcon.status.value = buddy.status.value;
+			if(unreadMessageBadge.count != buddy.unreadMessageCount)
+			{
+				unreadMessageBadge.count = buddy.unreadMessageCount;
+				callLater(invalidateProperties);
+			}
 			
 			if(buddy.status.isOffline())
 			{
@@ -356,6 +376,7 @@ package com.cleartext.ximpp.views.buddies
 			}
 
 			statusIcon.x = width - 2*PADDING - StatusIcon.SIZE;
+			unreadMessageBadge.x = width - 3*PADDING - unreadMessageBadge.width - StatusIcon.SIZE;
 			
 			var maxWidth:Number = width - AVATAR_SIZE - StatusIcon.SIZE - 4*PADDING - LEFT_PADDING;
 			nameLabel.setActualSize(maxWidth, nameLabel.textHeight);
@@ -412,7 +433,6 @@ package com.cleartext.ximpp.views.buddies
 				g.beginFill(0x000000, 0.15)
 				g.drawRect(0, unscaledHeight-1, unscaledWidth, 1);
 			}
-			
 		}
 	}		
 }

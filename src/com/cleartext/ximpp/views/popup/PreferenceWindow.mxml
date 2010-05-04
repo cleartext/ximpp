@@ -115,10 +115,20 @@
 				
 				settings.userAccount.accountName = accountName.text;
 				settings.userAccount.nickName = nickName.text;
-				settings.userAccount.avatar = avatar.bitmapData;
 				settings.userAccount.jid = jid.text;
 				settings.userAccount.password = password.text;
 				settings.userAccount.server = server.text;
+				
+				if(avatarInput.bitmapData)
+				{
+					settings.userAccount.avatar = avatarInput.bitmapData;
+					settings.userAccount.avatarHash = SHA1.hashBytes(avatarInput.bitmapData.getPixels(avatarInput.bitmapData.rect));
+				}
+				else
+				{
+					settings.userAccount.avatar = null;
+					settings.userAccount.avatarHash = "";
+				}
 				
 				database.saveUserAccount(settings.userAccount);
 
@@ -138,10 +148,19 @@
 				{
 					previousAccount.accountName = accountName.text;
 					previousAccount.nickName = nickName.text;
-					previousAccount.avatar = avatar.bitmapData;
 					previousAccount.jid = jid.text;
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
+					if(avatarInput.bitmapData)
+					{
+						previousAccount.avatar = avatarInput.bitmapData;
+						previousAccount.avatarHash = SHA1.hashBytes(avatarInput.bitmapData.getPixels(avatarInput.bitmapData.rect));
+					}
+					else
+					{
+						previousAccount.avatar = null;
+						previousAccount.avatarHash = "";
+					}
 
 //					previousAccount.mBlogPrivateJid = keepJidPrivate.selected;
 //					previousAccount.mBlogDisplayName = displayName.text;
@@ -165,7 +184,7 @@
 				{
 					accountName.text = previousAccount.accountName;
 					nickName.text = previousAccount.nickName;
-					avatar.data = previousAccount;
+					avatarInput.bitmapData = previousAccount.avatar;
 					jid.text = previousAccount.jid;
 					password.text = previousAccount.password;
 					server.text = previousAccount.server;
@@ -248,11 +267,7 @@
 									var tx:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
 									var ty:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-									if(previousAccount)
-									{
-										previousAccount.avatar = newBitmapData;
-										previousAccount.avatarHash = SHA1.hashBytes(newBitmapData.getPixels(newBitmapData.rect));
-									}
+									avatarInput.bitmapData = newBitmapData;
 								});
 						});
 				}
@@ -314,11 +329,11 @@
 			labelField="accountName" 
 			change="selectedAccountChanged()" enabled="false" visible="false" includeInLayout="false"/>
 
-		<popup:AddRemoveButton
+		<!--<popup:AddRemoveButton
 			bottom="20"
 			width="170"
 			addButtonClicked="addAccount()"
-			removeButtonClicked="removeAccount()" enabled="false" toolTip="multiple accounts comming soon" visible="false" includeInLayout="false"/>
+			removeButtonClicked="removeAccount()" enabled="false" toolTip="multiple accounts comming soon" />-->
 		
 		<mx:Form horizontalCenter="0">
 			<mx:FormItem label="account name:">
@@ -332,7 +347,7 @@
 				<mx:TextInput id="nickName" change="changesMade = true;" width="{TEXT_INPUT_WIDTH}" />
 			</mx:FormItem>
 			<mx:FormItem label="profile picture:" direction="horizontal">
-				<common:Avatar id="avatar" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
+				<common:Avatar id="avatarInput" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
 			</mx:FormItem>
 
 			<mx:FormItem label="jid:">

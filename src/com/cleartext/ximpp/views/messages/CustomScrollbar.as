@@ -133,16 +133,9 @@ package com.cleartext.ximpp.views.messages
 			if(newRatio != ratioVisible)
 			{
 				ratioVisible = newRatio;
-				if(ratioVisible >= 1)
-					visible = false;
-				else
-				{
-					visible = true;
-					invalidateDisplayList();
-				}
+				visible = ratioVisible < 1;
+				dispatchEvent(new Event("scrollChanged"));
 			}
 		}
-		
-		
 	}
 }

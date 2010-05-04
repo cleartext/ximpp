@@ -1,12 +1,9 @@
 package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.assets.Constants;
-	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.XMPPModel;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	
-	import flash.display.Bitmap;
 	import flash.display.GradientType;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
@@ -243,13 +240,17 @@ package com.cleartext.ximpp.views.common
 		private function delete_clickHandler(event:MouseEvent):void
 		{
 			event.stopImmediatePropagation();
-			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.DELETE_GROUP_WINDOW, text));
+			var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.DELETE_GROUP_WINDOW);
+			popupEvent.group = text;
+			Swiz.dispatchEvent(popupEvent);
 		}
 		
 		private function edit_clickHandler(event:MouseEvent):void
 		{
 			event.stopImmediatePropagation();
-			Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.EDIT_GROUP_WINDOW, text));
+			var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.EDIT_GROUP_WINDOW);
+			popupEvent.group = text;
+			Swiz.dispatchEvent(popupEvent);
 		}
 		
 		override protected function commitProperties():void

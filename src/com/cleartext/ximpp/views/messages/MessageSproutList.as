@@ -40,14 +40,17 @@ package com.cleartext.ximpp.views.messages
 			if(chat && !chat.microBlogging)
 			{
 				var previousJid:String;
+				var previousMillis:Number = 0;
 				for each(var data:ISproutListData in dataProvider)
 				{
 					var item:ChatRenderer = itemRenderersByDataUid[data.uid] as ChatRenderer;
 					if(item)
 					{
 						var thisJid:String = item.message.sender;
-						item.showTopRow = (thisJid != previousJid);
+						var thisMillis:Number = item.message.timestamp.time;
+						item.showTopRow = (thisJid != previousJid || previousMillis-thisMillis > 1800000);
 						previousJid = thisJid;
+						previousMillis = thisMillis;
 					}
 				}
 			}

@@ -29,31 +29,18 @@
 			
 			override protected function submit(event:Event):void
 			{
-				buddy.nickName = nickname.text;
-				buddies.addBuddy(buddy);
-				buddies.refresh();
-				
-				xmpp.modifyRosterItem(buddy);
-				
-				if(subscriptionPanel.subscribeYes.selected)
-					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
-				
+				xmpp.addToRoster(jid, nickname.text, getSelected(list));
 				closeWindow();
 			}
 			
-			private var _buddy:Buddy;
-			public function get buddy():Buddy
+			private var _jid:String;
+			public function get jid():String
 			{
-				return _buddy;
+				return _jid;
 			}
-			public function set buddy(value:Buddy):void
+			public function set jid(value:String):void
 			{
-				_buddy = value;
-				jid.text = buddy.jid;
-				nickname.text = buddy.nickName;
-
-				subscriptionPanel.buddy = buddy;
-				subscriptionPanel.subscribeYes.selected = true;
+				_jid = value;
 				invalidateProperties();
 			}
 			
@@ -72,21 +59,19 @@
 			{
 				super.commitProperties();
 				
-				if(!buddy)
-					return;
-				
 				if(messageString)
 				{
 					explanationText.text = "You have received a presence stanza from " + 
-						buddy.nickName + " of type " + messageString + ", do you want to add them to your buddy list?";
+						jid + " of type " + messageString + ", do you want to add them to your buddy list?";
 				}
 				else
 				{
 					explanationText.text = "You have received a message from " + 
-						buddy.nickName + ", do you want to add them to your buddy list?";
+						jid + ", do you want to add them to your buddy list?";
 				}
+
+				jidLabel.text = jid;
 			}
-			
 		]]>
 	</mx:Script>
 	
@@ -95,15 +80,23 @@
 		<mx:Text id="explanationText"  width="450"/>
 		
 		<mx:FormItem label="jid:">
-			<mx:Label id="jid" />
+			<mx:Label id="jidLabel" />
 		</mx:FormItem>
 
 		<mx:FormItem label="nickname:">
 			<mx:TextInput id="nickname" />
 		</mx:FormItem>
 
-		<popup:SubscirptionPanel id="subscriptionPanel" showPublish="false" />
-		
+		<mx:FormItem label="groups:">
+			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox focusEnabled="false" change="data.selected = !data.selected"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:List>
+		</mx:FormItem>
+
 	</mx:Form>
 	
 	<mx:ControlBar />

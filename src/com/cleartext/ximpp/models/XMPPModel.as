@@ -215,27 +215,23 @@ package com.cleartext.ximpp.models
 				return;
 			
 			var message:Message = appModel.createFromStanza(messageStanza);
-			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
-			
-			if(!buddy)
-			{
-				for each(var c:Chat in appModel.chats)
-				{
-					if(c.buddy.jid == message.sender)
-					{
-						buddy = chat.buddy;
-						break;
-					}
-				}
-			}
+			database.saveMessage(message);
 
+			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			if(!buddy)
 			{
 				buddy = new Buddy(message.sender);
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.BUDDY_NOT_IN_ROSTER_WINDOW, null, buddy));
+				buddy.nickName = (event.stanza as MessageStanza).nick;
+
+				var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW);
+				popupEvent.buddy = buddy;
+				popupEvent.presenceRequest = true;
+				popupEvent.messageString = message.plainMessage;
+				Swiz.dispatchEvent(popupEvent);
+				return;
 			}
 			
-			buddy.lastSeen = message.utcTimestamp;
+			buddy.lastSeen = message.timestamp;
 			buddy.isTyping = false;
 			buddy.resource = event.stanza.from.resource;
 			buddy.unreadMessageCount++;
@@ -251,8 +247,6 @@ package com.cleartext.ximpp.models
 				chat.addMessage(message, limit);
 			}
 
-			database.saveMessage(message);
-			database.saveBuddy(buddy);
 		}
 		
 		private function chatStateHandler(event:XMPPEvent):void
@@ -286,9 +280,23 @@ package com.cleartext.ximpp.models
 			// "subscribed" are handled below
 			else if(stanza.type == SubscriptionTypes.SUBSCRIBE)
 			{
-				if(!buddy)
+				// if there are in our rosterlist, then auto-subscirbe
+				if(buddy)
+				{
+					sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
+					if(!buddy.subscribedTo)
+						sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
+				}
+				// if they aren't in the roster list, then alert the user
+				else
+				{
 					buddy = new Buddy(fromJid);
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW, null, buddy));
+					buddy.nickName = stanza.nick;
+					var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW);
+					popupEvent.presenceRequest = true;
+					popupEvent.buddy = buddy;
+					Swiz.dispatchEvent(popupEvent);
+				}
 			}
 			else
 			{
@@ -339,7 +347,10 @@ package com.cleartext.ximpp.models
 			// update the values, otherwise create a new buddy
 			var buddy:Buddy = appModel.getBuddyByJid(jid);
 			if(!buddy)
+			{
 				buddy = new Buddy(jid);
+				buddies.addBuddy(buddy);
+			}
 
 			var subscription:String = event.stanza["subscription"];
 			if(subscription == SubscriptionTypes.REMOVE)
@@ -351,7 +362,6 @@ package com.cleartext.ximpp.models
 				buddy.groups = event.stanza["groups"];
 				buddy.nickName = event.stanza["name"];
 				buddy.subscription = subscription;
-				buddies.addBuddy(buddy);
 			}
 			buddies.refresh();
 		}
@@ -527,26 +537,36 @@ package com.cleartext.ximpp.models
 			sendIq(settings.userAccount.jid,
 					IQTypes.SET,
 					IQTypes.addRemoveRosterItem(toJid, nickName, groups, false),
-					modifyRosterHandler);
+					function():void
+					{
+						sendSubscribe(toJid, SubscriptionTypes.SUBSCRIBE);
+					});
 		}
-		
+
 		//-------------------------------
 		// REMOVE FROM ROSTER
 		//-------------------------------
 		
-		public function removeFromRoster(toJid:String, newSubscription:String):void
+		public function removeFromRoster(toJid:String):void
 		{
-			if(newSubscription)
-				sendSubscribe(toJid, newSubscription);
-
 			sendIq(settings.userAccount.jid, 
 					IQTypes.SET,
 					IQTypes.addRemoveRosterItem(toJid, null, null, true),
-					modifyRosterHandler);
+					removeFromRosterHandler);
 		}
 
 		//-------------------------------
-		// MODIFY ROSTER HANDLER
+		// REMOVE FROM ROSTER HANDLER
+		//-------------------------------
+		
+		private function removeFromRosterHandler(stanza:IqStanza):void
+		{
+			buddies.refresh();
+			appModel.log("removeFromRosterHandler");
+		}
+
+		//-------------------------------
+		// MODIFY ROSTER ITEM
 		//-------------------------------
 		
 		public function modifyRosterItem(buddy:Buddy):void

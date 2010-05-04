@@ -58,13 +58,7 @@ package com.cleartext.ximpp.views.common
 		
 		protected function buddyChangedHandler(event:BuddyEvent):void
 		{
-			var bmd:BitmapData = (buddy) ? buddy.avatar : null;
-			if(bmd != bitmapData)
-			{
-				_bitmapData = bmd;
-				dirty = true;
-				invalidateDisplayList();
-			}
+			bitmapData = (buddy) ? buddy.avatar : null;
 		}
 		
 		private var _bitmapData:BitmapData;
@@ -72,6 +66,16 @@ package com.cleartext.ximpp.views.common
 		{
 			return _bitmapData;
 		}
+		public function set bitmapData(value:BitmapData):void
+		{
+			if(value != bitmapData)
+			{
+				_bitmapData = value;
+				dirty = true;
+				invalidateDisplayList();
+			}
+		}
+		
 		
 		private var _border:Boolean = true;
 		public function get border():Boolean

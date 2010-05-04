@@ -42,10 +42,10 @@
 					xmpp.addToRoster(buddy.jid, nickname.text, null);
 				}
 				
-				if(subscriptionPanel.publishYes.selected)
-					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
-				else
-					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBED);
+//				if(subscriptionPanel.publishYes.selected)
+//					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
+//				else
+//					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBED);
 				
 				closeWindow();
 			}
@@ -64,10 +64,6 @@
 				nickname.text = buddy.nickName;
 				
 				addUserItem.visible = addUserItem.includeInLayout = !buddies.containsJid(buddy.jid);
-				
-				subscriptionPanel.buddy = buddy;
-				subscriptionPanel.subscribeYes.selected = true;
-				subscriptionPanel.publishYes.selected = true;
 			}
 			
 		]]>
@@ -83,8 +79,6 @@
 		<mx:FormItem id="addUserItem" >
 			<mx:CheckBox id="addUser" selected="true" label="add to buddy list?" />
 		</mx:FormItem>
-		
-		<popup:SubscirptionPanel showSubscribe="{addUser.selected}" id="subscriptionPanel" autoSend="false"/>
 		
 	</mx:Form>
 	

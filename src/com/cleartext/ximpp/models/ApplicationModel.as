@@ -310,7 +310,9 @@ package com.cleartext.ximpp.models
 		{
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.SEND_TO_ALL_MICRO_BLOGGING_WINDOW, messageString));
+				var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.SEND_TO_ALL_MICRO_BLOGGING_WINDOW);
+				popupEvent.messageString = messageString;
+				Swiz.dispatchEvent(popupEvent);
 			}
 			else
 			{
