@@ -25,7 +25,6 @@ package com.cleartext.ximpp.models
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.core.Application;
-	import mx.events.CloseEvent;
 	
 	import org.swizframework.Swiz;
 	
@@ -50,6 +49,10 @@ package com.cleartext.ximpp.models
 		[Autowire]
 		[Bindable]
 		public var mBlogBuddies:MicroBloggingModel;
+		
+		[Autowire]
+		[Bindable]
+		public var requests:BuddyRequestModel;
 		
 		[Bindable]
 		public var chats:ArrayCollection = new ArrayCollection();
@@ -239,14 +242,7 @@ package com.cleartext.ximpp.models
 			setUserTimeout();
 			if(!settings.userAccount.valid)
 			{
-				Alert.show(
-					"There are no valid settings selected. Do you want to change your preferences now?",
-					 "Invalid User Settings", Alert.YES | Alert.NO, null,
-					 function(event:CloseEvent):void
-					 {
-					 	if(event.detail == Alert.YES)
-					 		Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));
-					 });
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));
 			}
 			else if(settings.global.autoConnect)
 			{

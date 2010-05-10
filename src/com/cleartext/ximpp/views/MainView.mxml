@@ -217,10 +217,12 @@
 			<buddies:BuddyCanvas
 				backgroundColor="0xffffff"
 				id="buddyCanvas"
-				width="25%"/>
+				minWidth="250"
+				width="30%"/>
 			<messages:MessageCanvas
 				id="chatCanvas"
-				width="75%"/>
+				minWidth="400"
+				width="70%"/>
 		</mx:HDividedBox>
 		
 		<mx:HDividedBox 

@@ -31,6 +31,12 @@
 			[Bindable]
 			public var appModel:ApplicationModel;
 			
+			override protected function init(event:FlexEvent):void
+			{
+				super.init(event);
+				list.dataProvider = wrapArray(buddies.groups.toArray());
+			}
+			
 			private var _presenceRequest:Boolean = false;
 			public function get presenceRequest():Boolean
 			{
@@ -117,10 +123,9 @@
 				avatarInput.bitmapData = buddy.avatar;
 				mBlogCheckbox.selected = buddy.microBlogging;
 								
-				var groups:Array = wrapArray(buddies.groups.toArray());
-				for each(var g:Object in groups)
+				for each(var g:Object in list.dataProvider)
 					g.selected = !buddy.microBlogging && buddy.groups.indexOf(g.data) != -1;
-				list.dataProvider = groups;
+
 				dispatchEvent(new Event("buddySet"));
 			}
 			

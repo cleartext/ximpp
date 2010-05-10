@@ -184,7 +184,7 @@
 				{
 					accountName.text = previousAccount.accountName;
 					nickName.text = previousAccount.nickName;
-					avatarInput.bitmapData = previousAccount.avatar;
+					avatarInput.data = previousAccount;
 					jid.text = previousAccount.jid;
 					password.text = previousAccount.password;
 					server.text = previousAccount.server;

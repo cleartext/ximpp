@@ -287,7 +287,7 @@ package com.cleartext.ximpp.views.messages
 				searchBox.borderAlpha = 0.5;
 				searchBox.setConstraintValue("right", 23);
 				searchBox.addEventListener(SearchBoxEvent.SEARCH, doSearch);
-				searchBox.y = Constants.TOP_BAR_HEIGHT + TRIANGLE_HEIGHT + SELECTOR_WIDTH + AVATAR_SIZE - SEARCH_BAR_HEIGHT/2;
+				searchBox.y = Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT - SEARCH_BAR_HEIGHT/2;
 				addChild(searchBox);
 			}
 			
@@ -321,14 +321,14 @@ package com.cleartext.ximpp.views.messages
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
 			customScroll.setRange(unscaledWidth, H_GAP + numChats() * (H_GAP + AVATAR_SIZE));
-			customScroll.setActualSize(unscaledWidth-216, 12);
+			customScroll.setActualSize(unscaledWidth - 216, 12);
 			customScroll.move(200, Constants.TOP_BAR_HEIGHT - 6);
 			
 			inputCanvas.move(0, 0);
 			inputCanvas.setActualSize(unscaledWidth, Constants.TOP_BAR_HEIGHT);
 			
-			messageStack.move(0, Constants.TOP_BAR_HEIGHT + SEARCH_BAR_HEIGHT + avatarCanvas.height);
-			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - avatarCanvas.height - SEARCH_BAR_HEIGHT);
+			messageStack.move(0, Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT + SEARCH_BAR_HEIGHT);
+			messageStack.setActualSize(unscaledWidth, unscaledHeight - Constants.TOP_BAR_HEIGHT - Constants.AVATAR_TAB_HEIGHT - SEARCH_BAR_HEIGHT);
 			
 			var g:Graphics = avatarCanvas.graphics;
 			g.clear();
@@ -351,7 +351,7 @@ package com.cleartext.ximpp.views.messages
 			g.beginFill(0xffffff);
 			g.drawRoundRect(
 				unscaledWidth - SEARCH_BAR_WIDTH - 23 - SEARCH_BAR_BORDER,
-				Constants.TOP_BAR_HEIGHT+TRIANGLE_HEIGHT + SELECTOR_WIDTH + AVATAR_SIZE - SEARCH_BAR_HEIGHT/2 - SEARCH_BAR_BORDER,
+				Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT - SEARCH_BAR_HEIGHT/2 - SEARCH_BAR_BORDER,
 				SEARCH_BAR_WIDTH + 2*SEARCH_BAR_BORDER,
 				SEARCH_BAR_HEIGHT + 2*SEARCH_BAR_BORDER,
 				SEARCH_BAR_HEIGHT + SEARCH_BAR_BORDER,
@@ -359,16 +359,14 @@ package com.cleartext.ximpp.views.messages
 
 			g.beginFill(0xffffff);
 			g.drawRoundRect(
-				0,
-				Constants.TOP_BAR_HEIGHT+TRIANGLE_HEIGHT+SELECTOR_WIDTH+AVATAR_SIZE,
-				unscaledWidth,
-				LIST_HEADER_HEIGHT + 8,
+				0, Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT,
+				unscaledWidth, LIST_HEADER_HEIGHT + 8,
 				8, 8);
 
 			var m:Matrix = new Matrix();
-			m.createGradientBox(unscaledWidth, LIST_HEADER_HEIGHT, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT+TRIANGLE_HEIGHT+SELECTOR_WIDTH+AVATAR_SIZE);
+			m.createGradientBox(unscaledWidth, LIST_HEADER_HEIGHT, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT);
 			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0, 0.5], [95, 255], m); 
-			g.drawRect(1, Constants.TOP_BAR_HEIGHT+TRIANGLE_HEIGHT+SELECTOR_WIDTH+AVATAR_SIZE , unscaledWidth-2, LIST_HEADER_HEIGHT);
+			g.drawRect(1, Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT, unscaledWidth-2, LIST_HEADER_HEIGHT);
 		}
 		
 		private function doSearch(event:SearchBoxEvent):void

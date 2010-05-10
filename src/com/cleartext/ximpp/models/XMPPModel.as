@@ -1,6 +1,5 @@
 package com.cleartext.ximpp.models
 {
-	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
@@ -23,8 +22,6 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XMPPEvent;
 	
 	import flash.utils.Dictionary;
-	
-	import org.swizframework.Swiz;
 	
 	public class XMPPModel
 	{
@@ -50,6 +47,11 @@ package com.cleartext.ximpp.models
 		private function get mBlogBuddies():MicroBloggingModel
 		{
 			return appModel.mBlogBuddies;
+		}
+		
+		private function get requests():BuddyRequestModel
+		{
+			return appModel.requests;
 		}
 		
 		[Bindable]
@@ -220,14 +222,7 @@ package com.cleartext.ximpp.models
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			if(!buddy)
 			{
-				buddy = new Buddy(message.sender);
-				buddy.nickName = (event.stanza as MessageStanza).nick;
-
-				var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW);
-				popupEvent.buddy = buddy;
-				popupEvent.presenceRequest = true;
-				popupEvent.messageString = message.plainMessage;
-				Swiz.dispatchEvent(popupEvent);
+				requests.receiving(message.sender, messageStanza.nick, message.plainMessage);
 				return;
 			}
 			
@@ -290,12 +285,7 @@ package com.cleartext.ximpp.models
 				// if they aren't in the roster list, then alert the user
 				else
 				{
-					buddy = new Buddy(fromJid);
-					buddy.nickName = stanza.nick;
-					var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW);
-					popupEvent.presenceRequest = true;
-					popupEvent.buddy = buddy;
-					Swiz.dispatchEvent(popupEvent);
+					requests.receiving(fromJid, stanza.nick);
 				}
 			}
 			else
@@ -362,6 +352,8 @@ package com.cleartext.ximpp.models
 				buddy.groups = event.stanza["groups"];
 				buddy.nickName = event.stanza["name"];
 				buddy.subscription = subscription;
+				
+				requests.setSubscription(jid, buddy.nickName, buddy.subscription);
 			}
 			buddies.refresh();
 		}
@@ -402,7 +394,8 @@ package com.cleartext.ximpp.models
 				
 				buddy.nickName = item.@name;
 				buddy.subscription = item.@subscription;
-				
+				requests.setSubscription(jid, buddy.nickName, buddy.subscription);
+
 				// flag used to delete buddies that are no longer in
 				// the roster list
 				delete buddiesToDelete[buddy.jid];
@@ -596,8 +589,28 @@ package com.cleartext.ximpp.models
 		
 		public function sendSubscribe(toJid:String, type:String):void
 		{
+			if(type == SubscriptionTypes.SUBSCRIBE)
+				requests.sending(toJid);
+
 			xmpp.send('<presence to="' + toJid + '" type="' + type + '" />');
 		}
+		
+		//-------------------------------
+		// SEND BLOCK
+		//-------------------------------
+		
+		public function sendBlock(toJid:String):void
+		{
+//			// get the blocked list
+//			sendIq(settings.userAccount.jid,
+//				IQTypes.GET,
+//			
+//			sendIq(settings.userAccount.jid,
+//				IQTypes.SET,
+//				new XML("<query xmln='jabber:iq:privacy'><list name='blocked'><item type='jid' value ='" + toJid + "' action='deny' order"));
+		}
+		
+		
 		
 		public function getAvatarForMBlogBuddy(jid:String):void
 		{

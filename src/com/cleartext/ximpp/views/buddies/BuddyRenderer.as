@@ -5,6 +5,7 @@ package com.cleartext.ximpp.views.buddies
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.XMPPModel;
+	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Status;
@@ -24,6 +25,7 @@ package com.cleartext.ximpp.views.buddies
 	import flash.ui.ContextMenuItem;
 	import flash.utils.Timer;
 	
+	import mx.core.IInvalidating;
 	import mx.core.UITextField;
 	import mx.effects.Tween;
 	
@@ -118,7 +120,8 @@ package com.cleartext.ximpp.views.buddies
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
 				contextMenuLabel.label = "can not edit";
-				editItem.enabled = false;
+				if(contextMenu.containsItem(editItem))
+					contextMenu.removeItem(editItem);
 				deleteItem.enabled = false;
 				socialItem.enabled = false;
 				return;
@@ -126,6 +129,25 @@ package com.cleartext.ximpp.views.buddies
 			
 			contextMenuLabel.label = (buddy && xmpp.connected) ? buddy.nickName : "go online to edit";
 			socialItem.label = (buddy && buddy.microBlogging) ? "remove from workstream" : "add to workstream";
+			
+			var customContextMenu:ContextMenu = (contextMenu as ContextMenu);
+			
+			if(!buddy.subscribedTo && customContextMenu.customItems.length == 4)
+			{
+				var subscirbeItem:ContextMenuItem = new ContextMenuItem("resend subscirption request", true);
+				subscirbeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT,
+					function():void
+					{
+						xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
+						subscirbeItem.caption = "subscription request sent";
+						subscirbeItem.enabled = false;
+					});
+				customContextMenu.customItems.push(subscirbeItem);
+			}
+			else if(buddy.subscribedTo && customContextMenu.customItems.length == 5)
+			{
+				customContextMenu.customItems.pop();
+			}
 			
 			editItem.enabled = xmpp.connected;
 			deleteItem.enabled = xmpp.connected;

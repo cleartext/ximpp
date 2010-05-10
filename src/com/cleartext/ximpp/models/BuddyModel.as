@@ -110,7 +110,6 @@ package com.cleartext.ximpp.models
 			sort = new Sort();
 			sort.fields = [new SortField("toString",true)];
 			groups.sort = sort;
-
 		}
 		
 		public function addBuddy(buddy:Buddy):void

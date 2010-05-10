@@ -35,7 +35,12 @@ package com.cleartext.ximpp.events
 		
 		override public function clone():Event
 		{
-			return new PopUpEvent(type);
+			var event:PopUpEvent = new PopUpEvent(type);
+			event.buddy = buddy;
+			event.group = group;
+			event.presenceRequest = presenceRequest;
+			event.messageString = messageString;
+			return event;
 		}
 	}
 }

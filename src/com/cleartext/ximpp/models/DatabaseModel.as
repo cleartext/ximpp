@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.BuddyRequest;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -46,6 +47,11 @@ package com.cleartext.ximpp.models
 		private function get mBlogBuddies():MicroBloggingModel
 		{
 			return appModel.mBlogBuddies;
+		}
+				
+		private function get requests():BuddyRequestModel
+		{
+			return appModel.requests;
 		}
 				
 		public function close():void
@@ -134,9 +140,29 @@ package com.cleartext.ximpp.models
 				appModel.log("Creating microBloggingBuddiesTable table");
 				stmt.text = MicroBloggingBuddy.CREATE_MICRO_BLOGGING_BUDDIES_TABLE;
 				stmt.execute();
+
+				/*
+				 * Create buddyRequests table
+				 */
+				appModel.log("Creating buddyRequests table");
+				stmt.text = BuddyRequest.CREATE_BUDDY_REQUESTS_TABLE;
+				stmt.execute();
 				
 				syncConn.commit();
 				appModel.log("Database created");
+
+//				syncConn.loadSchema();
+//				var schema:SQLSchemaResult = syncConn.getSchemaResult();
+//				var requestTableExists:Boolean = false;
+//				for each (var table:SQLTableSchema in schema.tables)
+//				{
+//					if(table.name == "buddyRequests")
+//					{
+//						requestTableExists = true;
+//						break;
+//					}
+//				}
+				
 				
 			}
 			catch (error:Error)
@@ -221,7 +247,6 @@ package com.cleartext.ximpp.models
 				stmt.sqlConnection = syncConn;
 				stmt.text = "Select * from buddies WHERE userid=" + settings.userId + " ORDER BY lastSeen ASC" ;
 				stmt.execute();
-			    syncConn.commit(); 
 				
 				var result:SQLResult = stmt.getResult();
 				
@@ -229,7 +254,18 @@ package com.cleartext.ximpp.models
 					for(var i:int=result.data.length-1; i>=0; i--)
 						buddies.addBuddy(Buddy.createFromDB(result.data[i]));
 	
+				stmt.text = "Select * from buddyRequests WHERE userid=" + settings.userId + " ORDER BY timestamp ASC" ;
+				stmt.execute();
+
+				
+				result = stmt.getResult();
+				
+				if(result && result.data)
+					for(var j:int=result.data.length-1; j>=0; j--)
+						requests.addRequest(BuddyRequest.createFromDB(result.data[j]));
+
 			    // if we've got to this point without errors, commit the transaction 
+			    syncConn.commit(); 
 				appModel.log("Buddy list loaded");
 			}
 			catch (e:Error)
@@ -317,6 +353,15 @@ package com.cleartext.ximpp.models
 			return id;
 		}
 
+		public function saveRequest(request:BuddyRequest):int
+		{
+			var criteria:Array = [new DatabaseValue("jid", request.jid)];
+			var id:int = updateOrInsert("buddyRequests", request.toDatabaseValues(settings.userId), criteria);
+			if(id != -1)
+				request.buddyRequestId = id;
+			return id;
+		}
+
 		public function saveMicroBloggingBuddy(buddy:MicroBloggingBuddy):void
 		{
 			updateStmt("microBloggingBuddies", buddy.toDatabaseValues(), [new DatabaseValue("microBloggingBuddyId", buddy.microBloggingBuddyId)]);
@@ -335,6 +380,21 @@ package com.cleartext.ximpp.models
 		    // if we've got to this point without errors, commit the transaction 
 		    syncConn.commit(); 
 			appModel.log("Buddy deleted");
+		}
+		
+		public function removeRequest(buddyRequestId:int):void
+		{
+			syncConn.begin(); 
+			appModel.log("Deleting buddyRequest with buddyRequestId: " + buddyRequestId);
+			
+			var stmt:SQLStatement = new SQLStatement();
+			stmt.sqlConnection = syncConn;
+			stmt.text = "DELETE FROM buddyRequests WHERE buddyRequestId = " + buddyRequestId;
+			stmt.execute();
+
+		    // if we've got to this point without errors, commit the transaction 
+		    syncConn.commit(); 
+			appModel.log("BuddyRequest deleted");
 		}
 		
 		public function saveMessage(message:Message):void

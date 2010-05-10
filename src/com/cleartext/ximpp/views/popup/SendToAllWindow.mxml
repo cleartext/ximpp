@@ -52,7 +52,8 @@
 	
 	<mx:Text text="send to the following services:" selectable="false"/>
 	<mx:List id="list" dataProvider="{buddies.microBloggingBuddies}"
-		width="250" rowCount="8" labelField="nickName" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]">
+		width="250" labelField="nickName" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
+		height="100%">
 		<mx:itemRenderer>
 			<mx:Component>
 				<mx:CheckBox

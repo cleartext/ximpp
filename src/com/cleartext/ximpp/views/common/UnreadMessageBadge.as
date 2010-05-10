@@ -2,6 +2,7 @@ package com.cleartext.ximpp.views.common
 {
 	import flash.display.GradientType;
 	import flash.display.Graphics;
+	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
 	
 	import mx.core.UIComponent;
@@ -54,13 +55,18 @@ package com.cleartext.ximpp.views.common
 				if(count.toString() != textField.text)
 					invalidateProperties();
 				textField.text = count.toString();
-				width = textField.textWidth + 11;
-				height = textField.textHeight;
+				width = textField.width = textField.textWidth + 11;
+				height = textField.height = textField.textHeight;
 			}
 			else
 			{
 				visible = false;
 			}
+		}
+		
+		override protected function measure():void
+		{
+			super.measure();
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void

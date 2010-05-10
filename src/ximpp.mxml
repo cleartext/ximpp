@@ -6,7 +6,9 @@
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
 	xmlns:views="com.cleartext.ximpp.views.*"
-	themeColor="{Constants.THEME_COLOUR}">
+	themeColor="{Constants.THEME_COLOUR}"
+	showStatusBar="false"
+	>
 	<mx:Script>
 		<![CDATA[
 			import com.cleartext.ximpp.assets.Constants;

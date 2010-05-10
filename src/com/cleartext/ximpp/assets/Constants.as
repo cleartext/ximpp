@@ -185,6 +185,36 @@ package com.cleartext.ximpp.assets
 
 		[Embed (source="/com/cleartext/ximpp/assets/edit.png")]
 		public static const EditIcon:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/addUp.png")]
+		public static const AddUp:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/addDown.png")]
+		public static const AddDown:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/approveUp.png")]
+		public static const ApproveUp:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/approveOver.png")]
+		public static const ApproveOver:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/denyUp.png")]
+		public static const DenyUp:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/denyOver.png")]
+		public static const DenyOver:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/trashUp.png")]
+		public static const TrashUp:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/trashOver.png")]
+		public static const TrashOver:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/blockUp.png")]
+		public static const BlockUp:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/blockOver.png")]
+		public static const BlockOver:Class;
 		
 		public static const defaultAvatarBmd:BitmapData = new DefaultAvatar().bitmapData;
 

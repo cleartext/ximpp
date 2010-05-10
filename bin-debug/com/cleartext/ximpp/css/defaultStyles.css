@@ -89,12 +89,20 @@ HDividedBox
 	bar-color: #000000;
 }
 
-Application
+WindowedApplication
 {
-	font-family: myFont;
 	font-size: 12px;
+	font-family: myFont;  
     color: #444444;
 }
+
+Window
+{
+	font-size: 12px;
+	font-family: myFont;  
+    color: #444444;
+}
+
 
 @font-face {
     src:local("Helvetica");

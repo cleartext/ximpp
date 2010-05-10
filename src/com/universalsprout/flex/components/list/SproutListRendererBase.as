@@ -17,6 +17,7 @@ package com.universalsprout.flex.components.list
 		public function SproutListRendererBase(initialWidth:Number=NaN, initialHeight:Number=NaN)
 		{
 			super(initialWidth, initialHeight);
+			visible = false;
 			addEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler, false, 0, true);
 		}
 
