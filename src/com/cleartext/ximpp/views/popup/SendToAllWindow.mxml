@@ -50,7 +50,7 @@
 		]]>
 	</mx:Script>
 	
-	<mx:Text text="send to the following services:" selectable="false"/>
+	<mx:Text text="Send to the following services:" selectable="false"/>
 	<mx:List id="list" dataProvider="{buddies.microBloggingBuddies}"
 		width="250" labelField="nickName" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
 		height="100%">

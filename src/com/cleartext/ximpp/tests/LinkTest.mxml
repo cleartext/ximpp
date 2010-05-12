@@ -5,7 +5,6 @@
 			import com.cleartext.ximpp.models.valueObjects.UrlShortener;
 			import com.cleartext.ximpp.models.utils.LinkUitls;
 			import com.cleartext.ximpp.models.utils.LinkResult;
-			import com.seesmic.as3.xmpp.StreamEvent;
 			
 			[Bindable]
 			public var shortening:Boolean = false;

@@ -21,9 +21,6 @@
 			[Bindable]
 			public var appModel:ApplicationModel;
 			
-			[Bindable]
-			public var message:Message;
-			
 			private var background:Sprite;
 			
 			private function dateSort(itemA:Object, itemB:Object):int
@@ -42,7 +39,7 @@
 			private function dataGridChangeHandler():void
 			{
 				var obj:Object = dataGrid.selectedItem;
-				message = Message.createFromDB(obj, appModel.mBlogBuddies);
+				messageRenderer.data = Message.createFromDB(obj, appModel.mBlogBuddies);
 				callLater(canvas.invalidateDisplayList);
 			}
 			
@@ -83,7 +80,7 @@
 			</mx:columns>
 		</mx:DataGrid>
 		<mx:Canvas id="canvas" backgroundColor="0xffffff" width="100%" height="120" verticalScrollPolicy="on">
-			<messages:AllMicroBloggingRenderer id="messageRenderer" left="0" right="0" data="{message}" appModel="{appModel}"/>
+			<messages:AllMicroBloggingRenderer id="messageRenderer" left="0" right="0" appModel="{appModel}" visible="true"/>
 		</mx:Canvas>
 	</mx:VDividedBox>
 	

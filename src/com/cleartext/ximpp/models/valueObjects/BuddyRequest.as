@@ -6,6 +6,8 @@ package com.cleartext.ximpp.models.valueObjects
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
+	
+	import org.swizframework.Swiz;
 
 	public class BuddyRequest extends SproutListDataBase implements IEventDispatcher
 	{
@@ -44,6 +46,7 @@ package com.cleartext.ximpp.models.valueObjects
 			{
 				_timestamp = value;
 				dispatchEvent(new BuddyRequestEvent(BuddyRequestEvent.BUDDY_REQUEST_CHANGED));
+				Swiz.dispatchEvent(new BuddyRequestEvent(BuddyRequestEvent.NEW_REQUEST));
 			}
 		}
 

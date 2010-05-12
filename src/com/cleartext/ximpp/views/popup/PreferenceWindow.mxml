@@ -292,24 +292,25 @@
 
 	<mx:Canvas left="10" y="45" right="10">
 
-		<mx:CheckBox label="auto connect" id="autoConnectCheckBox"/>
-		<mx:CheckBox y="30" label="show offline buddies" id="showOfflineBuddiesCheckBox"/>
-		<mx:CheckBox y="60" label="animate buddy list" id="animateBuddyListCheckBox"/>
-		<mx:CheckBox y="90" label="animate message list" id="animateMessageListCheckBox"/>
+		<mx:CheckBox label="Auto connect" id="autoConnectCheckBox"/>
+		<mx:CheckBox y="30" label="Show offline buddies" id="showOfflineBuddiesCheckBox"/>
+		<mx:CheckBox y="60" label="Animate buddy list" id="animateBuddyListCheckBox"/>
+		<mx:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox"/>
+		<mx:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox" enabled="false"/>
 
-		<mx:Label right="106" y="4" text="sort messages by"/>
+		<mx:Label right="106" y="4" text="Sort messages by"/>
 		<mx:ComboBox right="0" width="102" id="messageSortComboBox" dataProvider="{['date sent', 'date received']}"/>
 	
-		<mx:Label right="78" y="34" text="max timeline messages"/>
+		<mx:Label right="78" y="34" text="Max workstream messages"/>
 		<mx:NumericStepper right="0" y="30" maximum="1000" minimum="0" id="numTimelineMessages" />
 
-		<mx:Label right="78" y="64" text="max chat messages" />
+		<mx:Label right="78" y="64" text="Max chat messages" />
 		<mx:NumericStepper right="0" y="60" maximum="1000" minimum="0" id="numChatMessages" />
 
-		<mx:Label right="86" y="94" text="url shortening"/>
+		<mx:Label right="86" y="94" text="Url shortening"/>
 		<mx:ComboBox right="0" width="82" id="urlShortenComboBox" y="90" dataProvider="{UrlShortener.types}"/>
 
-		<mx:Label right="124" y="124" text="set away (0 = never)"/>
+		<mx:Label right="124" y="124" text="Set away (0 = never)"/>
 		<mx:NumericStepper right="56" y="120" maximum="120" minimum="0" id="awayTimeout" />
 		<mx:Label right="0" y="124" text="minutes"/>
 
@@ -336,31 +337,31 @@
 			removeButtonClicked="removeAccount()" enabled="false" toolTip="multiple accounts comming soon" />-->
 		
 		<mx:Form horizontalCenter="0">
-			<mx:FormItem label="account name:">
+			<mx:FormItem label="Account name:">
 				<mx:VBox>
 					<mx:TextInput id="accountName" width="{TEXT_INPUT_WIDTH}"
 						focusOut="validateInput(event, 'account name can not be empty')" 
 						change="changesMade = true; validateInput(event, 'account name can not be empty'); if(previousAccount) { previousAccount.accountName = accountName.text; accountCollection.refresh(); }"/>
 				</mx:VBox>
 			</mx:FormItem>
-			<mx:FormItem label="nick name:">
+			<mx:FormItem label="Nickname:">
 				<mx:TextInput id="nickName" change="changesMade = true;" width="{TEXT_INPUT_WIDTH}" />
 			</mx:FormItem>
-			<mx:FormItem label="profile picture:" direction="horizontal">
+			<mx:FormItem label="Profile picture:" direction="horizontal">
 				<common:Avatar id="avatarInput" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
 			</mx:FormItem>
 
-			<mx:FormItem label="jid:">
+			<mx:FormItem label="Account id:">
 				<mx:VBox>
 					<mx:TextInput id="jid" enabled="{!xmpp.connected}" toolTip="{!xmpp.connected ? '' : 'log off to make changes'}" change="changesMade = true; validateInput(event, 'jid can not be empty');" focusOut="validateInput(event, 'jid can not be empty'); " width="{TEXT_INPUT_WIDTH}" />
 				</mx:VBox>
 			</mx:FormItem>
-			<mx:FormItem label="password:">
+			<mx:FormItem label="Password:">
 				<mx:VBox>
 					<mx:TextInput id="password" enabled="{!xmpp.connected}" toolTip="{!xmpp.connected ? '' : 'log off to make changes'}" displayAsPassword="true" change="changesMade = true; validateInput(event, 'password can not be empty');" focusOut="validateInput(event, 'password can not be empty'); " width="{TEXT_INPUT_WIDTH}" />
 				</mx:VBox>
 			</mx:FormItem>
-			<mx:FormItem label="server:">
+			<mx:FormItem label="Server:">
 				<mx:VBox>
 					<mx:TextInput id="server" enabled="{!xmpp.connected}" toolTip="{!xmpp.connected ? '' : 'log off to make changes'}" change="changesMade = true; validateInput(event, 'server can not be empty');" focusOut="validateInput(event, 'server can not be empty'); " width="{TEXT_INPUT_WIDTH}" />
 				</mx:VBox>

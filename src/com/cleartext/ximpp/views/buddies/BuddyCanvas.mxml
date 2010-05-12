@@ -11,6 +11,7 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.BuddyRequestEvent;
 			import mx.managers.PopUpManager;
 			import mx.controls.LinkButton;
 			import mx.controls.Button;
@@ -167,6 +168,17 @@
 			public function userAccountChanged(event:UserAccountEvent):void
 			{
 				avatar.data = settings.userAccount;
+			}
+			
+			[Mediate (event="BuddyRequestEvent.NEW_REQUEST")]
+			public function showRequestPanel(event:BuddyRequestEvent):void
+			{
+				if(event)
+					requestCanvas.visible = requestCanvas.includeInLayout = true;
+				else
+					requestCanvas.visible = requestCanvas.includeInLayout = !requestCanvas.visible;
+				
+				callLater(invalidateDisplayList);
 			}
 			
 			public function showAddCanvas(event:MouseEvent):void
@@ -374,6 +386,8 @@
 			clipContent="false"
 			backgroundColor="0x444444"
 			width="100%" height="150"
+			visible="false"
+			includeInLayout="false"
 			>
 			<mx:Canvas id="requestHeader" 
 				y="-5"
@@ -411,7 +425,7 @@
 			x="24" y="1"
 			height="22"
 			textRollOverColor="0x848484"
-			click="requestCanvas.visible = requestCanvas.includeInLayout = !requestCanvas.visible"
+			click="showRequestPanel(null)"
 			skin="{null}"
 			label="requests"
 			/>

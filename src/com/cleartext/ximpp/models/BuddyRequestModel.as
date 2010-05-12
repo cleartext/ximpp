@@ -12,6 +12,8 @@ package com.cleartext.ximpp.models
 	import mx.collections.Sort;
 	import mx.collections.SortField;
 	
+	import org.swizframework.Swiz;
+	
 	public class BuddyRequestModel extends EventDispatcher
 	{
 		[Autowire]
@@ -50,6 +52,8 @@ package com.cleartext.ximpp.models
 				request.addEventListener(BuddyRequestEvent.BUDDY_REQUEST_CHANGED, requestChangedHandler, false, 0, true);
 				requests.refresh();
 				database.saveRequest(request);
+				
+				Swiz.dispatchEvent(new BuddyRequestEvent(BuddyRequestEvent.NEW_REQUEST));
 			}
 		}
 		

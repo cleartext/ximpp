@@ -174,15 +174,15 @@
 	
 	<mx:Form>
 
-		<mx:FormItem label="jid:">
+		<mx:FormItem label="Account id:">
 			<mx:TextInput id="jidTextInput" change="validateInput(event, 'jid can not be empty')" focusOut="validateInput(event, 'jid can not be empty')"  width="250"/>
 		</mx:FormItem>
 		
-		<mx:FormItem label="nickname:">
+		<mx:FormItem label="Nickname:">
 			<mx:TextInput id="nicknameTextInput" width="250"/>
 		</mx:FormItem>
 
-		<mx:FormItem label="avatar:">
+		<mx:FormItem label="Profile picture:">
 			<mx:HBox>
 				<common:Avatar id="avatarInput" buttonMode="true" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editClicked="changeAvatar()"/>
 				<mx:Button label="remove" click="avatarInput.bitmapData=null" />
@@ -190,10 +190,14 @@
 		</mx:FormItem>
 		
 		<mx:FormItem>
-			<mx:CheckBox label="micro-blogging buddy" id="mBlogCheckbox"/>
+			<mx:CheckBox label="Add to work stream?" id="mBlogCheckbox"/>
 		</mx:FormItem>
 
-		<mx:FormItem label="groups:" enabled="{buddy.isGateway || !mBlogCheckbox.selected}">
+		<mx:FormItem>
+			<mx:CheckBox label="Open new tab when message received?" id="openTabCheckBox" enabled="false" selected="true"/>
+		</mx:FormItem>
+
+		<mx:FormItem label="Groups:" enabled="{buddy.isGateway || !mBlogCheckbox.selected}">
 			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >
 				<mx:itemRenderer>
 					<mx:Component>

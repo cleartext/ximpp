@@ -5,6 +5,7 @@ package com.cleartext.ximpp.models
 	import air.update.events.StatusUpdateErrorEvent;
 	import air.update.events.UpdateEvent;
 	
+	import com.cleartext.ximpp.events.ApplicationEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.utils.LinkUitls;
@@ -19,6 +20,8 @@ package com.cleartext.ximpp.models
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
 	
@@ -149,9 +152,20 @@ package com.cleartext.ximpp.models
 			trace(traceStr);
 		}
 		
+		private var statusTimer:Timer;
+		
 		public function ApplicationModel()
 		{
 			super();
+			
+			statusTimer = new Timer(60000);
+			statusTimer.addEventListener(TimerEvent.TIMER, statusTimerHandler);
+			statusTimer.start();
+		}
+		
+		private function statusTimerHandler(event:TimerEvent):void
+		{
+			Swiz.dispatchEvent(new ApplicationEvent(ApplicationEvent.STATUS_TIMER));
 		}
 		
 		public function setUserTimeout():void

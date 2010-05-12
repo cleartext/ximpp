@@ -84,14 +84,13 @@
 	
 	
     <mx:Form>
-
-		<mx:FormItem label="name:">
+		<mx:FormItem label="Group name:">
 			<mx:VBox>
 				<mx:TextInput id="groupNameInput" change="validateInput(event, 'group name can not be empty')" focusOut="validateInput(event, 'group name can not be empty')"/>
 			</mx:VBox>
 		</mx:FormItem>
 
-		<mx:FormItem label="buddies:">
+		<mx:FormItem label="Buddies:">
 			<mx:List id="list" width="250" labelField="nickName" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
 				click="validateInput(event,'need to select at least one buddy')" focusOut="validateInput(event, 'need to select at least one buddy')">
 				<mx:itemRenderer>
@@ -107,4 +106,3 @@
     <mx:ControlBar />
 
 </popup:PopupWindowBase>
-

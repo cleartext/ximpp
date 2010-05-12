@@ -107,7 +107,7 @@ package com.cleartext.ximpp.views.buddies
 				createButtons(request.incomming);
 				
 				textField.htmlText = text;
-				textField.styleName = "blackNormal";
+				textField.styleName = "lGreySmall";
 			}
 			
 			heightInvalid = true;
@@ -231,7 +231,6 @@ package com.cleartext.ximpp.views.buddies
 				textField.wordWrap = true;
 				textField.y = PADDING;
 				textField.x = PADDING;
-				textField.alpha = 0.7;
 				addChild(textField);
 			}
 		}

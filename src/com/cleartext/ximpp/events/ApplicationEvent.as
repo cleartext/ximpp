@@ -5,6 +5,7 @@ package com.cleartext.ximpp.events
 	public class ApplicationEvent extends Event
 	{
 		public static const APPLICATION_COMPLETE:String = "appComplete";
+		public static const STATUS_TIMER:String = "statusTimer";
 		
 		public function ApplicationEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

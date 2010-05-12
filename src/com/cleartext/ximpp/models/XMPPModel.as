@@ -217,12 +217,12 @@ package com.cleartext.ximpp.models
 				return;
 			
 			var message:Message = appModel.createFromStanza(messageStanza);
-			database.saveMessage(message);
 
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
 			if(!buddy)
 			{
 				requests.receiving(message.sender, messageStanza.nick, message.plainMessage);
+				database.saveMessage(message);
 				return;
 			}
 			
@@ -241,7 +241,7 @@ package com.cleartext.ximpp.models
 				chat = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
 				chat.addMessage(message, limit);
 			}
-
+			database.saveMessage(message);
 		}
 		
 		private function chatStateHandler(event:XMPPEvent):void
@@ -485,7 +485,7 @@ package com.cleartext.ximpp.models
 		// SEND PRESENCE
 		//-------------------------------
 		
-		public function sendPresence():void
+		public function sendPresence(toJid:String=""):void
 		{
 			var status:Status = appModel.localStatus;
 			var customStatus:String = settings.userAccount.customStatus;
@@ -500,7 +500,7 @@ package com.cleartext.ximpp.models
 			else if(connected)
 			{
 				var priority:String = (status.value == Status.AWAY || status.value == Status.EXTENDED_AWAY) ? "0" : "5";
-				xmpp.sendPresence(customStatus, status.toShow(), priority, "", (gotAvatar) ? settings.userAccount.avatarHash : "");
+				xmpp.sendPresence(customStatus, status.toShow(), priority, toJid, (gotAvatar) ? settings.userAccount.avatarHash : "");
 				appModel.serverSideStatus.value = status.value;
 			}
 			
@@ -511,6 +511,7 @@ package com.cleartext.ximpp.models
 				connect();
 			}	
 		}
+		
 		
 		//-------------------------------
 		// SEND MESSAGE

@@ -5,6 +5,7 @@ package com.cleartext.ximpp.events
 	public class BuddyRequestEvent extends Event
 	{
 		public static const BUDDY_REQUEST_CHANGED:String = "buddyRequestChanged";
+		public static const NEW_REQUEST:String = "newRequest";
 		
 		public function BuddyRequestEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

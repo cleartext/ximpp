@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.views.buddies
 {
+	import com.cleartext.ximpp.events.ApplicationEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
@@ -19,13 +20,10 @@ package com.cleartext.ximpp.views.buddies
 	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
-	import flash.utils.Timer;
 	
-	import mx.core.IInvalidating;
 	import mx.core.UITextField;
 	import mx.effects.Tween;
 	
@@ -47,8 +45,12 @@ package com.cleartext.ximpp.views.buddies
 		private static const PADDING:Number = 3;
 		
 		private var previousStatus:String = Status.OFFLINE;
-		private var statusTimer:Timer;
 		private var over:Boolean = false;
+		
+		private var customContextMenu:ContextMenu;
+		private var subscribeItem:ContextMenuItem;
+		private var logonItem:ContextMenuItem;
+		private var timerCount:int=0;
 		
 		//---------------------------------------
 		// Constructor
@@ -60,6 +62,7 @@ package com.cleartext.ximpp.views.buddies
 			heightTo = SMALL_HEIGHT;
 			cacheAsBitmap = true;
 			doubleClickEnabled = true;
+			addEventListener(MouseEvent.CONTEXT_MENU, createContextMenu);
 			addEventListener(MouseEvent.DOUBLE_CLICK,
 				function():void
 				{
@@ -81,77 +84,102 @@ package com.cleartext.ximpp.views.buddies
 					invalidateDisplayList();
 				});
 
-			contextMenuLabel = new ContextMenuItem("");
-			contextMenuLabel.enabled = false;
-			
-			editItem = new ContextMenuItem("edit");
-			editItem.separatorBefore = true;
-			editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editHandler);
-			
-			deleteItem = new ContextMenuItem("delete");
-			deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteHandler);
-			
-			socialItem = new ContextMenuItem("");
-			socialItem.separatorBefore = true;
-			socialItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, socialHandler);
-			
-			var customContextMenu:ContextMenu = new ContextMenu();
+			customContextMenu = new ContextMenu();
 			customContextMenu.hideBuiltInItems();
-			customContextMenu.customItems.push(contextMenuLabel);
-			customContextMenu.customItems.push(editItem);
-			customContextMenu.customItems.push(deleteItem);
-			customContextMenu.customItems.push(socialItem);
-			
-			customContextMenu.addEventListener(Event.DISPLAYING, displayContextMenu);
-			
 			contextMenu = customContextMenu;
 			
-			statusTimer = new Timer(60000);
-			statusTimer.addEventListener(TimerEvent.TIMER, statusTimerHandler);
-		}
-		
-		private function statusTimerHandler(event:TimerEvent):void
-		{
-			invalidateProperties();
-		}
-		
-		private function displayContextMenu(event:Event):void
-		{
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
-				contextMenuLabel.label = "can not edit";
-				if(contextMenu.containsItem(editItem))
-					contextMenu.removeItem(editItem);
-				deleteItem.enabled = false;
-				socialItem.enabled = false;
+				customContextMenu.items.push(new ContextMenuItem("Can not edit All Social", false, false));
+			}
+			else
+			{
+				var objs:Array = [
+					{label: '', handler: null, separatorBefore: false},
+					{label: 'edit', handler: editHandler, separatorBefore: true},
+					{label: 'delete', handler: deleteHandler, separatorBefore: false},
+					{label: 'add to workstream', handler: socialHandler, separatorBefore: true}
+					];
+					
+				for each(var obj:Object in objs)
+				{
+					var item:ContextMenuItem = new ContextMenuItem(obj.label, obj.separatorBefore, false);
+					if(obj.handler)
+						item.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, obj.handler);
+					customContextMenu.addItem(item);
+				}
+			}
+		}
+		
+		[Mediate(event="ApplicationEvent.STATUS_TIMER")]
+		public function statusTimerHandler(event:ApplicationEvent):void
+		{
+			if(!buddy.status.isOffline())
+			{
+				timerCount++;
+				invalidateProperties();
+			}
+		}
+		
+		private function createContextMenu(event:Event):void
+		{
+			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				return;
-			}
 			
-			contextMenuLabel.label = (buddy && xmpp.connected) ? buddy.nickName : "go online to edit";
-			socialItem.label = (buddy && buddy.microBlogging) ? "remove from workstream" : "add to workstream";
+			// label at top
+			customContextMenu.getItemAt(0).label = (buddy && xmpp.connected) ? buddy.nickName : "go online to edit";
+			// workstream label
+			customContextMenu.getItemAt(3).label = (buddy && buddy.microBlogging) ? "remove from workstream" : "add to workstream";
 			
-			var customContextMenu:ContextMenu = (contextMenu as ContextMenu);
-			
-			if(!buddy.subscribedTo && customContextMenu.customItems.length == 4)
+			// add or remove subscription request if required
+			if(!buddy.subscribedTo && !subscribeItem)
 			{
-				var subscirbeItem:ContextMenuItem = new ContextMenuItem("resend subscirption request", true);
-				subscirbeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT,
-					function():void
-					{
-						xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
-						subscirbeItem.caption = "subscription request sent";
-						subscirbeItem.enabled = false;
-					});
-				customContextMenu.customItems.push(subscirbeItem);
+				subscribeItem = new ContextMenuItem("resend subscirption request", true);
+				subscribeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, sendSubscription);
+				customContextMenu.addItemAt(subscribeItem, 4);
 			}
-			else if(buddy.subscribedTo && customContextMenu.customItems.length == 5)
+			else if(buddy.subscribedTo && subscribeItem)
 			{
-				customContextMenu.customItems.pop();
+				customContextMenu.removeItem(subscribeItem);
+				subscribeItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, sendSubscription);
+				subscribeItem = null;
 			}
 			
-			editItem.enabled = xmpp.connected;
-			deleteItem.enabled = xmpp.connected;
-			socialItem.enabled = xmpp.connected;
+			// add or remove gateway item if required
+			if(buddy.isGateway && buddy.status.isOffline() && !logonItem)
+			{
+				logonItem = new ContextMenuItem("logon", true);
+				logonItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, logonHandler);
+				customContextMenu.addItem(logonItem);
+			}
+			else if((!buddy.isGateway || !buddy.status.isOffline()) && logonItem)
+			{
+				customContextMenu.removeItem(logonItem);
+				logonItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, logonHandler);
+				logonItem = null;
+			}
+			
+			// set enabled based on connected status
+			for(var i:int=1; i<customContextMenu.numItems; i++)
+			{
+				customContextMenu.getItemAt(i).enabled = xmpp.connected;
+			}
+		}
+		
+		private function logonHandler(event:ContextMenuEvent):void
+		{
+			// incase we went offline while the user was clicking
+			if(!xmpp.connected)
+				return;
+			xmpp.sendPresence(buddy.jid);
+		}
+
+		private function sendSubscription(event:ContextMenuEvent):void
+		{
+			// incase we went offline while the user was clicking
+			if(!xmpp.connected)
+				return;
+			xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
 		}
 
 		private function editHandler(event:ContextMenuEvent):void
@@ -163,6 +191,9 @@ package com.cleartext.ximpp.views.buddies
 
 		private function socialHandler(event:ContextMenuEvent):void
 		{
+			// incase we went offline while the user was clicking
+			if(!xmpp.connected)
+				return;
 			buddy.microBlogging = !buddy.microBlogging;
 			xmpp.modifyRosterItem(buddy);
 		}
@@ -200,13 +231,12 @@ package com.cleartext.ximpp.views.buddies
 		{
 			if(!buddy || buddy.status.isOffline())
 			{
-				statusTimer.reset();
+				timerCount = 0;
 				previousStatus = Status.OFFLINE;
 			}
 			else if(buddy.status.value != previousStatus)
 			{
-				statusTimer.reset();
-				statusTimer.start();
+				timerCount = 0;
 				previousStatus = buddy.status.value;
 			}
 			
@@ -230,11 +260,6 @@ package com.cleartext.ximpp.views.buddies
 		private var statusLabel:UITextField;
 		private var customStatusLabel:UITextField
 		private var unreadMessageBadge:UnreadMessageBadge;
-		
-		private var contextMenuLabel:ContextMenuItem;
-		private var editItem:ContextMenuItem;
-		private var deleteItem:ContextMenuItem;
-		private var socialItem:ContextMenuItem;
 		
 		//---------------------------------------
 		// Create Children
@@ -329,12 +354,12 @@ package com.cleartext.ximpp.views.buddies
 			else
 			{
 				var extraText:String = " for ";
-				var mins:int = statusTimer.currentCount;
+				var mins:int = timerCount;
 				
 				if(mins == 0)
 					extraText += " < 1 minute";
-				else if(mins == 1)
-					extraText += " 1 minute";
+				else if(mins < 5)
+					extraText += " a few minutes";
 				else if(mins < 60)
 					extraText += mins + " minutes";
 				else if(mins < 1440)
@@ -396,7 +421,7 @@ package com.cleartext.ximpp.views.buddies
 				avatar.alpha = 1;
 				alpha = 1;
 			}
-
+			
 			statusIcon.x = width - 2*PADDING - StatusIcon.SIZE;
 			unreadMessageBadge.x = width - 3*PADDING - unreadMessageBadge.width - StatusIcon.SIZE;
 			
