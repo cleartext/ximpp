@@ -142,7 +142,6 @@ package com.cleartext.ximpp.views.messages
 		
 		override protected function commitProperties():void
 		{
-			super.commitProperties();
 			if(message)
 			{
 				if(!chatBuddy || chatBuddy.jid != message.sender)
