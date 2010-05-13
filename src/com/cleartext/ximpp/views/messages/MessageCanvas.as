@@ -29,10 +29,9 @@ package com.cleartext.ximpp.views.messages
 	import mx.containers.ViewStack;
 	import mx.core.Container;
 	import mx.core.ScrollPolicy;
+	import mx.effects.Fade;
 	import mx.effects.Move;
 	import mx.events.CloseEvent;
-	import mx.events.CollectionEvent;
-	import mx.events.CollectionEventKind;
 	import mx.events.FlexEvent;
 	import mx.utils.StringUtil;
 	
@@ -86,31 +85,6 @@ package com.cleartext.ximpp.views.messages
 		
 		private var isTypingTimer:Timer;
 		
-		private var _index:int = 0;
-		public function get index():int
-		{
-			return _index;
-		}
-		public function set index(value:int):void
-		{
-			_index = value;
-			refreshIndex();
-		}
-		
-		private function refreshIndex():void
-		{
-			if(_index >= avatars.length)
-				_index = 0;
-			else if(_index < 0)
-				_index = Math.max(avatars.length -1, 0);
-			
-			var currentAvatar:AvatarTab = avatarByIndex(index);
-			if(currentAvatar)
-				setCurrentChat(currentAvatar.chat);
-			else
-				inputCanvas.buddy = null;
-		}
-		
 		public function MessageCanvas()
 		{
 			super();
@@ -123,61 +97,10 @@ package com.cleartext.ximpp.views.messages
 			isTypingTimer = new Timer(3000, 2);
 			isTypingTimer.addEventListener(TimerEvent.TIMER, isTimerTypingHandler);
 			
-			addEventListener(FlexEvent.CREATION_COMPLETE, 
-				function():void
-				{
-					for each(var chat:Chat in chats.chats)
-						setCurrentChat(chat);
-					chats.chats.addEventListener(CollectionEvent.COLLECTION_CHANGE, chatsChangedHandler);
-				});
+			addEventListener(FlexEvent.CREATION_COMPLETE, function():void { chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY); });
 		}
 		
-		private function chatsChangedHandler(event:CollectionEvent):void
-		{
-			var chat:Chat;
-			if(event.kind == CollectionEventKind.ADD)
-			{
-				for(var i:int=0; i<chats.chats.length; i++)
-				{
-					chat = chats.chats.getItemAt(i) as Chat;
-					var avatar:AvatarTab = avatarByIndex(i);
-
-					if(!avatar || chat != avatar.chat)
-					{
-						chat.messages.filterFunction = filterMessages;
-						setChatStateTo(chat, ChatStateTypes.ACTIVE);
-						
-						avatar = new AvatarTab();
-						avatar.data = chat;
-						avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
-						avatar.width = AVATAR_SIZE;
-						avatar.height = AVATAR_SIZE;
-						avatar.border = false;
-						avatar.toolTip = chat.buddy.nickName;
-						avatar.addEventListener(CloseEvent.CLOSE, avatar_close);
-						avatar.alpha = 0;
-			
-						avatars.addItemAt(avatar, i);
-						moveAvatar(i, 1, false);
-						avatarCanvas.addChildAt(avatar, 0);
-						
-						var sproutList:MessageSproutList = new MessageSproutList();
-						sproutList.animate = settings.global.animateMessageList;
-						sproutList.horizontalScrollPolicy = "off";
-						sproutList.data = chat;
-						messageStack.addChild(sproutList);
-						messageStack.selectedChild = sproutList;
-			
-						chat.messages.refresh();
-					}
-				}
-			}
-			else if(event.kind == CollectionEventKind.REMOVE)
-				for each(chat in event.items)
-					removeChat(chat);
-		}
-		
-		public function numChats():int
+		public function numAvatars():int
 		{
 			return avatars.length;
 		}
@@ -185,55 +108,6 @@ package com.cleartext.ximpp.views.messages
 		private function avatarByIndex(i:int):AvatarTab
 		{
 			return (avatars.length > 0 && i < avatars.length) ? avatars.getItemAt(i) as AvatarTab : null;
-		}
-		
-		private function setCurrentChat(chat:Chat):void
-		{
-			if(!chat)
-				return;
-			
-			inputCanvas.buddy = chat.buddy;
-
-			// select the current one move and fade it or
-			// create a new avatar
-			var exists:Boolean = false;
-			for(var i:int=0; i<avatars.length; i++)
-			{
-				var c:Chat = avatarByIndex(i).chat;
-				setChatStateTo(c, ChatStateTypes.ACTIVE);
-				if(c == chat)
-				{
-					_index = i;
-					moveAvatar(index, 1);
-
-					exists = true;
-					
-					for each(var s:Container in messageStack.getChildren())
-					{
-						if(s.data == chat)
-						{
-							messageStack.selectedChild = s;
-							break;
-						}
-					}
-				}
-			}
-			
-
-			// do all the other avatars
-			var cursor:int = index+1;
-			for(var j:int=1; j<avatars.length; j++)
-			{
-				if(cursor >= avatars.length)
-					cursor = 0;
-				
-				// the last avatar needs to go to position 0
-				moveAvatar(cursor, (j==avatars.length-1) ? 0 : j+1);
-				cursor++;
-			}
-			
-			chats.selectedChat = chat;
-			customScroll.value = 0;
 		}
 		
 		private function setChatStateTo(chat:Chat, newState:String, sendStanza:Boolean=true):void
@@ -248,8 +122,7 @@ package com.cleartext.ximpp.views.messages
 		
 		private function avatar_close(event:CloseEvent):void
 		{
-			var avatar:AvatarTab = event.target as AvatarTab;
-			chats.removeChat(avatar.chat.buddy);
+			chats.removeChat((event.target as AvatarTab).chat.buddy);
 		}
 				
 		override protected function createChildren():void
@@ -301,36 +174,166 @@ package com.cleartext.ximpp.views.messages
 				addChild(messageStack);
 			}
 			
+			chats.addEventListener(ChatEvent.ADD_CHAT, addChatHandler);
+			chats.addEventListener(ChatEvent.REMOVE_CHAT, removeChatHandler);
 			chats.addEventListener(ChatEvent.SELECT_CHAT, selectChatHandler);
+		}
+		
+		private function addChatHandler(event:ChatEvent):void
+		{
+			if(appModel)
+				appModel.log(chats.selectedIndex + " " + event.index + " " + event.select + " " + event.chat.buddy.nickName);
+
+			var chat:Chat = event.chat;
+			var avatar:AvatarTab = new AvatarTab();
+			avatar.data = chat;
+			avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
+			avatar.width = AVATAR_SIZE;
+			avatar.height = AVATAR_SIZE;
+			avatar.border = false;
+			avatar.toolTip = chat.buddy.nickName;
+			avatar.addEventListener(CloseEvent.CLOSE, avatar_close);
+			avatar.alpha = 0;
+			
+			if(event.select)
+			{
+				avatar.move(H_GAP*2+AVATAR_SIZE, SELECTOR_WIDTH + TRIANGLE_HEIGHT);
+			}
+			else
+			{
+				avatar.move(H_GAP, SELECTOR_WIDTH + TRIANGLE_HEIGHT);
+				
+				var fade:Fade = new Fade(avatar);
+				fade.alphaFrom = 0;
+				fade.alphaTo = AvatarTab.OUT_ALPHA;
+				fade.duration = 350;
+				fade.play();
+			}
+
+			avatars.addItemAt(avatar, event.index);
+			avatarCanvas.addChildAt(avatar, 0);
+			
+			var sproutList:MessageSproutList = new MessageSproutList();
+			sproutList.animate = settings.global.animateMessageList;
+			sproutList.horizontalScrollPolicy = "off";
+			sproutList.data = chat;
+			messageStack.addChild(sproutList);
+
+			chat.messages.filterFunction = filterMessages;
+			chat.messages.refresh();
+	
+			selectChatHandler(null);
+		}
+		
+		private function removeChatHandler(event:ChatEvent):void
+		{
+			if(avatars.length == 0)
+				return;
+			
+			var chat:Chat = event.chat;
+			var avatarToRemove:AvatarTab;
+			
+			if(chat)
+			{
+				for each(var a:AvatarTab in avatars)
+				{
+					if(a.chat == chat)
+					{
+						avatarToRemove = a;
+						break;
+					}
+				}
+			}
+			
+			if(!avatarToRemove)
+				return;
+
+			avatarCanvas.removeChild(avatarToRemove);
+			avatars.removeItemAt(avatars.getItemIndex(avatarToRemove));
+
+			for each(var s:Container in messageStack.getChildren())
+			{
+				if(s.data == avatarToRemove.chat)
+				{
+					messageStack.removeChild(s);
+					break;
+				}
+			}
+			selectChatHandler(null);
 		}
 		
 		private function selectChatHandler(event:ChatEvent):void
 		{
-			setCurrentChat(chats.selectedChat);
+			var chat:Chat = chats.selectedChat;
+
+			if(!chat)
+			{
+				inputCanvas.buddy = null;
+				return;
+			}
+			
+			if(appModel)
+				appModel.log(chats.selectedIndex + " " + chats.selectedChat.buddy.nickName);
+			
+			chat.messages.refresh();
+			setChatStateTo(chat, ChatStateTypes.ACTIVE);
+
+			// set input canvas
+			inputCanvas.buddy = chat.buddy;
+
+			// set message list
+			for each(var s:Container in messageStack.getChildren())
+			{
+				if(s.data == chat)
+				{
+					messageStack.selectedChild = s;
+					break;
+				}
+			}
+			
+			// layout selected tab:
+			moveAvatar(chats.selectedIndex, 1);
+
+			// do all the other avatars
+			var cursor:int = chats.selectedIndex+1;
+			for(var j:int=1; j<avatars.length; j++)
+			{
+				if(cursor >= avatars.length)
+					cursor = 0;
+				
+				// the last avatar needs to go to position 0
+				moveAvatar(cursor, (j==avatars.length-1) ? 0 : j+1);
+				cursor++;
+			}
+			customScroll.value = 0;
 		}
 		
 		private function input_keyDownHandler(event:KeyboardEvent):void
 		{
-			setChatStateTo(avatarByIndex(index).chat, ChatStateTypes.COMPOSING);
-			isTypingTimer.reset();
-			isTypingTimer.start();
+			if(chats.selectedChat)
+			{
+				setChatStateTo(chats.selectedChat, ChatStateTypes.COMPOSING);
+				isTypingTimer.reset();
+				isTypingTimer.start();
+			}
 		}
 		
 		private function isTimerTypingHandler(event:TimerEvent):void
 		{
-			var chat:Chat = avatarByIndex(index).chat;
-			
-			if(chat.chatState == ChatStateTypes.COMPOSING)
-				setChatStateTo(chat, ChatStateTypes.PAUSED);
-			else
-				setChatStateTo(chat, ChatStateTypes.ACTIVE);
+			if(chats.selectedChat)
+			{
+				if(chats.selectedChat.chatState == ChatStateTypes.COMPOSING)
+					setChatStateTo(chats.selectedChat, ChatStateTypes.PAUSED);
+				else
+					setChatStateTo(chats.selectedChat, ChatStateTypes.ACTIVE);
+			}
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
-			customScroll.setRange(unscaledWidth, H_GAP + numChats() * (H_GAP + AVATAR_SIZE));
+			customScroll.setRange(unscaledWidth, H_GAP + numAvatars() * (H_GAP + AVATAR_SIZE));
 			customScroll.setActualSize(unscaledWidth - 216, 12);
 			customScroll.move(200, Constants.TOP_BAR_HEIGHT - 6);
 			
@@ -387,7 +390,7 @@ package com.cleartext.ximpp.views.messages
 			var searchString:String = event.searchString.toLocaleLowerCase();
 			searchString = StringUtil.trim(searchString);
 			searchTerms = searchString.split(/\s+/);
-			avatarByIndex(index).chat.messages.refresh();
+			chats.selectedChat.messages.refresh();
 		}
 
 		private function filterMessages(message:Message):Boolean
@@ -412,7 +415,7 @@ package com.cleartext.ximpp.views.messages
 		
 		private function avatarClickHandler(event:MouseEvent):void
 		{
-			setCurrentChat((event.currentTarget as AvatarTab).chat);
+			chats.getChat((event.target as AvatarTab).chat.buddy, true);
 		}
 		
 		private function moveAvatar(avatarIndex:int, position:int, animate:Boolean=true):void
@@ -447,51 +450,9 @@ package com.cleartext.ximpp.views.messages
 			}
 		}
 		
-		private function removeChat(chat:Chat=null):void
-		{
-			if(avatars.length == 0)
-				return;
-			
-			var avatarToRemove:AvatarTab;
-			
-			if(chat)
-			{
-				for each(var a:AvatarTab in avatars)
-				{
-					if(a.chat == chat)
-					{
-						avatarToRemove = a;
-						break;
-					}
-				}
-			}
-			else
-			{
-				avatarToRemove = avatarByIndex(index);
-			}
-			
-			if(!avatarToRemove)
-				return;
-
-			avatarCanvas.removeChild(avatarToRemove);
-			avatars.removeItemAt(avatars.getItemIndex(avatarToRemove));
-
-			for each(var s:Container in messageStack.getChildren())
-			{
-				if(s.data == avatarToRemove.chat)
-				{
-					messageStack.removeChild(s);
-					break;
-				}
-			}
-
-			// make sure index is valid and layout the avatars
-			refreshIndex();
-		}
-		
 		private function scrollChangedHandler(event:Event):void
 		{
-			avatarCanvas.x = -customScroll.value* (numChats() * (H_GAP + AVATAR_SIZE) + H_GAP - width);
+			avatarCanvas.x = -customScroll.value* (numAvatars() * (H_GAP + AVATAR_SIZE) + H_GAP - width);
 		}
 	}
 }

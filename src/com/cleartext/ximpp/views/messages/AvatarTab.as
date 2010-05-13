@@ -18,9 +18,9 @@ package com.cleartext.ximpp.views.messages
 
 	public class AvatarTab extends Avatar
 	{
-		private static const SELECTED_ALPHA:Number = 1.0;
-		private static const OVER_ALPHA:Number = 1.0;
-		private static const OUT_ALPHA:Number = 0.7;
+		public static const SELECTED_ALPHA:Number = 1.0;
+		public static const OVER_ALPHA:Number = 1.0;
+		public static const OUT_ALPHA:Number = 0.7;
 
 		private var closeButton:Button;
 		private var dropShaddow:DropShadowFilter = new DropShadowFilter(2);

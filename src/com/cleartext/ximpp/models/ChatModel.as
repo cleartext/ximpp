@@ -7,8 +7,6 @@ package com.cleartext.ximpp.models
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
-	
-	import mx.collections.ArrayCollection;
 
 	public class ChatModel extends EventDispatcher
 	{
@@ -23,32 +21,24 @@ package com.cleartext.ximpp.models
 		
 		public var chatsByJid:Dictionary;
 		
-		private var _chats:ArrayCollection;
-		public function get chats():ArrayCollection
-		{
-			return _chats;
-		}
+		private var chats:Array;
 		
 		private var _selectedChat:Chat;
-		[Bindable (event="selectChat")]
 		public function get selectedChat():Chat
 		{
 			return _selectedChat;
 		}
-		public function set selectedChat(value:Chat):void
+		
+		public function get selectedIndex():int
 		{
-			if(selectedChat != value)
-			{
-				_selectedChat = value;
-				dispatchEvent(new ChatEvent(ChatEvent.SELECT_CHAT));
-			}
+			return chats.indexOf(selectedChat);
 		}
 		
 		public function ChatModel()
 		{
 			super();
 			
-			_chats = new ArrayCollection();
+			chats = new Array();
 			chatsByJid = new Dictionary();
 		}
 		
@@ -61,23 +51,31 @@ package com.cleartext.ximpp.models
 			
 			if(!chat)
 			{
+				if(chats.length == 0)
+					select = true;
+				
 				chat = new Chat(buddy);
 				chat.messages = database.loadMessages(buddy);
-				var index:int = chats.length;
+				var index:int = 0;
 				if(selectedChat)
 				{
-					index = chats.getItemIndex(selectedChat) - 1;
-					if(index < 0)
-						index = chats.length;
+					index = chats.indexOf(selectedChat);
 				}
-				chats.addItemAt(chat, index);
+				chats.splice(index, 0, chat);
 				chatsByJid[buddy.jid] = chat;
 				buddy.open = true;
-			}
-			
-			if(select)
-				selectedChat = chat;
 				
+				if(select)
+					_selectedChat = chat;
+				
+				dispatchEvent(new ChatEvent(ChatEvent.ADD_CHAT, chat, index, select));
+			}
+			else if(select && selectedChat != chat)
+			{
+				_selectedChat = chat;
+				dispatchEvent(new ChatEvent(ChatEvent.SELECT_CHAT));
+			}
+
 			return chat;
 		}
 		
@@ -88,9 +86,19 @@ package com.cleartext.ximpp.models
 			if(chat)
 			{
 				buddy.open = false;
-				var i:int = chats.getItemIndex(chat);
-				chats.removeItemAt(i);
+				var i:int = chats.indexOf(chat);
+				chats.splice(i, 1);
 				delete chatsByJid[buddy.jid];
+
+
+				if(chat == selectedChat)
+				{
+					if(chats.length == 0)
+						_selectedChat = null;
+					else
+						_selectedChat = (i >= chats.length) ? chats[0] : chats[i];
+				}
+				dispatchEvent(new ChatEvent(ChatEvent.REMOVE_CHAT, chat, i));
 			}
 		}
 		

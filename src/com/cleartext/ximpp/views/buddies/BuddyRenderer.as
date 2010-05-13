@@ -62,7 +62,6 @@ package com.cleartext.ximpp.views.buddies
 			heightTo = SMALL_HEIGHT;
 			cacheAsBitmap = true;
 			doubleClickEnabled = true;
-			addEventListener(MouseEvent.CONTEXT_MENU, createContextMenu);
 			addEventListener(MouseEvent.DOUBLE_CLICK,
 				function():void
 				{
@@ -83,31 +82,6 @@ package com.cleartext.ximpp.views.buddies
 					invalidateDisplayList();
 				});
 
-			customContextMenu = new ContextMenu();
-			customContextMenu.hideBuiltInItems();
-			contextMenu = customContextMenu;
-			
-			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
-			{
-				customContextMenu.items.push(new ContextMenuItem("Can not edit All Social", false, false));
-			}
-			else
-			{
-				var objs:Array = [
-					{label: '', handler: null, separatorBefore: false},
-					{label: 'edit', handler: editHandler, separatorBefore: true},
-					{label: 'delete', handler: deleteHandler, separatorBefore: false},
-					{label: 'add to workstream', handler: socialHandler, separatorBefore: true}
-					];
-					
-				for each(var obj:Object in objs)
-				{
-					var item:ContextMenuItem = new ContextMenuItem(obj.label, obj.separatorBefore, false);
-					if(obj.handler)
-						item.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, obj.handler);
-					customContextMenu.addItem(item);
-				}
-			}
 		}
 		
 		[Mediate(event="ApplicationEvent.STATUS_TIMER")]
@@ -211,6 +185,9 @@ package com.cleartext.ximpp.views.buddies
 		
 		override public function set data(value:Object):void
 		{
+			if(data == value)
+				return;
+
 			if(buddy)
 				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
 			
@@ -221,6 +198,34 @@ package com.cleartext.ximpp.views.buddies
 				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
 				if(avatar)
 					avatar.data = buddy;
+
+				customContextMenu = new ContextMenu();
+				customContextMenu.hideBuiltInItems();
+				contextMenu = customContextMenu;
+				
+				if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				{
+					customContextMenu.items.push(new ContextMenuItem("Can not edit My Workstream", false, false));
+				}
+				else
+				{
+					addEventListener(MouseEvent.CONTEXT_MENU, createContextMenu);
+	
+					var objs:Array = [
+						{label: '', handler: null, separatorBefore: false},
+						{label: 'edit', handler: editHandler, separatorBefore: true},
+						{label: 'delete', handler: deleteHandler, separatorBefore: false},
+						{label: 'add to workstream', handler: socialHandler, separatorBefore: true}
+						];
+						
+					for each(var obj:Object in objs)
+					{
+						var item:ContextMenuItem = new ContextMenuItem(obj.label, obj.separatorBefore, false);
+						if(obj.handler)
+							item.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, obj.handler);
+						customContextMenu.addItem(item);
+					}
+				}
 			}
 			
 			buddyChangedHandler(null);
@@ -356,9 +361,9 @@ package com.cleartext.ximpp.views.buddies
 				var mins:int = timerCount;
 				
 				if(mins == 0)
-					extraText += " < 1 minute";
+					extraText += "< 1 minute";
 				else if(mins < 5)
-					extraText += " a few minutes";
+					extraText += "a few minutes";
 				else if(mins < 60)
 					extraText += mins + " minutes";
 				else if(mins < 1440)

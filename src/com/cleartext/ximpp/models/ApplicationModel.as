@@ -290,7 +290,7 @@ package com.cleartext.ximpp.models
 		{
 //			chats.removeAll();
 			database.loadBuddyData();
-			setTimeout(chats.getChat, 1, Buddy.ALL_MICRO_BLOGGING_BUDDY);
+//			setTimeout(chats.getChat, 1, Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
 		}
 		
 		public function getBuddyByJid(jid:String):Buddy

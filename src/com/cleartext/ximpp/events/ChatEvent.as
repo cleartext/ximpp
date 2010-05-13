@@ -9,19 +9,22 @@ package com.cleartext.ximpp.events
 		public static const ADD_CHAT:String = "addChat";
 		public static const REMOVE_CHAT:String = "removeChat";
 		public static const SELECT_CHAT:String = "selectChat";
-		public static const CHAT_CHANGED:String = "chatChanged";
 
 		public var chat:Chat;
+		public var select:Boolean = false;
+		public var index:int;
 		
-		public function ChatEvent(type:String, chat:Chat=null, bubbles:Boolean=false, cancelable:Boolean=false)
+		public function ChatEvent(type:String, chat:Chat=null, index:int=-1, select:Boolean=false, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
 			this.chat = chat;
+			this.select = select;
+			this.index = index;
 		}
 		
 		override public function clone():Event
 		{
-			return new ChatEvent(type, chat, bubbles, cancelable);	
+			return new ChatEvent(type, chat, index, select, bubbles, cancelable);	
 		}
 	}
 }
