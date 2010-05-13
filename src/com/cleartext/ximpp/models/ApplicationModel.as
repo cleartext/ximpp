@@ -25,7 +25,6 @@ package com.cleartext.ximpp.models
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
 	
-	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.core.Application;
 	
@@ -57,8 +56,12 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var requests:BuddyRequestModel;
 		
+		[Autowire]
 		[Bindable]
-		public var chats:ArrayCollection = new ArrayCollection();
+		public var chats:ChatModel;
+		
+//		[Bindable]
+//		public var chats:ArrayCollection = new ArrayCollection();
 		
 		/*
 		 * SERVER SIDE STATUS
@@ -285,9 +288,9 @@ package com.cleartext.ximpp.models
 		[Mediate(event="UserAccountEvent.CHANGED")]
 		public function userIdChanged(event:UserAccountEvent):void
 		{
-			chats.removeAll();
+//			chats.removeAll();
 			database.loadBuddyData();
-			setTimeout(getChat, 1, Buddy.ALL_MICRO_BLOGGING_BUDDY);
+			setTimeout(chats.getChat, 1, Buddy.ALL_MICRO_BLOGGING_BUDDY);
 		}
 		
 		public function getBuddyByJid(jid:String):Buddy
@@ -299,21 +302,6 @@ package com.cleartext.ximpp.models
 				return settings.userAccount;
 			
 			return buddies.getBuddyByJid(jid);
-		}
-				
-		public function getChat(buddy:Buddy):Chat
-		{
-			if(!buddy)
-				return null;
-			
-			for each(var c:Chat in chats)
-				if(c.buddy.jid == buddy.jid)
-					return c;
-
-			var chat:Chat = new Chat(buddy);
-			chat.messages = database.loadMessages(buddy);
-			chats.addItem(chat);
-			return chat;
 		}
 		
 		public function sendMessageTo(buddy:Buddy, messageString:String):void
@@ -347,15 +335,7 @@ package com.cleartext.ximpp.models
 				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, 'chat', null, customTags);
 				var message:Message = createFromStanza(messageStanza);
 				
-				var c:Chat = getChat(buddy);
-				c.messages.addItemAt(message,0);
-				
-				if(buddy.microBlogging)
-				{
-					c = getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
-					c.messages.addItemAt(message,0);
-				}
-
+				chats.addMessage(buddy, message);
 				database.saveMessage(message);
 			}
 		}

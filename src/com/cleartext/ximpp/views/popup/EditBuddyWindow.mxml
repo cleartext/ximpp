@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.ChatModel;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.models.valueObjects.Status;
@@ -30,6 +31,10 @@
 			[Autowire]
 			[Bindable]
 			public var appModel:ApplicationModel;
+			
+			[Autowire]
+			[Bindable]
+			public var chats:ChatModel;
 			
 			override protected function init(event:FlexEvent):void
 			{
@@ -83,8 +88,8 @@
 				}
 				else
 				{
-					appModel.getChat(buddy);
 					buddies.addBuddy(buddy);
+					chats.getChat(buddy, true);
 					xmpp.addToRoster(buddy.jid, buddy.nickName, buddy.groups);
 				}
 				buddies.refresh();

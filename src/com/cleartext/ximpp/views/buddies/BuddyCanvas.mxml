@@ -11,6 +11,7 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.ChatModel;
 			import com.cleartext.ximpp.events.BuddyRequestEvent;
 			import mx.managers.PopUpManager;
 			import mx.controls.LinkButton;
@@ -59,6 +60,10 @@
 			[Autowire]
 			[Bindable]
 			public var database:DatabaseModel;
+			
+			[Autowire]
+			[Bindable]
+			public var chats:ChatModel;
 			
 			public var addCanvas:VBox;
 			
@@ -159,7 +164,7 @@
 				
 				if(xmppModel.connected && microBloggingCheckBox.selected && customStatusInput.text != "")
 				{
-					appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
+					chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
 					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, customStatusInput.text));
 				}
 			}

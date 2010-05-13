@@ -13,7 +13,7 @@ package com.cleartext.ximpp.events
 
 		public var chat:Chat;
 		
-		public function ChatEvent(type:String, chat:Chat, bubbles:Boolean=false, cancelable:Boolean=false)
+		public function ChatEvent(type:String, chat:Chat=null, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
 			this.chat = chat;

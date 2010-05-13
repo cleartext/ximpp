@@ -4,6 +4,7 @@
 	clipContent="false">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.ApplicationModel;
 			import com.cleartext.ximpp.events.InputTextEvent;
 			import mx.utils.StringUtil;
 			import com.cleartext.ximpp.assets.Constants;
@@ -37,6 +38,10 @@
 			
 			[Autowire]
 			[Bindable]
+			public var appModel:ApplicationModel;
+			
+			[Autowire]
+			[Bindable]
 			public var settings:SettingsModel;
 			
 			[Autowire]
@@ -63,8 +68,8 @@
 			public function send(event:SendButtonEvent=null):void
 			{
 				var trimedText:String = StringUtil.trim(inputTextArea.text);
-				if(trimedText.length != 0)
-					messageCanvas.sendMessage(trimedText);
+				if(trimedText.length != 0 && buddy)
+					appModel.sendMessageTo(buddy, trimedText);
 
 				callLater(function():void{inputTextArea.text = ""});
 			}

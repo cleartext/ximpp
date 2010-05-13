@@ -5,6 +5,7 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.events.SearchBoxEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.BuddyModel;
+	import com.cleartext.ximpp.models.ChatModel;
 	import com.cleartext.ximpp.models.DatabaseModel;
 	import com.cleartext.ximpp.models.SettingsModel;
 	import com.cleartext.ximpp.models.XMPPModel;
@@ -56,6 +57,10 @@ package com.cleartext.ximpp.views.messages
 		[Autowire]
 		[Bindable]
 		public var database:DatabaseModel;
+			
+		[Autowire]
+		[Bindable]
+		public var chats:ChatModel;
 			
 		private static const ANIMATION_DURATION:Number = 350;
 
@@ -121,27 +126,55 @@ package com.cleartext.ximpp.views.messages
 			addEventListener(FlexEvent.CREATION_COMPLETE, 
 				function():void
 				{
-					for each(var chat:Chat in appModel.chats)
+					for each(var chat:Chat in chats.chats)
 						setCurrentChat(chat);
-					appModel.chats.addEventListener(CollectionEvent.COLLECTION_CHANGE, chatsChangedHandler);
+					chats.chats.addEventListener(CollectionEvent.COLLECTION_CHANGE, chatsChangedHandler);
 				});
 		}
 		
 		private function chatsChangedHandler(event:CollectionEvent):void
 		{
-			for each(var chat:Chat in event.items)
+			var chat:Chat;
+			if(event.kind == CollectionEventKind.ADD)
 			{
-				if(event.kind == CollectionEventKind.ADD)
-					setCurrentChat(chat);
-				else if(event.kind == CollectionEventKind.REMOVE)
-					removeChat(chat);
+				for(var i:int=0; i<chats.chats.length; i++)
+				{
+					chat = chats.chats.getItemAt(i) as Chat;
+					var avatar:AvatarTab = avatarByIndex(i);
+
+					if(!avatar || chat != avatar.chat)
+					{
+						chat.messages.filterFunction = filterMessages;
+						setChatStateTo(chat, ChatStateTypes.ACTIVE);
+						
+						avatar = new AvatarTab();
+						avatar.data = chat;
+						avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
+						avatar.width = AVATAR_SIZE;
+						avatar.height = AVATAR_SIZE;
+						avatar.border = false;
+						avatar.toolTip = chat.buddy.nickName;
+						avatar.addEventListener(CloseEvent.CLOSE, avatar_close);
+						avatar.alpha = 0;
+			
+						avatars.addItemAt(avatar, i);
+						moveAvatar(i, 1, false);
+						avatarCanvas.addChildAt(avatar, 0);
+						
+						var sproutList:MessageSproutList = new MessageSproutList();
+						sproutList.animate = settings.global.animateMessageList;
+						sproutList.horizontalScrollPolicy = "off";
+						sproutList.data = chat;
+						messageStack.addChild(sproutList);
+						messageStack.selectedChild = sproutList;
+			
+						chat.messages.refresh();
+					}
+				}
 			}
-		}
-		
-		public function sendMessage(messageString:String):void
-		{
-			var buddy:Buddy = avatarByIndex(index).buddy as Buddy;
-			appModel.sendMessageTo(buddy, messageString);
+			else if(event.kind == CollectionEventKind.REMOVE)
+				for each(chat in event.items)
+					removeChat(chat);
 		}
 		
 		public function numChats():int
@@ -151,7 +184,7 @@ package com.cleartext.ximpp.views.messages
 		
 		private function avatarByIndex(i:int):AvatarTab
 		{
-			return (avatars.length > 0) ? avatars.getItemAt(i) as AvatarTab : null;
+			return (avatars.length > 0 && i < avatars.length) ? avatars.getItemAt(i) as AvatarTab : null;
 		}
 		
 		private function setCurrentChat(chat:Chat):void
@@ -186,37 +219,7 @@ package com.cleartext.ximpp.views.messages
 				}
 			}
 			
-			if(!exists)
-			{
-				chat.messages.filterFunction = filterMessages;
-				setChatStateTo(chat, ChatStateTypes.ACTIVE);
-				
-				var avatar:AvatarTab = new AvatarTab();
-				avatar.data = chat;
-				avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
-				avatar.width = AVATAR_SIZE;
-				avatar.height = AVATAR_SIZE;
-				avatar.border = false;
-				avatar.toolTip = chat.buddy.nickName;
-				avatar.addEventListener(CloseEvent.CLOSE, avatar_close);
-				avatar.alpha = 0;
-	
-				avatars.addItemAt(avatar, index);
-				moveAvatar(index, 1, false);
-				avatarCanvas.addChildAt(avatar, 0);
-				
-				var sproutList:MessageSproutList = new MessageSproutList();
-				sproutList.animate = settings.global.animateMessageList;
-				sproutList.horizontalScrollPolicy = "off";
-				sproutList.data = chat;
-				messageStack.addChild(sproutList);
-				messageStack.selectedChild = sproutList;
-				
-				chat.buddy.open = true;
-			}
-			
-			chat.messages.refresh();
-			
+
 			// do all the other avatars
 			var cursor:int = index+1;
 			for(var j:int=1; j<avatars.length; j++)
@@ -229,6 +232,7 @@ package com.cleartext.ximpp.views.messages
 				cursor++;
 			}
 			
+			chats.selectedChat = chat;
 			customScroll.value = 0;
 		}
 		
@@ -245,8 +249,7 @@ package com.cleartext.ximpp.views.messages
 		private function avatar_close(event:CloseEvent):void
 		{
 			var avatar:AvatarTab = event.target as AvatarTab;
-			avatar.chat.buddy.open = false;
-			appModel.chats.removeItemAt(appModel.chats.getItemIndex(avatar.chat));
+			chats.removeChat(avatar.chat.buddy);
 		}
 				
 		override protected function createChildren():void
@@ -297,6 +300,13 @@ package com.cleartext.ximpp.views.messages
 				messageStack.setStyle("backgroundColor", 0xffffff);
 				addChild(messageStack);
 			}
+			
+			chats.addEventListener(ChatEvent.SELECT_CHAT, selectChatHandler);
+		}
+		
+		private function selectChatHandler(event:ChatEvent):void
+		{
+			setCurrentChat(chats.selectedChat);
 		}
 		
 		private function input_keyDownHandler(event:KeyboardEvent):void
@@ -477,12 +487,6 @@ package com.cleartext.ximpp.views.messages
 
 			// make sure index is valid and layout the avatars
 			refreshIndex();
-		}
-		
-		[Mediate(event="ChatEvent.SELECT_CHAT")]
-		public function selectChatHandler(event:ChatEvent):void
-		{
-			setCurrentChat(event.chat);
 		}
 		
 		private function scrollChangedHandler(event:Event):void

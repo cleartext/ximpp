@@ -54,6 +54,11 @@ package com.cleartext.ximpp.models
 			return appModel.requests;
 		}
 		
+		private function get chats():ChatModel
+		{
+			return appModel.chats;
+		}
+		
 		[Bindable]
 		public var connected:Boolean = false;
 
@@ -231,15 +236,11 @@ package com.cleartext.ximpp.models
 			buddy.resource = event.stanza.from.resource;
 			buddy.unreadMessageCount++;
 			
-			var chat:Chat = appModel.getChat(buddy);
-			var limit:int = (buddy.microBlogging) ? settings.global.numTimelineMessages : settings.global.numChatMessages;
-			chat.addMessage(message, limit);
-
+			chats.addMessage(buddy, message);
+			
 			if(buddy.microBlogging)
 			{
 				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessageCount++;
-				chat = appModel.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY);
-				chat.addMessage(message, limit);
 			}
 			database.saveMessage(message);
 		}

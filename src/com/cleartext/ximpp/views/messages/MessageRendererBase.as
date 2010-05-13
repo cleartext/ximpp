@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.models.ApplicationModel;
+	import com.cleartext.ximpp.models.ChatModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
@@ -15,6 +16,9 @@ package com.cleartext.ximpp.views.messages
 
 	public class MessageRendererBase extends SproutListRendererBase
 	{
+		[Autowire]
+		public var chats:ChatModel;
+		
 		[Autowire]
 		public var appModel:ApplicationModel;
 		

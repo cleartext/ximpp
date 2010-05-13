@@ -119,7 +119,7 @@ package com.cleartext.ximpp.views.messages
 						buddy = new Buddy(message.mBlogSender.jid);
 						appModel.buddies.addBuddy(buddy);
 					}
-					appModel.getChat(buddy);
+					chats.getChat(buddy, true);
 					break;
 			}
 		}

@@ -4,7 +4,7 @@ package com.cleartext.ximpp.views.buddies
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.ChatEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
-	import com.cleartext.ximpp.models.ApplicationModel;
+	import com.cleartext.ximpp.models.ChatModel;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
@@ -32,7 +32,7 @@ package com.cleartext.ximpp.views.buddies
 	public class BuddyRenderer extends SproutListRendererBase
 	{
 		[Autowire]
-		public var appModel:ApplicationModel;
+		public var chats:ChatModel;
 		
 		[Autowire]
 		public var xmpp:XMPPModel;
@@ -66,8 +66,7 @@ package com.cleartext.ximpp.views.buddies
 			addEventListener(MouseEvent.DOUBLE_CLICK,
 				function():void
 				{
-					var chat:Chat = appModel.getChat(buddy);
-					Swiz.dispatchEvent(new ChatEvent(ChatEvent.SELECT_CHAT, chat));
+					chats.getChat(buddy, true);
 				});
 			addEventListener(MouseEvent.ROLL_OUT,
 				function():void
