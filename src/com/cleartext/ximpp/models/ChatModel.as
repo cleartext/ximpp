@@ -67,8 +67,8 @@ package com.cleartext.ximpp.models
 				
 				if(select)
 					_selectedChat = chat;
-				
-				appModel.soundColor.play(SoundAndColorModel.NEW_CONVERSATION);
+				else
+					appModel.soundColor.play(SoundAndColorModel.NEW_CONVERSATION);
 				
 				dispatchEvent(new ChatEvent(ChatEvent.ADD_CHAT, chat, index, select));
 			}
