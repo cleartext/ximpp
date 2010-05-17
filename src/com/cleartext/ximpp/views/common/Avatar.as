@@ -199,7 +199,9 @@ package com.cleartext.ximpp.views.common
 				
 			var g:Graphics = graphics;
 			g.clear();
-			var bmd:BitmapData = (bitmapData) ? bitmapData : Constants.defaultAvatarBmd;
+			var bmd:BitmapData = bitmapData;
+			if(!bmd)
+				bmd = (buddy && buddy.microBlogging) ? Constants.defaultWorkstreamBmd : Constants.defaultAvatarBmd;
 
 			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 
 			var w:Number = bmd.width * scale;

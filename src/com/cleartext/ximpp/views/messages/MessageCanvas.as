@@ -126,7 +126,7 @@ package com.cleartext.ximpp.views.messages
 			if(chat.chatState != newState)
 			{
 				chat.chatState = newState;
-				if(sendStanza && xmpp.connected && !chat.buddy.microBlogging)
+				if(sendStanza && xmpp.connected && !chat.buddy.microBlogging && !chat.buddy.isChatRoom)
 					xmpp.sendMessage(chat.buddy.fullJid, null, null, 'chat', newState);
 			}
 		}

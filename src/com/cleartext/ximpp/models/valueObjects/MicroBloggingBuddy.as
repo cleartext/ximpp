@@ -43,6 +43,11 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 		
+		public function get microBlogging():Boolean
+		{
+			return false;
+		}
+		
 		public var avatarUrl:String;
 		public var avatarHash:String;
 		

@@ -42,17 +42,28 @@ package com.cleartext.ximpp.models
 			chatsByJid = new Dictionary();
 		}
 		
-		public function getChat(buddy:Buddy, select:Boolean=false):Chat
+		public function getChat(buddyOrJid:Object, select:Boolean=false):Chat
 		{
-			if(!buddy)
+			var chat:Chat;
+
+			if(buddyOrJid is String)
+				chat = chatsByJid[buddyOrJid];
+			else if(buddyOrJid is Buddy)
+				chat = chatsByJid[buddyOrJid.jid];
+			else
 				return null;
-			
-			var chat:Chat = chatsByJid[buddy.jid];
 			
 			if(!chat)
 			{
 				if(chats.length == 0)
 					select = true;
+				
+				var buddy:Buddy = buddyOrJid as Buddy;
+				if(!buddy)
+				{
+					buddy = new Buddy(buddyOrJid as String);
+					buddy.isChatRoom = true;
+				}
 				
 				chat = new Chat(buddy);
 				chat.messages = database.loadMessages(buddy);
@@ -101,6 +112,11 @@ package com.cleartext.ximpp.models
 						_selectedChat = (i >= chats.length) ? chats[0] : chats[i];
 				}
 				dispatchEvent(new ChatEvent(ChatEvent.REMOVE_CHAT, chat, i));
+				
+				if(buddy.isChatRoom)
+				{
+					appModel.xmpp.leaveChatRoom(buddy.jid);
+				}
 			}
 		}
 		

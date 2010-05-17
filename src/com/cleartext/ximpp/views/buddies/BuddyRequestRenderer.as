@@ -158,7 +158,10 @@ package com.cleartext.ximpp.views.buddies
 			{
 				case "approve" :
 					if(xmpp.connected)
+					{
+						xmpp.sendSubscribe(request.jid, SubscriptionTypes.SUBSCRIBED);
 						xmpp.addToRoster(request.jid, request.nickname, null);
+					}
 					break;
 				case "deny" :
 					if(xmpp.connected)

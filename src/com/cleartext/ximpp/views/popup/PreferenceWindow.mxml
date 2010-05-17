@@ -4,7 +4,6 @@
 	width="500" height="100%"
 	horizontalScrollPolicy="off"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	title="User Preferences"
 	layout="absolute"
 	xmlns:preferences="com.cleartext.ximpp.views.preferences.*" 
 	xmlns:common="com.cleartext.ximpp.views.common.*" 
@@ -89,6 +88,8 @@
 						break;
 					}
 				}
+				
+				title = "User Preferences - " + appModel.currentVersion;
 				
 				selectedAccountChanged();
 			}

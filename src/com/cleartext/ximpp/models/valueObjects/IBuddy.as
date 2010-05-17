@@ -11,5 +11,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		function get avatar():BitmapData;
 		function set avatar(value:BitmapData):void
+		
+		function get microBlogging():Boolean;
 	}
 }

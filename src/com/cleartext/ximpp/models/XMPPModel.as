@@ -104,6 +104,7 @@ package com.cleartext.ximpp.models
 			xmpp.addEventListener(XMPPEvent.CHAT_STATE, chatStateHandler);
 			xmpp.addEventListener(XMPPEvent.PRESENCE, presenceHandler);
 			xmpp.addEventListener(XMPPEvent.ROSTER_ITEM, rosterListChangeHandler);
+			xmpp.addEventListener(XMPPEvent.MESSAGE_MUC, messageHandler);
 		}
 		
 		//-------------------------------
@@ -222,6 +223,12 @@ package com.cleartext.ximpp.models
 		 */
 		private function messageHandler(event:XMPPEvent):void
 		{
+//			if(event.type == XMPPEvent.MESSAGE_MUC)
+//			{
+//				trace(event);
+//				return;
+//			}
+			
 			var messageStanza:MessageStanza = event.stanza as MessageStanza;
 			
 			if(messageStanza.body == "The message has been sent.")
@@ -239,7 +246,10 @@ package com.cleartext.ximpp.models
 			
 			buddy.lastSeen = message.timestamp;
 			buddy.isTyping = false;
-			buddy.resource = event.stanza.from.resource;
+			if(!buddy.isChatRoom)
+				buddy.resource = event.stanza.from.resource;
+			else
+				message.displayMessage = event.stanza.from.resource + " : " + message.displayMessage;
 			buddy.unreadMessages++;
 			
 			chats.addMessage(buddy, message);
@@ -253,7 +263,8 @@ package com.cleartext.ximpp.models
 			{
 				soundColor.play(SoundAndColorModel.NEW_MESSAGE);
 			}
-			database.saveMessage(message);
+			if(!buddy.isChatRoom)
+				database.saveMessage(message);
 		}
 		
 		private function chatStateHandler(event:XMPPEvent):void
@@ -280,6 +291,19 @@ package com.cleartext.ximpp.models
 			
 			if(fromJid == settings.userAccount.jid)
 			{
+				return;
+			}
+			
+			if(chatRoomNicknames.hasOwnProperty(fromJid))
+			{
+				if(stanza.from.resource == chatRoomNicknames[fromJid])
+				{
+					if(stanza.type == "available")
+						chats.getChat(fromJid, true);
+					else if(stanza.type == "unavailable")
+						chats.getChat(fromJid).buddy.status.value = Status.ERROR;
+				}
+				
 				return;
 			}
 
@@ -649,11 +673,12 @@ package com.cleartext.ximpp.models
 		public function joinChatRoom(roomJid:String, nickname:String, password:String=""):void
 		{
 			chatRoomNicknames[roomJid] = nickname;
-			xmpp.send('<presence to="' + roomJid + "/" + nickname + '>' + (password=="" ? '' : '<password>' + password + '</password>') + '</presence>');
+			xmpp.send('<presence to="' + roomJid + "/" + nickname + '">' + (password=="" ? '' : '<password>' + password + '</password>') + "<x xmlns='http://jabber.org/protocol/muc'/></presence>");
 		}
 		
 		public function leaveChatRoom(roomJid:String):void
 		{
+			delete chatRoomNicknames[roomJid];
 			xmpp.send('<presence type="unavailable" to="' + roomJid + "/" + chatRoomNicknames[roomJid] +'" />');
 		}
 		
@@ -664,7 +689,6 @@ package com.cleartext.ximpp.models
 		
 		public function recieveChatRoomMessage(event:XMPPEvent):void
 		{
-			
 		}
 		
 	}

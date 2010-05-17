@@ -164,6 +164,9 @@ package com.cleartext.ximpp.assets
 		[Embed (source="/com/cleartext/ximpp/assets/user.jpg")]
 		public static const DefaultAvatar:Class;
 
+		[Embed (source="/com/cleartext/ximpp/assets/workstream.png")]
+		public static const DefaultWorkstream:Class;
+
 		[Embed (source="/com/cleartext/ximpp/assets/edit.png")]
 		public static const EditIcon:Class;
 
@@ -198,6 +201,8 @@ package com.cleartext.ximpp.assets
 		public static const BlockOver:Class;
 		
 		public static const defaultAvatarBmd:BitmapData = new DefaultAvatar().bitmapData;
+
+		public static const defaultWorkstreamBmd:BitmapData = new DefaultWorkstream().bitmapData;
 
 		public static const editIconBmd:BitmapData = new EditIcon().bitmapData;
 

@@ -62,8 +62,7 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var chats:ChatModel;
 		
-//		[Bindable]
-//		public var chats:ArrayCollection = new ArrayCollection();
+		public var currentVersion:String;
 		
 		/*
 		 * SERVER SIDE STATUS
@@ -254,6 +253,8 @@ package com.cleartext.ximpp.models
 			updater.addEventListener(StatusUpdateErrorEvent.UPDATE_ERROR, log);
 			updater.initialize();
 			
+			currentVersion = updater.currentVersion;
+			
 			soundColor.load();
 			
 			database.createDatabase();
@@ -304,6 +305,9 @@ package com.cleartext.ximpp.models
 				
 			if(jid == settings.userAccount.jid)
 				return settings.userAccount;
+				
+			if(chats.chatsByJid.hasOwnProperty(jid))
+				return chats.chatsByJid[jid].buddy;
 			
 			return buddies.getBuddyByJid(jid);
 		}
@@ -315,6 +319,10 @@ package com.cleartext.ximpp.models
 				var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.SEND_TO_ALL_MICRO_BLOGGING_WINDOW);
 				popupEvent.messageString = messageString;
 				Swiz.dispatchEvent(popupEvent);
+			}
+			else if(buddy.isChatRoom)
+			{
+				xmpp.sendToChatRoom(buddy.jid, messageString);
 			}
 			else
 			{
@@ -336,7 +344,7 @@ package com.cleartext.ximpp.models
 					customTags.push(x);
 				}
 
-				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, 'chat', null, customTags);
+				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, (buddy.isChatRoom ? 'groupchat' : 'chat'), null, customTags);
 				var message:Message = createFromStanza(messageStanza);
 				
 				chats.addMessage(buddy, message);
