@@ -10,7 +10,6 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.utils.LinkUitls;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
-	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.seesmic.as3.xmpp.MessageStanza;
@@ -23,7 +22,6 @@ package com.cleartext.ximpp.models
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
-	import flash.utils.setTimeout;
 	
 	import mx.controls.Alert;
 	import mx.core.Application;
@@ -32,6 +30,10 @@ package com.cleartext.ximpp.models
 	
 	public class ApplicationModel extends EventDispatcher
 	{
+		[Autowire]
+		[Bindable]
+		public var soundColor:SoundAndColorModel;
+		
 		[Autowire]
 		[Bindable]
 		public var settings:SettingsModel;
@@ -251,6 +253,8 @@ package com.cleartext.ximpp.models
 			updater.addEventListener(DownloadErrorEvent.DOWNLOAD_ERROR, log);
 			updater.addEventListener(StatusUpdateErrorEvent.UPDATE_ERROR, log);
 			updater.initialize();
+			
+			soundColor.load();
 			
 			database.createDatabase();
 

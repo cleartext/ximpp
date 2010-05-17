@@ -11,6 +11,7 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.SoundAndColorModel;
 			import com.cleartext.ximpp.models.ChatModel;
 			import com.cleartext.ximpp.events.BuddyRequestEvent;
 			import mx.managers.PopUpManager;
@@ -64,6 +65,10 @@
 			[Autowire]
 			[Bindable]
 			public var chats:ChatModel;
+			
+			[Autowire]
+			[Bindable]
+			public var soundColor:SoundAndColorModel;
 			
 			public var addCanvas:VBox;
 			
@@ -202,8 +207,8 @@
 						var btn:LinkButton = new LinkButton();
 						btn.label = label;
 						btn.width = 110;
-						btn.setStyle("rollOverColor", Constants.THEME_COLOUR);
-						btn.setStyle("selectionColor", Constants.THEME_COLOUR);
+						btn.setStyle("rollOverColor", soundColor.themeColor);
+						btn.setStyle("selectionColor", soundColor.themeColor);
 						btn.setStyle("textAlign", "left");
 						btn.addEventListener(MouseEvent.CLICK, linkButtonClickHandler, false, 0, true);
 						addCanvas.addChild(btn);

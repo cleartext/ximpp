@@ -4,7 +4,6 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
-	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Status;
@@ -57,6 +56,11 @@ package com.cleartext.ximpp.models
 		private function get chats():ChatModel
 		{
 			return appModel.chats;
+		}
+		
+		private function get soundColor():SoundAndColorModel
+		{
+			return appModel.soundColor;
 		}
 		
 		[Bindable]
@@ -234,13 +238,18 @@ package com.cleartext.ximpp.models
 			buddy.lastSeen = message.timestamp;
 			buddy.isTyping = false;
 			buddy.resource = event.stanza.from.resource;
-			buddy.unreadMessageCount++;
+			buddy.unreadMessages++;
 			
 			chats.addMessage(buddy, message);
 			
 			if(buddy.microBlogging)
 			{
-				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessageCount++;
+				soundColor.play(SoundAndColorModel.NEW_SOCIAL);
+				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessages++;
+			}
+			else
+			{
+				soundColor.play(SoundAndColorModel.NEW_MESSAGE);
 			}
 			database.saveMessage(message);
 		}

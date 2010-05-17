@@ -5,8 +5,8 @@
 	width="800" height="600" 
 	layout="absolute" 
 	xmlns:messages="com.cleartext.ximpp.views.messages.*" 
-	minHeight="400" minWidth="500" 
-	backgroundColor="{Constants.BACKGROUND_COLOUR}">
+	minHeight="400" minWidth="500"
+	creationComplete="init()">
 	
 	<mx:Script>
 		<![CDATA[
@@ -20,6 +20,12 @@
 
 			[Bindable]
 			public var appModel:ApplicationModel;
+			
+			private function init():void
+			{
+				if(appModel)
+					setStyle("backgroundColor", appModel.soundColor.backgroundColor);
+			}
 			
 			private var background:Sprite;
 			

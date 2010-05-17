@@ -8,10 +8,13 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
+	import flash.data.SQLColumnSchema;
 	import flash.data.SQLConnection;
 	import flash.data.SQLMode;
 	import flash.data.SQLResult;
+	import flash.data.SQLSchemaResult;
 	import flash.data.SQLStatement;
+	import flash.data.SQLTableSchema;
 	import flash.events.EventDispatcher;
 	import flash.events.SQLErrorEvent;
 	import flash.filesystem.File;
@@ -148,22 +151,38 @@ package com.cleartext.ximpp.models
 				stmt.text = BuddyRequest.CREATE_BUDDY_REQUESTS_TABLE;
 				stmt.execute();
 				
+				syncConn.loadSchema();
+				var schema:SQLSchemaResult = syncConn.getSchemaResult();
+				for each (var table:SQLTableSchema in schema.tables)
+				{
+					if(table.name == "buddies")
+					{
+						var mods:Array = Buddy.TABLE_MODS.slice();
+						
+						for each(var column:SQLColumnSchema in table.columns)
+						{
+							for(var i:int=0; i<mods.length; i++)
+							{
+								if(column.name == mods[i].name)
+									mods.splice(i,1);
+							}
+						}
+						
+						for each(var mod:Object in mods)
+						{
+							var sql:String = "ALTER TABLE buddies ADD COLUMN " + mod.name + " " + mod.type;
+							if(mod.hasOwnProperty("defaultVal"))
+								sql += " DEFAULT " + mod.defaultVal;
+							appModel.log("Updating buddy table structure " + sql);
+							stmt.text = sql;
+							stmt.execute();
+						}
+					}
+				}
+
 				syncConn.commit();
 				appModel.log("Database created");
 
-//				syncConn.loadSchema();
-//				var schema:SQLSchemaResult = syncConn.getSchemaResult();
-//				var requestTableExists:Boolean = false;
-//				for each (var table:SQLTableSchema in schema.tables)
-//				{
-//					if(table.name == "buddyRequests")
-//					{
-//						requestTableExists = true;
-//						break;
-//					}
-//				}
-				
-				
 			}
 			catch (error:Error)
 			{
@@ -241,7 +260,7 @@ package com.cleartext.ximpp.models
 			try
 			{
 				syncConn.begin(); 
-				appModel.log("Loading buddy list");
+				appModel.log("Loading buddy data");
 				
 				var stmt:SQLStatement = new SQLStatement();
 				stmt.sqlConnection = syncConn;
@@ -256,7 +275,6 @@ package com.cleartext.ximpp.models
 	
 				stmt.text = "Select * from buddyRequests WHERE userid=" + settings.userId + " ORDER BY timestamp ASC" ;
 				stmt.execute();
-
 				
 				result = stmt.getResult();
 				
@@ -265,8 +283,10 @@ package com.cleartext.ximpp.models
 						requests.addRequest(BuddyRequest.createFromDB(result.data[j]));
 
 			    // if we've got to this point without errors, commit the transaction 
-			    syncConn.commit(); 
-				appModel.log("Buddy list loaded");
+			    if(syncConn.inTransaction)
+				    syncConn.commit(); 
+	
+				appModel.log("Buddy data loaded");
 			}
 			catch (e:Error)
 			{

@@ -3,6 +3,8 @@
 	xmlns:swiz="http://swiz.swizframework.org"
 	xmlns:models="com.cleartext.ximpp.models.*">
 
+	<models:SoundAndColorModel id="soundColor" />
+
 	<models:SettingsModel id="settings" />
 
 	<models:DatabaseModel id="database" />

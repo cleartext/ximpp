@@ -345,9 +345,9 @@ package com.cleartext.ximpp.views.buddies
 			customStatusLabel.text = buddy.customStatus;
 			nameLabel.text = buddy.nickName;
 			statusIcon.status.value = buddy.status.value;
-			if(unreadMessageBadge.count != buddy.unreadMessageCount)
+			if(unreadMessageBadge.count != buddy.unreadMessages)
 			{
-				unreadMessageBadge.count = buddy.unreadMessageCount;
+				unreadMessageBadge.count = buddy.unreadMessages;
 				callLater(invalidateProperties);
 			}
 			

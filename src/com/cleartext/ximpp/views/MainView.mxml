@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.SoundAndColorModel;
 			import com.cleartext.ximpp.views.popup.SearchWindow;
 			import com.cleartext.ximpp.views.popup.XmlInputWindow;
 			import com.cleartext.ximpp.assets.Constants;
@@ -43,6 +44,10 @@
 			[Autowire]
 			[Bindable]
 			public var buddies:BuddyModel;
+			
+			[Autowire]
+			[Bindable]
+			public var soundColor:SoundAndColorModel;
 			
 			[Autowire(bean="xmpp", property="connected")]
 			[Bindable]
@@ -185,7 +190,7 @@
 				var g:Graphics = graphics;
 				g.clear();
 	
-				g.beginFill(Constants.BACKGROUND_COLOUR);
+				g.beginFill(soundColor.backgroundColor);
 				g.drawRect(0, 0, unscaledWidth, unscaledHeight);
 	
 				var matrix:Matrix = new Matrix();
@@ -193,15 +198,15 @@
 				var w:Number = unscaledWidth/2 - 100;
 				var r:Number = Math.tan(Math.atan(w/50) - Math.atan(50/w)) * w;
 				matrix.createGradientBox(unscaledWidth, 100, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT+headerCanvas.height);
-				g.beginGradientFill(GradientType.LINEAR, [Constants.BACKGROUND_COLOUR, Constants.BACKGROUND_ACCENT], [0.8, 0.8], [0, 255], matrix);
+				g.beginGradientFill(GradientType.LINEAR, [soundColor.backgroundColor, soundColor.backgroundAccent], [0.8, 0.8], [0, 255], matrix);
 				g.drawCircle(unscaledWidth/2, Constants.TOP_BAR_HEIGHT+headerCanvas.height+5-r, r+50);
 
 				matrix.createGradientBox(50, unscaledHeight);
-				g.beginGradientFill(GradientType.LINEAR, [Constants.BACKGROUND_ACCENT, Constants.BACKGROUND_COLOUR], [1.0, 1.0], [0, 255], matrix);
+				g.beginGradientFill(GradientType.LINEAR, [soundColor.backgroundAccent, soundColor.backgroundColor], [1.0, 1.0], [0, 255], matrix);
 				g.drawRect(0, 0, 50, unscaledHeight);
 				
 				matrix.createGradientBox(50, unscaledHeight, Math.PI, unscaledWidth-50);
-				g.beginGradientFill(GradientType.LINEAR, [Constants.BACKGROUND_ACCENT, Constants.BACKGROUND_COLOUR], [1.0, 1.0], [0, 255], matrix);
+				g.beginGradientFill(GradientType.LINEAR, [soundColor.backgroundAccent, soundColor.backgroundColor], [1.0, 1.0], [0, 255], matrix);
 				g.drawRect(unscaledWidth-50, 0, 50, unscaledHeight);
 			}
 

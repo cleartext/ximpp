@@ -4,25 +4,6 @@ package com.cleartext.ximpp.assets
 	
 	public class Constants
 	{
-		/**
-		 * CONSTANTS TO CHANGE
-		 */
-		
-		// default 0xf7a136
-		public static const THEME_COLOUR:uint = 0xf7a136;
-		// default 0x000000
-		public static const BACKGROUND_COLOUR:uint = 0x000000;
-		// default 0x3e443f
-		public static const BACKGROUND_ACCENT:uint = 0x3e443f;
-		
-		// default com/cleartext/ximpp/assets/logo.png ideal height: 30 px
-		[Embed (source="com/cleartext/ximpp/assets/logo.png")]
-		public static const Logo:Class;
-		
-		/**
-		 * CONSTANTS NOT TO CHANGE
-		 */
-		
 		public static const TOP_BAR_HEIGHT:Number = 88;
 		public static const TOP_ROW_HEIGHT:Number = 25;
 		public static const AVATAR_TAB_HEIGHT:Number = 65;

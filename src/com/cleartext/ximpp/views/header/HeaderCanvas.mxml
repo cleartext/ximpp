@@ -4,6 +4,8 @@
 	xmlns:common="com.cleartext.ximpp.views.common.*">
 	<mx:Script>
 		<![CDATA[
+			import mx.graphics.codec.PNGEncoder;
+			import com.cleartext.ximpp.models.SoundAndColorModel;
 			import com.cleartext.ximpp.assets.Constants;
 			import mx.controls.Alert;
 			import com.cleartext.ximpp.events.PopUpEvent;
@@ -18,20 +20,24 @@
 			[Bindable]
 			public var appModel:ApplicationModel;
 			
+			[Autowire]
+			[Bindable]
+			public var soundColor:SoundAndColorModel;
+			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
 				
 				var matr1:Matrix = new Matrix();
 				matr1.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2, 0, 0);
-				graphics.beginGradientFill(GradientType.LINEAR, [Constants.BACKGROUND_ACCENT, Constants.BACKGROUND_COLOUR], [1, 1], [0x00, 0xFF], matr1);  
+				graphics.beginGradientFill(GradientType.LINEAR, [soundColor.backgroundAccent, soundColor.backgroundColor], [1, 1], [0x00, 0xFF], matr1);  
 				graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			}
 			
 		]]>
 	</mx:Script>
 
-	<mx:Image y="6" x="8" source="{Constants.Logo}" height="30"/>
+	<mx:Image id="logo" y="6" x="8" height="30" source="{soundColor.logo}"/>
 
 	<mx:Button
 		upIcon="{Constants.SearchUp}"

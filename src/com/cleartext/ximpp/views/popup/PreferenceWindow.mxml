@@ -76,6 +76,7 @@
 				numChatMessages.value = settings.global.numChatMessages;
 				messageSortComboBox.selectedItem = (settings.global.sortByTimestamp) ? "date sent" : "date received";
 				awayTimeout.value = settings.global.awayTimeout;
+				playSoundsCheckBox.selected = settings.global.playSounds;
 				
 				// load user accounts
 				accountList.dataProvider = database.getAllUserAccounts();
@@ -106,6 +107,7 @@
 				settings.global.numChatMessages = numChatMessages.value;
 				settings.global.sortByTimestamp = (messageSortComboBox.selectedItem == "date sent");
 				settings.global.awayTimeout = awayTimeout.value;
+				settings.global.playSounds = playSoundsCheckBox.selected;
 				
 				for each(var userId:int in accountsToDelete)
 					database.removeAccount(userId);
@@ -296,7 +298,7 @@
 		<mx:CheckBox y="30" label="Show offline buddies" id="showOfflineBuddiesCheckBox"/>
 		<mx:CheckBox y="60" label="Animate buddy list" id="animateBuddyListCheckBox"/>
 		<mx:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox"/>
-		<mx:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox" enabled="false"/>
+		<mx:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox"/>
 
 		<mx:Label right="106" y="4" text="Sort messages by"/>
 		<mx:ComboBox right="0" width="102" id="messageSortComboBox" dataProvider="{['date sent', 'date received']}"/>

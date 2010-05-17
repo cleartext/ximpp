@@ -160,7 +160,7 @@ package com.cleartext.ximpp.models
 				return false; 
 			
 			if(groupName == OPEN_TABS)
-				return buddy.open;
+				return buddy.openTab;
 			if(buddy.microBlogging)
 				return groupName == MICRO_BLOGGING_GROUP;
 			else if(buddy.isGateway)
@@ -203,7 +203,7 @@ package com.cleartext.ximpp.models
 					return clamp(date2.time - date1.time);
 
 				case BuddySortTypes.UNREAD_MESSAGES :
-					var unreadCompare:int = clamp(buddy2.unreadMessageCount - buddy1.unreadMessageCount);
+					var unreadCompare:int = clamp(buddy2.unreadMessages - buddy1.unreadMessages);
 					if(unreadCompare != 0)
 						return unreadCompare;
 					var sCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());

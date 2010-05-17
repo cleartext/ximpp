@@ -97,7 +97,18 @@ package com.cleartext.ximpp.views.messages
 			isTypingTimer = new Timer(3000, 2);
 			isTypingTimer.addEventListener(TimerEvent.TIMER, isTimerTypingHandler);
 			
-			addEventListener(FlexEvent.CREATION_COMPLETE, function():void { chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY); });
+			addEventListener(FlexEvent.CREATION_COMPLETE, creationCompleteHandler);
+		}
+		
+		protected function creationCompleteHandler(event:FlexEvent):void
+		{
+			chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
+			
+			for each(var buddy:Buddy in buddies.buddies.source)
+			{
+				if(buddy.openTab)
+					chats.getChat(buddy);
+			}
 		}
 		
 		public function numAvatars():int
@@ -428,7 +439,7 @@ package com.cleartext.ximpp.views.messages
 
 			if(position == 1)
 			{
-				(avatar.buddy as Buddy).unreadMessageCount = 0;
+				(avatar.buddy as Buddy).unreadMessages = 0;
 				newX += SELECTOR_WIDTH;
 			}
 			else if(position >1)

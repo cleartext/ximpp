@@ -74,6 +74,7 @@
 				
 				buddy.nickName = nicknameTextInput.text;
 				buddy.microBlogging = mBlogCheckbox.selected;
+				buddy.autoOpenTab = openTabCheckBox.selected;
 
 				buddy.avatar = avatarInput.bitmapData;
 				if(avatarInput.bitmapData == null)
@@ -127,6 +128,7 @@
 				nicknameTextInput.text = buddy.nickName;
 				avatarInput.bitmapData = buddy.avatar;
 				mBlogCheckbox.selected = buddy.microBlogging;
+				openTabCheckBox.selected = buddy.autoOpenTab;
 								
 				for each(var g:Object in list.dataProvider)
 					g.selected = !buddy.microBlogging && buddy.groups.indexOf(g.data) != -1;
@@ -199,7 +201,7 @@
 		</mx:FormItem>
 
 		<mx:FormItem>
-			<mx:CheckBox label="Open new tab when message received?" id="openTabCheckBox" enabled="false" selected="true"/>
+			<mx:CheckBox label="Open new tab when message received?" id="openTabCheckBox" />
 		</mx:FormItem>
 
 		<mx:FormItem label="Groups:" enabled="{buddy.isGateway || !mBlogCheckbox.selected}">

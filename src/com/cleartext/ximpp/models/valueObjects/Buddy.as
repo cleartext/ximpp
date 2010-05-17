@@ -2,7 +2,6 @@ package com.cleartext.ximpp.models.valueObjects
 {
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.StatusEvent;
-	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
@@ -45,7 +44,13 @@ package com.cleartext.ximpp.models.valueObjects
 			"avatarHash TEXT, " + 
 			"sendTo BOOLEAN, " + 
 			"customStatus TEXT);";
-			
+		
+		public static const TABLE_MODS:Array = [
+			{name: "openTab", type: "BOOLEAN"},
+			{name: "autoOpenTab", type: "BOOLEAN", defaultVal: "TRUE"},
+			{name: "unreadMessages", type: "INTEGER"}
+		];
+		
 		// storred in database		
 		private var _buddyId:int = -1;
 		public function get buddyId():int
@@ -214,17 +219,32 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 
-		private var _open:Boolean = false;
+		private var _autoOpenTab:Boolean = true;
 		[Bindable("buddyChanged")]
-		public function get open():Boolean
+		public function get autoOpenTab():Boolean
 		{
-			return _open;
+			return _autoOpenTab;
 		}
-		public function set open(value:Boolean):void
+		public function set autoOpenTab(value:Boolean):void
 		{
-			if(open != value)
+			if(autoOpenTab != value)
 			{
-				_open = value;
+				_autoOpenTab = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			}
+		}
+
+		private var _openTab:Boolean = false;
+		[Bindable("buddyChanged")]
+		public function get openTab():Boolean
+		{
+			return _openTab;
+		}
+		public function set openTab(value:Boolean):void
+		{
+			if(openTab != value)
+			{
+				_openTab = value;
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
 		}
@@ -236,17 +256,17 @@ package com.cleartext.ximpp.models.valueObjects
 		// not storred in database 
 		//------------------------------------
 
-		private var _unreadMessageCount:int = 0;
+		private var _unreadMessages:int = 0;
 		[Bindable(event="buddyChanged")]
-		public function get unreadMessageCount():int
+		public function get unreadMessages():int
 		{
-			return _unreadMessageCount;
+			return _unreadMessages;
 		}
-		public function set unreadMessageCount(value:int):void
+		public function set unreadMessages(value:int):void
 		{
-			if(_unreadMessageCount != value)
+			if(_unreadMessages != value)
 			{
-				_unreadMessageCount = value;
+				_unreadMessages = value;
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
 		}
@@ -305,6 +325,9 @@ package com.cleartext.ximpp.models.valueObjects
 			newBuddy.avatarHash = obj["avatarHash"];
 			newBuddy.subscription = obj["subscription"];
 			AvatarUtils.stringToAvatar(obj["avatar"], newBuddy, "avatar");
+			newBuddy.openTab = obj["openTab"];
+			newBuddy.autoOpenTab = obj["autoOpenTab"];
+			newBuddy.unreadMessages = obj["unreadMessages"];
 
 			return newBuddy;
 		}
@@ -321,7 +344,11 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("sendTo", sendTo),
-				new DatabaseValue("avatarHash", avatarHash)];
+				new DatabaseValue("avatarHash", avatarHash),
+				new DatabaseValue("openTab", openTab),
+				new DatabaseValue("autoOpenTab", autoOpenTab),
+				new DatabaseValue("unreadMessages", unreadMessages),
+				];
 		}
 		
 		public function get fullJid():String

@@ -63,10 +63,12 @@ package com.cleartext.ximpp.models
 				}
 				chats.splice(index, 0, chat);
 				chatsByJid[buddy.jid] = chat;
-				buddy.open = true;
+				buddy.openTab = true;
 				
 				if(select)
 					_selectedChat = chat;
+				
+				appModel.soundColor.play(SoundAndColorModel.NEW_CONVERSATION);
 				
 				dispatchEvent(new ChatEvent(ChatEvent.ADD_CHAT, chat, index, select));
 			}
@@ -85,7 +87,7 @@ package com.cleartext.ximpp.models
 			
 			if(chat)
 			{
-				buddy.open = false;
+				buddy.openTab = false;
 				var i:int = chats.indexOf(chat);
 				chats.splice(i, 1);
 				delete chatsByJid[buddy.jid];
@@ -106,7 +108,8 @@ package com.cleartext.ximpp.models
 		{
 			var limit:int = (buddy.microBlogging) ? settings.global.numTimelineMessages : settings.global.numChatMessages;			
 			
-			getChat(buddy).addMessage(message, limit);
+			if(buddy.autoOpenTab || chatsByJid.hasOwnProperty(buddy.jid))
+				getChat(buddy).addMessage(message, limit);
 				
 			if(buddy.microBlogging)
 				getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY).addMessage(message, limit);

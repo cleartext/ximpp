@@ -103,18 +103,18 @@ package com.cleartext.ximpp.views.messages
 
 			if(chatBuddy && unreadMessageBadge)
 			{
-				if(chatBuddy.unreadMessageCount > 0)
+				if(chatBuddy.unreadMessages > 0)
 				{
 					if(selected)
 					{
-						chatBuddy.unreadMessageCount = 0;
+						chatBuddy.unreadMessages = 0;
 						return;
 					}
 
 					unreadMessageBadge.visible = true;
 				}
 
-				unreadMessageBadge.count = chatBuddy.unreadMessageCount;
+				unreadMessageBadge.count = chatBuddy.unreadMessages;
 			}
 		}
 		
