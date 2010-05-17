@@ -4,6 +4,7 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.Message;
+	import com.cleartext.ximpp.models.valueObjects.Status;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -62,6 +63,7 @@ package com.cleartext.ximpp.models
 				if(!buddy)
 				{
 					buddy = new Buddy(buddyOrJid as String);
+					buddy.status.value = Status.AVAILABLE;
 					buddy.isChatRoom = true;
 				}
 				
