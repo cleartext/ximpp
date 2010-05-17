@@ -181,7 +181,7 @@
 	
 	<mx:Form>
 
-		<mx:FormItem label="Account id:">
+		<mx:FormItem label="Buddy id (jid):">
 			<mx:TextInput id="jidTextInput" change="validateInput(event, 'jid can not be empty')" focusOut="validateInput(event, 'jid can not be empty')"  width="250"/>
 		</mx:FormItem>
 		
@@ -201,7 +201,7 @@
 		</mx:FormItem>
 
 		<mx:FormItem>
-			<mx:CheckBox label="Open new tab when message received?" id="openTabCheckBox" />
+			<mx:CheckBox label="Open new tab when message received?" id="openTabCheckBox" selected="true"/>
 		</mx:FormItem>
 
 		<mx:FormItem label="Groups:" enabled="{buddy.isGateway || !mBlogCheckbox.selected}">

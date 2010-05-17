@@ -12,6 +12,8 @@ package com.cleartext.ximpp.events
 
 		public static const ADD_GATEWAY_WINDOW:String = "addGatewayWindow";
 
+		public static const JOIN_GROUP_CHAT:String = "joinGroupChatWindow";
+
 		public static const ADD_BUDDY_WINDOW:String = "addBuddyWindow";
 		public static const EDIT_BUDDY_WINDOW:String = "editBuddyWindow";
 		public static const DELETE_BUDDY_WINDOW:String = "deleteBuddyWindow";

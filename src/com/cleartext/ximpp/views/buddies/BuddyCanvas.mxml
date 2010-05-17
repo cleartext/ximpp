@@ -203,6 +203,7 @@
 					addCanvas.setStyle("borderColor", 0x898989);
 					addCanvas.setStyle("borderStyle", "solid");
 					for each(var label:String in ["Add buddy", "Add gateway", "Add group"])
+//					for each(var label:String in ["Add buddy", "Add gateway", "Add group", "Join group chat"])
 					{
 						var btn:LinkButton = new LinkButton();
 						btn.label = label;
@@ -241,6 +242,9 @@
 						break;
 					case "Add group" :
 						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_GROUP_WINDOW))
+						break;
+					case "Join group chat" :
+						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.JOIN_GROUP_CHAT))
 						break;
 				}
 			}

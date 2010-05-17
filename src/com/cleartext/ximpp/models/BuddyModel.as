@@ -292,5 +292,11 @@ package com.cleartext.ximpp.models
 			return result.sortOn("nickName");
 		}
 		
+		public function addGroupChat(roomJid:String):void
+		{
+			var buddy:Buddy = new Buddy(roomJid);
+			buddy.isChatRoom = true;
+			addBuddy(buddy);
+		}
 	}
 }

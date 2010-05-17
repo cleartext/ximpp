@@ -28,6 +28,8 @@ package com.cleartext.ximpp.models
 		[Bindable]
 		public var appModel:ApplicationModel;
 		
+		private var chatRoomNicknames:Dictionary = new Dictionary();
+		
 		private function get settings():SettingsModel
 		{
 			return appModel.settings;
@@ -622,7 +624,6 @@ package com.cleartext.ximpp.models
 		}
 		
 		
-		
 		public function getAvatarForMBlogBuddy(jid:String):void
 		{
 			sendIq(jid, 'get', <vCard xmlns='vcard-temp'/>, mBlogVCardHandler);
@@ -644,5 +645,27 @@ package com.cleartext.ximpp.models
 		{
 			xmpp.send(xmlString);
 		}
+		
+		public function joinChatRoom(roomJid:String, nickname:String, password:String=""):void
+		{
+			chatRoomNicknames[roomJid] = nickname;
+			xmpp.send('<presence to="' + roomJid + "/" + nickname + '>' + (password=="" ? '' : '<password>' + password + '</password>') + '</presence>');
+		}
+		
+		public function leaveChatRoom(roomJid:String):void
+		{
+			xmpp.send('<presence type="unavailable" to="' + roomJid + "/" + chatRoomNicknames[roomJid] +'" />');
+		}
+		
+		public function sendToChatRoom(roomJid:String, message:String):void
+		{
+			xmpp.send("<message type='groupchat' to='" + roomJid + "' ><body>" + message + "</body></message>");
+		}
+		
+		public function recieveChatRoomMessage(event:XMPPEvent):void
+		{
+			
+		}
+		
 	}
 }

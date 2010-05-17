@@ -256,6 +256,8 @@ package com.cleartext.ximpp.models.valueObjects
 		// not storred in database 
 		//------------------------------------
 
+		public var isChatRoom:Boolean = false;
+
 		private var _unreadMessages:int = 0;
 		[Bindable(event="buddyChanged")]
 		public function get unreadMessages():int

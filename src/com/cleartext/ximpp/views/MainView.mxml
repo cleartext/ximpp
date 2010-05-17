@@ -9,6 +9,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.JoinGroupChatWindow;
 			import com.cleartext.ximpp.models.SoundAndColorModel;
 			import com.cleartext.ximpp.views.popup.SearchWindow;
 			import com.cleartext.ximpp.views.popup.XmlInputWindow;
@@ -89,6 +90,13 @@
 				var window:SearchWindow = new SearchWindow();
 				window.appModel = appModel;
 				window.open();
+			}
+
+			[Mediate(event="PopUpEvent.JOIN_GROUP_CHAT")]
+			public function showGroupChatWindow(event:PopUpEvent):void
+			{
+				var window:JoinGroupChatWindow = new JoinGroupChatWindow();
+				initializePopUp(window);
 			}
 
 			//----------------------------------------------
