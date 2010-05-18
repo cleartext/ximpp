@@ -3,6 +3,7 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.BuddyModelEvent;
 	import com.cleartext.ximpp.models.types.BuddySortTypes;
+	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
@@ -294,6 +295,9 @@ package com.cleartext.ximpp.models
 		
 		public function getBuddiesByGroup(groupName:String):Array
 		{
+			if(groupName == Buddy.ALL_MICRO_BLOGGING_JID)
+				groupName = MicroBloggingTypes.MICRO_BLOGGING_GROUP;
+			
 			var result:Array = new Array();
 			for each(var buddy:Buddy in buddies.source)
 				if(buddy.groups.indexOf(groupName) != -1)
