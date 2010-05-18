@@ -86,7 +86,7 @@
 			
 			private function shorten(str:String=" "):void
 			{
-				if(!buddy.microBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
+				if(!buddy.isMicroBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
 					return;
 					
 				var results:Array = LinkUitls.findLinks(inputTextArea.text + str);
@@ -181,7 +181,7 @@
 		styleName="dGreyNormal" 
 		visible="{shortening}"/>
 
-	<mx:VRule right="258" height="17" y="4" visible="{buddy.microBlogging}"/>		
+	<mx:VRule right="258" height="17" y="4" visible="{buddy.isMicroBlogging}"/>		
 
 	<mx:CheckBox 
 		label="auto-shorten urls" 
@@ -190,15 +190,15 @@
 		selected="{settings.global.autoShortenUrls}"
 		click="shortenURLsClickHandler()"
 		paddingTop="-8" 
-		visible="{buddy.microBlogging}"/>
+		visible="{buddy.isMicroBlogging}"/>
 		
-	<mx:VRule right="122" height="17" y="4" visible="{buddy.microBlogging}"/>		
+	<mx:VRule right="122" height="17" y="4" visible="{buddy.isMicroBlogging}"/>		
 
 	<mx:Label
 		text="{inputTextArea.text.length + ' Characters'}" 
 		right="10" y="6" 
 		styleName="{(inputTextArea.text.length > 140) ? 'redBold' : 'dGreyNormal'}" 
-		visible="{buddy.microBlogging}"/>
+		visible="{buddy.isMicroBlogging}"/>
 
 	<common:DefaultTextInput
 		id="inputTextArea"

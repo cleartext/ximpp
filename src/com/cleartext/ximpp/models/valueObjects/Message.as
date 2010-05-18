@@ -1,10 +1,7 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.events.MicroBloggingMessageEvent;
 	import com.cleartext.ximpp.models.MicroBloggingModel;
 	import com.cleartext.ximpp.models.types.MessageStatusTypes;
-	import com.cleartext.ximpp.models.utils.LinkUitls;
-	import com.seesmic.as3.xmpp.MessageStanza;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
 	public class Message extends SproutListDataBase
@@ -57,6 +54,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public var subject:String;
 		public var plainMessage:String;
 		public var displayMessage:String;
+		public var groupChatSender:String;
 		
 		public var rawXML:String;
 		

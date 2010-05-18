@@ -123,7 +123,7 @@ package com.cleartext.ximpp.models
 				xmpp.auto_reconnect = true;
 				appModel.serverSideStatus.value = Status.CONNECTING;
 
-				xmpp.setJID(account.jid + "/cleartext");
+				xmpp.setJID(account.jid);
 				xmpp.setPassword(account.password);
 				xmpp.setServer(account.server);
 				xmpp.setupTLS(TLSEvent, TLSConfig, TLSEngine, TLSSocket, true, true, true);
@@ -223,12 +223,6 @@ package com.cleartext.ximpp.models
 		 */
 		private function messageHandler(event:XMPPEvent):void
 		{
-//			if(event.type == XMPPEvent.MESSAGE_MUC)
-//			{
-//				trace(event);
-//				return;
-//			}
-			
 			var messageStanza:MessageStanza = event.stanza as MessageStanza;
 			
 			if(messageStanza.body == "The message has been sent.")
@@ -249,12 +243,12 @@ package com.cleartext.ximpp.models
 			if(!buddy.isChatRoom)
 				buddy.resource = event.stanza.from.resource;
 			else
-				message.displayMessage = event.stanza.from.resource + " : " + message.displayMessage;
+				message.groupChatSender = event.stanza.from.resource;
 			buddy.unreadMessages++;
 			
 			chats.addMessage(buddy, message);
 			
-			if(buddy.microBlogging)
+			if(buddy.isMicroBlogging)
 			{
 				soundColor.play(SoundAndColorModel.NEW_SOCIAL);
 				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessages++;
@@ -299,9 +293,9 @@ package com.cleartext.ximpp.models
 				if(stanza.from.resource == chatRoomNicknames[fromJid])
 				{
 					if(stanza.type == "available")
-						chats.getChat(fromJid, true);
+						chats.getChat(fromJid, true, Buddy.CHAT_ROOM);
 					else if(stanza.type == "unavailable")
-						chats.getChat(fromJid).buddy.status.value = Status.ERROR;
+						chats.getChat(fromJid, false, Buddy.CHAT_ROOM).buddy.status.value = Status.ERROR;
 				}
 				
 				return;
@@ -681,15 +675,5 @@ package com.cleartext.ximpp.models
 			delete chatRoomNicknames[roomJid];
 			xmpp.send('<presence type="unavailable" to="' + roomJid + "/" + chatRoomNicknames[roomJid] +'" />');
 		}
-		
-		public function sendToChatRoom(roomJid:String, message:String):void
-		{
-			xmpp.send("<message type='groupchat' to='" + roomJid + "' ><body>" + message + "</body></message>");
-		}
-		
-		public function recieveChatRoomMessage(event:XMPPEvent):void
-		{
-		}
-		
 	}
 }

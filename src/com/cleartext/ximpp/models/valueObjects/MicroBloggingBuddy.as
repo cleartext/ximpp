@@ -43,7 +43,19 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 		
-		public function get microBlogging():Boolean
+		public function get isMicroBlogging():Boolean
+		{
+			return false;
+		}
+		public function get isGroup():Boolean
+		{
+			return false;
+		}
+		public function get isGateway():Boolean
+		{
+			return false;
+		}
+		public function get isChatRoom():Boolean
 		{
 			return false;
 		}

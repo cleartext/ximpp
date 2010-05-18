@@ -73,14 +73,14 @@
 					_buddy = new Buddy(jidTextInput.text);
 				
 				buddy.nickName = nicknameTextInput.text;
-				buddy.microBlogging = mBlogCheckbox.selected;
+				buddy.isMicroBlogging = mBlogCheckbox.selected;
 				buddy.autoOpenTab = openTabCheckBox.selected;
 
 				buddy.avatar = avatarInput.bitmapData;
 				if(avatarInput.bitmapData == null)
 					buddy.avatarHash = null;
 
-				if(!buddy.microBlogging && !buddy.isGateway)
+				if(!buddy.isMicroBlogging && !buddy.isGateway)
 					buddy.groups = getSelected(list);
 				
 				if(buddies.containsJid(buddy.jid))
@@ -127,11 +127,11 @@
 				jidTextInput.text = buddy.jid;
 				nicknameTextInput.text = buddy.nickName;
 				avatarInput.bitmapData = buddy.avatar;
-				mBlogCheckbox.selected = buddy.microBlogging;
+				mBlogCheckbox.selected = buddy.isMicroBlogging;
 				openTabCheckBox.selected = buddy.autoOpenTab;
 								
 				for each(var g:Object in list.dataProvider)
-					g.selected = !buddy.microBlogging && buddy.groups.indexOf(g.data) != -1;
+					g.selected = !buddy.isMicroBlogging && buddy.groups.indexOf(g.data) != -1;
 
 				dispatchEvent(new Event("buddySet"));
 			}

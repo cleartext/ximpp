@@ -16,7 +16,7 @@
 			import com.cleartext.ximpp.assets.Constants;
 			import com.cleartext.ximpp.views.popup.PopupWindowBase;
 			import mx.core.UIComponent;
-			import com.cleartext.ximpp.views.popup.SendToAllWindow;
+			import com.cleartext.ximpp.views.popup.BroadcastWindow;
 			import com.cleartext.ximpp.views.popup.AddGatewayWindow;
 			import com.cleartext.ximpp.views.popup.EditGroupWindow;
 			import com.cleartext.ximpp.views.popup.RemoveGroupWindow;
@@ -69,12 +69,13 @@
 				initializePopUp(new PreferenceWindow());
 			}
 
-			[Mediate(event="PopUpEvent.SEND_TO_ALL_MICRO_BLOGGING_WINDOW")]
+			[Mediate(event="PopUpEvent.BROADCAST_WINDOW")]
 			public function showSendToAllWindow(event:PopUpEvent):void
 			{
-				var window:SendToAllWindow = new SendToAllWindow();
+				var window:BroadcastWindow = new BroadcastWindow();
 				initializePopUp(window);
 
+				window.group = event.buddy;
 				window.message = event.messageString;
 			}
 
@@ -155,18 +156,17 @@
 			public function showEditGroupWindow(event:PopUpEvent):void
 			{
 				var window:EditGroupWindow = new EditGroupWindow();
-				initializePopUp(window);
-
 				window.groupName = event.group;
+				initializePopUp(window);
 			}
+
 
 			[Mediate(event="PopUpEvent.DELETE_GROUP_WINDOW")]
 			public function showRemoveGroupWindow(event:PopUpEvent):void
 			{
 				var window:RemoveGroupWindow = new RemoveGroupWindow();
-				initializePopUp(window);
-
 				window.groupName = event.group;
+				initializePopUp(window);
 			}
 
 			//----------------------------------------------

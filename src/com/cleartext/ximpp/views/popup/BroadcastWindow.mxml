@@ -8,6 +8,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Message;
+			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.events.InputTextEvent;
 			import org.swizframework.Swiz;
 			import flash.sampler.NewObjectSample;
@@ -31,11 +33,36 @@
 			
 			public var message:String;
 			
+			private var _group:Buddy;
+			public function set group(value:Buddy):void
+			{
+				_group = value;
+				list.dataProvider = buddies.getBuddiesByGroup(_group.jid);
+			}
+			
 			override protected function submit(event:Event):void
 			{
-				for each(var buddy:Buddy in buddies.microBloggingBuddies)
+				if(_group != Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				{
+					var msg:Message = new Message();
+					msg.sender = appModel.settings.userAccount.jid;
+					msg.recipient = _group.jid;
+					msg.type = "chat";
+					msg.plainMessage = msg.displayMessage = message;
+					var date:Date = new Date();
+					msg.timestamp = date;
+					msg.utcTimestamp = new Date(date.fullYearUTC, date.monthUTC, date.dateUTC, date.hoursUTC, date.minutesUTC, date.secondsUTC, date.millisecondsUTC);
+					
+					appModel.chats.addMessage(_group, msg);
+					appModel.database.saveMessage(msg);
+				}
+				
+				for each(var buddy:Buddy in list.dataProvider)
 					if(buddy.sendTo)
-						appModel.sendMessageTo(buddy, message);
+					{
+						appModel.log("calling [ApplicationModel].sendMessage()");
+						appModel.sendMessageTo(buddy, message, _group == Buddy.ALL_MICRO_BLOGGING_BUDDY);
+					}
 
 				closeWindow();
 			}
@@ -50,7 +77,7 @@
 	</mx:Script>
 	
 	<mx:Text text="Send to the following services:" selectable="false"/>
-	<mx:List id="list" dataProvider="{buddies.microBloggingBuddies}"
+	<mx:List id="list"
 		width="250" labelField="nickName" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
 		height="400">
 		<mx:itemRenderer>

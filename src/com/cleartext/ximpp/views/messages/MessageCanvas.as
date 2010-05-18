@@ -2,6 +2,7 @@ package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.ChatEvent;
+	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.events.SearchBoxEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.BuddyModel;
@@ -100,6 +101,12 @@ package com.cleartext.ximpp.views.messages
 			addEventListener(FlexEvent.CREATION_COMPLETE, creationCompleteHandler);
 		}
 		
+		[Mediate(event="PopUpEvent.NEW_CHAT_WITH_GROUP")]
+		public function newChatWithGroup(event:PopUpEvent):void
+		{
+			chats.getChat(event.group, true, Buddy.GROUP);
+		}
+		
 		protected function creationCompleteHandler(event:FlexEvent):void
 		{
 			chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
@@ -126,7 +133,7 @@ package com.cleartext.ximpp.views.messages
 			if(chat.chatState != newState)
 			{
 				chat.chatState = newState;
-				if(sendStanza && xmpp.connected && !chat.buddy.microBlogging && !chat.buddy.isChatRoom)
+				if(sendStanza && xmpp.connected && !chat.buddy.isGroup && !chat.buddy.isChatRoom)
 					xmpp.sendMessage(chat.buddy.fullJid, null, null, 'chat', newState);
 			}
 		}

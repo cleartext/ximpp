@@ -43,7 +43,7 @@ package com.cleartext.ximpp.models
 			chatsByJid = new Dictionary();
 		}
 		
-		public function getChat(buddyOrJid:Object, select:Boolean=false):Chat
+		public function getChat(buddyOrJid:Object, select:Boolean=false, type:String=Buddy.BUDDY):Chat
 		{
 			var chat:Chat;
 
@@ -63,8 +63,18 @@ package com.cleartext.ximpp.models
 				if(!buddy)
 				{
 					buddy = new Buddy(buddyOrJid as String);
-					buddy.status.value = Status.AVAILABLE;
-					buddy.isChatRoom = true;
+					
+					switch(type)
+					{
+						case Buddy.CHAT_ROOM :
+							buddy.status.value = Status.AVAILABLE;
+							buddy.isChatRoom = true;
+							break;
+						case Buddy.GROUP :
+							buddy.isGroup = true;
+							buddy.status.value = Status.AVAILABLE;
+							break;
+					}
 				}
 				
 				chat = new Chat(buddy);
@@ -94,9 +104,14 @@ package com.cleartext.ximpp.models
 			return chat;
 		}
 		
-		public function removeChat(buddy:Buddy):void
+		public function removeChat(buddy:Buddy=null):void
 		{
-			var chat:Chat = chatsByJid[buddy.jid];
+			var chat:Chat;
+
+			if(!buddy)
+				chat = selectedChat;
+			else
+				chat = chatsByJid[buddy.jid];
 			
 			if(chat)
 			{
@@ -124,12 +139,12 @@ package com.cleartext.ximpp.models
 		
 		public function addMessage(buddy:Buddy, message:Message):void
 		{
-			var limit:int = (buddy.microBlogging) ? settings.global.numTimelineMessages : settings.global.numChatMessages;			
+			var limit:int = (buddy.isMicroBlogging) ? settings.global.numTimelineMessages : settings.global.numChatMessages;			
 			
 			if(buddy.autoOpenTab || chatsByJid.hasOwnProperty(buddy.jid))
 				getChat(buddy).addMessage(message, limit);
 				
-			if(buddy.microBlogging)
+			if(buddy.isMicroBlogging)
 				getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY).addMessage(message, limit);
 		}
 		

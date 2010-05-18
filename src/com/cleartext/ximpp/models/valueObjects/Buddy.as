@@ -14,6 +14,11 @@ package com.cleartext.ximpp.models.valueObjects
 	[Bindable]
 	public class Buddy extends SproutListDataBase implements IBuddy
 	{
+		public static const BUDDY:String = "buddy"; 
+		public static const GATEWAY:String = "gateway"; 
+		public static const GROUP:String = "group"; 
+		public static const CHAT_ROOM:String = "chatRoom"; 
+		
 		public static const ALL_MICRO_BLOGGING_JID:String = "My Workstream";
 		public static const ALL_MICRO_BLOGGING_BUDDY:Buddy = new Buddy(ALL_MICRO_BLOGGING_JID);
 
@@ -23,7 +28,10 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			dispatcher = new EventDispatcher(this);
 			super();
+			
 			this.jid = jid;
+			isGroup = jid == ALL_MICRO_BLOGGING_JID;
+
 			status.addEventListener(StatusEvent.STATUS_CHANGED,
 				function():void
 				{
@@ -158,13 +166,13 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 
 		[Bindable (event="buddyChanged")]
-		public function get microBlogging():Boolean
+		public function get isMicroBlogging():Boolean
 		{
 			return (jid == ALL_MICRO_BLOGGING_JID || groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP) != -1);
 		}
-		public function set microBlogging(value:Boolean):void
+		public function set isMicroBlogging(value:Boolean):void
 		{
-			if(microBlogging != value)
+			if(isMicroBlogging != value)
 			{
 				// find if we already have the correct group
 				var index:int = groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP);
@@ -256,8 +264,6 @@ package com.cleartext.ximpp.models.valueObjects
 		// not storred in database 
 		//------------------------------------
 
-		public var isChatRoom:Boolean = false;
-
 		private var _unreadMessages:int = 0;
 		[Bindable(event="buddyChanged")]
 		public function get unreadMessages():int
@@ -298,6 +304,26 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			return _isGateway;
 		}
+		
+		private var _isGroup:Boolean = false;
+		public function get isGroup():Boolean
+		{
+			return _isGroup;
+		}
+		public function set isGroup(value:Boolean):void
+		{
+			_isGroup = value;
+		}
+
+		private var _isChatRoom:Boolean = false;
+		public function get isChatRoom():Boolean
+		{
+			return _isChatRoom;
+		}
+		public function set isChatRoom(value:Boolean):void
+		{
+			_isChatRoom = value;
+		}
 
 		private var _status:Status = new Status(Status.OFFLINE);
 		[Bindable("buddyChanged")]
@@ -323,7 +349,7 @@ package com.cleartext.ximpp.models.valueObjects
 				groups = [];
 			newBuddy.groups = groups;
 			newBuddy.sendTo = obj["sendTo"];
-			newBuddy.microBlogging = (groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP) != -1);
+			newBuddy.isMicroBlogging = (groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP) != -1);
 			newBuddy.avatarHash = obj["avatarHash"];
 			newBuddy.subscription = obj["subscription"];
 			AvatarUtils.stringToAvatar(obj["avatar"], newBuddy, "avatar");
@@ -355,6 +381,8 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public function get fullJid():String
 		{
+			if(isChatRoom)
+				return jid;
 			return jid + ((resource) ? "/" + resource : "");
 		}
 		

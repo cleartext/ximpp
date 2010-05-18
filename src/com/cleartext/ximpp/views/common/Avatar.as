@@ -3,6 +3,7 @@ package com.cleartext.ximpp.views.common
 	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.AvatarEvent;
 	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	
@@ -201,7 +202,16 @@ package com.cleartext.ximpp.views.common
 			g.clear();
 			var bmd:BitmapData = bitmapData;
 			if(!bmd)
-				bmd = (buddy && buddy.microBlogging) ? Constants.defaultWorkstreamBmd : Constants.defaultAvatarBmd;
+			{
+				if(buddy && buddy.isChatRoom)
+					bmd = Constants.defaultMUCBmd;
+				else if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					bmd = Constants.defaultWorkstreamBmd;
+				else if(buddy && buddy.isGroup)
+					bmd = Constants.defaultGroupBmd;
+				else
+					bmd = Constants.defaultAvatarBmd;
+			}
 
 			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 
 			var w:Number = bmd.width * scale;

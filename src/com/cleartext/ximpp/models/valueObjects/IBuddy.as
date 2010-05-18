@@ -12,6 +12,9 @@ package com.cleartext.ximpp.models.valueObjects
 		function get avatar():BitmapData;
 		function set avatar(value:BitmapData):void
 		
-		function get microBlogging():Boolean;
+		function get isMicroBlogging():Boolean;
+		function get isGroup():Boolean;
+		function get isGateway():Boolean;
+		function get isChatRoom():Boolean;
 	}
 }

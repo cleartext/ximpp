@@ -102,7 +102,7 @@ package com.cleartext.ximpp.views.buddies
 			// label at top
 			customContextMenu.getItemAt(0).label = (buddy && xmpp.connected) ? buddy.nickName : "go online to edit";
 			// workstream label
-			customContextMenu.getItemAt(3).label = (buddy && buddy.microBlogging) ? "remove from workstream" : "add to workstream";
+			customContextMenu.getItemAt(3).label = (buddy && buddy.isMicroBlogging) ? "remove from workstream" : "add to workstream";
 			
 			// add or remove subscription request if required
 			if(!buddy.subscribedTo && !subscribeItem)
@@ -167,7 +167,7 @@ package com.cleartext.ximpp.views.buddies
 			// incase we went offline while the user was clicking
 			if(!xmpp.connected)
 				return;
-			buddy.microBlogging = !buddy.microBlogging;
+			buddy.isMicroBlogging = !buddy.isMicroBlogging;
 			xmpp.modifyRosterItem(buddy);
 		}
 

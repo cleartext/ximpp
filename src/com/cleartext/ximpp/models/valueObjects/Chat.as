@@ -14,9 +14,19 @@ package com.cleartext.ximpp.models.valueObjects
 		public var used:Boolean = true;
 		public var messages:ArrayCollection;
 		
-		public function get microBlogging():Boolean
+		public function get isMicroBlogging():Boolean
 		{
-			return buddy && buddy.microBlogging;
+			return buddy && buddy.isMicroBlogging;
+		}
+		
+		public function get isGroup():Boolean
+		{
+			return buddy && buddy.isGroup;
+		}
+		
+		public function get isChatRoom():Boolean
+		{
+			return buddy && buddy.isChatRoom;
 		}
 		
 		public var chatState:String;

@@ -30,6 +30,7 @@ package com.cleartext.ximpp.views.common
 		private var image:RoundedImage;
 		private var editButton:Button;
 		private var deleteButton:Button;
+		private var broadcastButton:Button;
 		
 		public var forceWhiteBackground:Boolean = false;
 		
@@ -145,7 +146,12 @@ package com.cleartext.ximpp.views.common
 		{
 			hover = true;
 			textField.visible = true;
-			editButton.visible = deleteButton.visible = showEditButton;
+
+			editButton.visible = 
+				deleteButton.visible = 
+				broadcastButton.visible = 
+				showEditButton;
+
 			invalidateDisplayList();
 			
 			editButton.enabled = deleteButton.enabled = xmpp.connected;
@@ -154,16 +160,19 @@ package com.cleartext.ximpp.views.common
 			{
 				editButton.toolTip = null;
 				deleteButton.toolTip = null;
+				broadcastButton.toolTip = null;
 			}
 			else if(xmpp.connected)
 			{
 				editButton.toolTip = "edit group";
 				deleteButton.toolTip = "remove group";
+				broadcastButton.toolTip = "broadcast to group";
 			}
 			else
 			{
 				editButton.toolTip = "go online to edit";
 				deleteButton.toolTip = "go online to remove";
+				broadcastButton.toolTip = "broadcast to group";
 			}
 
 			if(selected)
@@ -176,6 +185,7 @@ package com.cleartext.ximpp.views.common
 			textField.visible = false;
 			editButton.visible = false;
 			deleteButton.visible = false;
+			broadcastButton.visible = false;
 			invalidateDisplayList();
 
 			if(selected)
@@ -235,6 +245,29 @@ package com.cleartext.ximpp.views.common
 				deleteButton.addEventListener(MouseEvent.CLICK, delete_clickHandler);
 				addChild(deleteButton);
 			}
+			
+			if(!broadcastButton)
+			{
+				broadcastButton = new Button();
+				broadcastButton.visible = false;
+				broadcastButton.setStyle("skin", null);
+				broadcastButton.setStyle("upIcon", Constants.BroadcastUp);
+				broadcastButton.setStyle("overIcon", Constants.BroadcastOver);
+				broadcastButton.setStyle("downIcon", Constants.BroadcastUp);
+				broadcastButton.setStyle("disabledIcon", Constants.BroadcastUp);
+				broadcastButton.width = 16;
+				broadcastButton.height = 16;
+				broadcastButton.addEventListener(MouseEvent.CLICK, broadcast_clickHandler);
+				addChild(broadcastButton);
+			}
+		}
+		
+		private function broadcast_clickHandler(event:MouseEvent):void
+		{
+			event.stopImmediatePropagation();
+			var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.NEW_CHAT_WITH_GROUP);
+			popupEvent.group = text;
+			Swiz.dispatchEvent(popupEvent);
 		}
 		
 		private function delete_clickHandler(event:MouseEvent):void
@@ -273,16 +306,22 @@ package com.cleartext.ximpp.views.common
 				xVal = (expandRight) ? 42 : (-textField.width-5);
 				textField.move(xVal, 9);
 			}
+
+			if(broadcastButton.visible)
+			{
+				xVal = (expandRight) ? textField.textWidth + 55 : - textField.textWidth - 42;
+				broadcastButton.move(xVal, 8);
+			}
 			
 			if(editButton.visible)
 			{
-				xVal = (expandRight) ? textField.textWidth + 56 : - textField.textWidth - 43;
+				xVal = (expandRight) ? textField.textWidth + 80 : - textField.textWidth - 67;
 				editButton.move(xVal, 8);
 			}
 	
 			if(deleteButton.visible)
 			{
-				xVal = (expandRight) ? textField.textWidth + 78 : - textField.textWidth - 65;
+				xVal = (expandRight) ? textField.textWidth + 102 : - textField.textWidth - 89;
 				deleteButton.move(xVal, 8);
 			}
 			
@@ -292,7 +331,7 @@ package com.cleartext.ximpp.views.common
 			{
 				wVal = textField.textWidth + 55;
 				if(showEditButton)
-					wVal += 46;
+					wVal += 68;
 			}
 			else
 			{

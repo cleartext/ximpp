@@ -312,23 +312,22 @@ package com.cleartext.ximpp.models
 			return buddies.getBuddyByJid(jid);
 		}
 		
-		public function sendMessageTo(buddy:Buddy, messageString:String):void
+		public function sendMessageTo(buddy:Buddy, messageString:String, save:Boolean=true):void
 		{
-			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			log("[ApplicationModel].sendMessage() " + buddy.jid + " : " + messageString + " : " + save);
+			
+			if(buddy.isGroup)
 			{
-				var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.SEND_TO_ALL_MICRO_BLOGGING_WINDOW);
+				var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.BROADCAST_WINDOW);
 				popupEvent.messageString = messageString;
+				popupEvent.buddy = buddy;
 				Swiz.dispatchEvent(popupEvent);
-			}
-			else if(buddy.isChatRoom)
-			{
-				xmpp.sendToChatRoom(buddy.jid, messageString);
 			}
 			else
 			{
 				var customTags:Array = new Array();
 
-				if(buddy.microBlogging)
+				if(buddy.isMicroBlogging)
 				{
 					var userName:String = settings.userAccount.jid;
 					userName = userName.substr(0, userName.indexOf("@"));
@@ -345,10 +344,13 @@ package com.cleartext.ximpp.models
 				}
 
 				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, (buddy.isChatRoom ? 'groupchat' : 'chat'), null, customTags);
-				var message:Message = createFromStanza(messageStanza);
 				
-				chats.addMessage(buddy, message);
-				database.saveMessage(message);
+				if(!buddy.isChatRoom && save)
+				{
+					var message:Message = createFromStanza(messageStanza);
+					chats.addMessage(buddy, message);
+					database.saveMessage(message);
+				}
 			}
 		}
 		

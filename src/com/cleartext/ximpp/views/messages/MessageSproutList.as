@@ -23,7 +23,9 @@ package com.cleartext.ximpp.views.messages
 				dataProvider = chat.messages;
 				if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					itemRenderer = new ClassFactory(AllMicroBloggingRenderer);
-				else if(chat.microBlogging)
+				else if(chat.isChatRoom)
+					itemRenderer = new ClassFactory(MUCRenderer);
+				else if(chat.isMicroBlogging || chat.isGroup)
 					itemRenderer = new ClassFactory(MicroBloggingRenderer);
 				else
 					itemRenderer = new ClassFactory(ChatRenderer);
@@ -37,16 +39,17 @@ package com.cleartext.ximpp.views.messages
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-			if(chat && !chat.microBlogging)
+			if(chat && !chat.isMicroBlogging && !chat.isGroup)
 			{
 				var previousJid:String;
 				var previousMillis:Number = 0;
+				
 				for each(var data:ISproutListData in dataProvider)
 				{
-					var item:ChatRenderer = itemRenderersByDataUid[data.uid] as ChatRenderer;
-					if(item)
+					var item:Object = itemRenderersByDataUid[data.uid];
+					if(item && item.hasOwnProperty("showTopRow") && item.hasOwnProperty("message"))
 					{
-						var thisJid:String = item.message.sender;
+						var thisJid:String = chat.isChatRoom ? item.message.groupChatSender : item.message.sender;
 						var thisMillis:Number = item.message.timestamp.time;
 						item.showTopRow = (thisJid != previousJid || previousMillis-thisMillis > 1800000);
 						previousJid = thisJid;

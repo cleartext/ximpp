@@ -23,7 +23,8 @@ package com.cleartext.ximpp.events
 		public static const EDIT_GROUP_WINDOW:String = "editGroupWindow";
 		public static const DELETE_GROUP_WINDOW:String = "deleteGroupWindow";
 
-		public static const SEND_TO_ALL_MICRO_BLOGGING_WINDOW:String = "sendToAllMicroBloggingWindow";
+		public static const BROADCAST_WINDOW:String = "broadcastWindow";
+		public static const NEW_CHAT_WITH_GROUP:String = "newChatWithGroup";
 		
 		public var buddy:Buddy;
 		public var group:String;

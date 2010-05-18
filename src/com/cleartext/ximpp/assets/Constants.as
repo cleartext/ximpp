@@ -167,6 +167,12 @@ package com.cleartext.ximpp.assets
 		[Embed (source="/com/cleartext/ximpp/assets/workstream.png")]
 		public static const DefaultWorkstream:Class;
 
+		[Embed (source="/com/cleartext/ximpp/assets/group-im.png")]
+		public static const DefaultGroup:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/muc.png")]
+		public static const DefaultMUC:Class;
+
 		[Embed (source="/com/cleartext/ximpp/assets/edit.png")]
 		public static const EditIcon:Class;
 
@@ -200,9 +206,19 @@ package com.cleartext.ximpp.assets
 		[Embed (source="/com/cleartext/ximpp/assets/blockOver.png")]
 		public static const BlockOver:Class;
 		
+		[Embed (source="/com/cleartext/ximpp/assets/broadcastUp.png")]
+		public static const BroadcastUp:Class;
+
+		[Embed (source="/com/cleartext/ximpp/assets/broadcastOver.png")]
+		public static const BroadcastOver:Class;
+		
 		public static const defaultAvatarBmd:BitmapData = new DefaultAvatar().bitmapData;
 
 		public static const defaultWorkstreamBmd:BitmapData = new DefaultWorkstream().bitmapData;
+
+		public static const defaultGroupBmd:BitmapData = new DefaultGroup().bitmapData;
+
+		public static const defaultMUCBmd:BitmapData = new DefaultMUC().bitmapData;
 
 		public static const editIconBmd:BitmapData = new EditIcon().bitmapData;
 

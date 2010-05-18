@@ -161,7 +161,7 @@ package com.cleartext.ximpp.models
 			
 			if(groupName == OPEN_TABS)
 				return buddy.openTab;
-			if(buddy.microBlogging)
+			if(buddy.isMicroBlogging)
 				return groupName == MICRO_BLOGGING_GROUP;
 			else if(buddy.isGateway)
 				return groupName == GATEWAY_GROUP;
@@ -239,7 +239,7 @@ package com.cleartext.ximpp.models
 				if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					continue;
 				
-				if(buddy.microBlogging)
+				if(buddy.isMicroBlogging)
 					microBloggingTemp.addItem(buddy);
 
 				else if(!buddy.isGateway)
@@ -265,7 +265,7 @@ package com.cleartext.ximpp.models
 		{
 			var result:Array = new Array();
 			for each(var buddy:Buddy in buddies.source)
-				if(!buddy.isGateway && !buddy.microBlogging)
+				if(!buddy.isGateway && !buddy.isMicroBlogging)
 					result.push(buddy);
 			
 			return result.sortOn("nickName");
@@ -275,7 +275,7 @@ package com.cleartext.ximpp.models
 		{
 			var result:Array = new Array();
 			for each(var buddy:Buddy in buddies.source)
-				if(!buddy.microBlogging)
+				if(!buddy.isMicroBlogging)
 					result.push(buddy);
 			
 			return result.sortOn("nickName");
@@ -292,11 +292,14 @@ package com.cleartext.ximpp.models
 			return result.sortOn("nickName");
 		}
 		
-		public function addGroupChat(roomJid:String):void
+		public function getBuddiesByGroup(groupName:String):Array
 		{
-			var buddy:Buddy = new Buddy(roomJid);
-			buddy.isChatRoom = true;
-			addBuddy(buddy);
+			var result:Array = new Array();
+			for each(var buddy:Buddy in buddies.source)
+				if(buddy.groups.indexOf(groupName) != -1)
+					result.push(buddy);
+			
+			return result.sortOn("nickName");
 		}
 	}
 }
