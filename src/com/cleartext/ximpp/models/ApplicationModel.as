@@ -293,9 +293,7 @@ package com.cleartext.ximpp.models
 		[Mediate(event="UserAccountEvent.CHANGED")]
 		public function userIdChanged(event:UserAccountEvent):void
 		{
-//			chats.removeAll();
 			database.loadBuddyData();
-//			setTimeout(chats.getChat, 1, Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
 		}
 		
 		public function getBuddyByJid(jid:String):Buddy
@@ -364,10 +362,10 @@ package com.cleartext.ximpp.models
 			newMessage.subject = stanza.subject;
 			newMessage.plainMessage = stanza.body;
 			newMessage.rawXML = stanza.xmlstring;
-			var date:Date = stanza.utcTimestamp;
-			newMessage.utcTimestamp = date;
-			newMessage.timestamp = new Date(Date.UTC(date.fullYear, date.month, date.date, date.hours, date.minutes, date.seconds, date.milliseconds));
-			
+
+			newMessage.receivedTimestamp = new Date();
+			newMessage.sentTimestamp = stanza.sentTimestamp;
+
 			var linkVals:Array;
 			
 			var customTags:Array = stanza.customTags;

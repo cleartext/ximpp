@@ -9,6 +9,9 @@
 
 	<mx:Script>
 		<![CDATA[
+			import mx.core.Application;
+			import mx.events.AIREvent;
+			import com.cleartext.ximpp.events.ApplicationEvent;
 			import com.cleartext.ximpp.views.popup.JoinGroupChatWindow;
 			import com.cleartext.ximpp.models.SoundAndColorModel;
 			import com.cleartext.ximpp.views.popup.SearchWindow;
@@ -57,6 +60,12 @@
 			private function init():void
 			{
 				appModel.init();
+				Application.application.addEventListener(AIREvent.APPLICATION_ACTIVATE, applicationActivateHandler);
+			}
+			
+			private function applicationActivateHandler(event:AIREvent):void
+			{
+				NativeApplication.nativeApplication.icon.bitmaps = [Constants.appIconBmd];
 			}
 			
 			//----------------------------------------------
@@ -191,6 +200,22 @@
 				((window as PopupWindowBase).defaultButton as Button).setFocus();
 			}
 			
+			[Mediate(event="ApplicationEvent.NOTIFY")]
+			public function notify(event:ApplicationEvent):void
+			{
+				NativeApplication.nativeApplication.icon.bitmaps = [Constants.appIconWarningBmd];
+				
+				if(NativeApplication.supportsDockIcon)
+				{
+					var dock:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
+					dock.bounce(NotificationType.INFORMATIONAL);
+				}
+				else if (NativeApplication.supportsSystemTrayIcon)
+				{
+					stage.nativeWindow.notifyUser(NotificationType.INFORMATIONAL);
+				}
+			}
+
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
 				super.updateDisplayList(unscaledWidth, unscaledHeight);

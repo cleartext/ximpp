@@ -1,11 +1,12 @@
 package com.cleartext.ximpp.models.valueObjects
 {
 	import com.cleartext.ximpp.models.MicroBloggingModel;
-	import com.cleartext.ximpp.models.types.MessageStatusTypes;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
 	public class Message extends SproutListDataBase
 	{
+		public var sortBySentDate:Boolean;
+		
 		public static const CREATE_MESSAGES_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS messages (" +
 			"messageId INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -20,35 +21,18 @@ package com.cleartext.ximpp.models.valueObjects
 			"senderId INTEGER, " +
 			"originalSenderId INTEGER, " +
 			"rawxml TEXT);"; 
+			
+		public static const TABLE_MODS:Array = [
+			{name: "sentTimestamp", type: "NUMERIC"},
+			{name: "receivedTimestamp", type: "NUMERIC"}
+		];
 		
 		public var messageId:int = -1;
 		
-		public var utcTimestamp:Date;
-		public var timestamp:Date;
+		public var sentTimestamp:Date;
+		public var receivedTimestamp:Date;
+		
 		public var sender:String;
-		
-		public function get time():Number
-		{
-			if(utcTimestamp)
-				return utcTimestamp.time;
-			return 0;
-		}
-		
-		private var _status:String = MessageStatusTypes.UNKNOWN;
-		[Bindable(event="messageStatusChanged")]
-		public function get status():String
-		{
-			return _status;
-		}
-		public function set status(value:String):void
-		{
-			if(_status != value)
-			{
-				_status = value;
-//				dispatchEvent(new MicroBloggingMessageEvent(MicroBloggingMessageEvent.MESSAGE_STATUS_CHANGED, this));
-			}
-		}
-		
 		public var recipient:String;
 		public var type:String;
 		public var subject:String;
@@ -66,6 +50,11 @@ package com.cleartext.ximpp.models.valueObjects
 			super();
 		}
 		
+		public function get sortDate():Date
+		{
+			return (sortBySentDate) ? sentTimestamp : receivedTimestamp;
+		}
+		
 		public static function createFromDB(obj:Object, mBlogBuddies:MicroBloggingModel):Message
 		{
 			var newMessage:Message = new Message();
@@ -80,9 +69,14 @@ package com.cleartext.ximpp.models.valueObjects
 			newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(obj["originalSenderId"]);
 			newMessage.rawXML = obj["rawXML"];
 			
-			var date:Date = new Date(obj["timestamp"]);
-			newMessage.utcTimestamp = date;
-			newMessage.timestamp = new Date(Date.UTC(date.fullYear, date.month, date.date, date.hours, date.minutes, date.seconds, date.milliseconds));			
+			if(obj["timestamp"])
+			{
+				newMessage.receivedTimestamp = new Date(obj["timestamp"]);
+				newMessage.sentTimestamp = new Date(obj["timestamp"]);
+			}
+			
+			newMessage.receivedTimestamp = new Date(Number(obj["receivedTimestamp"]));
+			newMessage.sentTimestamp = new Date(Number(obj["sentTimestamp"]));
 
 			return newMessage;
 		}
@@ -91,7 +85,8 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			var result:Array = [
 				new DatabaseValue("userId", userId),
-				new DatabaseValue("timestamp", utcTimestamp),
+				new DatabaseValue("receivedTimestamp", receivedTimestamp.time),
+				new DatabaseValue("sentTimestamp", sentTimestamp.time),
 				new DatabaseValue("sender", sender),
 				new DatabaseValue("recipient", recipient),
 				new DatabaseValue("type", type),

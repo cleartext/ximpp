@@ -38,9 +38,8 @@ package com.cleartext.ximpp.models.valueObjects
 			
 			messages = new ArrayCollection();
 			var sort:Sort = new Sort();
-			sort.fields = [new SortField("time")];
+			sort.fields = [new SortField("sortDate", false, true)];
 			messages.sort = sort;
-			messages.refresh()
 		}
 		
 		public function addMessage(message:Message, limit:int):void

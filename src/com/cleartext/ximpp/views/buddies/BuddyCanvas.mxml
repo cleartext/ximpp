@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox 
 	clipContent="false"
-	creationComplete="userAccountChanged(null)"
+	creationComplete="init()"
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	xmlns:buddies="com.cleartext.ximpp.views.buddies.*"
 	width="100%" height="100%"
@@ -11,6 +11,7 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import mx.events.CollectionEvent;
 			import com.cleartext.ximpp.models.SoundAndColorModel;
 			import com.cleartext.ximpp.models.ChatModel;
 			import com.cleartext.ximpp.events.BuddyRequestEvent;
@@ -74,6 +75,14 @@
 			
 			[Bindable]
 			private var showingAddCanvas:Boolean = false;
+			
+			private function init():void
+			{
+				userAccountChanged(null);
+				
+				requests.requests.addEventListener(CollectionEvent.COLLECTION_CHANGE, setRequestIcon);
+				setRequestIcon();
+			}
 			
 			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
@@ -188,7 +197,25 @@
 				else
 					requestCanvas.visible = requestCanvas.includeInLayout = !requestCanvas.visible;
 				
+				setRequestIcon();
+
 				callLater(invalidateDisplayList);
+			}
+			
+			private function setRequestIcon(event:Event=null):void
+			{
+				var newIcon:Class;
+				
+				if(requests.requests.length > 0)
+				{
+					newIcon = (requestCanvas.visible) ? Constants.RequestDown1 : Constants.RequestUp1;
+				}
+				else
+				{
+					newIcon = (requestCanvas.visible) ? Constants.RequestDown : Constants.RequestUp;
+				}
+
+				requestButton.setStyle("icon", newIcon);
 			}
 			
 			public function showAddCanvas(event:MouseEvent):void
@@ -431,16 +458,18 @@
 			id="addButton"
 			click="showAddCanvas(event)"
 			skin="{null}"
-			icon="{(!showingAddCanvas) ? Constants.AddUp :  Constants.AddDown}"
+			upIcon="{(!showingAddCanvas) ? Constants.AddUp :  Constants.AddDown}"
+			overIcon="{(!showingAddCanvas) ? Constants.AddUp :  Constants.AddDown}"
+			downIcon="{Constants.AddDown}"
+			disabledIcon="{(!showingAddCanvas) ? Constants.AddUp :  Constants.AddDown}"
 			/>
 
 		<mx:Button
+			id="requestButton"
 			x="24" y="1"
-			height="22"
-			textRollOverColor="0x848484"
+			height="22" width="23"
 			click="showRequestPanel(null)"
 			skin="{null}"
-			label="requests"
 			/>
 	</mx:Canvas>
 

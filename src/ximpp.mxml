@@ -2,7 +2,6 @@
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	creationComplete="applicationCompleteHandler()"
-	close="mainView.appModel.shutDown()"
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
 	xmlns:views="com.cleartext.ximpp.views.*"
@@ -10,14 +9,23 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import mx.core.Application;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
 			import com.cleartext.ximpp.assets.Constants;
 			import mx.managers.ToolTipManager;
 			
 			private function applicationCompleteHandler():void
 			{
 				ToolTipManager.showDelay=100;
+				nativeApplication.addEventListener(Event.EXITING, exitHandler);
 			}
- 			
+			
+			private function exitHandler(event:Event):void
+			{
+				mainView.appModel.shutDown();
+			}
+
 		]]>
 	</mx:Script>
 	

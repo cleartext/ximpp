@@ -25,7 +25,8 @@ package com.cleartext.ximpp.models.valueObjects
 		public var awayTimeout:int;
 		public var playSounds:Boolean;
 		
-		public var sortByTimestamp:Boolean;
+		[Bindable]
+		public var sortBySentDate:Boolean;
 		
 		[Bindable]
 		public var autoShortenUrls:Boolean;
@@ -61,7 +62,7 @@ package com.cleartext.ximpp.models.valueObjects
 				newGlobalSettings.showOfflineBuddies = xml.@showOfflineBuddies == "true";
 				newGlobalSettings.sendStatusToMicroBlogging = xml.@sendStatusToMicroBlogging == "true";
 				newGlobalSettings.buddySortMethod = xml.@buddySortMethod;
-				newGlobalSettings.sortByTimestamp = xml.@sortByTimestamp == "true";
+				newGlobalSettings.sortBySentDate = xml.@sortByTimestamp == "true";
 				newGlobalSettings.awayTimeout = xml.@awayTimeout;
 				newGlobalSettings.playSounds = xml.@playSounds == "true";
 			}
@@ -73,7 +74,7 @@ package com.cleartext.ximpp.models.valueObjects
 				newGlobalSettings.animateMessageList = true;
 				newGlobalSettings.showOfflineBuddies = true;
 				newGlobalSettings.sendStatusToMicroBlogging = false;
-				newGlobalSettings.sortByTimestamp = true;
+				newGlobalSettings.sortBySentDate = true;
 				newGlobalSettings.playSounds = true;
 			}
 			
@@ -106,7 +107,7 @@ package com.cleartext.ximpp.models.valueObjects
 				showOfflineBuddies={showOfflineBuddies} 
 				sendStatusToMicroBlogging={sendStatusToMicroBlogging} 
 				buddySortMethod={buddySortMethod}
-				sortByTimestamp={sortByTimestamp}
+				sortBySentDate={sortBySentDate}
 				awayTimeout={awayTimeout}
 				playSounds={playSounds}
 				/>;

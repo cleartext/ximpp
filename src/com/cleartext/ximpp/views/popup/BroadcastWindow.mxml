@@ -50,8 +50,8 @@
 					msg.type = "chat";
 					msg.plainMessage = msg.displayMessage = message;
 					var date:Date = new Date();
-					msg.timestamp = date;
-					msg.utcTimestamp = new Date(date.fullYearUTC, date.monthUTC, date.dateUTC, date.hoursUTC, date.minutesUTC, date.secondsUTC, date.millisecondsUTC);
+					msg.sentTimestamp = date;
+					msg.receivedTimestamp = date;
 					
 					appModel.chats.addMessage(_group, msg);
 					appModel.database.saveMessage(msg);

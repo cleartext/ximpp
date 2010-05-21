@@ -73,7 +73,7 @@
 				showOfflineBuddiesCheckBox.selected = settings.global.showOfflineBuddies;
 				numTimelineMessages.value = settings.global.numTimelineMessages;
 				numChatMessages.value = settings.global.numChatMessages;
-				messageSortComboBox.selectedItem = (settings.global.sortByTimestamp) ? "date sent" : "date received";
+				messageSortComboBox.selectedItem = (settings.global.sortBySentDate) ? "date sent" : "date received";
 				awayTimeout.value = settings.global.awayTimeout;
 				playSoundsCheckBox.selected = settings.global.playSounds;
 				
@@ -106,7 +106,7 @@
 				settings.global.showOfflineBuddies = showOfflineBuddiesCheckBox.selected;
 				settings.global.numTimelineMessages = numTimelineMessages.value;
 				settings.global.numChatMessages = numChatMessages.value;
-				settings.global.sortByTimestamp = (messageSortComboBox.selectedItem == "date sent");
+				settings.global.sortBySentDate = (messageSortComboBox.selectedLabel == "date sent");
 				settings.global.awayTimeout = awayTimeout.value;
 				settings.global.playSounds = playSoundsCheckBox.selected;
 				

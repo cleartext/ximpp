@@ -212,6 +212,24 @@ package com.cleartext.ximpp.assets
 		[Embed (source="/com/cleartext/ximpp/assets/broadcastOver.png")]
 		public static const BroadcastOver:Class;
 		
+		[Embed (source="/com/cleartext/ximpp/assets/icon.png")]
+		public static const AppIcon:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/icon-warning.png")]
+		public static const AppIconWarning:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/requestUp.png")]
+		public static const RequestUp:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/requestUp1.png")]
+		public static const RequestUp1:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/requestDown.png")]
+		public static const RequestDown:Class;
+		
+		[Embed (source="/com/cleartext/ximpp/assets/requestDown1.png")]
+		public static const RequestDown1:Class;
+		
 		public static const defaultAvatarBmd:BitmapData = new DefaultAvatar().bitmapData;
 
 		public static const defaultWorkstreamBmd:BitmapData = new DefaultWorkstream().bitmapData;
@@ -221,6 +239,12 @@ package com.cleartext.ximpp.assets
 		public static const defaultMUCBmd:BitmapData = new DefaultMUC().bitmapData;
 
 		public static const editIconBmd:BitmapData = new EditIcon().bitmapData;
+		
+		public static const appIconBmd:BitmapData = new AppIcon().bitmapData;
+
+		public static const appIconWarningBmd:BitmapData = new AppIconWarning().bitmapData;
+		
+		
 
 	}
 }

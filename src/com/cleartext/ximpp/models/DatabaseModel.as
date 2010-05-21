@@ -74,7 +74,7 @@ package com.cleartext.ximpp.models
 				
 				// create the local database file
 				var dbName:String = "ximpp.db";
-				// dbName = "ok-ximpp.db";
+				dbName = "ximpp1.db";
 				// dbName = new Date().time + ".db";
 				
 				var dbFile:File = File.applicationStorageDirectory.resolvePath(dbName);
@@ -151,32 +151,62 @@ package com.cleartext.ximpp.models
 				stmt.text = BuddyRequest.CREATE_BUDDY_REQUESTS_TABLE;
 				stmt.execute();
 				
+				var mods:Array;
+				var column:SQLColumnSchema;
+				var mod:Object;
+				var sql:String;
+				var i:int;
+				
 				syncConn.loadSchema();
 				var schema:SQLSchemaResult = syncConn.getSchemaResult();
 				for each (var table:SQLTableSchema in schema.tables)
 				{
 					if(table.name == "buddies")
 					{
-						var mods:Array = Buddy.TABLE_MODS.slice();
+						mods = Buddy.TABLE_MODS.slice();
 						
-						for each(var column:SQLColumnSchema in table.columns)
+						for each(column in table.columns)
 						{
-							for(var i:int=0; i<mods.length; i++)
+							for(i=0; i<mods.length; i++)
 							{
 								if(column.name == mods[i].name)
 									mods.splice(i,1);
 							}
 						}
 						
-						for each(var mod:Object in mods)
+						for each(mod in mods)
 						{
-							var sql:String = "ALTER TABLE buddies ADD COLUMN " + mod.name + " " + mod.type;
+							sql = "ALTER TABLE buddies ADD COLUMN " + mod.name + " " + mod.type;
 							if(mod.hasOwnProperty("defaultVal"))
 								sql += " DEFAULT " + mod.defaultVal;
 							appModel.log("Updating buddy table structure " + sql);
 							stmt.text = sql;
 							stmt.execute();
 						}
+					}
+					else if(table.name == "messages")
+					{
+						mods = Message.TABLE_MODS.slice();
+						
+						for each(column in table.columns)
+						{
+							for(i=0; i<mods.length; i++)
+							{
+								if(column.name == mods[i].name)
+									mods.splice(i,1);
+							}
+						}
+						
+						for each(mod in mods)
+						{
+							sql = "ALTER TABLE messages ADD COLUMN " + mod.name + " " + mod.type;
+							if(mod.hasOwnProperty("defaultVal"))
+								sql += " DEFAULT " + mod.defaultVal;
+							appModel.log("Updating message table structure " + sql);
+							stmt.text = sql;
+							stmt.execute();
+						}
+						
 					}
 				}
 
@@ -428,7 +458,7 @@ package com.cleartext.ximpp.models
 			if(buddyArray.length == 0)
 				return new ArrayCollection();;
 
-			var sortType:String = (settings.global.sortByTimestamp) ? "timestamp" : "messageId";
+			var sortType:String = (settings.global.sortBySentDate) ? "sentTimestamp" : "receivedTimestamp";
 
 			// start a transaction 
 			syncConn.begin(); 
@@ -464,7 +494,7 @@ package com.cleartext.ximpp.models
 			appModel.log("Messages loaded");
 
 			var sort:Sort = new Sort();
-			sort.fields = [new SortField(sortType, false, true)];
+			sort.fields = [new SortField("sortDate", false, true)];
 			messages.sort = sort;
 			return messages;
 		}
@@ -616,7 +646,7 @@ package com.cleartext.ximpp.models
 		
 		public function searchMessages(searchTerms:Array):Array
 		{
-			var sortType:String = (settings.global.sortByTimestamp) ? "timestamp" : "messageId";
+			var sortType:String = (settings.global.sortBySentDate) ? "sentTimestamp" : "receivedTimestamp";
 			
 			// start a transaction 
 			syncConn.begin(); 

@@ -66,7 +66,7 @@ package com.cleartext.ximpp.views.messages
 				nameTextField.width = nameTextField.textWidth + padding*4;
 				nameTextField.styleName = (fromThisUser) ? "lGreyBold" : "blackBold";
 
-				dateTextField.text = df.format(message.timestamp);
+				dateTextField.text = df.format(message.sortDate);
 				dateTextField.width = dateTextField.textWidth + padding*2;
 				dateTextField.styleName = (fromThisUser) ? "lGreySmall" : "blackSmall";
 

@@ -49,7 +49,7 @@ package com.cleartext.ximpp.views.messages
 					nameTextField.width = nameTextField.textWidth + padding*4;
 					nameTextField.styleName = "blackBold";
 	
-					dateTextField.text = df.format(message.timestamp);
+					dateTextField.text = df.format(message.sentTimestamp);
 					dateTextField.width = dateTextField.textWidth + padding*2;
 					dateTextField.styleName = "blackSmall";
 					dateTextField.x = width - dateTextField.width - 2*padding;	

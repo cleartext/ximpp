@@ -133,7 +133,11 @@ package com.cleartext.ximpp.views.messages
 			if(chat.chatState != newState)
 			{
 				chat.chatState = newState;
-				if(sendStanza && xmpp.connected && !chat.buddy.isGroup && !chat.buddy.isChatRoom)
+				if(sendStanza && xmpp.connected &&
+						 !chat.buddy.isGroup &&
+						 !chat.buddy.isMicroBlogging &&
+						 !chat.buddy.isChatRoom &&
+						 !chat.buddy.status.isOffline())
 					xmpp.sendMessage(chat.buddy.fullJid, null, null, 'chat', newState);
 			}
 		}

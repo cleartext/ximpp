@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.models
 {
+	import com.cleartext.ximpp.events.ApplicationEvent;
 	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
@@ -21,6 +22,8 @@ package com.cleartext.ximpp.models
 	import com.seesmic.as3.xmpp.XMPPEvent;
 	
 	import flash.utils.Dictionary;
+	
+	import org.swizframework.Swiz;
 	
 	public class XMPPModel
 	{
@@ -238,7 +241,7 @@ package com.cleartext.ximpp.models
 				return;
 			}
 			
-			buddy.lastSeen = message.timestamp;
+			buddy.lastSeen = message.receivedTimestamp;
 			buddy.isTyping = false;
 			if(!buddy.isChatRoom)
 				buddy.resource = event.stanza.from.resource;
@@ -259,6 +262,8 @@ package com.cleartext.ximpp.models
 			}
 			if(!buddy.isChatRoom)
 				database.saveMessage(message);
+				
+			Swiz.dispatchEvent(new ApplicationEvent(ApplicationEvent.NOTIFY));
 		}
 		
 		private function chatStateHandler(event:XMPPEvent):void
@@ -316,6 +321,7 @@ package com.cleartext.ximpp.models
 				else
 				{
 					requests.receiving(fromJid, stanza.nick);
+					Swiz.dispatchEvent(new ApplicationEvent(ApplicationEvent.NOTIFY));
 				}
 			}
 			else
@@ -472,7 +478,7 @@ package com.cleartext.ximpp.models
 				
 				// if we have a different avatar to the one on the server, then send a
 				// vcard back to the server
-				if(serverAvatar != localAvatar && localAvatar != "")
+				if(serverAvatar != localAvatar && localAvatar != "" && localAvatar != "null")
 				{
 					vCard.vCardTemp::PHOTO.vCardTemp::BINVAL = localAvatar;
 					sendIq(settings.userAccount.jid, IQTypes.SET, vCard[0]);
