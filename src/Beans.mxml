@@ -19,6 +19,8 @@
 
 	<models:ChatModel id="chats" />
 
+	<models:WebRootModel id="webroot" />
+
 	<models:ApplicationModel id="appModel" />
 
 </swiz:BeanLoader>	

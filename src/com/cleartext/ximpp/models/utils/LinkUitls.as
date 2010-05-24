@@ -61,7 +61,7 @@ package com.cleartext.ximpp.models.utils
 		{
 			// this is the start of the text that we want to insert round the link
 			// it will look something lke <U><FONT COLOR="#0033FF"><A HREF="
-            return '<U><FONT COLOR="#' + String("000000" + linkColour.toString(16).toUpperCase()).substr(-6) + '"><A HREF="';
+            return '<U><FONT COLOR="#' + String("000000" + linkColour.toString(16).toUpperCase()).substr(-6) + '"><A HREF="event:';
 		}
 
 		public static function get endTag():String

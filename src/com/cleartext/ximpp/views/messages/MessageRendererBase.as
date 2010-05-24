@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.views.messages
 {
+	import com.cleartext.ximpp.events.LinkEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.ChatModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
@@ -8,11 +9,14 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.universalsprout.flex.components.list.SproutListRendererBase;
 	
+	import flash.events.TextEvent;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFieldType;
 	
 	import mx.core.UITextField;
 	import mx.formatters.DateFormatter;
+	
+	import org.swizframework.Swiz;
 
 	public class MessageRendererBase extends SproutListRendererBase
 	{
@@ -155,8 +159,14 @@ package com.cleartext.ximpp.views.messages
 				bodyTextField.selectable = true;
 				bodyTextField.type = TextFieldType.DYNAMIC;
 				bodyTextField.wordWrap = true;
+				bodyTextField.addEventListener(TextEvent.LINK, linkHandler);
 				addChild(bodyTextField);
 			}
+		}
+		
+		private function linkHandler(event:TextEvent):void
+		{
+			Swiz.dispatchEvent(new LinkEvent(LinkEvent.LINK_CLICKED, event.text));
 		}
 		
 		override public function setWidth(widthVal:Number):Number

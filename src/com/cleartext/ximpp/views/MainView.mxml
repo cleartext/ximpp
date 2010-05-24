@@ -9,6 +9,9 @@
 
 	<mx:Script>
 		<![CDATA[
+			import flash.net.navigateToURL;
+			import com.cleartext.ximpp.views.popup.LinkWindow;
+			import com.cleartext.ximpp.events.LinkEvent;
 			import mx.core.Application;
 			import mx.events.AIREvent;
 			import com.cleartext.ximpp.events.ApplicationEvent;
@@ -76,6 +79,21 @@
 			public function showPreferencesWindow(event:PopUpEvent):void
 			{
 				initializePopUp(new PreferenceWindow());
+			}
+
+			[Mediate(event="LinkEvent.LINK_CLICKED")]
+			public function showLinkWindow(event:LinkEvent):void
+			{
+				if(false)
+				{
+					navigateToURL(new URLRequest(event.url));
+				}
+				else
+				{
+					var window:LinkWindow = new LinkWindow();
+					window.url = event.url;
+					initializePopUp(window);
+				}
 			}
 
 			[Mediate(event="PopUpEvent.BROADCAST_WINDOW")]
