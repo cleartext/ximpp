@@ -24,6 +24,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public var showOfflineBuddies:Boolean;
 		public var awayTimeout:int;
 		public var playSounds:Boolean;
+		public var checkUrls:Boolean;
 		
 		[Bindable]
 		public var sortBySentDate:Boolean;
@@ -65,6 +66,7 @@ package com.cleartext.ximpp.models.valueObjects
 				newGlobalSettings.sortBySentDate = xml.@sortByTimestamp == "true";
 				newGlobalSettings.awayTimeout = xml.@awayTimeout;
 				newGlobalSettings.playSounds = xml.@playSounds == "true";
+				newGlobalSettings.checkUrls = xml.@checkUrls == "true";
 			}
 			else
 			{
@@ -76,6 +78,8 @@ package com.cleartext.ximpp.models.valueObjects
 				newGlobalSettings.sendStatusToMicroBlogging = false;
 				newGlobalSettings.sortBySentDate = true;
 				newGlobalSettings.playSounds = true;
+				newGlobalSettings.checkUrls = true;
+				newGlobalSettings.awayTimeout = 5;
 			}
 			
 			// make sure that the values are set and are reasonable
@@ -90,6 +94,7 @@ package com.cleartext.ximpp.models.valueObjects
 
 			if(BuddySortTypes.types.indexOf(newGlobalSettings.buddySortMethod) == -1)
 				newGlobalSettings.buddySortMethod = BuddySortTypes.STATUS;
+
 
 			return newGlobalSettings;
 		}
@@ -110,6 +115,7 @@ package com.cleartext.ximpp.models.valueObjects
 				sortBySentDate={sortBySentDate}
 				awayTimeout={awayTimeout}
 				playSounds={playSounds}
+				checkUrls={checkUrls}
 				/>;
 				
 			return [
@@ -117,10 +123,6 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("xml", xml.toXMLString())];
 		}
 				
-		override public function toString():String
-		{
-			return null;
-		}
-		
+	
 	}
 }

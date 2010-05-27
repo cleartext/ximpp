@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	creationComplete="applicationCompleteHandler()"
+	applicationComplete="windowCompleteHandler()"
 	layout="absolute"
 	xmlns:swiz="http://swiz.swizframework.org"
 	xmlns:views="com.cleartext.ximpp.views.*"
@@ -9,18 +9,95 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import mx.containers.Canvas;
+			import mx.managers.LayoutManager;
+			import mx.rpc.soap.LoadEvent;
+			import com.cleartext.ximpp.events.LoadingEvent;
+			import mx.controls.ProgressBarMode;
+			import mx.controls.ProgressBar;
+			import flash.utils.getTimer;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.containers.Panel;
+			import flash.utils.setTimeout;
 			import mx.core.Application;
 			import mx.controls.Alert;
 			import mx.events.CloseEvent;
 			import com.cleartext.ximpp.assets.Constants;
 			import mx.managers.ToolTipManager;
 			
-			private function applicationCompleteHandler():void
+			private var progressBar:ProgressBar;
+			private var panel:Panel;
+			private var renderCount:int = 1;
+			
+			private function windowCompleteHandler():void
 			{
 				ToolTipManager.showDelay=100;
 				nativeApplication.addEventListener(Event.EXITING, exitHandler);
-			}
-			
+				
+				progressBar = new ProgressBar();
+				progressBar.label = "Loading";
+				
+				progressBar.addEventListener(Event.RENDER, splashReady);
+				progressBar.mode = ProgressBarMode.MANUAL;
+				progressBar.setConstraintValue("horizontalCenter", 0);
+				progressBar.setConstraintValue("verticalCenter", 0);
+
+				panel = new Panel();
+				panel.width = 300;
+				panel.height = 100;
+				panel.layout = "absolute";
+				panel.title = "Initialising";
+				panel.addChild(progressBar);
+
+				PopUpManager.addPopUp(panel, this, true);
+				PopUpManager.centerPopUp(panel);
+		   	}
+		   	
+		   	private function splashReady(event:Event=null):void
+		   	{
+	   			if(--renderCount == 0)
+	   			{
+			   		progressBar.removeEventListener(event.type, splashReady);
+
+			   		mainView.appModel.addEventListener(LoadingEvent.BUDDIES_LOADING, progressHandler);
+			   		mainView.appModel.addEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
+			   		mainView.appModel.addEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
+
+					mainView.appModel.addEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
+					mainView.appModel.init();
+	   			}
+		   	}
+		   	
+		   	private function progressHandler(event:LoadingEvent):void
+		   	{
+				panel.setStyle("borderAlpha", 0.8);
+				panel.setStyle("borderColor", mainView.soundColor.backgroundColor);
+				panel.setStyle("titleStyleName", "whiteBoldBig");
+
+		   		switch(event.type)
+		   		{
+			   		case LoadingEvent.BUDDIES_LOADING:
+			   			progressBar.label = "Loading Buddies";
+			   			progressBar.setProgress(0 + event.loaded/event.total, 3);
+		   				break;
+			   		case LoadingEvent.WORKSTREAM_LOADING:
+			   			progressBar.label = "Loading Workstream";
+			   			if(event.total > 0)
+				   			progressBar.setProgress(1 + event.loaded/event.total, 3);
+		   				break;
+			   		case LoadingEvent.CHATS_LOADING:
+			   			progressBar.label = "Loading Open Chats";
+			   			progressBar.setProgress(2 + event.loaded/event.total, 3);
+		   				break;
+		   		}
+		   	}
+		   	
+		   	private function initCompleteHandler(event:LoadingEvent):void
+		   	{
+				PopUpManager.removePopUp(panel);
+		   	}
+		   	
 			private function exitHandler(event:Event):void
 			{
 				mainView.appModel.shutDown();

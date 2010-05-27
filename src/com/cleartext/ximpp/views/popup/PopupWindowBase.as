@@ -1,5 +1,6 @@
 package com.cleartext.ximpp.views.popup
 {
+	import com.cleartext.ximpp.models.SoundAndColorModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	
 	import flash.events.Event;
@@ -20,6 +21,9 @@ package com.cleartext.ximpp.views.popup
 
 	public class PopupWindowBase extends TitleWindow
 	{
+		[Autowire]
+		public var soundAndColor:SoundAndColorModel;
+
 		public var showCancelButton:Boolean = true;
 		
 		protected var errorMessageToolTips:Dictionary = new Dictionary();
@@ -87,6 +91,9 @@ package com.cleartext.ximpp.views.popup
 					cb.addChild(cancelButton);
 				}
 			}
+			setStyle("borderAlpha", 0.8);
+			setStyle("borderColor", soundAndColor.backgroundColor);
+			setStyle("titleStyleName", "whiteBoldBig");
 		}
 
 

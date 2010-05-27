@@ -74,9 +74,11 @@ package com.cleartext.ximpp.models.valueObjects
 				newMessage.receivedTimestamp = new Date(obj["timestamp"]);
 				newMessage.sentTimestamp = new Date(obj["timestamp"]);
 			}
-			
-			newMessage.receivedTimestamp = new Date(Number(obj["receivedTimestamp"]));
-			newMessage.sentTimestamp = new Date(Number(obj["sentTimestamp"]));
+			else
+			{
+				newMessage.receivedTimestamp = new Date(Number(obj["receivedTimestamp"]));
+				newMessage.sentTimestamp = new Date(Number(obj["sentTimestamp"]));
+			}
 
 			return newMessage;
 		}

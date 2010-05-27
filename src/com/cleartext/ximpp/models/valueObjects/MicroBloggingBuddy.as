@@ -28,6 +28,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public var microBloggingBuddyId:int = -1;
 		public var userName:String;
 		public var gatewayJid:String;
+		public var profileUrl:String;
 
 		private var _displayName:String;
 		public function get displayName():String

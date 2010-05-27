@@ -12,6 +12,8 @@ package com.cleartext.ximpp.views.messages
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	
 	import mx.controls.Button;
 	
@@ -48,6 +50,9 @@ package com.cleartext.ximpp.views.messages
 			switch(type)
 			{
 				case MicroBloggingTypes.RECEIVED :
+					avatar.buttonMode = true;
+					avatar.addEventListener(MouseEvent.CLICK, button_clickHandler, false, 0, true);
+				
 					var reply:Button = new Button();
 					reply.data = "reply";
 					reply.addEventListener(MouseEvent.CLICK, button_clickHandler, false, 0, true);
@@ -104,24 +109,33 @@ package com.cleartext.ximpp.views.messages
 
 		private function button_clickHandler(event:MouseEvent):void
 		{
-			switch(event.target.data)
+			if(event.target == avatar)
 			{
-				case "reply" :
-					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "@" + message.mBlogSender.userName + " "));
-					break;
-				case "retweet" :
-					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + message.mBlogSender.userName + " : " + bodyTextField.text));
-					break;
-				case "direct" :
-					var buddy:Buddy = appModel.getBuddyByJid(message.mBlogSender.jid);
-					if(!buddy)
-					{
-						buddy = new Buddy(message.mBlogSender.jid);
-						appModel.buddies.addBuddy(buddy);
-					}
-					chats.getChat(buddy, true);
-					break;
+				if(mBlogSender.profileUrl)
+					navigateToURL(new URLRequest(mBlogSender.profileUrl));
 			}
+			else
+			{
+				switch(event.target.data)
+				{
+					case "reply" :
+						Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "@" + message.mBlogSender.userName + " "));
+						break;
+					case "retweet" :
+						Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + message.mBlogSender.userName + " : " + bodyTextField.text));
+						break;
+					case "direct" :
+						var buddy:Buddy = appModel.getBuddyByJid(message.mBlogSender.jid);
+						if(!buddy)
+						{
+							buddy = new Buddy(message.mBlogSender.jid);
+							appModel.buddies.addBuddy(buddy);
+						}
+						chats.getChat(buddy, true);
+						break;
+				}
+			}
+			
 		}
 
 		override protected function get bodyTextWidth():Number

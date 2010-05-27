@@ -107,7 +107,7 @@ package com.cleartext.ximpp.views.buddies
 			// add or remove subscription request if required
 			if(!buddy.subscribedTo && !subscribeItem)
 			{
-				subscribeItem = new ContextMenuItem("resend subscirption request", true);
+				subscribeItem = new ContextMenuItem("resend subscription request", true);
 				subscribeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, sendSubscription);
 				customContextMenu.addItemAt(subscribeItem, 4);
 			}

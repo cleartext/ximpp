@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas
 	width="100%" height="100%"
-	initialize="init();"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:header="com.cleartext.ximpp.views.header.*"
 	xmlns:buddies="com.cleartext.ximpp.views.buddies.*" 
-	xmlns:messages="com.cleartext.ximpp.views.messages.*">
+	xmlns:messages="com.cleartext.ximpp.views.messages.*"
+	creationComplete="init()"
+	>
 
 	<mx:Script>
 		<![CDATA[
@@ -62,7 +63,6 @@
 		
 			private function init():void
 			{
-				appModel.init();
 				Application.application.addEventListener(AIREvent.APPLICATION_ACTIVATE, applicationActivateHandler);
 			}
 			
@@ -84,15 +84,15 @@
 			[Mediate(event="LinkEvent.LINK_CLICKED")]
 			public function showLinkWindow(event:LinkEvent):void
 			{
-				if(false)
-				{
-					navigateToURL(new URLRequest(event.url));
-				}
-				else
+				if(appModel.settings.global.checkUrls)
 				{
 					var window:LinkWindow = new LinkWindow();
 					window.url = event.url;
 					initializePopUp(window);
+				}
+				else
+				{
+					navigateToURL(new URLRequest(event.url));
 				}
 			}
 

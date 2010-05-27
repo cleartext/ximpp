@@ -109,13 +109,6 @@ package com.cleartext.ximpp.views.messages
 		
 		protected function creationCompleteHandler(event:FlexEvent):void
 		{
-			chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
-			
-			for each(var buddy:Buddy in buddies.buddies.source)
-			{
-				if(buddy.openTab)
-					chats.getChat(buddy);
-			}
 		}
 		
 		public function numAvatars():int

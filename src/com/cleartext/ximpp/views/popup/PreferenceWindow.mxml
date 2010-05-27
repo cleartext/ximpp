@@ -76,6 +76,7 @@
 				messageSortComboBox.selectedItem = (settings.global.sortBySentDate) ? "date sent" : "date received";
 				awayTimeout.value = settings.global.awayTimeout;
 				playSoundsCheckBox.selected = settings.global.playSounds;
+				checkUrlsCheckBox.selected = settings.global.checkUrls;
 				
 				// load user accounts
 				accountList.dataProvider = database.getAllUserAccounts();
@@ -109,6 +110,7 @@
 				settings.global.sortBySentDate = (messageSortComboBox.selectedLabel == "date sent");
 				settings.global.awayTimeout = awayTimeout.value;
 				settings.global.playSounds = playSoundsCheckBox.selected;
+				settings.global.checkUrls = checkUrlsCheckBox.selected;
 				
 				for each(var userId:int in accountsToDelete)
 					database.removeAccount(userId);
@@ -291,6 +293,7 @@
 	
 	<mx:Label x="10" y="10" styleName="blackBoldBig" text="Global Settings" />
 
+
 	<mx:HRule left="10" right="10" y="35" />
 
 	<mx:Canvas left="10" y="45" right="10">
@@ -300,30 +303,34 @@
 		<mx:CheckBox y="60" label="Animate buddy list" id="animateBuddyListCheckBox"/>
 		<mx:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox"/>
 		<mx:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox"/>
+		<mx:CheckBox y="150" label="Check urls" id="checkUrlsCheckBox"/>
 
-		<mx:Label right="106" y="4" text="Sort messages by"/>
-		<mx:ComboBox right="0" width="102" id="messageSortComboBox" dataProvider="{['date sent', 'date received']}"/>
+		<mx:Button label="Check for updates" click="appModel.checkForUpdates(true)" right="0"/>
+
+		<mx:Label right="106" y="34" text="Sort messages by"/>
+		<mx:ComboBox right="0" width="102" y="30" id="messageSortComboBox" dataProvider="{['date sent', 'date received']}"/>
 	
-		<mx:Label right="78" y="34" text="Max workstream messages"/>
-		<mx:NumericStepper right="0" y="30" maximum="1000" minimum="0" id="numTimelineMessages" />
+		<mx:Label right="78" y="64" text="Max workstream messages"/>
+		<mx:NumericStepper right="0" y="60" maximum="1000" minimum="0" id="numTimelineMessages" />
 
-		<mx:Label right="78" y="64" text="Max chat messages" />
-		<mx:NumericStepper right="0" y="60" maximum="1000" minimum="0" id="numChatMessages" />
+		<mx:Label right="78" y="94" text="Max chat messages" />
+		<mx:NumericStepper right="0" y="90" maximum="1000" minimum="0" id="numChatMessages" />
 
-		<mx:Label right="86" y="94" text="Url shortening"/>
-		<mx:ComboBox right="0" width="82" id="urlShortenComboBox" y="90" dataProvider="{UrlShortener.types}"/>
+		<mx:Label right="86" y="124" text="Url shortening"/>
+		<mx:ComboBox right="0" width="82" id="urlShortenComboBox" y="120" dataProvider="{UrlShortener.types}"/>
 
-		<mx:Label right="124" y="124" text="Set away (0 = never)"/>
-		<mx:NumericStepper right="56" y="120" maximum="120" minimum="0" id="awayTimeout" />
-		<mx:Label right="0" y="124" text="minutes"/>
+		<mx:Label right="124" y="154" text="Set away (0 = never)"/>
+		<mx:NumericStepper right="56" y="150" maximum="120" minimum="0" id="awayTimeout" />
+		<mx:Label right="0" y="154" text="minutes"/>
+
 
 	</mx:Canvas>
 
-	<mx:Label x="10" y="200" styleName="blackBoldBig" text="Account Settings" />
+	<mx:Label x="10" y="230" styleName="blackBoldBig" text="Account Settings" />
 	
-	<mx:HRule left="10" right="10" y="225" />
+	<mx:HRule left="10" right="10" y="255" />
 
-	<mx:Canvas y="235" right="10" left="10" >
+	<mx:Canvas y="265" right="10" left="10" >
 		
 		<mx:List 
 			id="accountList" 

@@ -26,17 +26,7 @@
 				if(appModel)
 					setStyle("backgroundColor", appModel.soundColor.backgroundColor);
 			}
-			
-			private function dateSortSent(itemA:Object, itemB:Object):int
-			{
-				return ObjectUtil.dateCompare(itemA.sentTimestamp, itemB.sentTimestamp);
-			}
-            
-			private function dateSortReceived(itemA:Object, itemB:Object):int
-			{
-				return ObjectUtil.dateCompare(itemA.receivedTimestamp, itemB.receivedTimestamp);
-			}
-            
+			            
 			private function doSearch():void
 			{
 				cursorManager.setBusyCursor();
@@ -54,7 +44,7 @@
 			
 			private function formatDate(item:Object, column:DataGridColumn):String
 			{
-				return df.format(item.timestamp);
+				return df.format(new Date(item[column.dataField]));
 			}
 					
 		]]>
@@ -72,8 +62,8 @@
 	<mx:VDividedBox top="70" left="10" right="10" bottom="10">
 		<mx:DataGrid id="dataGrid" change="dataGridChangeHandler()" width="100%" height="100%" rowHeight="25">
 			<mx:columns>
-				<mx:DataGridColumn dataField="sentTimestamp" labelFunction="formatDate" width="75" headerText="sent" sortCompareFunction="dateSortSent"/>
-				<mx:DataGridColumn dataField="receivedTimestamp" labelFunction="formatDate" width="75" headerText="received" sortCompareFunction="dateSortReceived"/>
+				<mx:DataGridColumn dataField="sentTimestamp" labelFunction="formatDate" width="75" headerText="sent" />
+				<mx:DataGridColumn dataField="receivedTimestamp" labelFunction="formatDate" width="75" headerText="received" />
 				<mx:DataGridColumn dataField="sender" width="100" headerText="from" />
 				<mx:DataGridColumn dataField="recipient" width="100" headerText="to" />
 				<mx:DataGridColumn dataField="plainMessage" headerText="message" />

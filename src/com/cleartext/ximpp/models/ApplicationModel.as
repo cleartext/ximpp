@@ -6,8 +6,8 @@ package com.cleartext.ximpp.models
 	import air.update.events.UpdateEvent;
 	
 	import com.cleartext.ximpp.events.ApplicationEvent;
+	import com.cleartext.ximpp.events.LoadingEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
-	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.utils.LinkUitls;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -22,6 +22,7 @@ package com.cleartext.ximpp.models
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
+	import flash.utils.setTimeout;
 	
 	import mx.controls.Alert;
 	import mx.core.Application;
@@ -235,8 +236,8 @@ package com.cleartext.ximpp.models
 			// send the presence stanza
 			xmpp.sendPresence();
 		}
-
-		public function init():void
+		
+		public function checkForUpdates(visible:Boolean=false):void
 		{
 			// check for updates
 			var updater:ApplicationUpdaterUI = new ApplicationUpdaterUI();
@@ -246,7 +247,7 @@ package com.cleartext.ximpp.models
 				{
 					(event.target as ApplicationUpdaterUI).checkNow();
 				});
-			updater.isCheckForUpdateVisible = false;
+			updater.isCheckForUpdateVisible = visible;
 
 			updater.addEventListener(ErrorEvent.ERROR, log);
 			updater.addEventListener(DownloadErrorEvent.DOWNLOAD_ERROR, log);
@@ -254,25 +255,68 @@ package com.cleartext.ximpp.models
 			updater.initialize();
 			
 			currentVersion = updater.currentVersion;
-			
-			soundColor.load();
-			
-			database.createDatabase();
+		}
 
-			// if this changes the userId, it will reload all the data from the database
+		public function init():void
+		{
+			checkForUpdates();
+			soundColor.load();
+
+			database.createDatabase();
 			database.loadGlobalSettings();
-			setUserTimeout();
-			if(!settings.userAccount.valid)
-			{
-				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));
-			}
-			else if(settings.global.autoConnect)
-			{
-				setUserPresence(Status.AVAILABLE, settings.userAccount.customStatus);
-			}
 			
+			setUserTimeout();
+
 			buddies.buddies.addItem(Buddy.ALL_MICRO_BLOGGING_BUDDY);
 			buddies.refresh();
+			
+			if(!settings.userAccount.valid)
+			{
+				dispatchEvent(new LoadingEvent(LoadingEvent.LOADING_COMPLETE));
+				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));
+			}
+			else
+			{
+				database.addEventListener(LoadingEvent.BUDDIES_LOADING, dispatchEvent);
+				database.addEventListener(LoadingEvent.BUDDIES_LOADED, loadWorkstream);
+				database.loadBuddyData();
+			}
+		}
+		
+		private function loadWorkstream(event:LoadingEvent):void
+		{
+			database.removeEventListener(LoadingEvent.BUDDIES_LOADED, loadWorkstream);
+			database.removeEventListener(LoadingEvent.BUDDIES_LOADING, dispatchEvent);
+
+			database.addEventListener(LoadingEvent.WORKSTREAM_LOADING, dispatchEvent);
+			database.addEventListener(LoadingEvent.WORKSTREAM_LOADED, loadChats);
+			chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
+		}
+		
+		private function loadChats(event:LoadingEvent):void
+		{
+			database.removeEventListener(LoadingEvent.WORKSTREAM_LOADING, dispatchEvent);
+			database.removeEventListener(LoadingEvent.WORKSTREAM_LOADED, loadChats);
+			
+			var chatsToOpen:Array = new Array();
+			for each(var buddy:Buddy in buddies.buddies.source)
+				if(buddy.openTab && buddy!=Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					chatsToOpen.push(buddy);
+			
+			database.addEventListener(LoadingEvent.CHATS_LOADED, chatsLoadedHandler);
+			database.addEventListener(LoadingEvent.CHATS_LOADING, dispatchEvent);
+			database.loadChats(chatsToOpen);
+		}
+		
+		private function chatsLoadedHandler(event:LoadingEvent):void
+		{
+			database.removeEventListener(LoadingEvent.CHATS_LOADED, chatsLoadedHandler);
+			database.removeEventListener(LoadingEvent.CHATS_LOADING, dispatchEvent);
+
+			if(settings.global.autoConnect)
+				setUserPresence(Status.AVAILABLE, settings.userAccount.customStatus);
+
+			dispatchEvent(new LoadingEvent(LoadingEvent.LOADING_COMPLETE));
 		}
 		
 		public function shutDown():void
@@ -290,11 +334,11 @@ package com.cleartext.ximpp.models
 				});
 		}
 		
-		[Mediate(event="UserAccountEvent.CHANGED")]
-		public function userIdChanged(event:UserAccountEvent):void
-		{
-			database.loadBuddyData();
-		}
+//		[Mediate(event="UserAccountEvent.CHANGED")]
+//		public function userIdChanged(event:UserAccountEvent):void
+//		{
+//			database.loadBuddyData();
+//		}
 		
 		public function getBuddyByJid(jid:String):Buddy
 		{

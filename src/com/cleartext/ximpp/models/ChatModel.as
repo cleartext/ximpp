@@ -78,7 +78,7 @@ package com.cleartext.ximpp.models
 				}
 				
 				chat = new Chat(buddy);
-				chat.messages = database.loadMessages(buddy);
+				database.loadMessages(chat, !select);
 				var index:int = 0;
 				if(selectedChat)
 				{

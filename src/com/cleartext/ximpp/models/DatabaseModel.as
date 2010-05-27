@@ -1,7 +1,9 @@
 package com.cleartext.ximpp.models
 {
+	import com.cleartext.ximpp.events.LoadingEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.BuddyRequest;
+	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -19,6 +21,8 @@ package com.cleartext.ximpp.models
 	import flash.events.SQLErrorEvent;
 	import flash.filesystem.File;
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
+	import flash.utils.setTimeout;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
@@ -26,6 +30,12 @@ package com.cleartext.ximpp.models
 	
 	public class DatabaseModel extends EventDispatcher
 	{
+		private var maxTimeForProcess:int = 10;
+		private var timeout:int = 10;
+		
+		private var chatsToLoad:Array;
+		private var chatIndex:int = 0;
+		
 		/*
 		 * synchronous and asynchronous database connections
 		 */
@@ -57,6 +67,11 @@ package com.cleartext.ximpp.models
 			return appModel.requests;
 		}
 				
+		private function get chats():ChatModel
+		{
+			return appModel.chats;
+		}
+				
 		public function close():void
 		{
 			appModel.log("Closing sync database connection")
@@ -74,7 +89,7 @@ package com.cleartext.ximpp.models
 				
 				// create the local database file
 				var dbName:String = "ximpp.db";
-				// dbName = "ximpp1.db";
+				// dbName = "ximpp32.db";
 				// dbName = new Date().time + ".db";
 				
 				var dbFile:File = File.applicationStorageDirectory.resolvePath(dbName);
@@ -207,6 +222,13 @@ package com.cleartext.ximpp.models
 							stmt.execute();
 						}
 						
+						sql = "UPDATE messages SET receivedTimestamp=strftime('%s',timestamp)*1000 WHERE receivedTimestamp is null";
+						stmt.text = sql;
+						stmt.execute();
+						
+						sql = "UPDATE messages SET sentTimestamp=strftime('%s',timestamp)*1000 WHERE sentTimestamp is null";
+						stmt.text = sql;
+						stmt.execute();
 					}
 				}
 
@@ -285,42 +307,63 @@ package com.cleartext.ximpp.models
 			}
 		}
 
-		public function loadBuddyData():void
+		public function loadBuddyData(data:Array=null, index:int=0):void
 		{
-			try
+			var start:int = getTimer();
+			
+			if(data)
 			{
-				syncConn.begin(); 
-				appModel.log("Loading buddy data");
+				while(index>=0)
+				{
+					buddies.addBuddy(Buddy.createFromDB(data[index]));
+					index--;
+					if(start + maxTimeForProcess < getTimer())
+					{
+						var len:int = data.length;
+						dispatchEvent(new LoadingEvent(LoadingEvent.BUDDIES_LOADING, len-index, len));
+						setTimeout(loadBuddyData, timeout, data, index);
+						return;
+					}
+				}
 				
-				var stmt:SQLStatement = new SQLStatement();
-				stmt.sqlConnection = syncConn;
-				stmt.text = "Select * from buddies WHERE userid=" + settings.userId + " ORDER BY lastSeen ASC" ;
-				stmt.execute();
-				
-				var result:SQLResult = stmt.getResult();
-				
-				if(result && result.data)
-					for(var i:int=result.data.length-1; i>=0; i--)
-						buddies.addBuddy(Buddy.createFromDB(result.data[i]));
-	
-				stmt.text = "Select * from buddyRequests WHERE userid=" + settings.userId + " ORDER BY timestamp ASC" ;
-				stmt.execute();
-				
-				result = stmt.getResult();
-				
-				if(result && result.data)
-					for(var j:int=result.data.length-1; j>=0; j--)
-						requests.addRequest(BuddyRequest.createFromDB(result.data[j]));
-
-			    // if we've got to this point without errors, commit the transaction 
-			    if(syncConn.inTransaction)
-				    syncConn.commit(); 
-	
-				appModel.log("Buddy data loaded");
+				dispatchEvent(new LoadingEvent(LoadingEvent.BUDDIES_LOADED));
 			}
-			catch (e:Error)
+			else
 			{
-				appModel.log(e);
+				try
+				{
+					syncConn.begin(); 
+					appModel.log("Loading buddy data");
+					
+					var stmt:SQLStatement = new SQLStatement();
+					stmt.sqlConnection = syncConn;
+					stmt.text = "Select * from buddies WHERE userid=" + settings.userId + " ORDER BY lastSeen DESC" ;
+					stmt.execute();
+					
+					var result:SQLResult = stmt.getResult();
+					
+					if(result && result.data)
+						loadBuddyData(result.data, result.data.length-1);
+					else
+						dispatchEvent(new LoadingEvent(LoadingEvent.BUDDIES_LOADED));
+		
+					stmt.text = "Select * from buddyRequests WHERE userid=" + settings.userId + " ORDER BY timestamp ASC" ;
+					stmt.execute();
+					
+					result = stmt.getResult();
+					
+					if(result && result.data)
+						for(var j:int=result.data.length-1; j>=0; j--)
+							requests.addRequest(BuddyRequest.createFromDB(result.data[j]));
+	
+				    // if we've got to this point without errors, commit the transaction 
+				    if(syncConn.inTransaction)
+					    syncConn.commit(); 
+				}
+				catch (e:Error)
+				{
+					appModel.log(e);
+				}
 			}
 		}
 				
@@ -452,11 +495,30 @@ package com.cleartext.ximpp.models
 			message.messageId = insertStmt("messages", message.toDatabaseValues(settings.userId));
 		}
 		
-		public function loadMessages(buddy:Buddy):ArrayCollection
+		public function loadChats(chatsToOpen:Array, index:int=0):void
 		{
+			var start:int = getTimer();
+			var len:int = chatsToOpen.length;
+			while(index < len)
+			{
+				chats.getChat(chatsToOpen[index] as Buddy);
+				index++;
+				if(start + maxTimeForProcess < getTimer())
+				{
+					dispatchEvent(new LoadingEvent(LoadingEvent.CHATS_LOADING, index, len));
+					setTimeout(loadChats, timeout, chatsToOpen, index);
+					return;
+				}
+			}
+			dispatchEvent(new LoadingEvent(LoadingEvent.CHATS_LOADED));
+		}
+		
+		public function loadMessages(chat:Chat, syncnonusly:Boolean=true):void
+		{
+			var buddy:Buddy = chat.buddy;
 			var buddyArray:Array = (buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? buddies.microBloggingBuddies.toArray() : [buddy];
 			if(buddyArray.length == 0)
-				return new ArrayCollection();;
+				return;
 
 			var sortType:String = (settings.global.sortBySentDate) ? "sentTimestamp" : "receivedTimestamp";
 
@@ -482,21 +544,49 @@ package com.cleartext.ximpp.models
 			var result:SQLResult = stmt.getResult();
 		    syncConn.commit(); 
 
-			var messages:ArrayCollection = new ArrayCollection();
-			
 			if(result && result.data)
 			{
-				var len:int = result.data.length;
-				for(var i:int=0; i<len; i++)
-					messages.addItem(Message.createFromDB(result.data[i], mBlogBuddies));
+				var sort:Sort = new Sort();
+				sort.fields = [new SortField("sortDate", false, true)];
+				chat.messages.sort = sort;
+				if(syncnonusly)
+				{
+					for(var i:int = result.data.length-1; i>=0; i--)
+						chat.messages.addItem(Message.createFromDB(result.data[i], mBlogBuddies));
+					dispatchEvent(new LoadingEvent(LoadingEvent.CHAT_LOADED));
+				}
+				else
+				{
+					loopOverMessages(result.data, 0, chat);
+				}
 			}
+
 		    // if we've got to this point without errors, commit the transaction 
 			appModel.log("Messages loaded");
+		}
+		
+		private function loopOverMessages(data:Array, index:int, chat:Chat):void
+		{
+			var start:int = getTimer();
 
-			var sort:Sort = new Sort();
-			sort.fields = [new SortField("sortDate", false, true)];
-			messages.sort = sort;
-			return messages;
+			var len:int = data.length;
+			while(index < len)
+			{
+				chat.messages.addItem(Message.createFromDB(data[index], mBlogBuddies));
+				index++;
+				if(start + maxTimeForProcess < getTimer())
+				{
+					if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					{
+						dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADING, index-1, len));
+					}
+					setTimeout(loopOverMessages, timeout, data, index, chat);
+					return;
+				}
+			}
+			
+			if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
 		}
 		
 		private function insertStmt(table:String, values:Array):int
@@ -661,7 +751,7 @@ package com.cleartext.ximpp.models
 				sql += "plainMessage LIKE '%" + s + "%' OR ";
 
 			sql = sql.substr(0, sql.length-4);
-			sql += ") ORDER BY timestamp";
+			sql += ") ORDER BY " + sortType;
 			stmt.text = sql;
 			stmt.execute();
 			var result:SQLResult = stmt.getResult();
