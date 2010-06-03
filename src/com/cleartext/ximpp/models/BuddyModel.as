@@ -132,7 +132,7 @@ package com.cleartext.ximpp.models
 			var index:int = buddies.list.getItemIndex(buddy);
 			if(index != -1)
 			{
-				database.removeBuddy(buddy.buddyId);
+				database.removeBuddy(buddy);
 				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
 				buddies.list.removeItemAt(index);
 				delete buddiesByJid[buddy.jid];

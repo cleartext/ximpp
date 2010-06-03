@@ -3,6 +3,7 @@
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	applicationComplete="windowCompleteHandler()"
 	layout="absolute"
+	autoExit="true"
 	xmlns:swiz="http://swiz.swizframework.org"
 	xmlns:views="com.cleartext.ximpp.views.*"
 	showStatusBar="false"
@@ -47,7 +48,7 @@
 				panel.width = 300;
 				panel.height = 100;
 				panel.layout = "absolute";
-				panel.title = "Initialising";
+				panel.title = "Initalising";
 				panel.addChild(progressBar);
 
 				PopUpManager.addPopUp(panel, this, true);
@@ -59,11 +60,9 @@
 	   			if(--renderCount == 0)
 	   			{
 			   		progressBar.removeEventListener(event.type, splashReady);
-
 			   		mainView.appModel.addEventListener(LoadingEvent.BUDDIES_LOADING, progressHandler);
 			   		mainView.appModel.addEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
 			   		mainView.appModel.addEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
-
 					mainView.appModel.addEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
 					mainView.appModel.init();
 	   			}
@@ -95,6 +94,12 @@
 		   	
 		   	private function initCompleteHandler(event:LoadingEvent):void
 		   	{
+
+		   		mainView.appModel.removeEventListener(LoadingEvent.BUDDIES_LOADING, progressHandler);
+		   		mainView.appModel.removeEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
+		   		mainView.appModel.removeEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
+				mainView.appModel.removeEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
+
 				PopUpManager.removePopUp(panel);
 		   	}
 		   	

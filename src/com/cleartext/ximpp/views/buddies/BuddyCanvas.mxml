@@ -198,8 +198,18 @@
 					requestCanvas.visible = requestCanvas.includeInLayout = !requestCanvas.visible;
 				
 				setRequestIcon();
-
 				callLater(invalidateDisplayList);
+			}
+			
+			[Mediate (event="BuddyRequestEvent.REMOVE_REQUEST")]
+			public function hideRequestPanel(event:BuddyRequestEvent):void
+			{
+				if(requests.requests.length == 0)
+				{
+					requestCanvas.visible = requestCanvas.includeInLayout = false;
+					setRequestIcon();
+					callLater(invalidateDisplayList);
+				}
 			}
 			
 			private function setRequestIcon(event:Event=null):void
@@ -426,7 +436,7 @@
 			clipContent="false"
 			backgroundColor="0x444444"
 			width="100%" height="150"
-			visible="false"
+			visible="{requests.requests.length > 0}"
 			includeInLayout="false"
 			>
 			<mx:Canvas id="requestHeader" 

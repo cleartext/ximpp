@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.ChatModel;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import mx.events.CloseEvent;

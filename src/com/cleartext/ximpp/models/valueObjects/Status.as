@@ -11,6 +11,7 @@ package com.cleartext.ximpp.models.valueObjects
 		// unavailable
 		public static const OFFLINE:String = "offline";
 		public static const UNSUBSCRIBED:String = "unsubscribed";
+		public static const UNAVAILABLE:String = "unavailable";
 		// available
 		public static const AVAILABLE:String = "available";
 		public static const AWAY:String = "away";

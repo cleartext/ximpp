@@ -36,6 +36,11 @@ package com.cleartext.ximpp.models.valueObjects
 			stmt.parameters[paramString] = value;
 			return columnName + ((match) ? " = " : " != ") + paramString;
 		}
+		
+		public function renderParameter():String
+		{
+			return columnName + ((match) ? " = " : " != ") + "(" + value + ")";
+		}
 	}
 	
 }

@@ -20,9 +20,11 @@ package com.cleartext.ximpp.models
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.TimerEvent;
+	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
-	import flash.utils.setTimeout;
 	
 	import mx.controls.Alert;
 	import mx.core.Application;
@@ -65,6 +67,9 @@ package com.cleartext.ximpp.models
 		
 		public var currentVersion:String;
 		
+		private var logFileStream:FileStream;
+		private var xmlFileStream:FileStream;
+		
 		/*
 		 * SERVER SIDE STATUS
 		 * This variable stores the state that the server has for us based on
@@ -98,18 +103,19 @@ package com.cleartext.ximpp.models
 		}
 		public function xmlStreamHandler(event:StreamEvent):void
 		{
-			if(!xmlConsoleEnabled || event.data == "")
+			if(event.data == "")
 				return;
 			
-			xmlConsoleText += getTimer() + " " ;
-			
-			if(event.type == StreamEvent.COMM_OUT)
-				xmlConsoleText += "OUT :";
-			else
-				xmlConsoleText += "IN :";
-			
-			xmlConsoleText += "\n" + event.data + "\n\n";
-			dispatchEvent(new Event("xmlConsoleTextChanged"));
+			var str:String = "<" + ((event.type == StreamEvent.COMM_OUT) ? "out " : "in " ) + "time='" + getTimer() + "'>\n" + 
+					event.data + "\n\n";
+	
+			xmlFileStream.writeUTFBytes(str);
+
+			if(xmlConsoleEnabled)
+			{
+				xmlConsoleText += str;
+				dispatchEvent(new Event("xmlConsoleTextChanged"));
+			}
 		}
 		
 		[Bindable]
@@ -125,28 +131,11 @@ package com.cleartext.ximpp.models
 			logText = "";
 			dispatchEvent(new Event("logTextChanged"));
 		}
-		public function log(toLog:Object):void
+		public function log(toLog:Object, lineBreak:Boolean=false):void
 		{
-			var str:String = getTimer() + " : ";
-			var traceStr:String = getTimer() + " : ";
-
-			if(toLog is String)
-			{
-				str += toLog;
-				traceStr += toLog;
-			}
-			else if(toLog is Event)
-			{
-				var event:Event = toLog as Event;
-				str += event.type;
-				traceStr += event.toString();
-			}
-			else if(toLog is Error)
-			{
-				var error:Error = toLog as Error;
-				str += error.name;
-				traceStr += error.toString();
-			}
+			var str:String = ((lineBreak) ? "\n" : "") + getTimer() + " : " + toLog.toString();
+			
+			logFileStream.writeUTFBytes(str + "\n");
 
 			if(logEnabled)
 			{
@@ -154,7 +143,7 @@ package com.cleartext.ximpp.models
 				dispatchEvent(new Event("logTextChanged"));
 			}
 
-			trace(traceStr);
+			trace(str);
 		}
 		
 		private var statusTimer:Timer;
@@ -185,7 +174,7 @@ package com.cleartext.ximpp.models
 			}
 			else
 			{
-				// test for valid second value
+				// make sure user setting is within possible bounds
 				seconds = Math.max(5, seconds);
 				seconds = Math.min(86400, seconds);
 
@@ -259,6 +248,28 @@ package com.cleartext.ximpp.models
 
 		public function init():void
 		{
+			// delete old logFiles
+			var logDir:File = File.applicationStorageDirectory.resolvePath("logs/");
+			var logList:Array = logDir.getDirectoryListing();
+			
+			logList.sortOn("name");
+			while(logList.length > 8)
+			{
+				var delFile:File = logList.shift();
+				delFile.deleteFile();
+			}
+			
+			// create log file
+			var now:String = new Date().time.toString();
+			var appLog:File = logDir.resolvePath(now + ".log");
+			var xmlLog:File =logDir.resolvePath(now + ".xml");
+			
+			logFileStream = new FileStream();
+			logFileStream.open(appLog, FileMode.WRITE);
+			
+			xmlFileStream = new FileStream();
+			xmlFileStream.open(xmlLog, FileMode.WRITE);
+			
 			checkForUpdates();
 			soundColor.load();
 
@@ -272,6 +283,7 @@ package com.cleartext.ximpp.models
 			
 			if(!settings.userAccount.valid)
 			{
+				log("Invalid user account, opening preferences panel");
 				dispatchEvent(new LoadingEvent(LoadingEvent.LOADING_COMPLETE));
 				Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.PREFERENCES_WINDOW));
 			}
@@ -288,6 +300,8 @@ package com.cleartext.ximpp.models
 			database.removeEventListener(LoadingEvent.BUDDIES_LOADED, loadWorkstream);
 			database.removeEventListener(LoadingEvent.BUDDIES_LOADING, dispatchEvent);
 
+			log("Loading workstream", true);
+
 			database.addEventListener(LoadingEvent.WORKSTREAM_LOADING, dispatchEvent);
 			database.addEventListener(LoadingEvent.WORKSTREAM_LOADED, loadChats);
 			chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
@@ -303,6 +317,8 @@ package com.cleartext.ximpp.models
 				if(buddy.openTab && buddy!=Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					chatsToOpen.push(buddy);
 			
+			log("Loading " + chatsToOpen.length + " chats");
+
 			database.addEventListener(LoadingEvent.CHATS_LOADED, chatsLoadedHandler);
 			database.addEventListener(LoadingEvent.CHATS_LOADING, dispatchEvent);
 			database.loadChats(chatsToOpen);
@@ -312,6 +328,8 @@ package com.cleartext.ximpp.models
 		{
 			database.removeEventListener(LoadingEvent.CHATS_LOADED, chatsLoadedHandler);
 			database.removeEventListener(LoadingEvent.CHATS_LOADING, dispatchEvent);
+
+			log("Loading complete");
 
 			if(settings.global.autoConnect)
 				setUserPresence(Status.AVAILABLE, settings.userAccount.customStatus);
@@ -323,6 +341,8 @@ package com.cleartext.ximpp.models
 		{
 			xmpp.disconnect();
 			database.close();
+			logFileStream.close();
+			xmlFileStream.close();
 		}
 		
 		public function fatalError(errorMsg:String=""):void

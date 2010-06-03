@@ -25,6 +25,8 @@ package com.cleartext.ximpp.events
 
 		public static const BROADCAST_WINDOW:String = "broadcastWindow";
 		public static const NEW_CHAT_WITH_GROUP:String = "newChatWithGroup";
+
+		public static const CHANGE_PASSWORD_WINDOW:String = "changePasswordWindow";
 		
 		public var buddy:Buddy;
 		public var group:String;

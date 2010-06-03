@@ -107,7 +107,7 @@ package com.cleartext.ximpp.views.popup
 			// override me
 		}
 		
-		public function validateInput(event:Event, message:String="can not be empty"):void
+		public function validateInput(event:Event, message:String="can not be empty", validateFunction:Function=null):void
 		{
 			var target:UIComponent = event.currentTarget as UIComponent;
 			
@@ -116,8 +116,10 @@ package com.cleartext.ximpp.views.popup
 			
 			var toolTip:ToolTip = errorMessageToolTips[target.name] as ToolTip;
 			
-			if(target is TextInput && (target as TextInput).text == "" ||
-				target is List && getSelected(target as List).length < 1)
+			if((validateFunction != null && !validateFunction.call(target)) ||
+				validateFunction == null && 
+					(target is TextInput && (target as TextInput).text == "" ||
+					target is List && getSelected(target as List).length < 1))
 			{
 				if (toolTip)
 				{

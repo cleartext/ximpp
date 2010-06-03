@@ -13,6 +13,9 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.events.UserAccountEvent;
+			import com.cleartext.ximpp.events.PopUpEvent;
+			import org.swizframework.Swiz;
 			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import com.adobe.crypto.SHA1;
@@ -287,6 +290,12 @@
 				
 			}
 			
+			[Mediate(event="UserAccountEvent.PASSWORD_CHANGE")]
+			public function changePasswordHandler(event:UserAccountEvent):void
+			{
+				password.text = event.newPassword;
+			}
+			
 			
 		]]>
 	</mx:Script>
@@ -367,9 +376,15 @@
 				</mx:VBox>
 			</mx:FormItem>
 			<mx:FormItem label="Password:">
-				<mx:VBox>
-					<mx:TextInput id="password" enabled="{!xmpp.connected}" toolTip="{!xmpp.connected ? '' : 'log off to make changes'}" displayAsPassword="true" change="changesMade = true; validateInput(event, 'password can not be empty');" focusOut="validateInput(event, 'password can not be empty'); " width="{TEXT_INPUT_WIDTH}" />
-				</mx:VBox>
+				<mx:HBox >
+					<mx:VBox>
+						<mx:TextInput id="password" enabled="{!xmpp.connected}" toolTip="{!xmpp.connected ? '' : 'log off to make changes'}" displayAsPassword="true" change="changesMade = true; validateInput(event, 'password can not be empty');" focusOut="validateInput(event, 'password can not be empty'); " width="{TEXT_INPUT_WIDTH}" />
+					</mx:VBox>
+					<mx:Button enabled="{xmpp.connected}" 
+						label="change..." 
+						click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.CHANGE_PASSWORD_WINDOW));"
+						toolTip="{xmpp.connected ? '' : 'go online to change your password on the server'}"/>
+				</mx:HBox>
 			</mx:FormItem>
 			<mx:FormItem label="Server:">
 				<mx:VBox>

@@ -104,36 +104,41 @@ package com.cleartext.ximpp.models
 			return chat;
 		}
 		
-		public function removeChat(buddy:Buddy=null):void
+		public function removeChat(buddyOrJid:Object=null):void
 		{
 			var chat:Chat;
+			var buddy:Buddy;
 
-			if(!buddy)
+			if(!buddyOrJid)
 				chat = selectedChat;
-			else
-				chat = chatsByJid[buddy.jid];
+			else if(buddyOrJid is Buddy)
+				chat = chatsByJid[buddyOrJid.jid];
+			else if(buddyOrJid is String)
+				chat = chatsByJid[buddyOrJid];
 			
-			if(chat)
+			if(!chat)
+				return;
+
+			buddy = chat.buddy;
+
+			buddy.openTab = false;
+			var i:int = chats.indexOf(chat);
+			chats.splice(i, 1);
+			delete chatsByJid[buddy.jid];
+
+
+			if(chat == selectedChat)
 			{
-				buddy.openTab = false;
-				var i:int = chats.indexOf(chat);
-				chats.splice(i, 1);
-				delete chatsByJid[buddy.jid];
-
-
-				if(chat == selectedChat)
-				{
-					if(chats.length == 0)
-						_selectedChat = null;
-					else
-						_selectedChat = (i >= chats.length) ? chats[0] : chats[i];
-				}
-				dispatchEvent(new ChatEvent(ChatEvent.REMOVE_CHAT, chat, i));
-				
-				if(buddy.isChatRoom)
-				{
-					appModel.xmpp.leaveChatRoom(buddy.jid);
-				}
+				if(chats.length == 0)
+					_selectedChat = null;
+				else
+					_selectedChat = (i >= chats.length) ? chats[0] : chats[i];
+			}
+			dispatchEvent(new ChatEvent(ChatEvent.REMOVE_CHAT, chat, i));
+			
+			if(buddy.isChatRoom)
+			{
+				appModel.xmpp.leaveChatRoom(buddy.jid);
 			}
 		}
 		

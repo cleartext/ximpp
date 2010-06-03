@@ -263,6 +263,10 @@ package com.cleartext.ximpp.models.valueObjects
 		//------------------------------------
 		// not storred in database 
 		//------------------------------------
+		
+		public var features:Array = new Array();
+		public var identities:Array = new Array();
+		public var items:Array = new Array();
 
 		private var _unreadMessages:int = 0;
 		[Bindable(event="buddyChanged")]
@@ -377,6 +381,20 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("autoOpenTab", autoOpenTab),
 				new DatabaseValue("unreadMessages", unreadMessages),
 				];
+		}
+		
+		public function get host():String
+		{
+			if(isChatRoom)
+				return jid;
+			return jid.substr(jid.indexOf("@")+1);
+		}
+		
+		public function get username():String
+		{
+			if(isChatRoom)
+				return "";
+			return jid.substr(0, jid.indexOf("@"));
 		}
 		
 		public function get fullJid():String

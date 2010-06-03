@@ -196,9 +196,6 @@ package com.cleartext.ximpp.views.messages
 		
 		private function addChatHandler(event:ChatEvent):void
 		{
-			if(appModel)
-				appModel.log(chats.selectedIndex + " " + event.index + " " + event.select + " " + event.chat.buddy.nickName);
-
 			var chat:Chat = event.chat;
 			var avatar:AvatarTab = new AvatarTab();
 			avatar.data = chat;
@@ -286,9 +283,6 @@ package com.cleartext.ximpp.views.messages
 				inputCanvas.buddy = null;
 				return;
 			}
-			
-			if(appModel)
-				appModel.log(chats.selectedIndex + " " + chats.selectedChat.buddy.nickName);
 			
 			chat.messages.refresh();
 			setChatStateTo(chat, ChatStateTypes.ACTIVE);

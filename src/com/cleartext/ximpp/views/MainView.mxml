@@ -10,6 +10,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.ChangePasswordWindow;
 			import flash.net.navigateToURL;
 			import com.cleartext.ximpp.views.popup.LinkWindow;
 			import com.cleartext.ximpp.events.LinkEvent;
@@ -75,6 +76,12 @@
 			// MISC WINDOWS
 			//----------------------------------------------
 				
+			[Mediate(event="PopUpEvent.CHANGE_PASSWORD_WINDOW")]
+			public function showChangePasswordWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new ChangePasswordWindow());
+			}
+
 			[Mediate(event="PopUpEvent.PREFERENCES_WINDOW")]
 			public function showPreferencesWindow(event:PopUpEvent):void
 			{

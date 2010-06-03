@@ -85,8 +85,7 @@ package com.cleartext.ximpp.models
 		{
 			try
 			{
-				appModel.log("Creating and opening database");
-				
+				appModel.log("Creating and opening database", true);
 				// create the local database file
 				var dbName:String = "ximpp.db";
 				// dbName = "ximpp32.db";
@@ -96,80 +95,68 @@ package com.cleartext.ximpp.models
 				appModel.log("DB Location: " + dbFile.nativePath);
 				
 				// link the sync connection to the file
-				appModel.log("Opening sync database connection")
+				appModel.log("Opening sync database connection");
 				syncConn = new SQLConnection();
 				syncConn.open(dbFile, SQLMode.CREATE);
 				syncConn.addEventListener(SQLErrorEvent.ERROR, appModel.log, false, 0, true);
 
-				// start a transaction
-				syncConn.begin();
-				var stmt:SQLStatement = new SQLStatement();
-				stmt.sqlConnection = syncConn;
+				var sql:String;
 				
 				/*
 				 * create the global settings table
 				 */
-				appModel.log("Creating global settings table.");
-				stmt.text = GlobalSettings.CREATE_GLOBAL_SETTINGS_TABLE;
-				stmt.execute();
+				appModel.log("Creating global settings table", true);
+				execute(GlobalSettings.CREATE_GLOBAL_SETTINGS_TABLE);
 
 				/*
 				 * check there is at least one row in the global settings table
 				 */
-				appModel.log("Checking default global settings exist.");
-				stmt.text = "INSERT INTO globalSettings (settingId)" + 
+				appModel.log("Checking default global settings exist");
+				execute("INSERT INTO globalSettings (settingId)" + 
 					"SELECT 1 " + 
-					"WHERE NOT EXISTS (SELECT 1 FROM globalSettings WHERE settingId=1)";
-				stmt.execute();
+					"WHERE NOT EXISTS (SELECT 1 FROM globalSettings WHERE settingId=1)");
 
 				/*
 				 * create the user accounts table
 				 */
-				appModel.log("Creating user settings table.");
-				stmt.text = UserAccount.CREATE_USER_ACCOUNTS_TABLE;
-				stmt.execute();
+				appModel.log("Creating user settings table", true);
+				execute(UserAccount.CREATE_USER_ACCOUNTS_TABLE);
 				
 				/*
 				 * check there is at least one user account
 				 */
-				appModel.log("Checking user account exist.");
-				stmt.text = "INSERT INTO userAccounts (userId)" + 
+				appModel.log("Checking user account exist");
+				execute("INSERT INTO userAccounts (userId)" + 
 					"SELECT 1 " + 
-					"WHERE NOT EXISTS (SELECT 1 FROM userAccounts WHERE userId=1)";
-				stmt.execute();
+					"WHERE NOT EXISTS (SELECT 1 FROM userAccounts WHERE userId=1)");
 
 				/*
 				 * create messages table
 				 */
-				appModel.log("Creating messages table");
-				stmt.text = Message.CREATE_MESSAGES_TABLE;
-				stmt.execute();
+				appModel.log("Creating messages table", true);
+				execute(Message.CREATE_MESSAGES_TABLE);
 				
 				/*
 				 * Create buddy table
 				 */
-				appModel.log("Creating buddy table");
-				stmt.text = Buddy.CREATE_BUDDIES_TABLE;
-				stmt.execute();
+				appModel.log("Creating buddy table", true);
+				execute(Buddy.CREATE_BUDDIES_TABLE);
 				
 				/*
-				 * Create imageCache table
+				 * Create microBloggingBuddies table
 				 */
-				appModel.log("Creating microBloggingBuddiesTable table");
-				stmt.text = MicroBloggingBuddy.CREATE_MICRO_BLOGGING_BUDDIES_TABLE;
-				stmt.execute();
+				appModel.log("Creating microBloggingBuddiesTable table", true);
+				execute(MicroBloggingBuddy.CREATE_MICRO_BLOGGING_BUDDIES_TABLE);
 
 				/*
 				 * Create buddyRequests table
 				 */
-				appModel.log("Creating buddyRequests table");
-				stmt.text = BuddyRequest.CREATE_BUDDY_REQUESTS_TABLE;
-				stmt.execute();
+				appModel.log("Creating buddyRequests table", true);
+				execute(BuddyRequest.CREATE_BUDDY_REQUESTS_TABLE);
 				
 				var mods:Array;
 				var column:SQLColumnSchema;
 				var mod:Object;
-				var sql:String;
 				var i:int;
 				
 				syncConn.loadSchema();
@@ -194,9 +181,8 @@ package com.cleartext.ximpp.models
 							sql = "ALTER TABLE buddies ADD COLUMN " + mod.name + " " + mod.type;
 							if(mod.hasOwnProperty("defaultVal"))
 								sql += " DEFAULT " + mod.defaultVal;
-							appModel.log("Updating buddy table structure " + sql);
-							stmt.text = sql;
-							stmt.execute();
+							appModel.log("Updating buddy table structure", true);
+							execute(sql);
 						}
 					}
 					else if(table.name == "messages")
@@ -217,24 +203,20 @@ package com.cleartext.ximpp.models
 							sql = "ALTER TABLE messages ADD COLUMN " + mod.name + " " + mod.type;
 							if(mod.hasOwnProperty("defaultVal"))
 								sql += " DEFAULT " + mod.defaultVal;
-							appModel.log("Updating message table structure " + sql);
-							stmt.text = sql;
-							stmt.execute();
+							appModel.log("Updating message table structure", true);
+							execute(sql);
 						}
 						
+						appModel.log("Setting receivedTimestamp feild", true);
 						sql = "UPDATE messages SET receivedTimestamp=strftime('%s',timestamp)*1000 WHERE receivedTimestamp is null";
-						stmt.text = sql;
-						stmt.execute();
+						execute(sql);
 						
+						appModel.log("Setting sentTimestamp feild", true);
 						sql = "UPDATE messages SET sentTimestamp=strftime('%s',timestamp)*1000 WHERE sentTimestamp is null";
-						stmt.text = sql;
-						stmt.execute();
+						execute(sql);
 					}
 				}
-
-				syncConn.commit();
-				appModel.log("Database created");
-
+				appModel.log("Database successfully created", true);
 			}
 			catch (error:Error)
 			{
@@ -248,23 +230,10 @@ package com.cleartext.ximpp.models
 		 */
 		public function loadUserSettings(newUserId:int):void
 		{
-			// start a transaction 
-			syncConn.begin(); 
-			appModel.log("Loading user settings");
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "SELECT * FROM userAccounts WHERE userId=" + newUserId;
-			stmt.execute();
-		    
-		   	var result:SQLResult = stmt.getResult();
-
+			appModel.log("Loading user settings", true);
+			var result:SQLResult = execute("SELECT * FROM userAccounts WHERE userId=" + newUserId);
 			if (result && result.data)
 			{
-			    // if we've got to this point without errors, commit the transaction 
-			    syncConn.commit();
-				appModel.log("User settings loaded ");
-
 				settings.userAccount = UserAccount.createFromDB(result.data[0], mBlogBuddies);
 			}
 			else
@@ -278,16 +247,8 @@ package com.cleartext.ximpp.models
 		 */
 		public function loadGlobalSettings():void
 		{
-			// start a transaction 
-			syncConn.begin();
-			appModel.log("Loading global settings");
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "SELECT * FROM globalSettings";
-			stmt.execute();
-		    
-		   	var result:SQLResult = stmt.getResult();
+			appModel.log("Loading global settings", true);
+		    var result:SQLResult = execute("SELECT * FROM globalSettings");
 		   	
 		   	var newUserId:int;
 			if (result && result.data)
@@ -296,10 +257,6 @@ package com.cleartext.ximpp.models
 				settings.global = GlobalSettings.createFromDB(result.data[0]) as GlobalSettings;
 			}
 			
-		    // if we've got to this point without errors, commit the transaction 
-		    syncConn.commit(); 
-			appModel.log("Global settings loaded");
-
 			// if the userId has changed, then we want to get all data from the database
 			if(newUserId != settings.userId)
 			{
@@ -332,33 +289,19 @@ package com.cleartext.ximpp.models
 			{
 				try
 				{
-					syncConn.begin(); 
-					appModel.log("Loading buddy data");
-					
-					var stmt:SQLStatement = new SQLStatement();
-					stmt.sqlConnection = syncConn;
-					stmt.text = "Select * from buddies WHERE userid=" + settings.userId + " ORDER BY lastSeen DESC" ;
-					stmt.execute();
-					
-					var result:SQLResult = stmt.getResult();
+					appModel.log("Loading buddy requests", true);
+					result = execute("Select * from buddyRequests WHERE userid=" + settings.userId + " ORDER BY timestamp ASC");
+					if(result && result.data)
+						for(var j:int=result.data.length-1; j>=0; j--)
+							requests.addRequest(BuddyRequest.createFromDB(result.data[j]));
+
+					appModel.log("Loading buddies", true);
+					var result:SQLResult = execute("Select * from buddies WHERE userid=" + settings.userId + " ORDER BY lastSeen DESC");
 					
 					if(result && result.data)
 						loadBuddyData(result.data, result.data.length-1);
 					else
 						dispatchEvent(new LoadingEvent(LoadingEvent.BUDDIES_LOADED));
-		
-					stmt.text = "Select * from buddyRequests WHERE userid=" + settings.userId + " ORDER BY timestamp ASC" ;
-					stmt.execute();
-					
-					result = stmt.getResult();
-					
-					if(result && result.data)
-						for(var j:int=result.data.length-1; j>=0; j--)
-							requests.addRequest(BuddyRequest.createFromDB(result.data[j]));
-	
-				    // if we've got to this point without errors, commit the transaction 
-				    if(syncConn.inTransaction)
-					    syncConn.commit(); 
 				}
 				catch (e:Error)
 				{
@@ -369,49 +312,27 @@ package com.cleartext.ximpp.models
 				
 		public function getAllUserAccounts():ArrayCollection
 		{
-			// start a transaction 
-			syncConn.begin(); 
-			appModel.log("Loading user accounts");
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "SELECT * FROM userAccounts";
-			stmt.execute();
-		    
-		   	var result:SQLResult = stmt.getResult();
+			appModel.log("Loading user accounts", true);
+			var result:SQLResult = execute("SELECT * FROM userAccounts");
 		   	var accounts:ArrayCollection = new ArrayCollection();
-
 			if (result && result.data)
 			{
 				var len:int = result.data.length;
 				for(var i:int=0; i<len; i++)
 					accounts.addItem(UserAccount.createFromDB(result.data[i], mBlogBuddies));
 			}
-			
-		    // if we've got to this point without errors, commit the transaction 
-		    syncConn.commit(); 
-			appModel.log("User accounts loaded");
 			return accounts;
 		}
 		
 		public function removeAccount(userId:int):void
 		{
-			syncConn.begin(); 
-			appModel.log("Deleting user account with userId: " + userId);
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "DELETE FROM userAccounts WHERE userId = " + userId;
-			stmt.execute();
-
-		    // if we've got to this point without errors, commit the transaction 
-		    syncConn.commit(); 
-			appModel.log("User account deleted");
+			appModel.log("Deleting user account", true);
+			execute("DELETE FROM userAccounts WHERE userId = " + userId);
 		}
 		
 		public function saveGlobalSettings():void
 		{
-			appModel.log("Saving global settings.");
+			appModel.log("Saving global settings", true);
 
 			var values:Array = settings.global.toDatabaseValues(settings.userId);
 			var criteria:Array = [new DatabaseValue("settingId", 1)];
@@ -421,7 +342,7 @@ package com.cleartext.ximpp.models
 		
 		public function saveUserAccount(userAccount:UserAccount):int
 		{
-			appModel.log("Saving user account " + userAccount.accountName + " userId: " + userAccount.userId);
+			appModel.log("Saving user account : " + userAccount.accountName + " userId: " + userAccount.userId, true);
 			
 			var values:Array = userAccount.toDatabaseValues(userAccount.userId);
 			var criteria:Array = [new DatabaseValue("userId", userAccount.userId)]
@@ -436,6 +357,7 @@ package com.cleartext.ximpp.models
 		
 		public function saveBuddy(buddy:Buddy):int
 		{
+			appModel.log("Saving buddy : " + buddy.jid + " buddyId: " + buddy.buddyId, true);
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY || buddy is UserAccount)
 				return -1;
 			
@@ -448,6 +370,7 @@ package com.cleartext.ximpp.models
 
 		public function saveRequest(request:BuddyRequest):int
 		{
+			appModel.log("Saving buddy request : " + request.jid + " incoming: " + request.incomming, true);
 			var criteria:Array = [new DatabaseValue("jid", request.jid)];
 			var id:int = updateOrInsert("buddyRequests", request.toDatabaseValues(settings.userId), criteria);
 			if(id != -1)
@@ -457,41 +380,25 @@ package com.cleartext.ximpp.models
 
 		public function saveMicroBloggingBuddy(buddy:MicroBloggingBuddy):void
 		{
+			appModel.log("Saving microblogging buddy : "  + buddy.jid + " micoBloggingBuddyId: " + buddy.microBloggingBuddyId, true);
 			updateStmt("microBloggingBuddies", buddy.toDatabaseValues(), [new DatabaseValue("microBloggingBuddyId", buddy.microBloggingBuddyId)]);
 		}
 
-		public function removeBuddy(buddyId:int):void
+		public function removeBuddy(buddy:Buddy):void
 		{
-			syncConn.begin(); 
-			appModel.log("Deleting buddy with buddyId: " + buddyId);
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "DELETE FROM buddies WHERE buddyId = " + buddyId;
-			stmt.execute();
-
-		    // if we've got to this point without errors, commit the transaction 
-		    syncConn.commit(); 
-			appModel.log("Buddy deleted");
+			appModel.log("Deleting buddy : " + buddy.jid + " buddyId: " + buddy.buddyId, true);
+			execute("DELETE FROM buddies WHERE buddyId = " + buddy.buddyId);
 		}
 		
-		public function removeRequest(buddyRequestId:int):void
+		public function removeRequest(request:BuddyRequest):void
 		{
-			syncConn.begin(); 
-			appModel.log("Deleting buddyRequest with buddyRequestId: " + buddyRequestId);
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "DELETE FROM buddyRequests WHERE buddyRequestId = " + buddyRequestId;
-			stmt.execute();
-
-		    // if we've got to this point without errors, commit the transaction 
-		    syncConn.commit(); 
-			appModel.log("BuddyRequest deleted");
+			appModel.log("Deleting buddyRequest : " + request.jid, true);
+			execute("DELETE FROM buddyRequests WHERE buddyRequestId = " + request.buddyRequestId);
 		}
 		
 		public function saveMessage(message:Message):void
 		{
+			appModel.log("Save message from: " + message.sender + " to: " + message.recipient, true);
 			message.messageId = insertStmt("messages", message.toDatabaseValues(settings.userId));
 		}
 		
@@ -518,31 +425,27 @@ package com.cleartext.ximpp.models
 			var buddy:Buddy = chat.buddy;
 			var buddyArray:Array = (buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? buddies.microBloggingBuddies.toArray() : [buddy];
 			if(buddyArray.length == 0)
+			{
+				if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
 				return;
+			}
 
-			var sortType:String = (settings.global.sortBySentDate) ? "sentTimestamp" : "receivedTimestamp";
-
-			// start a transaction 
-			syncConn.begin(); 
-			appModel.log("Loading messages with " + buddy.jid);
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			var sql:String = "Select * from messages WHERE userid=" + settings.userId
-				+ " AND (";
+			appModel.log("Loading messages with " + chat.buddy.jid, true);
+			var sql:String = "Select * from messages WHERE userid=" + settings.userId + " AND (";
 			
 			for each(var b:Buddy in buddyArray)
+			{
 				sql += "sender='" + b.jid + "' OR recipient='" + b.jid + "' OR ";
+			}
 
 			sql = sql.substr(0, sql.length-4);
-			sql += ") ORDER BY " + sortType + " DESC "
-					+ "LIMIT 0," + 
+			sql += ") ORDER BY " + 
+					((settings.global.sortBySentDate) ? "sentTimestamp" : "receivedTimestamp") + 
+					" DESC LIMIT 0," + 
 					((buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? settings.global.numTimelineMessages : settings.global.numChatMessages);
-			stmt.text = sql;
-			trace(sql);
-			stmt.execute();
-			var result:SQLResult = stmt.getResult();
-		    syncConn.commit(); 
+			
+			var result:SQLResult = execute(sql);
 
 			if(result && result.data)
 			{
@@ -552,7 +455,9 @@ package com.cleartext.ximpp.models
 				if(syncnonusly)
 				{
 					for(var i:int = result.data.length-1; i>=0; i--)
+					{
 						chat.messages.addItem(Message.createFromDB(result.data[i], mBlogBuddies));
+					}
 					dispatchEvent(new LoadingEvent(LoadingEvent.CHAT_LOADED));
 				}
 				else
@@ -560,9 +465,14 @@ package com.cleartext.ximpp.models
 					loopOverMessages(result.data, 0, chat);
 				}
 			}
-
-		    // if we've got to this point without errors, commit the transaction 
-			appModel.log("Messages loaded");
+			else if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			{
+				dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
+			}
+			else
+			{
+				dispatchEvent(new LoadingEvent(LoadingEvent.CHAT_LOADED));
+			}
 		}
 		
 		private function loopOverMessages(data:Array, index:int, chat:Chat):void
@@ -586,7 +496,9 @@ package com.cleartext.ximpp.models
 			}
 			
 			if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			{
 				dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
+			}
 		}
 		
 		private function insertStmt(table:String, values:Array):int
@@ -596,26 +508,38 @@ package com.cleartext.ximpp.models
 			stmt.sqlConnection = syncConn;
 			
 			var sql:String = "INSERT INTO " + table + " (";
+			var renderedSql:String = "SQL : " + sql;
+
 			var valuesString:String = ") VALUES (";
+			var renderedValuesString:String = valuesString;
 			
 			var firstTime:Boolean = true;
 			for each(var value:DatabaseValue in values)
 			{
 				if(firstTime)
+				{
 					firstTime = false;
+				}
 				else
 				{
 					sql += ", ";
 					valuesString += ", ";
+					renderedSql += ", ";
+					renderedValuesString += ", ";
 				}
 
 				sql += value.columnName;
+				renderedSql += value.columnName;
+
 				valuesString += value.param;
+				renderedValuesString += "(" + value.value + ")";
 				stmt.parameters[value.param] = value.value;
 			}
 			
+			renderedSql += renderedValuesString + ")";
+			appModel.log(renderedSql);
+
 			sql += valuesString + ")";
-	
 			stmt.text = sql;
 			stmt.execute();
 			syncConn.commit();
@@ -633,16 +557,23 @@ package com.cleartext.ximpp.models
 			stmt.sqlConnection = syncConn;
 			
 			var sql:String = "UPDATE " + table + " SET ";
+			var renderedSql:String = "SQL : " + sql;
 			
 			var firstTime:Boolean = true;
 			for each(var v:DatabaseValue in values)
 			{
 				if(firstTime)
+				{
 					firstTime = false;
+				}
 				else
+				{
 					sql += ", ";
+					renderedSql += ", ";
+				}
 				
 				sql += v.setParameter(stmt);
+				renderedSql += v.renderParameter();
 			}
 			
 			firstTime = true;
@@ -651,14 +582,20 @@ package com.cleartext.ximpp.models
 				if(firstTime)
 				{
 					sql += " WHERE ";
+					renderedSql += " WHERE "
 					firstTime = false;
 				}
 				else
+				{
 					sql += " AND ";
+					renderedSql += " AND ";
+				}
 
 				sql += c.setParameter(stmt);
+				renderedSql += c.renderParameter();
 			}
 			stmt.text = sql;
+			appModel.log(renderedSql);
 			stmt.execute();
 			syncConn.commit();
 		}
@@ -670,20 +607,27 @@ package com.cleartext.ximpp.models
 			stmt.sqlConnection = syncConn;
 			
 			var sql:String = "SELECT * FROM " + table;
-
+			var renderedSql:String = "SQL : " + sql;
 			var firstTime:Boolean = true;
 			for each(var c:DatabaseValue in criteria)
 			{
 				if(firstTime)
 				{
 					sql += " WHERE ";
+					renderedSql += " WHERE ";
 					firstTime = false;
 				}
 				else
+				{
 					sql += " AND ";
+					renderedSql += " AND ";
+				}
 
 				sql += c.setParameter(stmt);
+				renderedSql += c.renderParameter();
 			}
+			
+			appModel.log(renderedSql);
 			stmt.text = sql;
 			stmt.execute();
 			var result:SQLResult = stmt.getResult();
@@ -702,22 +646,16 @@ package com.cleartext.ximpp.models
 		
 		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null):MicroBloggingBuddy
 		{
-			syncConn.begin(); 
-			appModel.log("Loading microBloggingBuddy: " + idOrUserName);
-			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
-			stmt.text = "Select * from microBloggingBuddies WHERE ";
+			var traceStr:String = idOrUserName + (gatewayJid ? ("@" + gatewayJid) : "");
+			var sql:String = "Select * from microBloggingBuddies WHERE ";
 			
 			if(!gatewayJid)
-				stmt.text += "microBloggingBuddyId=" + idOrUserName;
+				sql += "microBloggingBuddyId=" + idOrUserName;
 			else
-				stmt.text += "userName='" + idOrUserName + "' AND gatewayJid='" + gatewayJid + "'";
+				sql += "userName='" + idOrUserName + "' AND gatewayJid='" + gatewayJid + "'";
 		
-			stmt.execute();
-			var result:SQLResult = stmt.getResult();
-		    // if we've got to this point without errors, commit the transaction 
-		    syncConn.commit(); 
+			appModel.log("Loading microBloggingBuddy : " + traceStr, true);
+			var result:SQLResult = execute(sql);
 
 			if(result && result.data && result.data.length > 0)
 				return MicroBloggingBuddy.createFromDB(result.data[0]);
@@ -729,6 +667,8 @@ package com.cleartext.ximpp.models
 			var buddy:MicroBloggingBuddy = new MicroBloggingBuddy();
 			buddy.userName = idOrUserName as String;
 			buddy.gatewayJid = gatewayJid;
+
+			appModel.log("Creating new microBloggingBuddy : " + traceStr, true);
 			buddy.microBloggingBuddyId = insertStmt("microBloggingBuddies", buddy.toDatabaseValues());
 			
 			return buddy;
@@ -739,27 +679,32 @@ package com.cleartext.ximpp.models
 			var sortType:String = (settings.global.sortBySentDate) ? "sentTimestamp" : "receivedTimestamp";
 			
 			// start a transaction 
-			syncConn.begin(); 
-			appModel.log("Loading messages with searchTerms " + searchTerms.join(", "));
+			appModel.log("Loading messages with searchTerms " + searchTerms.join(", "), true);
 			
-			var stmt:SQLStatement = new SQLStatement();
-			stmt.sqlConnection = syncConn;
 			var sql:String = "Select * from messages WHERE userid=" + settings.userId
 				+ " AND (";
-			
 			for each(var s:String in searchTerms)
 				sql += "plainMessage LIKE '%" + s + "%' OR ";
-
 			sql = sql.substr(0, sql.length-4);
 			sql += ") ORDER BY " + sortType;
-			stmt.text = sql;
-			stmt.execute();
-			var result:SQLResult = stmt.getResult();
-		    syncConn.commit(); 
-
+			
+			var result:SQLResult = execute(sql);
 			if(result && result.data)
 				return result.data;
+
 			return null;
+		}
+		
+		private function execute(sql:String):SQLResult
+		{
+			appModel.log("SQL : " + sql);
+			syncConn.begin();
+			var stmt:SQLStatement = new SQLStatement();
+			stmt.sqlConnection = syncConn;
+			stmt.text = sql;
+			stmt.execute();
+			syncConn.commit();
+			return stmt.getResult();
 		}
 	}
 }

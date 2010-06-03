@@ -1,6 +1,8 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.ApplicationEvent;
+	import com.cleartext.ximpp.events.UserAccountEvent;
+	import com.cleartext.ximpp.models.types.ChatStateTypes;
 	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
@@ -23,15 +25,45 @@ package com.cleartext.ximpp.models
 	
 	import flash.utils.Dictionary;
 	
+	import mx.controls.Alert;
+	
 	import org.swizframework.Swiz;
 	
 	public class XMPPModel
 	{
+		//------------------------------------------------------------------
+		//
+		//   NAMESPACES
+		//
+		//------------------------------------------------------------------
+		
+		namespace discoInfo = "http://jabber.org/protocol/disco#info";
+		public var DISCO_INFO_NS:String = "http://jabber.org/protocol/disco#info";
+		
+		namespace discoItems = "http://jabber.org/protocol/disco#items";
+		public var DISCO_ITEMS_NS:String = "http://jabber.org/protocol/disco#items";
+
+		namespace jabberRegister = "jabber:iq:register";
+		public var JABBER_REGISTER_NS:String = "jabber:iq:register";
+
+		namespace muc = "http://jabber.org/protocol/muc";
+		public var MUC_NS:String = "http://jabber.org/protocol/muc";
+
+		namespace vCardTemp = "vcard-temp";
+		public var V_CARD_TEMP_NS:String = "vcard-temp";
+		
+		namespace jabberRoster = "jabber:iq:roster";
+		public var JABBER_ROSTER_NS:String = "jabber:iq:roster";
+
+		//------------------------------------------------------------------
+		//
+		//   MODELS
+		//
+		//------------------------------------------------------------------
+		
 		[Autowire(bean="appModel")]
 		[Bindable]
 		public var appModel:ApplicationModel;
-		
-		private var chatRoomNicknames:Dictionary = new Dictionary();
 		
 		private function get settings():SettingsModel
 		{
@@ -68,19 +100,37 @@ package com.cleartext.ximpp.models
 			return appModel.soundColor;
 		}
 		
+		//------------------------------------------------------------------
+		//
+		//   VARIABLES
+		//
+		//------------------------------------------------------------------
+		
 		[Bindable]
 		public var connected:Boolean = false;
 
+		// a dictionary to store the nicknames that we have used to 
+		// log into various chat rooms the key of the dictonary is the 
+		// jid of the chat room
+		private var chatRoomNicknames:Dictionary = new Dictionary();
+		
+		// a dictionary to store the variables that we want to associate
+		// with iq queries the key is the id of the iq stanza the we
+		// are sending out
+		private var iqVariables:Dictionary = new Dictionary();
+		
 		// flags to track progress during connecting
 		private var gotAvatar:Boolean = false;
 		private var gotRosterList:Boolean = false;
 
-		// the xmpp object 
+		// the seesmic xmpp object 
 		private var xmpp:XMPP;
 				
-		//-------------------------------
-		// CONSTRUCTOR
-		//-------------------------------
+		//------------------------------------------------------------------
+		//
+		//   CONSTRUCTOR
+		//
+		//------------------------------------------------------------------
 		
 		public function XMPPModel()
 		{
@@ -109,6 +159,12 @@ package com.cleartext.ximpp.models
 			xmpp.addEventListener(XMPPEvent.ROSTER_ITEM, rosterListChangeHandler);
 			xmpp.addEventListener(XMPPEvent.MESSAGE_MUC, messageHandler);
 		}
+		
+		//------------------------------------------------------------------
+		//
+		//   CONNECTION / DISCONNECTION HANDLERS
+		//
+		//------------------------------------------------------------------
 		
 		//-------------------------------
 		// CONNECT
@@ -142,9 +198,9 @@ package com.cleartext.ximpp.models
 		{
 			if (connected)
 			{
-				connected = false;
 		 		appModel.log("Disconnecting from XMPP server");
 				xmpp.send("<presence from='" + xmpp.fulljid.toString() + "' type='unavailable' status='Logged out' />");
+				connected = false;
 		 	}
 		 	
 	 		xmpp.disconnect();
@@ -177,7 +233,7 @@ package com.cleartext.ximpp.models
 			gotRosterList = false;
 			sendIq(settings.userAccount.jid,
 					IQTypes.GET,
-					IQTypes.GET_ROSTER,
+					<query xmlns={JABBER_ROSTER_NS}/>,
 					getRosterHandler);
 
 			// get the vCard stored on the server
@@ -185,6 +241,12 @@ package com.cleartext.ximpp.models
 
 			sendPresence();
 		}
+		
+		//------------------------------------------------------------------
+		//
+		//   LOG / CONSOLE / FAIL HANDLERS
+		//
+		//------------------------------------------------------------------
 		
 		//-------------------------------
 		// LOG HANDLER
@@ -215,6 +277,12 @@ package com.cleartext.ximpp.models
 			disconnect();
 		}
 
+		//------------------------------------------------------------------
+		//
+		//   MESSAGE / CHATSTATE HANDLER
+		//
+		//------------------------------------------------------------------
+		
 		//-------------------------------
 		// MESSAGE HANDLER
 		//-------------------------------
@@ -222,18 +290,21 @@ package com.cleartext.ximpp.models
 		/**
 		 * receive a message stanza, find the associated sender and
 		 * receiver buddies, save to the database and add to the correct
-		 * chat or timeline
+		 * chat
 		 */
 		private function messageHandler(event:XMPPEvent):void
 		{
 			var messageStanza:MessageStanza = event.stanza as MessageStanza;
 			
+			// ignore "The message has been sent." messages
 			if(messageStanza.body == "The message has been sent.")
 				return;
 			
 			var message:Message = appModel.createFromStanza(messageStanza);
-
 			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
+			
+			// if the buddy does not exist in our buddy list, then treat it as a buddy
+			// request
 			if(!buddy)
 			{
 				requests.receiving(message.sender, messageStanza.nick, message.plainMessage);
@@ -243,14 +314,26 @@ package com.cleartext.ximpp.models
 			
 			buddy.lastSeen = message.receivedTimestamp;
 			buddy.isTyping = false;
-			if(!buddy.isChatRoom)
-				buddy.resource = event.stanza.from.resource;
-			else
+
+			// if this is a message from a groupchat, then work out the 
+			// sender's nickname
+			if(buddy.isChatRoom)
+			{
 				message.groupChatSender = event.stanza.from.resource;
+			}
+			// otherwise set the buddy's resource, we only save the message
+			// if it isn't from a chatRoom
+			else
+			{
+				buddy.resource = event.stanza.from.resource;
+				database.saveMessage(message);
+			}
+
 			buddy.unreadMessages++;
 			
 			chats.addMessage(buddy, message);
 			
+			// play sounds & increment unread messages for the mblog buddy
 			if(buddy.isMicroBlogging)
 			{
 				soundColor.play(SoundAndColorModel.NEW_SOCIAL);
@@ -260,11 +343,14 @@ package com.cleartext.ximpp.models
 			{
 				soundColor.play(SoundAndColorModel.NEW_MESSAGE);
 			}
-			if(!buddy.isChatRoom)
-				database.saveMessage(message);
 				
+			// notify the user (bounce the dock icon etc.)
 			Swiz.dispatchEvent(new ApplicationEvent(ApplicationEvent.NOTIFY));
 		}
+		
+		//-------------------------------
+		// CHAT STATE HANDLER
+		//-------------------------------
 		
 		private function chatStateHandler(event:XMPPEvent):void
 		{
@@ -273,12 +359,14 @@ package com.cleartext.ximpp.models
 			var buddy:Buddy = appModel.getBuddyByJid(fromJid);
 
 			if(buddy)
-				buddy.isTyping = (chatState == "composing");
+				buddy.isTyping = (chatState == ChatStateTypes.COMPOSING);
 		}
 		
-		//-------------------------------
-		// PRESENCE HANDLER
-		//-------------------------------
+		//------------------------------------------------------------------
+		//
+		//   PRESENCE HANDLER
+		//
+		//------------------------------------------------------------------
 		
 		private function presenceHandler(event:XMPPEvent):void
 		{
@@ -288,27 +376,29 @@ package com.cleartext.ximpp.models
 			var fromJid:String = stanza.from.getBareJID();
 			var buddy:Buddy = appModel.getBuddyByJid(fromJid);
 			
+			// if this is our own presence we don't care
 			if(fromJid == settings.userAccount.jid)
-			{
 				return;
-			}
 			
+			// if this is from a chat room that we have asked to join
 			if(chatRoomNicknames.hasOwnProperty(fromJid))
 			{
+				// if the resource of the jid is equal to the nickname that 
+				// we requested for this room, then open the chat, or show
+				// an error on unavailable
 				if(stanza.from.resource == chatRoomNicknames[fromJid])
 				{
-					if(stanza.type == "available")
+					if(stanza.type == Status.AVAILABLE)
 						chats.getChat(fromJid, true, Buddy.CHAT_ROOM);
-					else if(stanza.type == "unavailable")
+					else if(stanza.type == Status.UNAVAILABLE)
 						chats.getChat(fromJid, false, Buddy.CHAT_ROOM).buddy.status.value = Status.ERROR;
 				}
 				
 				return;
 			}
 
-			// note this is just for type "subscribe" - "unsubscribed" and
-			// "subscribed" are handled below
-			else if(stanza.type == SubscriptionTypes.SUBSCRIBE)
+			// if this is a subscription request
+			if(stanza.type == SubscriptionTypes.SUBSCRIBE)
 			{
 				// if there are in our rosterlist, then auto-subscirbe
 				if(buddy)
@@ -321,9 +411,12 @@ package com.cleartext.ximpp.models
 				else
 				{
 					requests.receiving(fromJid, stanza.nick);
+					// notify the user - bounce the dock icon etc
 					Swiz.dispatchEvent(new ApplicationEvent(ApplicationEvent.NOTIFY));
 				}
 			}
+			// all other presence types (including subscribed and unsubscribed can
+			// be handled here - using Status.setFromStanzaType()
 			else
 			{
 				if(!buddy)
@@ -335,20 +428,25 @@ package com.cleartext.ximpp.models
 				var wasOffline:Boolean = buddy.status.isOffline();
 				
 				buddy.resource = stanza.from.resource;
-				// setFromStanzaType also handles "unsubscribe" and "subscribed"
+				// setFromStanzaType also handles "unsubscribed" and "subscribed"
+				// if there is an error, then reset the customStatus, otherwise
+				// set the customStatus from the stanza
 				var error:Boolean = buddy.status.setFromStanzaType(stanza.type);
-				buddy.customStatus = (!error) ? stanza.status : "";
+				buddy.customStatus = (error) ? "" : stanza.status;
 				
-				// only set last seen if the buddy was offline or we are now 
+				// only set lastSeen if the buddy was offline or we are now 
 				// explicitly going online
 				if(wasOffline || buddy.status.value == Status.AVAILABLE)
+				{
 					buddy.lastSeen = new Date();
+					doDiscovery(buddy.fullJid);
+				}
 				
 				var avatarHash:String = stanza.avatarHash;
 				if(avatarHash && (buddy.avatarHash != avatarHash || !buddy.avatar))
 				{
 					buddy.tempAvatarHash = avatarHash;
-					sendIq(buddy.jid, 'get', <vCard xmlns='vcard-temp'/>, vCardHandler);
+					getVCard(buddy.jid);
 				}
 				
 				buddies.buddies.refresh();
@@ -356,12 +454,70 @@ package com.cleartext.ximpp.models
 			}
 		}
 		
+		//------------------------------------------------------------------
+		//
+		//   ROSTER HANDLERS
+		//
+		//------------------------------------------------------------------
+		
 		//-------------------------------
-		// ROSTER CHANGED HANDLER
+		// GET ROSTER HANDLER - CALLED TO GET INITAL ROSTER LIST AFTER CONNECTION
+		//-------------------------------
+		
+		private function getRosterHandler(stanza:IqStanza):void
+		{
+			appModel.log("getRosterHandler");
+			
+			var buddy:Buddy;
+			var buddiesToDelete:Dictionary = new Dictionary();
+			
+			for each(buddy in buddies.buddies.source)
+				buddiesToDelete[buddy.jid] = buddy;
+
+			for each(var item:XML in stanza.query.jabberRoster::item)
+			{
+				var jid:String = item.@jid;
+				
+				// if we already have the buddy, then we just want to
+				// update the values, otherwise create a new buddy
+				buddy = appModel.getBuddyByJid(jid);
+				if(!buddy)
+					buddy = new Buddy(jid);
+				
+				var groups:Array = new Array();
+				for each(var group:XML in item.jabberRoster::group)
+					{
+						var gString:String = String(group.text());
+						if(gString != "")
+							groups.push(gString);
+					}
+				buddy.groups = groups;
+				
+				buddy.nickName = item.@name;
+				buddy.subscription = item.@subscription;
+				requests.setSubscription(jid, buddy.nickName, buddy.subscription);
+
+				// flag used to delete buddies that are no longer in
+				// the roster list
+				delete buddiesToDelete[buddy.jid];
+				
+				// this adds, saves and adds an event listener to the buddy
+				buddies.addBuddy(buddy);
+			}
+			
+			for each(buddy in buddiesToDelete)
+				buddies.removeBuddy(buddy);
+
+			gotRosterList = true;
+		}
+		
+		//-------------------------------
+		// ROSTER CHANGED HANDLER - CALLED WHENEVER THE ROSTER LIST CHANGES AFTER CONNECTION
 		//-------------------------------
 		
 		private function rosterListChangeHandler(event:XMPPEvent):void
 		{
+			// if we haven't already got the roster list, then ignore
 			if(connected && !gotRosterList)
 				return;
 			
@@ -395,56 +551,103 @@ package com.cleartext.ximpp.models
 		}
 
 		//-------------------------------
-		// GET ROSTER HANDLER
+		// ADD TO ROSTER 
 		//-------------------------------
 		
-		private function getRosterHandler(stanza:IqStanza):void
+		public function addToRoster(toJid:String, nickName:String, groups:Array):void
 		{
-			appModel.log("getRosterHandler");
+			var query:XML = <query xmlns={JABBER_ROSTER_NS} />;
+			var item:XML = <item jid={toJid} />;
+			if(nickName)
+				item.@name = nickName;
 			
-			var buddy:Buddy;
-			var buddiesToDelete:Dictionary = new Dictionary();
+			for each(var group:String in groups)
+				item.appendChild(<group>{group}</group>);
 			
-			for each(buddy in buddies.buddies.source)
-				buddiesToDelete[buddy.jid] = buddy;
+			query.appendChild(item);
 
-			namespace rosterns = "jabber:iq:roster";
-			for each(var item:XML in stanza.query.rosterns::item)
-			{
-				var jid:String = item.@jid;
-				
-				// if we already have the buddy, then we just want to
-				// update the values, otherwise create a new buddy
-				buddy = appModel.getBuddyByJid(jid);
-				if(!buddy)
-					buddy = new Buddy(jid);
-				
-				var groups:Array = new Array();
-				for each(var group:XML in item.rosterns::group)
-					{
-						var gString:String = String(group.text());
-						if(gString != "")
-							groups.push(gString);
-					}
-				buddy.groups = groups;
-				
-				buddy.nickName = item.@name;
-				buddy.subscription = item.@subscription;
-				requests.setSubscription(jid, buddy.nickName, buddy.subscription);
-
-				// flag used to delete buddies that are no longer in
-				// the roster list
-				delete buddiesToDelete[buddy.jid];
-				
-				// this adds, saves and adds an event listener to the buddy
-				buddies.addBuddy(buddy);
-			}
-			
-			for each(buddy in buddiesToDelete)
-				buddies.removeBuddy(buddy);
-
-			gotRosterList = true;
+			sendIq(settings.userAccount.jid,
+					IQTypes.SET,
+					query,
+					addToRosterHandler,
+					toJid);
 		}
+
+		//-------------------------------
+		// ADD TO ROSTER HANDLER
+		//-------------------------------
+		
+		private function addToRosterHandler(stanza:IqStanza):void
+		{
+			var id:String = stanza.id;
+			if(iqVariables.hasOwnProperty(id))
+			{
+				var toJid:String = iqVariables[id] as String;
+				sendSubscribe(toJid, SubscriptionTypes.SUBSCRIBE);
+				chats.getChat(appModel.getBuddyByJid(toJid), true);
+				delete iqVariables[id];
+			}
+			appModel.log("addToRosterHandler");
+		}
+
+		//-------------------------------
+		// REMOVE FROM ROSTER
+		//-------------------------------
+		
+		public function removeFromRoster(toJid:String):void
+		{
+			chats.removeChat(toJid);
+			sendIq(settings.userAccount.jid, 
+					IQTypes.SET,
+					<query xmlns={JABBER_ROSTER_NS}><item jid={toJid} subscription={SubscriptionTypes.REMOVE} /></query>,
+					removeFromRosterHandler);
+		}
+
+		//-------------------------------
+		// REMOVE FROM ROSTER HANDLER
+		//-------------------------------
+		
+		private function removeFromRosterHandler(stanza:IqStanza):void
+		{
+			appModel.log("removeFromRosterHandler");
+		}
+
+		//-------------------------------
+		// MODIFY ROSTER ITEM
+		//-------------------------------
+		
+		public function modifyRosterItem(buddy:Buddy):void
+		{
+			var query:XML = <query xmlns={JABBER_ROSTER_NS} />;
+			var item:XML = <item jid={buddy.jid} subscription={buddy.subscription} />;
+			if(buddy.nickName != buddy.jid)
+				item.@name = buddy.nickName;
+			
+			for each(var group:String in buddy.groups)
+				item.appendChild(<group>{group}</group>);
+			
+			query.appendChild(item);
+			
+			sendIq(settings.userAccount.jid,
+					IQTypes.SET,
+					query,
+					modifyRosterHandler);
+		}
+		
+		//-------------------------------
+		// MODIFY ROSTER HANDLER
+		//-------------------------------
+		
+		private function modifyRosterHandler(stanza:IqStanza):void
+		{
+			appModel.log("modifyRosterHandler");
+		}
+
+		//------------------------------------------------------------------
+		//
+		//   VCARD HANDLERS
+		//
+		//------------------------------------------------------------------
 		
 		//-------------------------------
 		// GET VCARD
@@ -454,7 +657,7 @@ package com.cleartext.ximpp.models
 		{
 			sendIq(jid,
 					IQTypes.GET,
-					IQTypes.GET_USERS_VCARD,
+					<vCard xmlns='vcard-temp'/>,
 					vCardHandler);	
 		}
 		
@@ -469,6 +672,7 @@ package com.cleartext.ximpp.models
 			
 			var buddyJid:String = stanza.from;
 			
+			// if we are downloading our v-card from the server
 			if(buddyJid == settings.userAccount.jid)
 			{
 				gotAvatar = true;
@@ -497,19 +701,47 @@ package com.cleartext.ximpp.models
 		}
 		
 		//-------------------------------
+		// GET VCARD AVATAR FOR MBLOG BUDDY
+		//-------------------------------
+		
+		public function getAvatarForMBlogBuddy(jid:String):void
+		{
+			sendIq(jid, 'get', <vCard xmlns='vcard-temp'/>, mBlogVCardHandler);
+		}
+		
+		//-------------------------------
+		// MBLOG BUDDY VCARD HANDLER
+		//-------------------------------
+		
+		private function mBlogVCardHandler(stanza:IqStanza):void
+		{
+			var xml:XML = stanza.getXML();
+			var buddyJid:String = stanza.from;
+			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
+			var buddy:MicroBloggingBuddy = mBlogBuddies.getBuddyByJid(buddyJid);
+			AvatarUtils.stringToAvatar(avatarString, buddy, "avatar");
+		}
+		
+		//------------------------------------------------------------------
+		//
+		//   SEND IQ / PRESENCE / MESSAGE
+		//
+		//------------------------------------------------------------------
+		
+		//-------------------------------
 		// SEND IQ
 		//-------------------------------
 		
-		/**
-		 * This function should really be in the seesmic library
-		 */
-		public function sendIq(tojid:String, type:String, payload:XML, responseHandler:Function=null):void
+		public function sendIq(tojid:String, type:String, payload:XML, responseHandler:Function=null, responseVariables:Object=null):void
 		{
 			var iqStanza:IqStanza = new IqStanza(xmpp);
 			var id:String = iqStanza.setID();
 
 			if(responseHandler != null)
 				xmpp.addHandler(new IdHandler(id, responseHandler));
+			
+			if(responseVariables != null)
+				iqVariables[id] = responseVariables;
 			
 			iqStanza.setTo(tojid);
 			iqStanza.setType(type);
@@ -558,71 +790,12 @@ package com.cleartext.ximpp.models
 			return xmpp.sendMessage(toJid, body, subject, type, chatState, customTags);
 		}
 		
-		//-------------------------------
-		// ADD TO ROSTER 
-		//-------------------------------
-		
-		public function addToRoster(toJid:String, nickName:String, groups:Array):void
-		{
-			sendIq(settings.userAccount.jid,
-					IQTypes.SET,
-					IQTypes.addRemoveRosterItem(toJid, nickName, groups, false),
-					function():void
-					{
-						sendSubscribe(toJid, SubscriptionTypes.SUBSCRIBE);
-					});
-		}
 
-		//-------------------------------
-		// REMOVE FROM ROSTER
-		//-------------------------------
-		
-		public function removeFromRoster(toJid:String):void
-		{
-			sendIq(settings.userAccount.jid, 
-					IQTypes.SET,
-					IQTypes.addRemoveRosterItem(toJid, null, null, true),
-					removeFromRosterHandler);
-		}
-
-		//-------------------------------
-		// REMOVE FROM ROSTER HANDLER
-		//-------------------------------
-		
-		private function removeFromRosterHandler(stanza:IqStanza):void
-		{
-			buddies.refresh();
-			appModel.log("removeFromRosterHandler");
-		}
-
-		//-------------------------------
-		// MODIFY ROSTER ITEM
-		//-------------------------------
-		
-		public function modifyRosterItem(buddy:Buddy):void
-		{
-			sendIq(settings.userAccount.jid,
-					IQTypes.SET,
-					IQTypes.modifyRosterItem(buddy),
-					modifyRosterHandler);
-		}
-		
-		//-------------------------------
-		// MODIFY ROSTER HANDLER
-		//-------------------------------
-		
-		private function modifyRosterHandler(stanza:IqStanza):void
-		{
-			/**
-			 * TO DO:
-			 */
-			buddies.refresh();
-			appModel.log("modifyRosterHandler");
-		}
-
-		//-------------------------------
-		// SEND SUBSCRIBE
-		//-------------------------------
+		//------------------------------------------------------------------
+		//
+		//   SEND SUBSCRIBE / BLOCK
+		//
+		//------------------------------------------------------------------
 		
 		public function sendSubscribe(toJid:String, type:String):void
 		{
@@ -633,7 +806,7 @@ package com.cleartext.ximpp.models
 		}
 		
 		//-------------------------------
-		// SEND BLOCK
+		// SEND BLOCK - TODO
 		//-------------------------------
 		
 		public function sendBlock(toJid:String):void
@@ -647,39 +820,139 @@ package com.cleartext.ximpp.models
 //				new XML("<query xmln='jabber:iq:privacy'><list name='blocked'><item type='jid' value ='" + toJid + "' action='deny' order"));
 		}
 		
-		
-		public function getAvatarForMBlogBuddy(jid:String):void
-		{
-			sendIq(jid, 'get', <vCard xmlns='vcard-temp'/>, mBlogVCardHandler);
-		}
-		
-		private function mBlogVCardHandler(stanza:IqStanza):void
-		{
-			namespace vCardTemp = "vcard-temp";
-			var xml:XML = stanza.getXML();
-			
-			var buddyJid:String = stanza.from;
-			
-			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-			var buddy:MicroBloggingBuddy = mBlogBuddies.getBuddyByJid(buddyJid);
-			AvatarUtils.stringToAvatar(avatarString, buddy, "avatar");
-		}
+		//------------------------------------------------------------------
+		//
+		//   SEND XML STRING
+		//
+		//------------------------------------------------------------------
 		
 		public function sendXmlString(xmlString:String):void
 		{
 			xmpp.send(xmlString);
 		}
 		
+		//------------------------------------------------------------------
+		//
+		//   JOIN / LEAVE CHAT ROOM
+		//
+		//------------------------------------------------------------------
+		
+		//-------------------------------
+		// JOIN CHAT ROOM
+		//-------------------------------
+		
 		public function joinChatRoom(roomJid:String, nickname:String, password:String=""):void
 		{
 			chatRoomNicknames[roomJid] = nickname;
-			xmpp.send('<presence to="' + roomJid + "/" + nickname + '">' + (password=="" ? '' : '<password>' + password + '</password>') + "<x xmlns='http://jabber.org/protocol/muc'/></presence>");
+			xmpp.send('<presence to="' + roomJid + "/" + nickname + '">' + (password=="" ? '' : '<password>' + password + '</password>') + "<x xmlns='" + MUC_NS + "'/></presence>");
 		}
+		
+		//-------------------------------
+		// LEAVE CHAT ROOM
+		//-------------------------------
 		
 		public function leaveChatRoom(roomJid:String):void
 		{
 			delete chatRoomNicknames[roomJid];
 			xmpp.send('<presence type="unavailable" to="' + roomJid + "/" + chatRoomNicknames[roomJid] +'" />');
+		}
+		
+		//------------------------------------------------------------------
+		//
+		//   PASSWORD
+		//
+		//------------------------------------------------------------------
+		
+		//-------------------------------
+		// CHANGE PASSWORD
+		//-------------------------------
+		
+		public function changePassword(newPassword:String):void
+		{
+			sendIq(xmpp.fulljid.host,
+				IQTypes.SET, 
+				<query xmlns={JABBER_REGISTER_NS}><username>{xmpp.fulljid.user}</username><password>{newPassword}</password></query>,
+				changePasswordHandler);
+		}
+		
+		//-------------------------------
+		// CHANGE PASSWORD HANDLER
+		//-------------------------------
+		
+		public function changePasswordHandler(stanza:IqStanza):void
+		{
+			Alert.show("Password successfully changed", "Change Password");
+			var xml:XML = stanza.getXML();
+			var newPassword:String = xml.jabberRegister::query.jabberRegister::password.text();
+			settings.userAccount.password = newPassword;
+			Swiz.dispatchEvent(new UserAccountEvent(UserAccountEvent.PASSWORD_CHANGE, null, newPassword));
+		}
+		
+		//------------------------------------------------------------------
+		//
+		//   DISCOVERY
+		//
+		//------------------------------------------------------------------
+		
+		public function doDiscovery(toJid:String):void
+		{
+			discoveryInfo(toJid);
+			discoveryItems(toJid);
+		}
+
+		//-------------------------------
+		// DISCOVERY INFO
+		//-------------------------------
+
+		public function discoveryInfo(toJid:String):void
+		{
+			sendIq(toJid,
+					IQTypes.GET,
+					<query xmlns={DISCO_INFO_NS}/>,
+					discoveryInfoHandler);
+		}
+		
+		//-------------------------------
+		// DISCOVERY INFO HANDLER
+		//-------------------------------
+
+		public function discoveryInfoHandler(iqStanza:IqStanza):void
+		{
+			var fromJid:String = iqStanza.from;
+			var bareJid:String = (fromJid.indexOf("/") == -1) ? fromJid : fromJid.substr(0, fromJid.indexOf("/"));
+			var buddy:Buddy = appModel.getBuddyByJid(bareJid);
+			if(!buddy)
+				return;
+			
+			if(iqStanza.query)
+			{
+				for each(var feature:XML in iqStanza.query.discoInfo::feature)
+				{
+					var ns:String = feature.attribute("var").toString();
+					buddy.features.push(ns);
+				}
+			}
+		}
+		
+		//-------------------------------
+		// DISCOVERY ITEMS
+		//-------------------------------
+
+		public function discoveryItems(toJid:String):void
+		{
+			sendIq(toJid,
+					IQTypes.GET,
+					<query xmlns={DISCO_ITEMS_NS}/>,
+					discoveryItemsHandler);
+		}
+
+		//-------------------------------
+		// DISCOVERY ITEMS HANDLER
+		//-------------------------------
+
+		public function discoveryItemsHandler(iqStanza:IqStanza):void
+		{
+			
 		}
 	}
 }

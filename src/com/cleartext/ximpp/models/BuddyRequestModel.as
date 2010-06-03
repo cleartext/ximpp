@@ -64,7 +64,8 @@ package com.cleartext.ximpp.models
 				requests.removeItemAt(i);
 			delete requestsByJid[request.jid];
 			request.removeEventListener(BuddyRequestEvent.BUDDY_REQUEST_CHANGED, requestChangedHandler);
-			database.removeRequest(request.buddyRequestId);
+			database.removeRequest(request);
+			Swiz.dispatchEvent(new BuddyRequestEvent(BuddyRequestEvent.REMOVE_REQUEST));
 		}
 		
 		private function requestChangedHandler(event:BuddyRequestEvent):void

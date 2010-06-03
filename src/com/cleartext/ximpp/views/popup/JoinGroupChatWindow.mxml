@@ -50,7 +50,7 @@
     <mx:Form>
 		<mx:FormItem label="Host address:">
 			<mx:VBox>
-				<mx:TextInput width="250" id="host" change="validateInput(event, 'you must enter a host')" focusOut="validateInput(event, 'you must enter a host')"/>
+				<mx:TextInput width="250" id="host" text="{'conference.' + settings.userAccount.host}" change="validateInput(event, 'you must enter a host')" focusOut="validateInput(event, 'you must enter a host')"/>
 			</mx:VBox>
 		</mx:FormItem>
 
@@ -62,7 +62,7 @@
 
 		<mx:FormItem label="Your nick name:">
 			<mx:VBox>
-				<mx:TextInput width="250" id="nickname" change="validateInput(event, 'you must enter a nick name')" focusOut="validateInput(event, 'you must enter a nick name')"/>
+				<mx:TextInput width="250" id="nickname" text="{settings.userAccount.nickName}" change="validateInput(event, 'you must enter a nick name')" focusOut="validateInput(event, 'you must enter a nick name')"/>
 			</mx:VBox>
 		</mx:FormItem>
 
