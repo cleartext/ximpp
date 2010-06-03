@@ -250,13 +250,16 @@ package com.cleartext.ximpp.models
 		{
 			// delete old logFiles
 			var logDir:File = File.applicationStorageDirectory.resolvePath("logs/");
-			var logList:Array = logDir.getDirectoryListing();
-			
-			logList.sortOn("name");
-			while(logList.length > 8)
+			if(logDir.isDirectory)
 			{
-				var delFile:File = logList.shift();
-				delFile.deleteFile();
+				var logList:Array = logDir.getDirectoryListing();
+				
+				logList.sortOn("name");
+				while(logList.length > 8)
+				{
+					var delFile:File = logList.shift();
+					delFile.deleteFile();
+				}
 			}
 			
 			// create log file
