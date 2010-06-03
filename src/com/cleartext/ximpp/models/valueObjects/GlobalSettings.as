@@ -3,126 +3,131 @@ package com.cleartext.ximpp.models.valueObjects
 	import com.cleartext.ximpp.models.types.BuddySortTypes;
 	
 	import flash.events.EventDispatcher;
+	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 
 	public class GlobalSettings extends EventDispatcher
 	{
-		public static const CREATE_GLOBAL_SETTINGS_TABLE:String =
-				"CREATE TABLE IF NOT EXISTS globalSettings (" +
-				"settingId INTEGER PRIMARY KEY AUTOINCREMENT, " + 
-				"userId INTEGER DEFAULT 1, " +
-				"xml TEXT);";
+		[Bindable]
+		public var buddySortMethod:String = BuddySortTypes.STATUS;
+		
+		[Bindable]
+		public var sortBySentDate:Boolean = true;
+		
+		[Bindable]
+		public var autoShortenUrls:Boolean = true;
+
+		[Bindable]
+		public var animateBuddyList:Boolean = true;
+
+		[Bindable]
+		public var animateMessageList:Boolean = true;
+
+		[Bindable]
+		public var sendStatusToMicroBlogging:Boolean = false;
+				
+		public var urlShortener:String = UrlShortener.types[0];
+		public var numChatMessages:uint = 200;
+		public var numTimelineMessages:uint = 200;
+		public var awayTimeout:int = 5;
+
+		public var autoConnect:Boolean = false;
+		public var showOfflineBuddies:Boolean = true;
+		public var playSounds:Boolean = true;
+		public var checkUrls:Boolean = true;
 		
 		public function GlobalSettings()
 		{
 			super();
 		}
 		
-		public var autoConnect:Boolean;
-		public var urlShortener:String;
-		public var numChatMessages:uint;
-		public var numTimelineMessages:uint;
-		public var showOfflineBuddies:Boolean;
-		public var awayTimeout:int;
-		public var playSounds:Boolean;
-		public var checkUrls:Boolean;
-		
-		[Bindable]
-		public var sortBySentDate:Boolean;
-		
-		[Bindable]
-		public var autoShortenUrls:Boolean;
-
-		[Bindable]
-		public var animateBuddyList:Boolean;
-
-		[Bindable]
-		public var animateMessageList:Boolean;
-
-		[Bindable]
-		public var buddySortMethod:String;
-		
-		[Bindable]
-		public var sendStatusToMicroBlogging:Boolean;
-
-		public static function createFromDB(obj:Object):GlobalSettings
+		public function load():void
 		{
-			var newGlobalSettings:GlobalSettings = new GlobalSettings();
-
-			// if we have values from the db, then use them, else
-			// just set the default values
-			if(obj["xml"] != null)
-			{
-				var xml:XML = new XML(obj["xml"] as String);
-				newGlobalSettings.autoConnect = xml.@autoConnect == "true";
-				newGlobalSettings.autoShortenUrls = xml.@autoShortenUrls == "true";
-				newGlobalSettings.urlShortener = xml.@urlShortener;
-				newGlobalSettings.animateBuddyList = xml.@animateBuddyList == "true";
-				newGlobalSettings.animateMessageList = xml.@animateMessageList == "true";
-				newGlobalSettings.numChatMessages = xml.@numChatMessages;
-				newGlobalSettings.numTimelineMessages = xml.@numTimelineMessages;
-				newGlobalSettings.showOfflineBuddies = xml.@showOfflineBuddies == "true";
-				newGlobalSettings.sendStatusToMicroBlogging = xml.@sendStatusToMicroBlogging == "true";
-				newGlobalSettings.buddySortMethod = xml.@buddySortMethod;
-				newGlobalSettings.sortBySentDate = xml.@sortByTimestamp == "true";
-				newGlobalSettings.awayTimeout = xml.@awayTimeout;
-				newGlobalSettings.playSounds = xml.@playSounds == "true";
-				newGlobalSettings.checkUrls = xml.@checkUrls == "true";
-			}
-			else
-			{
-				newGlobalSettings.autoConnect = true;
-				newGlobalSettings.autoShortenUrls = true;
-				newGlobalSettings.animateBuddyList = true;
-				newGlobalSettings.animateMessageList = true;
-				newGlobalSettings.showOfflineBuddies = true;
-				newGlobalSettings.sendStatusToMicroBlogging = false;
-				newGlobalSettings.sortBySentDate = true;
-				newGlobalSettings.playSounds = true;
-				newGlobalSettings.checkUrls = true;
-				newGlobalSettings.awayTimeout = 5;
-			}
+			var prefDir:File = File.applicationStorageDirectory;
 			
-			// make sure that the values are set and are reasonable
-			if(newGlobalSettings.numChatMessages < 1)
-				newGlobalSettings.numChatMessages = 200;
+			var file:File = new File(prefDir.nativePath + "/globalSettings.xml");
+			if(file.exists)
+			{
+				var fileStream:FileStream = new FileStream();
+				fileStream.open(file, FileMode.READ);
+				var xml:XML = new XML(fileStream.readUTFBytes(fileStream.bytesAvailable));
 
-			if(newGlobalSettings.numTimelineMessages < 1)
-				newGlobalSettings.numTimelineMessages = 200;
+				if(BuddySortTypes.types.indexOf(xml.buddySortMethod) != -1)
+					buddySortMethod = xml.buddySortMethod;
 
-			if(UrlShortener.types.indexOf(newGlobalSettings.urlShortener) == -1)
-				newGlobalSettings.urlShortener = UrlShortener.types[0];
+				if(xml.sortBySentDate)
+					sortBySentDate = xml.sortBySentDate == "true";
+	
+				if(xml.autoShortenUrls)
+					autoShortenUrls = xml.autoShortenUrls == "true";
 
-			if(BuddySortTypes.types.indexOf(newGlobalSettings.buddySortMethod) == -1)
-				newGlobalSettings.buddySortMethod = BuddySortTypes.STATUS;
+				if(xml.animateBuddyList)
+					animateBuddyList = xml.animateBuddyList == "true";
 
+				if(xml.animateMessageList)
+					animateMessageList = xml.animateMessageList == "true";
 
-			return newGlobalSettings;
+				if(xml.sendStatusToMicroBlogging)
+					sendStatusToMicroBlogging = xml.sendStatusToMicroBlogging == "true";
+
+				if(UrlShortener.types.indexOf(xml.urlShortener) != -1)
+					urlShortener = xml.urlShortener;
+	
+				if(xml.numChatMessages > 1)
+					numChatMessages = xml.numChatMessages;
+	
+				if(xml.numTimelineMessages > 1)
+					numTimelineMessages = xml.numTimelineMessages;
+	
+				if(xml.awayTimeout > 1)
+					awayTimeout = Math.min(1440, xml.awayTimeout);
+				
+				if(xml.autoConnect)
+					autoConnect = xml.autoConnect == "true";
+
+				if(xml.showOfflineBuddies)
+					showOfflineBuddies = xml.showOfflineBuddies == "true";
+
+				if(xml.playSounds)
+					playSounds = xml.playSounds == "true";
+
+				if(xml.checkUrls)
+					checkUrls = xml.checkUrls == "true";
+				
+				fileStream.close();
+			}
+			save();
 		}
 		
-		public function toDatabaseValues(userId:int):Array
+		public function save():void
 		{
-			var xml:XML = <globalSettings
-				autoConnect={autoConnect} 
-				urlShortener={urlShortener} 
-				autoShortenUrls={autoShortenUrls}
-				animateBuddyList={animateBuddyList} 
-				animateMessageList={animateMessageList} 
-				numChatMessages={numChatMessages} 
-				numTimelineMessages={numTimelineMessages} 
-				showOfflineBuddies={showOfflineBuddies} 
-				sendStatusToMicroBlogging={sendStatusToMicroBlogging} 
-				buddySortMethod={buddySortMethod}
-				sortBySentDate={sortBySentDate}
-				awayTimeout={awayTimeout}
-				playSounds={playSounds}
-				checkUrls={checkUrls}
-				/>;
-				
-			return [
-				new DatabaseValue("userId", userId),
-				new DatabaseValue("xml", xml.toXMLString())];
+			var prefDir:File = File.applicationStorageDirectory;
+			
+			var file:File = prefDir.resolvePath("globalSettings.xml");
+			var fileStream:FileStream = new FileStream();
+			fileStream.open(file, FileMode.WRITE);
+			
+			var xml:XML =
+				<globalSettings>
+					<buddySortMethod>{buddySortMethod}</buddySortMethod>
+					<sortBySentDate>{sortBySentDate}</sortBySentDate>
+					<autoShortenUrls>{autoShortenUrls}</autoShortenUrls>
+					<animateBuddyList>{animateBuddyList}</animateBuddyList>
+					<animateMessageList>{animateMessageList}</animateMessageList>
+					<sendStatusToMicroBlogging>{sendStatusToMicroBlogging}</sendStatusToMicroBlogging>
+					<urlShortener>{urlShortener}</urlShortener>
+					<numChatMessages>{numChatMessages}</numChatMessages>
+					<numTimelineMessages>{numTimelineMessages}</numTimelineMessages>
+					<awayTimeout>{awayTimeout}</awayTimeout>
+					<autoConnect>{autoConnect}</autoConnect>
+					<showOfflineBuddies>{showOfflineBuddies}</showOfflineBuddies>
+					<playSounds>{playSounds}</playSounds>
+					<checkUrls>{checkUrls}</checkUrls>
+				</globalSettings>;
+
+			fileStream.writeUTFBytes(xml.toXMLString());
+			fileStream.close();
 		}
-				
-	
 	}
 }

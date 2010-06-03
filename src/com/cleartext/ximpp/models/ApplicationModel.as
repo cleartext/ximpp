@@ -174,12 +174,7 @@ package com.cleartext.ximpp.models
 			}
 			else
 			{
-				// make sure user setting is within possible bounds
-				seconds = Math.max(5, seconds);
-				seconds = Math.min(86400, seconds);
-
 				nApp.idleThreshold = seconds;
-
 				nApp.addEventListener(Event.USER_IDLE, userHandler);
 				nApp.addEventListener(Event.USER_PRESENT, userHandler);
 			}

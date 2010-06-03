@@ -71,7 +71,7 @@ package com.cleartext.ximpp.models
 			var sound:Sound = this[soundName] as Sound;
 			if(!sound)
 			{
-				var file:File = File.applicationStorageDirectory.resolvePath(soundName + ".mp3");
+				var file:File = File.applicationStorageDirectory.resolvePath("sounds/" + soundName + ".mp3");
 				sound = new Sound(new URLRequest(file.url));
 				this[soundName] = sound;
 			}
@@ -110,15 +110,18 @@ package com.cleartext.ximpp.models
 			}
 			loadFile(file, {type: Bitmap, property: "logo"});
 			
+			file = new File(prefDir.nativePath + "/sounds")
+			file.createDirectory();
+			
 			// check for sounds
 			for each(var soundName:String in SOUND_NAMES)
 			{
 				var soundFileName:String = soundName + ".mp3";
-				file = new File(prefDir.nativePath + "/" + soundFileName);
+				file = new File(prefDir.nativePath + "/sounds/" + soundFileName);
 				if(!file.exists)
 				{
 					file = assetsDir.resolvePath(soundFileName);
-					file.copyTo(prefDir.resolvePath(soundFileName));
+					file.copyTo(prefDir.resolvePath("sounds/" + soundFileName));
 				}
 			}
 			
