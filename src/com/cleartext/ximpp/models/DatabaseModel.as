@@ -75,7 +75,8 @@ package com.cleartext.ximpp.models
 		public function close():void
 		{
 			appModel.log("Closing sync database connection")
-			syncConn.close();
+			if(syncConn)
+				syncConn.close();
 		}
 		
 		/**
@@ -241,7 +242,7 @@ package com.cleartext.ximpp.models
 			{
 				while(index>=0)
 				{
-					buddies.addBuddy(Buddy.createFromDB(data[index]));
+					buddies.addBuddy(Buddy.createFromDB(data[index]), false);
 					index--;
 					if(start + maxTimeForProcess < getTimer())
 					{
@@ -252,6 +253,7 @@ package com.cleartext.ximpp.models
 					}
 				}
 				
+				buddies.refresh();
 				dispatchEvent(new LoadingEvent(LoadingEvent.BUDDIES_LOADED));
 			}
 			else

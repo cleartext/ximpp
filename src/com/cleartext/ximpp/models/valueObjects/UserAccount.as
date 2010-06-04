@@ -60,8 +60,9 @@ package com.cleartext.ximpp.models.valueObjects
 			newUserAccount.mBlogUseChatAvatar = obj["mBlogUseChatAvatar"];
 			newUserAccount.mBlogAvatarUrl = obj["mBlogAvatarUrl"];
 
+			newUserAccount.avatarString = obj["avatar"];
 //			AvatarUtils.stringToAvatar(obj["mBlogAvatar"], newUserAccount, "mBlogAvatar");
-			AvatarUtils.stringToAvatar(obj["avatar"], newUserAccount, "avatar");
+			
 			
 			return newUserAccount;
 		}
@@ -81,7 +82,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("avatarHash", avatarHash),
-				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),
+				new DatabaseValue("avatar", avatarString),
 //				new DatabaseValue("mBlogAvatar", AvatarUtils.avatarToString(mBlogAvatar)),
 				new DatabaseValue("mBlogUseChatAvatar", mBlogUseChatAvatar),
 				new DatabaseValue("mBlogPrivateJid", mBlogPrivateJid),

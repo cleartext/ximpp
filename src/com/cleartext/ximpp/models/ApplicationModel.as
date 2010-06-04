@@ -135,7 +135,8 @@ package com.cleartext.ximpp.models
 		{
 			var str:String = ((lineBreak) ? "\n" : "") + getTimer() + " : " + toLog.toString();
 			
-			logFileStream.writeUTFBytes(str + "\n");
+			if(logFileStream)
+				logFileStream.writeUTFBytes(str + "\n");
 
 			if(logEnabled)
 			{

@@ -65,7 +65,7 @@ package com.cleartext.ximpp.models.valueObjects
 		public var avatarHash:String;
 		
 		private var _avatar:BitmapData;
-		[Bindable (event="buddyChanged")]
+		[Bindable (event="avatarChanged")]
 		public function get avatar():BitmapData
 		{
 			return _avatar;
@@ -75,6 +75,22 @@ package com.cleartext.ximpp.models.valueObjects
 			if(_avatar != value)
 			{
 				_avatar = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.AVATAR_CHANGED));
+			}
+		}
+
+		private var _avatarString:String;
+		[Bindable (event="buddyChanged")]
+		public function get avatarString():String
+		{
+			return _avatarString;
+		}
+		public function set avatarString(value:String):void
+		{
+			if(avatarString != value)
+			{
+				_avatarString = value;
+				AvatarUtils.stringToAvatar(avatarString, this, "avatar");
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
 		}
@@ -120,6 +136,7 @@ package com.cleartext.ximpp.models.valueObjects
 			bmd.draw(bitmap, matrix);
 			
 			avatar = bmd;
+			avatarString = AvatarUtils.avatarToString(avatar);
 		}
 
 		public function setAvatarUrl(url:String):void
@@ -157,7 +174,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newMicroBloggingBuddy.avatarUrl = obj["avatarUrl"];
 			newMicroBloggingBuddy.avatarHash = obj["avatarHash"];
 			newMicroBloggingBuddy.gatewayJid = obj["gatewayJid"];
-			AvatarUtils.stringToAvatar(obj["avatar"], newMicroBloggingBuddy, "avatar");
+			newMicroBloggingBuddy.avatarString = obj["avatar"];
 			
 			return newMicroBloggingBuddy;
 		}

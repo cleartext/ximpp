@@ -113,15 +113,16 @@ package com.cleartext.ximpp.models
 			groups.sort = sort;
 		}
 		
-		public function addBuddy(buddy:Buddy):void
+		public function addBuddy(buddy:Buddy, save:Boolean=true):void
 		{
-			if(buddy is UserAccount || buddies.list.getItemIndex(buddy) != -1)
+			if(buddy is UserAccount || buddiesByJid.hasOwnProperty(buddy.jid))
 				return;
 
 			buddies.addItem(buddy);
 			buddiesByJid[buddy.jid] = buddy;
 			buddy.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler, false, 0, true);
-			buddy.dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+			if(save)
+				buddy.dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 		}
 		
 		public function removeBuddy(buddy:Buddy):void

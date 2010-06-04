@@ -5,7 +5,6 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.types.ChatStateTypes;
 	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
-	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
@@ -678,7 +677,7 @@ package com.cleartext.ximpp.models
 				gotAvatar = true;
 				var vCard:XMLList = xml.vCardTemp::vCard;
 				var serverAvatar:String = vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-				var localAvatar:String = AvatarUtils.avatarToString(settings.userAccount.avatar);
+				var localAvatar:String = settings.userAccount.avatarString;
 				
 				// if we have a different avatar to the one on the server, then send a
 				// vcard back to the server
@@ -687,7 +686,11 @@ package com.cleartext.ximpp.models
 					vCard.vCardTemp::PHOTO.vCardTemp::BINVAL = localAvatar;
 					sendIq(settings.userAccount.jid, IQTypes.SET, vCard[0]);
 				}
-				
+				else if(localAvatar == "" || localAvatar == "null")
+				{
+					settings.userAccount.avatarString = serverAvatar;
+				}
+
 				// now we have the avatar, resend the presence to make sure the 
 				// avatar hash is sent to our buddies
 				sendPresence();
@@ -696,7 +699,7 @@ package com.cleartext.ximpp.models
 			{
 				var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
 				var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
-				AvatarUtils.stringToAvatar(avatarString, buddy, "avatar");
+				buddy.avatarString = avatarString;
 			}
 		}
 		
@@ -706,7 +709,10 @@ package com.cleartext.ximpp.models
 		
 		public function getAvatarForMBlogBuddy(jid:String):void
 		{
-			sendIq(jid, 'get', <vCard xmlns='vcard-temp'/>, mBlogVCardHandler);
+			sendIq(jid, 
+				IQTypes.GET, 
+				<vCard xmlns='vcard-temp'/>, 
+				mBlogVCardHandler);
 		}
 		
 		//-------------------------------
@@ -719,7 +725,7 @@ package com.cleartext.ximpp.models
 			var buddyJid:String = stanza.from;
 			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
 			var buddy:MicroBloggingBuddy = mBlogBuddies.getBuddyByJid(buddyJid);
-			AvatarUtils.stringToAvatar(avatarString, buddy, "avatar");
+			buddy.avatarString = avatarString;
 		}
 		
 		//------------------------------------------------------------------
@@ -747,7 +753,7 @@ package com.cleartext.ximpp.models
 			iqStanza.setType(type);
 			iqStanza.setQuery(payload);
 			iqStanza.send();
-		}		
+		}
 		
 		//-------------------------------
 		// SEND PRESENCE
@@ -780,7 +786,6 @@ package com.cleartext.ximpp.models
 			}	
 		}
 		
-		
 		//-------------------------------
 		// SEND MESSAGE
 		//-------------------------------
@@ -790,7 +795,6 @@ package com.cleartext.ximpp.models
 			return xmpp.sendMessage(toJid, body, subject, type, chatState, customTags);
 		}
 		
-
 		//------------------------------------------------------------------
 		//
 		//   SEND SUBSCRIBE / BLOCK

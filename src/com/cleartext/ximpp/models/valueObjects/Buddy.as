@@ -145,7 +145,7 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 
 		private var _avatar:BitmapData;
-		[Bindable (event="buddyChanged")]
+		[Bindable (event="avatarChanged")]
 		public function get avatar():BitmapData
 		{
 			return _avatar;
@@ -161,8 +161,28 @@ package com.cleartext.ximpp.models.valueObjects
 				}
 				
 				_avatar = value;
+				dispatchEvent(new BuddyEvent(BuddyEvent.AVATAR_CHANGED));
+			}
+		}
+
+		private var _avatarString:String;
+		[Bindable (event="buddyChanged")]
+		public function get avatarString():String
+		{
+			return _avatarString;
+		}
+		public function set avatarString(value:String):void
+		{
+			if(avatarString != value)
+			{
+				_avatarString = value;
+				AvatarUtils.stringToAvatar(avatarString, this, "avatar");
 				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
 			}
+		}
+		public function setAvatarString(value:String):void
+		{
+			_avatarString = value;
 		}
 
 		[Bindable (event="buddyChanged")]
@@ -342,7 +362,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			var jid:String = obj["jid"];
 			var newBuddy:Buddy = new Buddy(jid);
-			
+
 			newBuddy.buddyId = obj["buddyId"];
 			newBuddy.nickName = obj["nickName"];
 			newBuddy.lastSeen = obj["lastSeen"];
@@ -356,7 +376,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newBuddy.isMicroBlogging = (groups.indexOf(MicroBloggingTypes.MICRO_BLOGGING_GROUP) != -1);
 			newBuddy.avatarHash = obj["avatarHash"];
 			newBuddy.subscription = obj["subscription"];
-			AvatarUtils.stringToAvatar(obj["avatar"], newBuddy, "avatar");
+			newBuddy.avatarString = obj["avatar"];
 			newBuddy.openTab = obj["openTab"];
 			newBuddy.autoOpenTab = obj["autoOpenTab"];
 			newBuddy.unreadMessages = obj["unreadMessages"];
@@ -373,7 +393,7 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("groups", groups.join(",")),
 				new DatabaseValue("lastSeen", lastSeen),
 				new DatabaseValue("subscription", subscription),
-				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),
+				new DatabaseValue("avatar", avatarString),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("sendTo", sendTo),
 				new DatabaseValue("avatarHash", avatarHash),

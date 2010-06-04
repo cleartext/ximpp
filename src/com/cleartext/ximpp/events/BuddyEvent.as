@@ -7,6 +7,7 @@ package com.cleartext.ximpp.events
 		public static const EDIT_BUDDY:String = "editBuddy";
 		public static const DELETE_BUDDY:String = "deleteBuddy";
 		public static const CHANGED:String = "buddyChanged";
+		public static const AVATAR_CHANGED:String = "avatarChanged";
 		
 		public function BuddyEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

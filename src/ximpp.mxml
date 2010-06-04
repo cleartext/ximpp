@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:WindowedApplication
 	xmlns:mx="http://www.adobe.com/2006/mxml"
-	applicationComplete="windowCompleteHandler()"
+	windowComplete="windowCompleteHandler()"
 	layout="absolute"
 	autoExit="true"
 	xmlns:swiz="http://swiz.swizframework.org"
@@ -10,6 +10,7 @@
 	>
 	<mx:Script>
 		<![CDATA[
+			import mx.managers.PopUpManagerChildList;
 			import mx.containers.Canvas;
 			import mx.managers.LayoutManager;
 			import mx.rpc.soap.LoadEvent;
@@ -27,80 +28,48 @@
 			import com.cleartext.ximpp.assets.Constants;
 			import mx.managers.ToolTipManager;
 			
-			private var progressBar:ProgressBar;
-			private var panel:Panel;
-			private var renderCount:int = 1;
-			
 			private function windowCompleteHandler():void
 			{
+				progressBar.setProgress(0.75, 4);
 				ToolTipManager.showDelay=100;
 				nativeApplication.addEventListener(Event.EXITING, exitHandler);
-				
-				progressBar = new ProgressBar();
-				progressBar.label = "Loading";
-				
-				progressBar.addEventListener(Event.RENDER, splashReady);
-				progressBar.mode = ProgressBarMode.MANUAL;
-				progressBar.setConstraintValue("horizontalCenter", 0);
-				progressBar.setConstraintValue("verticalCenter", 0);
 
-				panel = new Panel();
-				panel.width = 300;
-				panel.height = 100;
-				panel.layout = "absolute";
-				panel.title = "Initalising";
-				panel.addChild(progressBar);
-
-				PopUpManager.addPopUp(panel, this, true);
-				PopUpManager.centerPopUp(panel);
-		   	}
-		   	
-		   	private function splashReady(event:Event=null):void
-		   	{
-	   			if(--renderCount == 0)
-	   			{
-			   		progressBar.removeEventListener(event.type, splashReady);
-			   		mainView.appModel.addEventListener(LoadingEvent.BUDDIES_LOADING, progressHandler);
-			   		mainView.appModel.addEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
-			   		mainView.appModel.addEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
-					mainView.appModel.addEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
-					mainView.appModel.init();
-	   			}
+		   		mainView.appModel.addEventListener(LoadingEvent.BUDDIES_LOADING, progressHandler);
+		   		mainView.appModel.addEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
+		   		mainView.appModel.addEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
+				mainView.appModel.addEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
+				mainView.appModel.init();
+				panel.setStyle("borderColor", mainView.soundColor.backgroundColor);
 		   	}
 		   	
 		   	private function progressHandler(event:LoadingEvent):void
 		   	{
-				panel.setStyle("borderAlpha", 0.8);
-				panel.setStyle("borderColor", mainView.soundColor.backgroundColor);
-				panel.setStyle("titleStyleName", "whiteBoldBig");
-
 		   		switch(event.type)
 		   		{
 			   		case LoadingEvent.BUDDIES_LOADING:
 			   			progressBar.label = "Loading Buddies";
-			   			progressBar.setProgress(0 + event.loaded/event.total, 3);
+			   			progressBar.setProgress(1 + event.loaded/event.total, 4);
 		   				break;
 			   		case LoadingEvent.WORKSTREAM_LOADING:
 			   			progressBar.label = "Loading Workstream";
 			   			if(event.total > 0)
-				   			progressBar.setProgress(1 + event.loaded/event.total, 3);
+				   			progressBar.setProgress(2 + event.loaded/event.total, 4);
 		   				break;
 			   		case LoadingEvent.CHATS_LOADING:
 			   			progressBar.label = "Loading Open Chats";
-			   			progressBar.setProgress(2 + event.loaded/event.total, 3);
+			   			progressBar.setProgress(3 + event.loaded/event.total, 4);
 		   				break;
 		   		}
 		   	}
 		   	
 		   	private function initCompleteHandler(event:LoadingEvent):void
 		   	{
-
 		   		mainView.appModel.removeEventListener(LoadingEvent.BUDDIES_LOADING, progressHandler);
 		   		mainView.appModel.removeEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
 		   		mainView.appModel.removeEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
 				mainView.appModel.removeEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
 
-				PopUpManager.removePopUp(panel);
+				removeChild(modalScreen);
 		   	}
 		   	
 			private function exitHandler(event:Event):void
@@ -117,9 +86,26 @@
 		eventPackages="com.cleartext.ximpp.events"
 		viewPackages="com.cleartext.ximpp.views"
 		injectionEvent="preinitialize"
-		beanLoaders="{ [ Beans ] }" />
+		beanLoaders="{[Beans]}" />
 
 	<views:MainView id="mainView"/>
+	<mx:Canvas id="modalScreen" 
+		backgroundAlpha="0.5" backgroundColor="0x666666" 
+		width="100%" height="100%">
+		<mx:Panel 
+			id="panel" 
+			width="300" height="100" 
+			layout="absolute" 
+			title="Initialising" 
+			titleStyleName="whiteBoldBig"
+			borderAlpha="0.8"
+			horizontalCenter="0" verticalCenter="0">
+			<mx:ProgressBar 
+				id="progressBar" 
+				horizontalCenter="0" verticalCenter="0" 
+				mode="manual" label="Initialising Database"/>
+		</mx:Panel>
+	</mx:Canvas>
 	
 	<mx:Style source="com/cleartext/ximpp/css/defaultStyles.css"/>
 	<mx:Style source="com/cleartext/ximpp/css/scrollSkins.css"/>

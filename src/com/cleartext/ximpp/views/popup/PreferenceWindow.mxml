@@ -130,6 +130,7 @@
 				if(avatarInput.bitmapData)
 				{
 					settings.userAccount.avatar = avatarInput.bitmapData;
+					settings.userAccount.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
 					settings.userAccount.avatarHash = SHA1.hashBytes(avatarInput.bitmapData.getPixels(avatarInput.bitmapData.rect));
 				}
 				else

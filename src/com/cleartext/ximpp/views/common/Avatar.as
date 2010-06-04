@@ -40,7 +40,7 @@ package com.cleartext.ximpp.views.common
 				_data = value;
 				
 				if(buddy)
-					buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler, false, 0, true);
+					buddy.addEventListener(BuddyEvent.AVATAR_CHANGED, buddyChangedHandler, false, 0, true);
 
 				buddyChangedHandler(null);
 			}
@@ -190,7 +190,7 @@ package com.cleartext.ximpp.views.common
 		public function dispose(input:*=null):void
 		{
 			if(buddy)
-				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				buddy.removeEventListener(BuddyEvent.AVATAR_CHANGED, buddyChangedHandler);
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void

@@ -54,7 +54,6 @@ package com.cleartext.ximpp.models
 			{
 				buddy = database.getMicroBloggingBuddy(idOrUserName, gatewayJid);
 				buddiesById[buddy.microBloggingBuddyId] = buddy;
-				
 				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
 			}
 			

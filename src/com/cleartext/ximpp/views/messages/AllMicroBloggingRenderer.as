@@ -43,7 +43,7 @@ package com.cleartext.ximpp.views.messages
 			
 			if(message)
 			{
-				serviceAvatar.data = appModel.getBuddyByJid((fromThisUser) ? message.recipient : message.sender);
+//				serviceAvatar.data = appModel.getBuddyByJid((fromThisUser) ? message.recipient : message.sender);
 			}
 		}
 		

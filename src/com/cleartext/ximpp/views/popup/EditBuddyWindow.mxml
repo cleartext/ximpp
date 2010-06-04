@@ -77,6 +77,7 @@
 				buddy.autoOpenTab = openTabCheckBox.selected;
 
 				buddy.avatar = avatarInput.bitmapData;
+				buddy.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
 				if(avatarInput.bitmapData == null)
 					buddy.avatarHash = null;
 
