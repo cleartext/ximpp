@@ -363,6 +363,10 @@ package com.cleartext.ximpp.models
 		{
 			if(!jid || jid=="")
 				return null;
+
+			var index:int = jid.indexOf("/");
+			if(index >0)
+				jid = jid.substr(0, index-1);
 				
 			if(jid == settings.userAccount.jid)
 				return settings.userAccount;

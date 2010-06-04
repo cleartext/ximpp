@@ -5,7 +5,6 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.valueObjects.BuddyRequest;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
-	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
@@ -466,6 +465,7 @@ package com.cleartext.ximpp.models
 		
 		private function insertStmt(table:String, values:Array):int
 		{
+			var start:int = getTimer();
 			syncConn.begin();
 			var stmt:SQLStatement = new SQLStatement();
 			stmt.sqlConnection = syncConn;
@@ -506,6 +506,7 @@ package com.cleartext.ximpp.models
 			stmt.text = sql;
 			stmt.execute();
 			syncConn.commit();
+			appModel.log("SQL : QUERY DURATION : " + (getTimer() - start));
 			
 			return stmt.getResult().lastInsertRowID;
 		}
@@ -515,6 +516,7 @@ package com.cleartext.ximpp.models
 			if(!table || !values)
 				return;
 			
+			var start:int = getTimer();
 			syncConn.begin();
 			var stmt:SQLStatement = new SQLStatement();
 			stmt.sqlConnection = syncConn;
@@ -561,6 +563,7 @@ package com.cleartext.ximpp.models
 			appModel.log(renderedSql);
 			stmt.execute();
 			syncConn.commit();
+			appModel.log("SQL : QUERY DURATION : " + (getTimer() - start));
 		}
 		
 		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null):MicroBloggingBuddy
@@ -617,12 +620,12 @@ package com.cleartext.ximpp.models
 		private function execute(sql:String):SQLResult
 		{
 			appModel.log("SQL : " + sql);
-			syncConn.begin();
+			var start:int = getTimer();
 			var stmt:SQLStatement = new SQLStatement();
 			stmt.sqlConnection = syncConn;
 			stmt.text = sql;
 			stmt.execute();
-			syncConn.commit();
+			appModel.log("SQL : QUERY DURATION : " + (getTimer() - start));
 			return stmt.getResult();
 		}
 	}
