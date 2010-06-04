@@ -26,9 +26,17 @@
 			[Bindable]
 			public var settings:SettingsModel;
 			
-			[Autowire]
-			[Bindable]
-			public var buddies:BuddyModel;
+			override protected function init(event:FlexEvent):void
+			{
+				super.init(event);
+
+				host.text = "conference." + settings.userAccount.host;
+				
+				if(settings.userAccount.nickName.indexOf("@") == -1)
+					nickname.text = settings.userAccount.nickName;
+				else
+					nickname.text = settings.userAccount.username;
+			}
 			
 			override protected function submit(event:Event):void
 			{
@@ -41,7 +49,15 @@
 			
 			override protected function validateForm():void
 			{
-				isValid = host.text != "" && room.text != "" && nickname.text != "";
+				isValid = host.text != "" && room.text != "" && validateNickName();
+			}
+			
+			private function validateNickName():Boolean
+			{
+				return nickname.text != "" &&
+					nickname.text.indexOf("@") == -1 &&
+					nickname.text.indexOf("/") == -1 && 
+					nickname.text.indexOf(" ") == -1;
 			}
 			
 		]]>
@@ -50,7 +66,7 @@
     <mx:Form>
 		<mx:FormItem label="Host address:">
 			<mx:VBox>
-				<mx:TextInput width="250" id="host" text="{'conference.' + settings.userAccount.host}" change="validateInput(event, 'you must enter a host')" focusOut="validateInput(event, 'you must enter a host')"/>
+				<mx:TextInput width="250" id="host" change="validateInput(event, 'you must enter a host')" focusOut="validateInput(event, 'you must enter a host')"/>
 			</mx:VBox>
 		</mx:FormItem>
 
@@ -62,12 +78,12 @@
 
 		<mx:FormItem label="Your nick name:">
 			<mx:VBox>
-				<mx:TextInput width="250" id="nickname" text="{settings.userAccount.nickName}" change="validateInput(event, 'you must enter a nick name')" focusOut="validateInput(event, 'you must enter a nick name')"/>
+				<mx:TextInput width="250" id="nickname" change="validateInput(event, 'you must enter a nick name without a \'@\', \'/\' or a space', validateNickName)" focusOut="validateInput(event, 'you must enter a nick name without a \'@\', \'/\' or a space', validateNickName)"/>
 			</mx:VBox>
 		</mx:FormItem>
 
 		<mx:FormItem label="Password (optional):">
-			<mx:TextInput width="250" id="password" />
+			<mx:TextInput width="250" id="password" displayAsPassword="true"/>
 		</mx:FormItem>
 
     </mx:Form>

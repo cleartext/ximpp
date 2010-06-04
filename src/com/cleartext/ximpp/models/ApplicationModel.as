@@ -106,8 +106,14 @@ package com.cleartext.ximpp.models
 			if(event.data == "")
 				return;
 			
-			var str:String = "<" + ((event.type == StreamEvent.COMM_OUT) ? "out " : "in " ) + "time='" + getTimer() + "'>\n" + 
-					event.data + "\n\n";
+			var str:String = "<" + 
+					((event.type == StreamEvent.COMM_OUT) ? "out " : "in " ) + 
+					"time='" + getTimer() + 
+					"'>\n" + 
+					event.data +
+					"\n</" +
+					((event.type == StreamEvent.COMM_OUT) ? "out " : "in " ) +
+					">\n\n";
 	
 			xmlFileStream.writeUTFBytes(str);
 
