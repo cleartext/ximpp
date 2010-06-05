@@ -30,9 +30,7 @@
 		]]>
 	</mx:Script>
 
-	<mx:Form>
-		<mx:Label text="{'Are you sure you want to remove ' + buddy.nickName + ' ?'}" />
-	</mx:Form>
+	<mx:Text text="{'Are you sure you want to remove ' + buddy.nickName + ' ?'}" width="400" minHeight="80"/>
 	
 	<mx:ControlBar/>
 

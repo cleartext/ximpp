@@ -67,9 +67,6 @@ package com.cleartext.ximpp.views.messages
 				avatar.data = fromBuddy;
 
 				nameTextField.text = (fromBuddy) ? fromBuddy.nickName : "";
-
-				fromThisUser = false;
-				nameTextField.text = message.sender;
 				nameTextField.width = nameTextField.textWidth + padding*4;
 				nameTextField.styleName = (fromThisUser) ? "lGreyBold" : "blackBold";
 

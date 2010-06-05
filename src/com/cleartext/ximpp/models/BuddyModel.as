@@ -193,16 +193,7 @@ package com.cleartext.ximpp.models
 					return clamp(buddy1.nickName.localeCompare(buddy2.nickName));
 
 				case BuddySortTypes.LAST_SEEN :
-					var date1:Date = buddy1.lastSeen;
-					var date2:Date = buddy2.lastSeen;
-					
-					if(!date1 && !date2)
-						return 0;
-					if(!date1)
-						return 1;
-					if(!date2)
-						return -1;
-					return clamp(date2.time - date1.time);
+					return clamp(buddy2.lastSeen - buddy1.lastSeen);
 
 				case BuddySortTypes.UNREAD_MESSAGES :
 					var unreadCompare:int = clamp(buddy2.unreadMessages - buddy1.unreadMessages);
@@ -285,13 +276,13 @@ package com.cleartext.ximpp.models
 		
 		public function get gatewayNames():Array
 		{
-			var result:Array = ["none"];
+			var result:Array = ["default (xmpp)"];
 
 			for each(var buddy:Buddy in buddies.source)
-				if(buddy.isGateway)
+				if(buddy.isGateway && buddy != Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					result.push(buddy.jid);
 			
-			return result.sortOn("nickName");
+			return result;
 		}
 		
 		public function getBuddiesByGroup(groupName:String):Array

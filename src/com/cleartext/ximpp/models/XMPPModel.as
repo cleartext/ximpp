@@ -1,11 +1,15 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.ApplicationEvent;
+	import com.cleartext.ximpp.events.FormEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
+	import com.cleartext.ximpp.events.XmppErrorEvent;
 	import com.cleartext.ximpp.models.types.ChatStateTypes;
 	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.FormField;
+	import com.cleartext.ximpp.models.valueObjects.FormObject;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Status;
@@ -53,6 +57,10 @@ package com.cleartext.ximpp.models
 		
 		namespace jabberRoster = "jabber:iq:roster";
 		public var JABBER_ROSTER_NS:String = "jabber:iq:roster";
+
+		namespace jabberData = "jabber:x:data";
+		public var JABBER_DATA_NS:String = "jabber:x:data";
+
 
 		//------------------------------------------------------------------
 		//
@@ -311,7 +319,7 @@ package com.cleartext.ximpp.models
 				return;
 			}
 			
-			buddy.lastSeen = message.receivedTimestamp;
+			buddy.lastSeen = message.receivedTimestamp.time;
 			buddy.isTyping = false;
 
 			// if this is a message from a groupchat, then work out the 
@@ -324,7 +332,12 @@ package com.cleartext.ximpp.models
 			// if it isn't from a chatRoom
 			else
 			{
-				buddy.resource = event.stanza.from.resource;
+				if(buddy.resource != messageStanza.from.resource)
+				{
+					appModel.log("*** " + buddy.jid + " buddyResource(" + buddy.resource + ") messageResource(" + messageStanza.from.resource + ")");
+					buddy.resource = messageStanza.from.resource;
+					discoveryInfo(buddy.fullJid);
+				}
 				database.saveMessage(message);
 			}
 
@@ -391,6 +404,11 @@ package com.cleartext.ximpp.models
 						chats.getChat(fromJid, true, Buddy.CHAT_ROOM);
 					else if(stanza.type == Status.UNAVAILABLE)
 						chats.getChat(fromJid, false, Buddy.CHAT_ROOM).buddy.status.value = Status.ERROR;
+					else if(stanza.type == Status.ERROR)
+						Swiz.dispatchEvent(new XmppErrorEvent(
+								XmppErrorEvent.ERROR, 
+								"Unable to join chat room: " + fromJid + " with nickname: " + stanza.from.resource, 
+								fromJid, stanza.error));
 				}
 				
 				return;
@@ -426,7 +444,12 @@ package com.cleartext.ximpp.models
 				
 				var wasOffline:Boolean = buddy.status.isOffline();
 				
-				buddy.resource = stanza.from.resource;
+				if(buddy.resource != stanza.from.resource)
+				{
+					appModel.log("*** " + buddy.jid + " buddyResource(" + buddy.resource + ") presenceResource(" + stanza.from.resource + ")");
+					buddy.resource = stanza.from.resource;
+					discoveryInfo(buddy.fullJid);
+				}
 				// setFromStanzaType also handles "unsubscribed" and "subscribed"
 				// if there is an error, then reset the customStatus, otherwise
 				// set the customStatus from the stanza
@@ -437,8 +460,7 @@ package com.cleartext.ximpp.models
 				// explicitly going online
 				if(wasOffline || buddy.status.value == Status.AVAILABLE)
 				{
-					buddy.lastSeen = new Date();
-					doDiscovery(buddy.fullJid);
+					buddy.lastSeen = new Date().time;
 				}
 				
 				var avatarHash:String = stanza.avatarHash;
@@ -898,12 +920,6 @@ package com.cleartext.ximpp.models
 		//
 		//------------------------------------------------------------------
 		
-		public function doDiscovery(toJid:String):void
-		{
-			discoveryInfo(toJid);
-			discoveryItems(toJid);
-		}
-
 		//-------------------------------
 		// DISCOVERY INFO
 		//-------------------------------
@@ -930,10 +946,14 @@ package com.cleartext.ximpp.models
 			
 			if(iqStanza.query)
 			{
-				for each(var feature:XML in iqStanza.query.discoInfo::feature)
+				var featuresXML:XMLList = iqStanza.query.discoInfo::feature as XMLList;
+				if(featuresXML && featuresXML.length() > 0)
 				{
-					var ns:String = feature.attribute("var").toString();
-					buddy.features.push(ns);
+					for each(var feature:XML in featuresXML)
+					{
+						var ns:String = feature.attribute("var").toString();
+						buddy.features.push(ns);
+					}
 				}
 			}
 		}
@@ -956,7 +976,122 @@ package com.cleartext.ximpp.models
 
 		public function discoveryItemsHandler(iqStanza:IqStanza):void
 		{
+			if(iqStanza.query)
+			{
+				var items:XMLList = iqStanza.query.discoItems::item as XMLList;
+				var result:Array = new Array();
+				for each(var item:XML in items)
+				{
+					var jid:String = item.@jid.toString();
+					if(!buddies.containsJid(jid))
+						result.push(jid);
+				}
+
+				var id:String = iqStanza.id;
+				if(iqVariables.hasOwnProperty(id))
+				{
+					(iqVariables[id] as Function)(result);
+					delete iqVariables[id];
+				}
+			}
+		}
+		
+		//-------------------------------
+		//  FIND TRANSPORTS
+		//-------------------------------
+
+		public function findTransports(handler:Function):void
+		{
+			sendIq(settings.userAccount.host,
+					IQTypes.GET,
+					<query xmlns={DISCO_ITEMS_NS}/>,
+					discoveryItemsHandler,
+					handler);
+		}
+		
+		//-------------------------------
+		//  ADD TRANSPORT
+		//-------------------------------
+
+		public function addTransport(toJid:String):void
+		{
+			sendIq(toJid,
+					IQTypes.GET,
+					<query xmlns={JABBER_REGISTER_NS}/>,
+					addTransportHandler);
+		}
+		
+		//-------------------------------
+		//  ADD TRANSPORT HANDLER
+		//-------------------------------
+
+		public function addTransportHandler(iqStanza:IqStanza):void
+		{
+			var x:Object = iqStanza.query.jabberData::x;
+			if(x && x[0])
+			{
+				x = x[0];
+				var form:FormObject = new FormObject();
+				form.instructions = x.jabberData::instructions;
+				form.title = x.jabberData::title;
+				form.from = iqStanza.from;
+				
+				var fields:XMLList = x.jabberData::field;
+				if(fields)
+				{
+					for each(var field:Object in fields)
+					{
+						var f:FormField = new FormField();
+						f.label = field.@label;
+						f.type = field.@type;
+						f.value = field.value;
+						f.varName = field.attribute("var").toString();
+						f.required = field.hasOwnProperty("required");
+						form.fields.push(f);
+					}
+				}
+				
+				Swiz.dispatchEvent(new FormEvent(FormEvent.NEW_FORM, form));
+			}
+			else
+			{
+				Swiz.dispatchEvent(new XmppErrorEvent(XmppErrorEvent.ERROR, "unable to connect to " + iqStanza.from, iqStanza.from, iqStanza.error));
+			}
+		}
+		
+		//-------------------------------
+		//  SUBMIT FORM
+		//-------------------------------
+
+		public function submitForm(form:FormObject):void
+		{
+			var query:XML = <query xmlns={JABBER_REGISTER_NS} />;
+			var xData:XML = <x xmlns={JABBER_DATA_NS} type='submit'/>;
 			
+			for each(var field:FormField in form.fields)
+			{
+				if(field.varName)
+					xData.appendChild(<field type={field.type} var={field.varName}><value>{field.value}</value></field>);
+			}
+			
+			query.appendChild(xData);
+			
+			sendIq(form.from,
+				IQTypes.SET,
+				query,
+				submitFormHandler);
+		}
+
+		//-------------------------------
+		//  SUBMIT FORM HANDLER
+		//-------------------------------
+
+		public function submitFormHandler(iqStanza:IqStanza):void
+		{
+			if(iqStanza.type=='error')
+			{
+				Swiz.dispatchEvent(new XmppErrorEvent(XmppErrorEvent.ERROR, "Sorry, " + iqStanza.from + " refused your form, please try again.", iqStanza.from, iqStanza.error));
+			}
 		}
 	}
 }

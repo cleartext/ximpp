@@ -114,13 +114,13 @@ package com.cleartext.ximpp.models.valueObjects
 			}
 		}
 		
-		private var _lastSeen:Date;
+		private var _lastSeen:int;
 		[Bindable (event="buddyChanged")]
-		public function get lastSeen():Date
+		public function get lastSeen():int
 		{
 			return _lastSeen;
 		}
-		public function set lastSeen(value:Date):void
+		public function set lastSeen(value:int):void
 		{
 			if(lastSeen != value)
 			{
@@ -405,14 +405,14 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public function get host():String
 		{
-			if(isChatRoom)
+			if(isGateway)
 				return jid;
 			return jid.substr(jid.indexOf("@")+1);
 		}
 		
 		public function get username():String
 		{
-			if(isChatRoom)
+			if(isChatRoom || isGateway)
 				return "";
 			return jid.substr(0, jid.indexOf("@"));
 		}

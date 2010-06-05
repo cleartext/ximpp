@@ -10,6 +10,10 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.views.popup.ErrorWindow;
+			import com.cleartext.ximpp.events.XmppErrorEvent;
+			import com.cleartext.ximpp.views.popup.FormWindow;
+			import com.cleartext.ximpp.events.FormEvent;
 			import com.cleartext.ximpp.views.popup.ChangePasswordWindow;
 			import flash.net.navigateToURL;
 			import com.cleartext.ximpp.views.popup.LinkWindow;
@@ -80,6 +84,24 @@
 			public function showChangePasswordWindow(event:PopUpEvent):void
 			{
 				initializePopUp(new ChangePasswordWindow());
+			}
+
+			[Mediate(event="XmppErrorEvent.ERROR")]
+			public function showErrorWindow(event:XmppErrorEvent):void
+			{
+				var window:ErrorWindow = new ErrorWindow();
+				window.message = event.message;
+				if(event.errorXML)
+					window.message +=  "\n\nDetails:\n\n" + event.errorXML.toXMLString();
+				initializePopUp(window);
+			}
+
+			[Mediate(event="FormEvent.NEW_FORM")]
+			public function showFormWindow(event:FormEvent):void
+			{
+				var window:FormWindow = new FormWindow();
+				window.form = event.form;
+				initializePopUp(window);
 			}
 
 			[Mediate(event="PopUpEvent.PREFERENCES_WINDOW")]
@@ -160,20 +182,6 @@
 				initializePopUp(window);
 
 				window.buddy = event.buddy;
-			}
-
-			[Mediate(event="PopUpEvent.SUBSCRIPTION_REQUEST_WINDOW")]
-			public function showSubscriptionRequest(event:PopUpEvent):void
-			{
-				var window:EditBuddyWindow = new EditBuddyWindow();
-				initializePopUp(window);
-
-				// the order of the next three asignments is important to 
-				// set the correct values in the window - I know this is bad
-				// but it saves a lot of code.
-				window.buddy = event.buddy;
-				window.presenceRequest = event.presenceRequest;
-				window.messageString = event.messageString;
 			}
 
 			//----------------------------------------------

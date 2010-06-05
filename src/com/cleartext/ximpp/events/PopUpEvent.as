@@ -17,7 +17,6 @@ package com.cleartext.ximpp.events
 		public static const ADD_BUDDY_WINDOW:String = "addBuddyWindow";
 		public static const EDIT_BUDDY_WINDOW:String = "editBuddyWindow";
 		public static const DELETE_BUDDY_WINDOW:String = "deleteBuddyWindow";
-		public static const SUBSCRIPTION_REQUEST_WINDOW:String = "subscriptionRequestWindow";
 
 		public static const ADD_GROUP_WINDOW:String = "addGroupWindow";
 		public static const EDIT_GROUP_WINDOW:String = "editGroupWindow";

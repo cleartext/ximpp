@@ -40,38 +40,22 @@
 			{
 				super.init(event);
 				list.dataProvider = wrapArray(buddies.groups.toArray());
-			}
-			
-			private var _presenceRequest:Boolean = false;
-			public function get presenceRequest():Boolean
-			{
-				return _presenceRequest;
-			}
-			public function set presenceRequest(value:Boolean):void
-			{
-				_presenceRequest = value;
 				
-				if(presenceRequest)
-				{
-					title = "Buddy Request";
-					submitButton.label= "add";
-					cancelButton.label= "deny";
-					customLabel.text = buddy.nickName + " wants to be added to your buddy list.";
-				}
-			}
-			
-			public function set messageString(value:String):void
-			{
-				if(value)
-					customLabel.text += " They sent you the following message:\n\n" + value;
+				gatewayComboBox.dataProvider = buddies.gatewayNames;
 			}
 			
 			override protected function submit(event:Event):void
 			{
 				if(!buddy)
+				{
+					var newJid:String = jidTextInput.text;
+					if(gatewayComboBox.selectedIndex > 0)
+						newJid = newJid.replace("@", "\\40") + "@" + gatewayComboBox.selectedLabel;
+
 					// make sure we set the private var so we don't reset the other values
-					_buddy = new Buddy(jidTextInput.text);
-				
+					_buddy = new Buddy(newJid);
+				}
+
 				buddy.nickName = nicknameTextInput.text;
 				buddy.isMicroBlogging = mBlogCheckbox.selected;
 				buddy.autoOpenTab = openTabCheckBox.selected;
@@ -99,14 +83,6 @@
 				closeWindow();
 			}
 			
-			override protected function cancelHandler(event:Event):void
-			{
-				if(presenceRequest)
-					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBED);
-
-				closeWindow();
-			}
-			
 			private var _buddy:Buddy;
 			[Bindable(event="buddySet")]
 			public function get buddy():Buddy
@@ -123,9 +99,20 @@
 				title = "Edit Buddy";
 				submitButton.label = "done";
 				isValid = true;
-						
+				
+				if(buddies.gatewayNames.indexOf(buddy.host) != -1)
+				{
+					jidTextInput.text = buddy.username.replace("\\40", "@");
+					gatewayComboBox.selectedItem = buddy.host;
+				}
+				else
+				{
+					jidTextInput.text = buddy.jid;
+				}
+
 				jidTextInput.enabled = false;
-				jidTextInput.text = buddy.jid;
+				gatewayComboBox.enabled = false;
+
 				nicknameTextInput.text = buddy.nickName;
 				avatarInput.bitmapData = buddy.avatar;
 				mBlogCheckbox.selected = buddy.isMicroBlogging;
@@ -182,8 +169,12 @@
 	
 	<mx:Form>
 
-		<mx:FormItem label="Buddy id (jid):">
+		<mx:FormItem label="Buddy id:">
 			<mx:TextInput id="jidTextInput" change="validateInput(event, 'jid can not be empty')" focusOut="validateInput(event, 'jid can not be empty')"  width="250"/>
+		</mx:FormItem>
+		
+		<mx:FormItem label="Gateway:">
+			<mx:ComboBox id="gatewayComboBox" />
 		</mx:FormItem>
 		
 		<mx:FormItem label="Nickname:">

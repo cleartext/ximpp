@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.ximpp.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	title="Error"
+	submitButtonLabel="done" 
+	showCancelButton="false"
+	isValid="true">
+	
+	<mx:Script>
+		<![CDATA[
+		
+			[Bindable]
+			public var message:String;
+			
+			override protected function submit(event:Event):void
+			{
+				closeWindow();
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Text width="400" text="{message}" minHeight="80"/>
+    
+    <mx:ControlBar />
+
+</popup:PopupWindowBase>

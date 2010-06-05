@@ -257,7 +257,7 @@ package com.cleartext.ximpp.models
 				var logList:Array = logDir.getDirectoryListing();
 				
 				logList.sortOn("name");
-				while(logList.length > 8)
+				while(logList.length > 6)
 				{
 					var delFile:File = logList.shift();
 					delFile.deleteFile();
