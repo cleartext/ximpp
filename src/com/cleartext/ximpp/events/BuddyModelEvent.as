@@ -5,7 +5,7 @@ package com.cleartext.ximpp.events
 	public class BuddyModelEvent extends Event
 	{
 		public static const FILTER_CHANGED:String = "filterChanged";
-		public static const GROUPS_CHANGED:String = "groupsChanged";
+		public static const REFRESH:String = "refresh";
 		
 		public function BuddyModelEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

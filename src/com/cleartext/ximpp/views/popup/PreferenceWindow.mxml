@@ -21,7 +21,6 @@
 			import com.adobe.crypto.SHA1;
 			import com.cleartext.ximpp.models.valueObjects.Status;
 			import com.cleartext.ximpp.models.utils.AvatarUtils;
-			import com.cleartext.ximpp.events.BuddyEvent;
 			import mx.events.CollectionEvent;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.models.DatabaseModel;
@@ -122,7 +121,7 @@
 //					database.saveUserAccount(userAccount);
 				
 				settings.userAccount.accountName = accountName.text;
-				settings.userAccount.nickName = nickName.text;
+				settings.userAccount.nickname = nickname.text;
 				settings.userAccount.jid = jid.text;
 				settings.userAccount.password = password.text;
 				settings.userAccount.server = server.text;
@@ -156,7 +155,7 @@
 				if(previousAccount)
 				{
 					previousAccount.accountName = accountName.text;
-					previousAccount.nickName = nickName.text;
+					previousAccount.nickname = nickname.text;
 					previousAccount.jid = jid.text;
 					previousAccount.password = password.text;
 					previousAccount.server = server.text;
@@ -192,7 +191,7 @@
 				if(previousAccount)
 				{
 					accountName.text = previousAccount.accountName;
-					nickName.text = previousAccount.nickName;
+					nickname.text = previousAccount.nickname;
 					avatarInput.data = previousAccount;
 					jid.text = previousAccount.jid;
 					password.text = previousAccount.password;
@@ -365,7 +364,7 @@
 				</mx:VBox>
 			</mx:FormItem>
 			<mx:FormItem label="Nickname:">
-				<mx:TextInput id="nickName" change="changesMade = true;" width="{TEXT_INPUT_WIDTH}" />
+				<mx:TextInput id="nickname" change="changesMade = true;" width="{TEXT_INPUT_WIDTH}" />
 			</mx:FormItem>
 			<mx:FormItem label="Profile picture:" direction="horizontal">
 				<common:Avatar id="avatarInput" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />

@@ -11,7 +11,6 @@
 			import com.cleartext.ximpp.events.PopUpEvent;
 			import org.swizframework.Swiz;
 			import com.cleartext.ximpp.events.UserAccountEvent;
-			import com.cleartext.ximpp.events.BuddyEvent;
 			import com.cleartext.ximpp.models.SettingsModel;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import com.cleartext.ximpp.models.valueObjects.Status;

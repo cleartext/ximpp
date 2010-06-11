@@ -1,9 +1,9 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.assets.Constants;
-	import com.cleartext.ximpp.events.BuddyEvent;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.events.HasAvatarEvent;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.UnreadMessageBadge;
 	
@@ -61,7 +61,7 @@ package com.cleartext.ximpp.views.messages
 			return data as Chat;
 		}
 		
-		override protected function buddyChangedHandler(event:BuddyEvent):void
+		override protected function buddyChangedHandler(event:HasAvatarEvent):void
 		{
 			super.buddyChangedHandler(event);
 			invalidateProperties();
@@ -99,7 +99,7 @@ package com.cleartext.ximpp.views.messages
 		{
 			super.commitProperties();
 			
-			var chatBuddy:Buddy = buddy as Buddy;
+			var chatBuddy:IBuddy = buddy as IBuddy;
 
 			if(chatBuddy && unreadMessageBadge)
 			{

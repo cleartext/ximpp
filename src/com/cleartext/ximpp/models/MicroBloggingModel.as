@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.models
 {
-	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.HasAvatarEvent;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
@@ -54,7 +54,7 @@ package com.cleartext.ximpp.models
 			{
 				buddy = database.getMicroBloggingBuddy(idOrUserName, gatewayJid);
 				buddiesById[buddy.microBloggingBuddyId] = buddy;
-				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 			}
 			
 			if(displayName != null)
@@ -77,7 +77,7 @@ package com.cleartext.ximpp.models
 			return null;
 		}
 		
-		public function buddyChangedHandler(event:BuddyEvent):void
+		private function buddyChangedHandler(event:HasAvatarEvent):void
 		{
 			var buddy:MicroBloggingBuddy = event.target as MicroBloggingBuddy;
 			database.saveMicroBloggingBuddy(buddy);

@@ -1,6 +1,5 @@
 package com.cleartext.ximpp.models
 {
-	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;

@@ -4,12 +4,16 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.FormEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.events.XmppErrorEvent;
+	import com.cleartext.ximpp.models.types.BuddyTypes;
 	import com.cleartext.ximpp.models.types.ChatStateTypes;
 	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
 	import com.cleartext.ximpp.models.valueObjects.FormField;
 	import com.cleartext.ximpp.models.valueObjects.FormObject;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
+	import com.cleartext.ximpp.models.valueObjects.ISubscribable;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Status;
@@ -52,6 +56,9 @@ package com.cleartext.ximpp.models
 		namespace muc = "http://jabber.org/protocol/muc";
 		public var MUC_NS:String = "http://jabber.org/protocol/muc";
 
+		namespace mucOwner = "http://jabber.org/protocol/muc#owner";
+		public var MUC_OWNER_NS:String = "http://jabber.org/protocol/muc#owner";
+
 		namespace vCardTemp = "vcard-temp";
 		public var V_CARD_TEMP_NS:String = "vcard-temp";
 		
@@ -60,7 +67,6 @@ package com.cleartext.ximpp.models
 
 		namespace jabberData = "jabber:x:data";
 		public var JABBER_DATA_NS:String = "jabber:x:data";
-
 
 		//------------------------------------------------------------------
 		//
@@ -308,7 +314,7 @@ package com.cleartext.ximpp.models
 				return;
 			
 			var message:Message = appModel.createFromStanza(messageStanza);
-			var buddy:Buddy = appModel.getBuddyByJid(message.sender);
+			var buddy:IBuddy = appModel.getBuddyByJid(message.sender);
 			
 			// if the buddy does not exist in our buddy list, then treat it as a buddy
 			// request
@@ -318,13 +324,10 @@ package com.cleartext.ximpp.models
 				database.saveMessage(message);
 				return;
 			}
-			
-			buddy.lastSeen = message.receivedTimestamp.time;
-			buddy.isTyping = false;
 
 			// if this is a message from a groupchat, then work out the 
 			// sender's nickname
-			if(buddy.isChatRoom)
+			if(buddy is ChatRoom)
 			{
 				message.groupChatSender = event.stanza.from.resource;
 			}
@@ -332,17 +335,16 @@ package com.cleartext.ximpp.models
 			// if it isn't from a chatRoom
 			else
 			{
-				if(buddy.resource != messageStanza.from.resource)
-				{
-					appModel.log("*** " + buddy.jid + " buddyResource(" + buddy.resource + ") messageResource(" + messageStanza.from.resource + ")");
-					buddy.resource = messageStanza.from.resource;
-					discoveryInfo(buddy.fullJid);
-				}
+				if(buddy is Buddy)
+					(buddy as Buddy).resource = messageStanza.from.resource;
+
+				buddy.isTyping = false;
+
 				database.saveMessage(message);
 			}
 
+			buddy.lastSeen = message.receivedTimestamp.time;
 			buddy.unreadMessages++;
-			
 			chats.addMessage(buddy, message);
 			
 			// play sounds & increment unread messages for the mblog buddy
@@ -368,7 +370,7 @@ package com.cleartext.ximpp.models
 		{
 			var chatState:String = event.stanza.chatState;
 			var fromJid:String = event.stanza.from.getBareJID();
-			var buddy:Buddy = appModel.getBuddyByJid(fromJid);
+			var buddy:Buddy = appModel.getBuddyByJid(fromJid) as Buddy;
 
 			if(buddy)
 				buddy.isTyping = (chatState == ChatStateTypes.COMPOSING);
@@ -386,7 +388,7 @@ package com.cleartext.ximpp.models
 
 			var stanza:PresenceStanza = event.stanza as PresenceStanza;
 			var fromJid:String = stanza.from.getBareJID();
-			var buddy:Buddy = appModel.getBuddyByJid(fromJid);
+			var buddy:IBuddy = appModel.getBuddyByJid(fromJid);
 			
 			// if this is our own presence we don't care
 			if(fromJid == settings.userAccount.jid)
@@ -401,9 +403,9 @@ package com.cleartext.ximpp.models
 				if(stanza.from.resource == chatRoomNicknames[fromJid])
 				{
 					if(stanza.type == Status.AVAILABLE)
-						chats.getChat(fromJid, true, Buddy.CHAT_ROOM);
+						chats.getChat(fromJid, true, BuddyTypes.CHAT_ROOM);
 					else if(stanza.type == Status.UNAVAILABLE)
-						chats.getChat(fromJid, false, Buddy.CHAT_ROOM).buddy.status.value = Status.ERROR;
+						chats.getChat(fromJid, false, BuddyTypes.CHAT_ROOM).buddy.status.value = Status.ERROR;
 					else if(stanza.type == Status.ERROR)
 						Swiz.dispatchEvent(new XmppErrorEvent(
 								XmppErrorEvent.ERROR, 
@@ -421,7 +423,7 @@ package com.cleartext.ximpp.models
 				if(buddy)
 				{
 					sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
-					if(!buddy.subscribedTo)
+					if((buddy is ISubscribable) && !(buddy as ISubscribable).subscribedTo)
 						sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
 				}
 				// if they aren't in the roster list, then alert the user
@@ -444,12 +446,9 @@ package com.cleartext.ximpp.models
 				
 				var wasOffline:Boolean = buddy.status.isOffline();
 				
-				if(buddy.resource != stanza.from.resource)
-				{
-					appModel.log("*** " + buddy.jid + " buddyResource(" + buddy.resource + ") presenceResource(" + stanza.from.resource + ")");
-					buddy.resource = stanza.from.resource;
-					discoveryInfo(buddy.fullJid);
-				}
+				if(buddy is Buddy)
+					(buddy as Buddy).resource = stanza.from.resource;
+
 				// setFromStanzaType also handles "unsubscribed" and "subscribed"
 				// if there is an error, then reset the customStatus, otherwise
 				// set the customStatus from the stanza
@@ -489,7 +488,7 @@ package com.cleartext.ximpp.models
 		{
 			appModel.log("getRosterHandler");
 			
-			var buddy:Buddy;
+			var buddy:IBuddy;
 			var buddiesToDelete:Dictionary = new Dictionary();
 			
 			for each(buddy in buddies.buddies.source)
@@ -505,18 +504,23 @@ package com.cleartext.ximpp.models
 				if(!buddy)
 					buddy = new Buddy(jid);
 				
-				var groups:Array = new Array();
-				for each(var group:XML in item.jabberRoster::group)
-					{
-						var gString:String = String(group.text());
-						if(gString != "")
-							groups.push(gString);
-					}
-				buddy.groups = groups;
+				var b:Buddy = buddy as Buddy;
+				if(b)
+				{
+					var groups:Array = new Array();
+					for each(var group:XML in item.jabberRoster::group)
+						{
+							var gString:String = String(group.text());
+							if(gString != "")
+								groups.push(gString);
+						}
+					b.groups = groups;
+
+					b.subscription = item.@subscription;
+					requests.setSubscription(jid, b.nickname, b.subscription);
+				}
 				
-				buddy.nickName = item.@name;
-				buddy.subscription = item.@subscription;
-				requests.setSubscription(jid, buddy.nickName, buddy.subscription);
+				buddy.nickname = item.@name;
 
 				// flag used to delete buddies that are no longer in
 				// the roster list
@@ -548,7 +552,11 @@ package com.cleartext.ximpp.models
 
 			// if we already have the buddy, then we just want to
 			// update the values, otherwise create a new buddy
-			var buddy:Buddy = appModel.getBuddyByJid(jid);
+			var buddy:Buddy = appModel.getBuddyByJid(jid) as Buddy;
+			
+			// NOTE we want a Buddy - a roster item here, this could
+			// lead to duplicates if someone adds a group or a chatroom
+			// to their roster list
 			if(!buddy)
 			{
 				buddy = new Buddy(jid);
@@ -563,10 +571,10 @@ package com.cleartext.ximpp.models
 			else
 			{
 				buddy.groups = event.stanza["groups"];
-				buddy.nickName = event.stanza["name"];
+				buddy.nickname = event.stanza["name"];
 				buddy.subscription = subscription;
 				
-				requests.setSubscription(jid, buddy.nickName, buddy.subscription);
+				requests.setSubscription(jid, buddy.nickname, buddy.subscription);
 			}
 			buddies.refresh();
 		}
@@ -575,15 +583,19 @@ package com.cleartext.ximpp.models
 		// ADD TO ROSTER 
 		//-------------------------------
 		
-		public function addToRoster(toJid:String, nickName:String, groups:Array):void
+		public function addToRoster(buddy:IBuddy):void
 		{
 			var query:XML = <query xmlns={JABBER_ROSTER_NS} />;
-			var item:XML = <item jid={toJid} />;
-			if(nickName)
-				item.@name = nickName;
+			var item:XML = <item jid={buddy.jid} />;
+			if(buddy.nickname != buddy.jid)
+				item.@name = buddy.nickname;
 			
-			for each(var group:String in groups)
-				item.appendChild(<group>{group}</group>);
+			if(buddy is Buddy)
+			{
+				var groups:Array = (buddy as Buddy).groups;
+				for each(var group:String in groups)
+					item.appendChild(<group>{group}</group>);
+			}
 			
 			query.appendChild(item);
 
@@ -591,7 +603,7 @@ package com.cleartext.ximpp.models
 					IQTypes.SET,
 					query,
 					addToRosterHandler,
-					toJid);
+					buddy.jid);
 		}
 
 		//-------------------------------
@@ -637,15 +649,23 @@ package com.cleartext.ximpp.models
 		// MODIFY ROSTER ITEM
 		//-------------------------------
 		
-		public function modifyRosterItem(buddy:Buddy):void
+		public function modifyRosterItem(buddy:IBuddy):void
 		{
 			var query:XML = <query xmlns={JABBER_ROSTER_NS} />;
-			var item:XML = <item jid={buddy.jid} subscription={buddy.subscription} />;
-			if(buddy.nickName != buddy.jid)
-				item.@name = buddy.nickName;
+			var item:XML = <item jid={buddy.jid}/>
 			
-			for each(var group:String in buddy.groups)
-				item.appendChild(<group>{group}</group>);
+			if(buddy is Buddy)
+				 item.@subscription=(buddy as Buddy).subscription;
+
+			if(buddy.nickname != buddy.jid)
+				item.@name = buddy.nickname;
+			
+			if(buddy is Buddy)
+			{
+				var groups:Array = (buddy as Buddy).groups;
+				for each(var group:String in groups)
+					item.appendChild(<group>{group}</group>);
+			}
 			
 			query.appendChild(item);
 			
@@ -720,7 +740,7 @@ package com.cleartext.ximpp.models
 			else
 			{
 				var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-				var buddy:Buddy = appModel.getBuddyByJid(buddyJid);
+				var buddy:IBuddy = appModel.getBuddyByJid(buddyJid);
 				buddy.avatarString = avatarString;
 			}
 		}
@@ -864,6 +884,31 @@ package com.cleartext.ximpp.models
 		//------------------------------------------------------------------
 		
 		//-------------------------------
+		// CREATE CHAT ROOM
+		//-------------------------------
+		
+		public function createChatRoom(roomJid:String):void
+		{
+			sendIq(roomJid,
+					IQTypes.GET,
+					<query xmlns={MUC_OWNER_NS}/>,
+					createChatRoomHandler);
+		}
+		
+		//-------------------------------
+		// CREATE CHAT ROOM HANDLER
+		//-------------------------------
+		
+		public function createChatRoomHandler(iqStanza:IqStanza):void
+		{
+			var x:Object = iqStanza.query.mucOwner::x;
+			if(x && x[0])
+				createForm(x[0], iqStanza.from);
+			else
+				Swiz.dispatchEvent(new XmppErrorEvent(XmppErrorEvent.ERROR, "unable to create new chat room at " + iqStanza.from, iqStanza.from, iqStanza.error));
+		}
+		
+		//-------------------------------
 		// JOIN CHAT ROOM
 		//-------------------------------
 		
@@ -940,7 +985,7 @@ package com.cleartext.ximpp.models
 		{
 			var fromJid:String = iqStanza.from;
 			var bareJid:String = (fromJid.indexOf("/") == -1) ? fromJid : fromJid.substr(0, fromJid.indexOf("/"));
-			var buddy:Buddy = appModel.getBuddyByJid(bareJid);
+			var buddy:Buddy = appModel.getBuddyByJid(bareJid) as Buddy;
 			if(!buddy)
 				return;
 			
@@ -996,6 +1041,12 @@ package com.cleartext.ximpp.models
 			}
 		}
 		
+		//------------------------------------------------------------------
+		//
+		//   TRANSPORTS
+		//
+		//------------------------------------------------------------------
+		
 		//-------------------------------
 		//  FIND TRANSPORTS
 		//-------------------------------
@@ -1029,36 +1080,46 @@ package com.cleartext.ximpp.models
 		{
 			var x:Object = iqStanza.query.jabberData::x;
 			if(x && x[0])
-			{
-				x = x[0];
-				var form:FormObject = new FormObject();
-				form.instructions = x.jabberData::instructions;
-				form.title = x.jabberData::title;
-				form.from = iqStanza.from;
-				
-				var fields:XMLList = x.jabberData::field;
-				if(fields)
-				{
-					for each(var field:Object in fields)
-					{
-						var f:FormField = new FormField();
-						f.label = field.@label;
-						f.type = field.@type;
-						f.value = field.value;
-						f.varName = field.attribute("var").toString();
-						f.required = field.hasOwnProperty("required");
-						form.fields.push(f);
-					}
-				}
-				
-				Swiz.dispatchEvent(new FormEvent(FormEvent.NEW_FORM, form));
-			}
+				createForm(x[0], iqStanza.from);
 			else
-			{
 				Swiz.dispatchEvent(new XmppErrorEvent(XmppErrorEvent.ERROR, "unable to connect to " + iqStanza.from, iqStanza.from, iqStanza.error));
-			}
 		}
 		
+		//------------------------------------------------------------------
+		//
+		//   FORMS
+		//
+		//------------------------------------------------------------------
+		
+		//-------------------------------
+		//  CREATE FORM
+		//-------------------------------
+
+		public function createForm(xml:Object, fromJid:String):void
+		{
+			var form:FormObject = new FormObject();
+			form.instructions = xml.jabberData::instructions;
+			form.title = xml.jabberData::title;
+			form.from = fromJid;
+			
+			var fields:XMLList = xml.jabberData::field;
+			if(fields)
+			{
+				for each(var field:Object in fields)
+				{
+					var f:FormField = new FormField();
+					f.label = field.@label;
+					f.type = field.@type;
+					f.value = field.value;
+					f.varName = field.attribute("var").toString();
+					f.required = field.hasOwnProperty("required");
+					form.fields.push(f);
+				}
+			}
+			
+			Swiz.dispatchEvent(new FormEvent(FormEvent.NEW_FORM, form));
+		}
+
 		//-------------------------------
 		//  SUBMIT FORM
 		//-------------------------------

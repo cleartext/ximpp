@@ -1,6 +1,6 @@
 package com.cleartext.ximpp.events
 {
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	
 	import flash.events.Event;
 
@@ -27,7 +27,7 @@ package com.cleartext.ximpp.events
 
 		public static const CHANGE_PASSWORD_WINDOW:String = "changePasswordWindow";
 		
-		public var buddy:Buddy;
+		public var buddy:IBuddy;
 		public var group:String;
 		public var presenceRequest:Boolean = false;
 		public var messageString:String;

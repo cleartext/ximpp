@@ -39,8 +39,8 @@
 				else
 					publishNo.selected = true;
 
-				subscribeLabel.text = "ask to see when " + buddy.nickName + " is online"; 
-				publishLabel.text = "allow " + buddy.nickName + " to see when you are online";
+				subscribeLabel.text = "ask to see when " + buddy.nickname + " is online"; 
+				publishLabel.text = "allow " + buddy.nickname + " to see when you are online";
 				
 				
 			}

@@ -10,28 +10,38 @@ package com.cleartext.ximpp.models.valueObjects
 	
 	public class Chat extends EventDispatcher
 	{
-		public var buddy:Buddy;
+		public var buddy:IBuddy;
 		public var used:Boolean = true;
 		public var messages:ArrayCollection;
 		
+		public function get isPerson():Boolean
+		{
+			return buddy.isPerson;
+		}
+		
+		public function get isGateway():Boolean
+		{
+			return buddy.isGateway;
+		}
+		
 		public function get isMicroBlogging():Boolean
 		{
-			return buddy && buddy.isMicroBlogging;
+			return buddy.isMicroBlogging;
 		}
 		
 		public function get isGroup():Boolean
 		{
-			return buddy && buddy.isGroup;
+			return buddy is Group;
 		}
 		
 		public function get isChatRoom():Boolean
 		{
-			return buddy && buddy.isChatRoom;
+			return buddy is ChatRoom;
 		}
 		
 		public var chatState:String;
 		
-		public function Chat(buddy:Buddy)
+		public function Chat(buddy:IBuddy)
 		{
 			super();
 			this.buddy = buddy;

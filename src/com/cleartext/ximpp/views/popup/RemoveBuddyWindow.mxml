@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.IBuddy;
 			import com.cleartext.ximpp.models.ChatModel;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -15,7 +16,7 @@
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
 
 			[Bindable]
-			public var buddy:Buddy;
+			public var buddy:IBuddy;
 
 			[Autowire]
 			[Bindable]
@@ -30,7 +31,7 @@
 		]]>
 	</mx:Script>
 
-	<mx:Text text="{'Are you sure you want to remove ' + buddy.nickName + ' ?'}" width="400" minHeight="80"/>
+	<mx:Text text="{'Are you sure you want to remove ' + buddy.nickname + ' ?'}" width="400" minHeight="80"/>
 	
 	<mx:ControlBar/>
 

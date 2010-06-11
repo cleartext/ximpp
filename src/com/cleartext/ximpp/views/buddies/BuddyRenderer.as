@@ -1,14 +1,13 @@
 package com.cleartext.ximpp.views.buddies
 {
 	import com.cleartext.ximpp.events.ApplicationEvent;
-	import com.cleartext.ximpp.events.BuddyEvent;
-	import com.cleartext.ximpp.events.ChatEvent;
+	import com.cleartext.ximpp.events.HasAvatarEvent;
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.ChatModel;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
-	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.cleartext.ximpp.views.common.Avatar;
 	import com.cleartext.ximpp.views.common.StatusIcon;
@@ -98,20 +97,23 @@ package com.cleartext.ximpp.views.buddies
 		{
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				return;
+
+			var subscribedTo:Boolean = (buddy is Buddy) && (buddy as Buddy).subscribedTo;
 			
 			// label at top
-			customContextMenu.getItemAt(0).label = (buddy && xmpp.connected) ? buddy.nickName : "go online to edit";
+			customContextMenu.getItemAt(0).label = (buddy && xmpp.connected) ? buddy.nickname : "go online to edit";
 			// workstream label
-			customContextMenu.getItemAt(3).label = (buddy && buddy.isMicroBlogging) ? "remove from workstream" : "add to workstream";
+			customContextMenu.getItemAt(3).label = buddy.isMicroBlogging ? "remove from workstream" : "add to workstream";
+			
 			
 			// add or remove subscription request if required
-			if(!buddy.subscribedTo && !subscribeItem)
+			if(subscribedTo && !subscribeItem)
 			{
 				subscribeItem = new ContextMenuItem("resend subscription request", true);
 				subscribeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, sendSubscription);
 				customContextMenu.addItemAt(subscribeItem, 4);
 			}
-			else if(buddy.subscribedTo && subscribeItem)
+			else if(subscribedTo && subscribeItem)
 			{
 				customContextMenu.removeItem(subscribeItem);
 				subscribeItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, sendSubscription);
@@ -125,7 +127,7 @@ package com.cleartext.ximpp.views.buddies
 				logonItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, logonHandler);
 				customContextMenu.addItem(logonItem);
 			}
-			else if((!buddy.isGateway || !buddy.status.isOffline()) && logonItem)
+			else if((buddy.isGateway || !buddy.status.isOffline()) && logonItem)
 			{
 				customContextMenu.removeItem(logonItem);
 				logonItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, logonHandler);
@@ -165,8 +167,10 @@ package com.cleartext.ximpp.views.buddies
 		private function socialHandler(event:ContextMenuEvent):void
 		{
 			// incase we went offline while the user was clicking
-			if(!xmpp.connected)
+			// plus we only want to make Buddies microblogging buddies
+			if(!xmpp.connected || !(buddy is Buddy))
 				return;
+				
 			buddy.isMicroBlogging = !buddy.isMicroBlogging;
 			xmpp.modifyRosterItem(buddy);
 		}
@@ -178,9 +182,9 @@ package com.cleartext.ximpp.views.buddies
 			Swiz.dispatchEvent(popupEvent);
 		}
 
-		private function get buddy():Buddy
+		private function get buddy():IBuddy
 		{
-			return data as Buddy;
+			return data as IBuddy;
 		}
 		
 		override public function set data(value:Object):void
@@ -189,13 +193,13 @@ package com.cleartext.ximpp.views.buddies
 				return;
 
 			if(buddy)
-				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 			
 			super.data = value;
 
 			if(buddy)
 			{
-				buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 				if(avatar)
 					avatar.data = buddy;
 
@@ -231,7 +235,7 @@ package com.cleartext.ximpp.views.buddies
 			buddyChangedHandler(null);
 		}
 		
-		private function buddyChangedHandler(event:BuddyEvent):void
+		private function buddyChangedHandler(event:HasAvatarEvent):void
 		{
 			if(!buddy || buddy.status.isOffline())
 			{
@@ -343,7 +347,7 @@ package com.cleartext.ximpp.views.buddies
 	
 			// set values
 			customStatusLabel.text = buddy.customStatus;
-			nameLabel.text = buddy.nickName;
+			nameLabel.text = buddy.nickname;
 			statusIcon.status.value = buddy.status.value;
 			if(unreadMessageBadge.count != buddy.unreadMessages)
 			{

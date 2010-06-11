@@ -1,13 +1,18 @@
 package com.cleartext.ximpp.views.messages
 {
+	import com.cleartext.ximpp.events.BuddyModelEvent;
+	import com.cleartext.ximpp.models.BuddyModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
+	import com.cleartext.ximpp.models.valueObjects.Group;
 	import com.cleartext.ximpp.models.valueObjects.Message;
+	import com.cleartext.ximpp.views.buddies.BuddyRenderer;
 	import com.universalsprout.flex.components.list.ISproutListData;
 	import com.universalsprout.flex.components.list.SproutList;
 	
 	import mx.binding.utils.BindingUtils;
+	import mx.collections.ArrayCollection;
 	import mx.core.ClassFactory;
 	import mx.core.IInvalidating;
 
@@ -17,9 +22,29 @@ package com.cleartext.ximpp.views.messages
 		[Bindable]
 		public var global:GlobalSettings;
 		
+		[Autowire]
+		public var buddies:BuddyModel;
+		
+		private var participantList:SproutList;
+		
 		public function get chat():Chat
 		{
 			return data as Chat;
+		}
+		
+		private var _participants:ArrayCollection;
+		public function get participants():ArrayCollection
+		{
+			return _participants;
+		}
+		public function set participants(value:ArrayCollection):void
+		{
+			if(_participants != value)
+			{
+				_participants = value;
+				if(participantList)
+					participantList.dataProvider = participants;
+			}
 		}
 		
 		override public function set data(value:Object):void
@@ -37,12 +62,22 @@ package com.cleartext.ximpp.views.messages
 					itemRenderer = new ClassFactory(MicroBloggingRenderer);
 				else
 					itemRenderer = new ClassFactory(ChatRenderer);
+
+				participants = chat.buddy.participants;
+				
+				if(chat.buddy is Group)
+					(chat.buddy as Group).addEventListener(BuddyModelEvent.REFRESH, refreshHandler);
 			}
 		}
 
 		public function MessageSproutList()
 		{
 			super();
+		}
+		
+		private function refreshHandler(event:BuddyModelEvent):void
+		{
+			participants = chat.buddy.participants;
 		}
 		
 		public function setSort(value:Boolean):void
@@ -68,6 +103,14 @@ package com.cleartext.ximpp.views.messages
 		{
 			super.createChildren();
 			BindingUtils.bindSetter(setSort, global, "sortBySentDate");
+			
+			if(!participantList)
+			{
+				participantList = new SproutList();
+				participantList.itemRenderer = new ClassFactory(BuddyRenderer);
+				participantList.dataProvider = participants;
+				addChild(participantList);
+			}
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
@@ -90,7 +133,13 @@ package com.cleartext.ximpp.views.messages
 					}
 				}
 			}
+
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
+			
+			setChildIndex(participantList, numChildren-1);
+			
+			participantList.setActualSize(200, 400);
+			participantList.move(unscaledWidth-240, 40);
 		}
 	}
 }

@@ -5,6 +5,7 @@ package com.cleartext.ximpp.views.buddies
 	import com.cleartext.ximpp.models.BuddyRequestModel;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
+	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.BuddyRequest;
 	import com.universalsprout.flex.components.list.SproutListRendererBase;
 	
@@ -160,7 +161,9 @@ package com.cleartext.ximpp.views.buddies
 					if(xmpp.connected)
 					{
 						xmpp.sendSubscribe(request.jid, SubscriptionTypes.SUBSCRIBED);
-						xmpp.addToRoster(request.jid, request.nickname, null);
+						var b:Buddy = new Buddy(request.jid);
+						b.nickname = request.nickname;
+						xmpp.addToRoster(b);
 					}
 					break;
 				case "deny" :

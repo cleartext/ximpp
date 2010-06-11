@@ -1,10 +1,11 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.assets.Constants;
-	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.HasAvatarEvent;
 	import com.cleartext.ximpp.events.InputTextEvent;
 	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	
 	import flash.display.DisplayObject;
@@ -24,7 +25,7 @@ package com.cleartext.ximpp.views.messages
 		protected var buttonWidth:Number = 16;
 		protected var buttons:Array = new Array();
 		
-		private var chatBuddy:Buddy;
+		private var chatBuddy:IBuddy;
 		private var mBlogSender:MicroBloggingBuddy;
 		private var type:String = "";
 			
@@ -125,7 +126,7 @@ package com.cleartext.ximpp.views.messages
 						Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + message.mBlogSender.userName + " : " + bodyTextField.text));
 						break;
 					case "direct" :
-						var buddy:Buddy = appModel.getBuddyByJid(message.mBlogSender.jid);
+						var buddy:IBuddy = appModel.getBuddyByJid(message.mBlogSender.jid);
 						if(!buddy)
 						{
 							buddy = new Buddy(message.mBlogSender.jid);
@@ -149,7 +150,7 @@ package com.cleartext.ximpp.views.messages
 			return heightTo;
 		}
 		
-		protected function buddyChangeHandler(event:BuddyEvent):void
+		protected function buddyChangeHandler(event:HasAvatarEvent):void
 		{
 			invalidateProperties();
 		}
@@ -161,12 +162,12 @@ package com.cleartext.ximpp.views.messages
 				if(!chatBuddy || chatBuddy.jid != message.sender)
 				{
 					if(chatBuddy)
-						chatBuddy.removeEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
+						chatBuddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
 
 					chatBuddy =  appModel.getBuddyByJid(message.sender);
 
 					if(chatBuddy)
-						chatBuddy.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler, false, 0, true);
+						chatBuddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler, false, 0, true);
 					
 					fromThisUser = (chatBuddy == userAccount);
 				}
@@ -176,13 +177,13 @@ package com.cleartext.ximpp.views.messages
 					if(mBlogSender != message.mBlogSender)
 					{
 						if(mBlogSender)
-							mBlogSender.removeEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
+							mBlogSender.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
 	
 						mBlogSender = message.mBlogSender;
 	
 						if(mBlogSender)
 						{
-							mBlogSender.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler, false, 0, true);
+							mBlogSender.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler, false, 0, true);
 							createButtons(MicroBloggingTypes.RECEIVED);
 						}
 						else
@@ -192,12 +193,12 @@ package com.cleartext.ximpp.views.messages
 	
 						avatar.data = mBlogSender;
 					}
-					nameTextField.text = mBlogSender.nickName; 
+					nameTextField.text = mBlogSender.nickname; 
 				}
 				else if(chatBuddy)
 				{
 					avatar.data = chatBuddy;
-					nameTextField.text = chatBuddy.nickName;
+					nameTextField.text = chatBuddy.nickname;
 					createButtons(null); 
 				}
 				

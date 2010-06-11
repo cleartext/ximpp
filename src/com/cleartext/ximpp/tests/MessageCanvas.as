@@ -101,7 +101,7 @@ package com.cleartext.ximpp.tests
 				avatar.width = AvatarUtils.AVATAR_SIZE;
 				avatar.height = AvatarUtils.AVATAR_SIZE;
 				avatar.border = false;
-				avatar.toolTip = chat.buddy.nickName;
+				avatar.toolTip = chat.buddy.nickname;
 				avatar.addEventListener(MouseEvent.ROLL_OVER, avatar_rollOver);
 				avatar.addEventListener(MouseEvent.ROLL_OUT, avatar_rollOut); 
 				avatar.alpha = 0;

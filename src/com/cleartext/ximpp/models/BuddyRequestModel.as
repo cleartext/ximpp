@@ -2,8 +2,8 @@ package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.BuddyRequestEvent;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.BuddyRequest;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -106,9 +106,9 @@ package com.cleartext.ximpp.models
 			}
 			request.timestamp = new Date();
 			request.incomming = false;
-			var buddy:Buddy = appModel.getBuddyByJid(toJid);
+			var buddy:IBuddy = appModel.getBuddyByJid(toJid);
 			if(buddy)
-				request.nickname = buddy.nickName;
+				request.nickname = buddy.nickname;
 		}
 
 		public function receiving(fromJid:String, nickname:String, message:String=null):void

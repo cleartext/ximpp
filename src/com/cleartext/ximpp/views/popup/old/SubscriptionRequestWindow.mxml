@@ -31,7 +31,7 @@
 			{
 				if(buddies.containsJid(buddy.jid))
 				{
-					buddy.nickName = nickname.text;
+					buddy.nickname = nickname.text;
 					buddies.addBuddy(buddy);
 					buddies.refresh();
 					
@@ -59,9 +59,9 @@
 			{
 				_buddy = value;
 				
-				labelText.text= buddy.nickName + ' wants to know when you are online.';
+				labelText.text= buddy.nickname + ' wants to know when you are online.';
 
-				nickname.text = buddy.nickName;
+				nickname.text = buddy.nickname;
 				
 				addUserItem.visible = addUserItem.includeInLayout = !buddies.containsJid(buddy.jid);
 			}

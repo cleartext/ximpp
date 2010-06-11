@@ -21,7 +21,6 @@
 			import mx.controls.Label;
 			import com.cleartext.ximpp.models.BuddyRequestModel;
 			import com.cleartext.ximpp.events.InputTextEvent;
-			import com.cleartext.ximpp.events.BuddyEvent;
 			import com.cleartext.ximpp.models.DatabaseModel;
 			import com.cleartext.ximpp.models.XMPPModel;
 			import com.cleartext.ximpp.events.CustomStatusEvent;

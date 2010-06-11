@@ -2,10 +2,12 @@ package com.cleartext.ximpp.views.common
 {
 	import com.cleartext.ximpp.assets.Constants;
 	import com.cleartext.ximpp.events.AvatarEvent;
-	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.HasAvatarEvent;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
-	import com.cleartext.ximpp.models.valueObjects.IBuddy;
+	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
+	import com.cleartext.ximpp.models.valueObjects.Group;
+	import com.cleartext.ximpp.models.valueObjects.IHasAvatar;
 	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
@@ -41,18 +43,18 @@ package com.cleartext.ximpp.views.common
 				
 				if(buddy)
 				{
-					buddy.addEventListener(BuddyEvent.AVATAR_CHANGED, buddyChangedHandler, false, 0, true);
-					buddy.addEventListener(BuddyEvent.CHANGED, buddyChangedHandler, false, 0, true);
+					buddy.addEventListener(HasAvatarEvent.AVATAR_CHANGE, buddyChangedHandler, false, 0, true);
+					buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler, false, 0, true);
 				}
 
 				buddyChangedHandler(null);
 			}
 		}
 		
-		public function get buddy():IBuddy
+		public function get buddy():IHasAvatar
 		{
-			if(data is IBuddy)
-				return data as IBuddy;
+			if(data is IHasAvatar)
+				return data as IHasAvatar;
 			
 			if(data is Chat)
 				return (data as Chat).buddy;
@@ -60,7 +62,7 @@ package com.cleartext.ximpp.views.common
 			return null;
 		}
 		
-		protected function buddyChangedHandler(event:BuddyEvent):void
+		protected function buddyChangedHandler(event:HasAvatarEvent):void
 		{
 			bitmapData = (buddy) ? buddy.avatar : null;
 		}
@@ -194,8 +196,8 @@ package com.cleartext.ximpp.views.common
 		{
 			if(buddy)
 			{
-				buddy.removeEventListener(BuddyEvent.AVATAR_CHANGED, buddyChangedHandler);
-				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangedHandler);
+				buddy.removeEventListener(HasAvatarEvent.AVATAR_CHANGE, buddyChangedHandler);
+				buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 			}
 		}
 		
@@ -209,11 +211,11 @@ package com.cleartext.ximpp.views.common
 			var bmd:BitmapData = bitmapData;
 			if(!bmd)
 			{
-				if(buddy && buddy.isChatRoom)
+				if(buddy && buddy is ChatRoom)
 					bmd = Constants.defaultMUCBmd;
 				else if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					bmd = Constants.defaultWorkstreamBmd;
-				else if(buddy && buddy.isGroup)
+				else if(buddy && buddy is Group)
 					bmd = Constants.defaultGroupBmd;
 				else
 					bmd = Constants.defaultAvatarBmd;

@@ -3,7 +3,7 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.events.LinkEvent;
 	import com.cleartext.ximpp.models.ApplicationModel;
 	import com.cleartext.ximpp.models.ChatModel;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	import com.cleartext.ximpp.views.common.Avatar;
@@ -61,12 +61,12 @@ package com.cleartext.ximpp.views.messages
 		{
 			if(message)
 			{
-				var fromBuddy:Buddy = appModel.getBuddyByJid(message.sender);
+				var fromBuddy:IBuddy = appModel.getBuddyByJid(message.sender);
 				fromThisUser = (fromBuddy == userAccount);
 				
 				avatar.data = fromBuddy;
 
-				nameTextField.text = (fromBuddy) ? fromBuddy.nickName : "";
+				nameTextField.text = (fromBuddy) ? fromBuddy.nickname : "";
 				nameTextField.width = nameTextField.textWidth + padding*4;
 				nameTextField.styleName = (fromThisUser) ? "lGreyBold" : "blackBold";
 

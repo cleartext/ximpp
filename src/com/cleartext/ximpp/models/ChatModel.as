@@ -1,10 +1,13 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.ChatEvent;
+	import com.cleartext.ximpp.models.types.BuddyTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
+	import com.cleartext.ximpp.models.valueObjects.Group;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
-	import com.cleartext.ximpp.models.valueObjects.Status;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -19,6 +22,9 @@ package com.cleartext.ximpp.models
 		
 		[Autowire]
 		public var settings:SettingsModel;
+		
+		[Autowire]
+		public var buddies:BuddyModel;
 		
 		public var chatsByJid:Dictionary;
 		
@@ -43,13 +49,13 @@ package com.cleartext.ximpp.models
 			chatsByJid = new Dictionary();
 		}
 		
-		public function getChat(buddyOrJid:Object, select:Boolean=false, type:String=Buddy.BUDDY):Chat
+		public function getChat(buddyOrJid:Object, select:Boolean=false, type:String=BuddyTypes.BUDDY):Chat
 		{
 			var chat:Chat;
 
 			if(buddyOrJid is String)
 				chat = chatsByJid[buddyOrJid];
-			else if(buddyOrJid is Buddy)
+			else if(buddyOrJid is IBuddy)
 				chat = chatsByJid[buddyOrJid.jid];
 			else
 				return null;
@@ -59,20 +65,19 @@ package com.cleartext.ximpp.models
 				if(chats.length == 0)
 					select = true;
 				
-				var buddy:Buddy = buddyOrJid as Buddy;
+				var buddy:IBuddy = buddyOrJid as IBuddy;
 				if(!buddy)
 				{
-					buddy = new Buddy(buddyOrJid as String);
-					
 					switch(type)
 					{
-						case Buddy.CHAT_ROOM :
-							buddy.status.value = Status.AVAILABLE;
-							buddy.isChatRoom = true;
+						case BuddyTypes.CHAT_ROOM :
+							buddy = new ChatRoom(buddyOrJid as String);
 							break;
-						case Buddy.GROUP :
-							buddy.isGroup = true;
-							buddy.status.value = Status.AVAILABLE;
+						case BuddyTypes.GROUP :
+							buddy = new Group(buddyOrJid as String, buddies);
+							break;
+						default :
+							buddy = new Buddy(buddyOrJid as String);
 							break;
 					}
 				}
@@ -107,11 +112,11 @@ package com.cleartext.ximpp.models
 		public function removeChat(buddyOrJid:Object=null):void
 		{
 			var chat:Chat;
-			var buddy:Buddy;
+			var buddy:IBuddy;
 
 			if(!buddyOrJid)
 				chat = selectedChat;
-			else if(buddyOrJid is Buddy)
+			else if(buddyOrJid is IBuddy)
 				chat = chatsByJid[buddyOrJid.jid];
 			else if(buddyOrJid is String)
 				chat = chatsByJid[buddyOrJid];
@@ -136,15 +141,15 @@ package com.cleartext.ximpp.models
 			}
 			dispatchEvent(new ChatEvent(ChatEvent.REMOVE_CHAT, chat, i));
 			
-			if(buddy.isChatRoom)
+			if(buddy is ChatRoom)
 			{
 				appModel.xmpp.leaveChatRoom(buddy.jid);
 			}
 		}
 		
-		public function addMessage(buddy:Buddy, message:Message):void
+		public function addMessage(buddy:IBuddy, message:Message):void
 		{
-			var limit:int = (buddy.isMicroBlogging) ? settings.global.numTimelineMessages : settings.global.numChatMessages;			
+			var limit:int = buddy.isMicroBlogging ? settings.global.numTimelineMessages : settings.global.numChatMessages;			
 			
 			if(buddy.autoOpenTab || chatsByJid.hasOwnProperty(buddy.jid))
 				getChat(buddy).addMessage(message, limit);

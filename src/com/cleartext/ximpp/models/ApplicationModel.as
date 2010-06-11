@@ -10,6 +10,9 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.PopUpEvent;
 	import com.cleartext.ximpp.models.utils.LinkUitls;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
+	import com.cleartext.ximpp.models.valueObjects.Group;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.seesmic.as3.xmpp.MessageStanza;
@@ -365,7 +368,7 @@ package com.cleartext.ximpp.models
 //			database.loadBuddyData();
 //		}
 		
-		public function getBuddyByJid(jid:String):Buddy
+		public function getBuddyByJid(jid:String):IBuddy
 		{
 			if(!jid || jid=="")
 				return null;
@@ -383,11 +386,11 @@ package com.cleartext.ximpp.models
 			return buddies.getBuddyByJid(jid);
 		}
 		
-		public function sendMessageTo(buddy:Buddy, messageString:String, save:Boolean=true):void
+		public function sendMessageTo(buddy:IBuddy, messageString:String, save:Boolean=true):void
 		{
 			log("[ApplicationModel].sendMessage() " + buddy.jid + " : " + messageString + " : " + save);
 			
-			if(buddy.isGroup)
+			if(buddy is Group)
 			{
 				var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.BROADCAST_WINDOW);
 				popupEvent.messageString = messageString;
@@ -404,7 +407,7 @@ package com.cleartext.ximpp.models
 					userName = userName.substr(0, userName.indexOf("@"));
 					var x:XML = <x xmlns='http://cleartext.net/mblog'/>;
 					var b:XML = <buddy type='sender'/>;
-					b.appendChild(<displayName>{settings.userAccount.nickName}</displayName>);
+					b.appendChild(<displayName>{settings.userAccount.nickname}</displayName>);
 					b.appendChild(<userName>{userName}</userName>);
 					b.appendChild(<jid>{settings.userAccount.jid}</jid>);
 					if(settings.userAccount.avatarHash)
@@ -414,9 +417,9 @@ package com.cleartext.ximpp.models
 					customTags.push(x);
 				}
 
-				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, (buddy.isChatRoom ? 'groupchat' : 'chat'), null, customTags);
+				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, (buddy is ChatRoom ? 'groupchat' : 'chat'), null, customTags);
 				
-				if(!buddy.isChatRoom && save)
+				if(!(buddy is ChatRoom) && save)
 				{
 					var message:Message = createFromStanza(messageStanza);
 					chats.addMessage(buddy, message);
@@ -455,6 +458,10 @@ package com.cleartext.ximpp.models
 
 							if(sBuddy.*::jid != mBlogBuddies.userAccount.jid)
 							{
+								var text:String = sBuddy.*::text;
+								if(text)
+									newMessage.plainMessage = text;
+
 								newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
 										String(sBuddy.*::userName), sBuddy.*::serviceJid, 
 										sBuddy.*::displayName, sBuddy.*::avatar.(@type=='url'),
@@ -471,9 +478,6 @@ package com.cleartext.ximpp.models
 										osBuddy.*::jid, osBuddy.*::avatar.(@type=='hash'));
 							}
 							
-							var text:String = x.*::text;
-							if(text)
-								newMessage.plainMessage = text;
 						}
 						
 						// if it has an atom, then it is probably jaiku or identi.ca

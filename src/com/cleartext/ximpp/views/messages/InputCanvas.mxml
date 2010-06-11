@@ -5,6 +5,7 @@
 	creationComplete="isTypingIcon.visible=false">
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.IBuddy;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import com.cleartext.ximpp.events.InputTextEvent;
 			import mx.utils.StringUtil;
@@ -28,7 +29,7 @@
 			private static const CORNER_RADIUS:Number = 5;
 			
 			[Bindable]
-			public var buddy:Buddy;
+			public var buddy:IBuddy;
 			
 			[Bindable]
 			public var shortening:Boolean = false;
@@ -174,17 +175,17 @@
 		visible="{buddy.isTyping}"/>
 	
 	<mx:Label 
-		text="{buddy.nickName}" 
+		text="{buddy.nickname}" 
 		x="{buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY ? 10 : 28}" y="6" 
 		styleName="blackBold"/>
 	
 	<mx:Label
 		text="shortening.." 
-		right="266" y="6" 
+		right="266" y="6"
 		styleName="dGreyNormal" 
 		visible="{shortening}"/>
 
-	<mx:VRule right="258" height="17" y="4" visible="{buddy.isMicroBlogging}"/>		
+	<mx:VRule right="258" height="17" y="4" visible="{buddy.isMicroBlogging}"/>
 
 	<mx:CheckBox 
 		label="auto-shorten urls" 

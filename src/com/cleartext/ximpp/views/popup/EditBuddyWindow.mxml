@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.IBuddy;
 			import com.cleartext.ximpp.models.ChatModel;
 			import com.cleartext.ximpp.models.ApplicationModel;
 			import mx.controls.Alert;
@@ -56,16 +57,17 @@
 					_buddy = new Buddy(newJid);
 				}
 
-				buddy.nickName = nicknameTextInput.text;
-				buddy.isMicroBlogging = mBlogCheckbox.selected;
-				buddy.autoOpenTab = openTabCheckBox.selected;
+				buddy.nickname = nicknameTextInput.text;
 
+				buddy.autoOpenTab = openTabCheckBox.selected;
 				buddy.avatar = avatarInput.bitmapData;
 				buddy.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
+				buddy.isMicroBlogging = mBlogCheckbox.selected;
+				
 				if(avatarInput.bitmapData == null)
 					buddy.avatarHash = null;
 
-				if(!buddy.isMicroBlogging && !buddy.isGateway)
+				if(buddy.isPerson)
 					buddy.groups = getSelected(list);
 				
 				if(buddies.containsJid(buddy.jid))
@@ -76,7 +78,7 @@
 				{
 					buddies.addBuddy(buddy);
 					chats.getChat(buddy, true);
-					xmpp.addToRoster(buddy.jid, buddy.nickName, buddy.groups);
+					xmpp.addToRoster(buddy);
 				}
 				buddies.refresh();
 				
@@ -113,13 +115,14 @@
 				jidTextInput.enabled = false;
 				gatewayComboBox.enabled = false;
 
-				nicknameTextInput.text = buddy.nickName;
+				nicknameTextInput.text = buddy.nickname;
 				avatarInput.bitmapData = buddy.avatar;
-				mBlogCheckbox.selected = buddy.isMicroBlogging;
 				openTabCheckBox.selected = buddy.autoOpenTab;
-								
+				
+				mBlogCheckbox.selected = buddy.isMicroBlogging;
+
 				for each(var g:Object in list.dataProvider)
-					g.selected = !buddy.isMicroBlogging && buddy.groups.indexOf(g.data) != -1;
+					g.selected = buddy.groups.indexOf(g.data) != -1;
 
 				dispatchEvent(new Event("buddySet"));
 			}
@@ -196,7 +199,7 @@
 			<mx:CheckBox label="Open new tab when message received?" id="openTabCheckBox" selected="true"/>
 		</mx:FormItem>
 
-		<mx:FormItem label="Groups:" enabled="{buddy.isGateway || !mBlogCheckbox.selected}">
+		<mx:FormItem label="Groups:" enabled="{(buddy as Object).isGateway || !mBlogCheckbox.selected}">
 			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >
 				<mx:itemRenderer>
 					<mx:Component>

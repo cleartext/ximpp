@@ -49,7 +49,7 @@ package com.cleartext.ximpp.models.valueObjects
 			newUserAccount.userId = obj["userId"];
 			newUserAccount.accountName = obj["accountName"];	
 			newUserAccount.jid = obj["jid"];	
-			newUserAccount.nickName = obj["nickname"];			
+			newUserAccount.nickname = obj["nickname"];			
 			newUserAccount.password = obj["password"];			
 			newUserAccount.server = obj["server"];
 			newUserAccount.customStatus = obj["customStatus"];
@@ -77,7 +77,7 @@ package com.cleartext.ximpp.models.valueObjects
 			return [
 				new DatabaseValue("accountName", accountName),
 				new DatabaseValue("jid", jid),
-				new DatabaseValue("nickname", nickName),
+				new DatabaseValue("nickname", nickname),
 				new DatabaseValue("password", password),
 				new DatabaseValue("server", server),
 				new DatabaseValue("customStatus", customStatus),

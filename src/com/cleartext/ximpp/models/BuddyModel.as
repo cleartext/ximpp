@@ -1,10 +1,11 @@
 package com.cleartext.ximpp.models
 {
-	import com.cleartext.ximpp.events.BuddyEvent;
 	import com.cleartext.ximpp.events.BuddyModelEvent;
+	import com.cleartext.ximpp.events.HasAvatarEvent;
 	import com.cleartext.ximpp.models.types.BuddySortTypes;
 	import com.cleartext.ximpp.models.types.MicroBloggingTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
 	
 	import flash.events.EventDispatcher;
@@ -13,6 +14,8 @@ package com.cleartext.ximpp.models
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
+	
+	import org.swizframework.Swiz;
 
 	public class BuddyModel extends EventDispatcher
 	{
@@ -105,7 +108,7 @@ package com.cleartext.ximpp.models
 			buddies.sort = sort;
 			
 			sort = new Sort();
-			sort.fields = [new SortField("nickName")];
+			sort.fields = [new SortField("nickname")];
 			microBloggingBuddies.sort = sort;
 			
 			sort = new Sort();
@@ -113,19 +116,19 @@ package com.cleartext.ximpp.models
 			groups.sort = sort;
 		}
 		
-		public function addBuddy(buddy:Buddy, save:Boolean=true):void
+		public function addBuddy(buddy:IBuddy, save:Boolean=true):void
 		{
 			if(buddy is UserAccount || buddiesByJid.hasOwnProperty(buddy.jid))
 				return;
 
 			buddies.addItem(buddy);
 			buddiesByJid[buddy.jid] = buddy;
-			buddy.addEventListener(BuddyEvent.CHANGED, buddyChangeHandler, false, 0, true);
+			buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler, false, 0, true);
 			if(save)
-				buddy.dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+				buddy.dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 		}
 		
-		public function removeBuddy(buddy:Buddy):void
+		public function removeBuddy(buddy:IBuddy):void
 		{
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				return;
@@ -134,7 +137,7 @@ package com.cleartext.ximpp.models
 			if(index != -1)
 			{
 				database.removeBuddy(buddy);
-				buddy.removeEventListener(BuddyEvent.CHANGED, buddyChangeHandler);
+				buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
 				buddies.list.removeItemAt(index);
 				delete buddiesByJid[buddy.jid];
 			}
@@ -157,7 +160,7 @@ package com.cleartext.ximpp.models
 				return false;
 			
 			if(searchString != "" && 
-					(buddy.nickName.toLowerCase().search(searchString.toLowerCase()) == -1 && 
+					(buddy.nickname.toLowerCase().search(searchString.toLowerCase()) == -1 && 
 					buddy.jid.toLowerCase().search(searchString.toLowerCase()) == -1))
 				return false; 
 			
@@ -190,7 +193,7 @@ package com.cleartext.ximpp.models
 			switch(sortType)
 			{
 				case BuddySortTypes.ALPHABETICAL :
-					return clamp(buddy1.nickName.localeCompare(buddy2.nickName));
+					return clamp(buddy1.nickname.localeCompare(buddy2.nickname));
 
 				case BuddySortTypes.LAST_SEEN :
 					return clamp(buddy2.lastSeen - buddy1.lastSeen);
@@ -202,13 +205,13 @@ package com.cleartext.ximpp.models
 					var sCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());
 					if(sCompare != 0)
 						return sCompare;
-					return clamp(buddy1.nickName.localeCompare(buddy2.nickName));
+					return clamp(buddy1.nickname.localeCompare(buddy2.nickname));
 
 				case BuddySortTypes.STATUS :
 					var statusCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());
 					if(statusCompare != 0)
 						return statusCompare;
-					return clamp(buddy1.nickName.localeCompare(buddy2.nickName));
+					return clamp(buddy1.nickname.localeCompare(buddy2.nickname));
 			}
 			return 0;
 		}
@@ -235,7 +238,7 @@ package com.cleartext.ximpp.models
 				if(buddy.isMicroBlogging)
 					microBloggingTemp.addItem(buddy);
 
-				else if(!buddy.isGateway)
+				else if(!(buddy.isGateway))
 					for each(var group:String in buddy.groups)
 						if(!groupsTemp.contains(group))
 							groupsTemp.addItem(group);
@@ -246,22 +249,24 @@ package com.cleartext.ximpp.models
 
 			microBloggingBuddies.list = microBloggingTemp.list;
 			microBloggingBuddies.refresh();
+			
+			dispatchEvent(new BuddyModelEvent(BuddyModelEvent.REFRESH));
 		}
 
-		private function buddyChangeHandler(event:BuddyEvent):void
+		private function buddyChangeHandler(event:HasAvatarEvent):void
 		{
 			refresh();
-			database.saveBuddy(event.target as Buddy);
+			database.saveBuddy(event.target as IBuddy);
 		}
 		
 		public function get realPeople():Array
 		{
 			var result:Array = new Array();
 			for each(var buddy:Buddy in buddies.source)
-				if(!buddy.isGateway && !buddy.isMicroBlogging)
+				if(buddy.isPerson)
 					result.push(buddy);
 			
-			return result.sortOn("nickName");
+			return result.sortOn("nickname");
 		}
 		
 		public function get nonMicroBlogging():Array
@@ -271,7 +276,7 @@ package com.cleartext.ximpp.models
 				if(!buddy.isMicroBlogging)
 					result.push(buddy);
 			
-			return result.sortOn("nickName");
+			return result.sortOn("nickname");
 		}
 		
 		public function get gatewayNames():Array
@@ -279,7 +284,7 @@ package com.cleartext.ximpp.models
 			var result:Array = ["default (xmpp)"];
 
 			for each(var buddy:Buddy in buddies.source)
-				if(buddy.isGateway && buddy != Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				if((buddy.isGateway) && buddy != Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					result.push(buddy.jid);
 			
 			return result;
@@ -295,7 +300,7 @@ package com.cleartext.ximpp.models
 				if(buddy.groups.indexOf(groupName) != -1)
 					result.push(buddy);
 			
-			return result.sortOn("nickName");
+			return result.sortOn("nickname");
 		}
 	}
 }

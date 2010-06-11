@@ -10,6 +10,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.Buddy;
 			import com.cleartext.ximpp.views.popup.ErrorWindow;
 			import com.cleartext.ximpp.events.XmppErrorEvent;
 			import com.cleartext.ximpp.views.popup.FormWindow;
@@ -169,10 +170,14 @@
 			[Mediate(event="PopUpEvent.EDIT_BUDDY_WINDOW")]
 			public function showEditBuddyWindow(event:PopUpEvent):void
 			{
+				var buddy:Buddy = event.buddy as Buddy;
+				if(!buddy)
+					return;
+				
 				var window:EditBuddyWindow = new EditBuddyWindow();
 				initializePopUp(window);
 
-				window.buddy = event.buddy;
+				window.buddy = buddy;
 			}
 
 			[Mediate(event="PopUpEvent.DELETE_BUDDY_WINDOW")]

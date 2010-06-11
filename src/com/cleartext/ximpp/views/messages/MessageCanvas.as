@@ -10,9 +10,10 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.models.DatabaseModel;
 	import com.cleartext.ximpp.models.SettingsModel;
 	import com.cleartext.ximpp.models.XMPPModel;
+	import com.cleartext.ximpp.models.types.BuddyTypes;
 	import com.cleartext.ximpp.models.types.ChatStateTypes;
-	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.views.common.SearchBox;
 	
@@ -104,7 +105,7 @@ package com.cleartext.ximpp.views.messages
 		[Mediate(event="PopUpEvent.NEW_CHAT_WITH_GROUP")]
 		public function newChatWithGroup(event:PopUpEvent):void
 		{
-			chats.getChat(event.group, true, Buddy.GROUP);
+			chats.getChat(event.group, true, BuddyTypes.GROUP);
 		}
 		
 		protected function creationCompleteHandler(event:FlexEvent):void
@@ -127,9 +128,7 @@ package com.cleartext.ximpp.views.messages
 			{
 				chat.chatState = newState;
 				if(sendStanza && xmpp.connected &&
-						 !chat.buddy.isGroup &&
-						 !chat.buddy.isMicroBlogging &&
-						 !chat.buddy.isChatRoom &&
+						 chat.isPerson &&
 						 !chat.buddy.status.isOffline())
 					xmpp.sendMessage(chat.buddy.fullJid, null, null, 'chat', newState);
 			}
@@ -203,7 +202,7 @@ package com.cleartext.ximpp.views.messages
 			avatar.width = AVATAR_SIZE;
 			avatar.height = AVATAR_SIZE;
 			avatar.border = false;
-			avatar.toolTip = chat.buddy.nickName;
+			avatar.toolTip = chat.buddy.nickname;
 			avatar.addEventListener(CloseEvent.CLOSE, avatar_close);
 			avatar.alpha = 0;
 			
@@ -437,7 +436,7 @@ package com.cleartext.ximpp.views.messages
 
 			if(position == 1)
 			{
-				(avatar.buddy as Buddy).unreadMessages = 0;
+				(avatar.buddy as IBuddy).unreadMessages = 0;
 				newX += SELECTOR_WIDTH;
 			}
 			else if(position >1)

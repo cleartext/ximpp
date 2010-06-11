@@ -32,8 +32,8 @@
 
 				host.text = "conference." + settings.userAccount.host;
 				
-				if(settings.userAccount.nickName.indexOf("@") == -1)
-					nickname.text = settings.userAccount.nickName;
+				if(settings.userAccount.nickname.indexOf("@") == -1)
+					nickname.text = settings.userAccount.nickname;
 				else
 					nickname.text = settings.userAccount.username;
 			}
@@ -49,15 +49,33 @@
 			
 			override protected function validateForm():void
 			{
-				isValid = host.text != "" && room.text != "" && validateNickName();
+				if(host.text != "" && room.text != "")
+				{
+					createButton.enabled = true;
+					isValid = validateNickname();
+				}
+				else
+				{
+					createButton.enabled = false;
+					isValid = false;
+				}
 			}
 			
-			private function validateNickName():Boolean
+			private function validateNickname():Boolean
 			{
 				return nickname.text != "" &&
 					nickname.text.indexOf("@") == -1 &&
 					nickname.text.indexOf("/") == -1 && 
 					nickname.text.indexOf(" ") == -1;
+			}
+			
+			private function createChatRoom():void
+			{
+				if(host.text != "" && room.text != "")
+				{
+					xmpp.createChatRoom(room.text + "@" + host.text);
+					closeWindow();
+				}
 			}
 			
 		]]>
@@ -78,12 +96,16 @@
 
 		<mx:FormItem label="Your nick name:">
 			<mx:VBox>
-				<mx:TextInput width="250" id="nickname" change="validateInput(event, 'you must enter a nick name without a \'@\', \'/\' or a space', validateNickName)" focusOut="validateInput(event, 'you must enter a nick name without a \'@\', \'/\' or a space', validateNickName)"/>
+				<mx:TextInput width="250" id="nickname" change="validateInput(event, 'you must enter a nick name without a \'@\', \'/\' or a space', validateNickname)" focusOut="validateInput(event, 'you must enter a nick name without a \'@\', \'/\' or a space', validateNickname)"/>
 			</mx:VBox>
 		</mx:FormItem>
 
 		<mx:FormItem label="Password (optional):">
 			<mx:TextInput width="250" id="password" displayAsPassword="true"/>
+		</mx:FormItem>
+		
+		<mx:FormItem>
+			<mx:Button label="create new chat room" id="createButton" click="createChatRoom()" valid="false"/>
 		</mx:FormItem>
 
     </mx:Form>

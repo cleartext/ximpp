@@ -91,7 +91,7 @@
 		</mx:FormItem>
 
 		<mx:FormItem label="Buddies:">
-			<mx:List id="list" width="250" labelField="nickName" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
+			<mx:List id="list" width="250" labelField="nickname" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
 				click="validateInput(event,'need to select at least one buddy')" focusOut="validateInput(event, 'need to select at least one buddy')">
 				<mx:itemRenderer>
 					<mx:Component>

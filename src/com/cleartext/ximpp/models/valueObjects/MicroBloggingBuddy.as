@@ -1,19 +1,22 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.events.BuddyEvent;
+	import com.cleartext.ximpp.events.HasAvatarEvent;
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.utils.AvatarUtils;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.geom.Matrix;
 	
 	import mx.controls.Image;
 	
-	public class MicroBloggingBuddy extends EventDispatcher implements IBuddy
+	public class MicroBloggingBuddy extends HasAvatarBase
 	{
+		//----------------------------------------
+		//  CREATE DB STRING
+		//----------------------------------------
+		
 		public static const CREATE_MICRO_BLOGGING_BUDDIES_TABLE:String =
 			"CREATE TABLE IF NOT EXISTS microBloggingBuddies (" +
 			"microBloggingBuddyId INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -25,12 +28,33 @@ package com.cleartext.ximpp.models.valueObjects
 			"avatar TEXT, " +
 			"gatewayJid TEXT);";
 		
+		//----------------------------------------
+		//  CONSTRUCTOR
+		//----------------------------------------
+		
+		public function MicroBloggingBuddy()
+		{
+			super(null);
+		}
+		
+		//----------------------------------------
+		//  PUBLIC PROPERTIES
+		//----------------------------------------
+		
+		// these are public so they can be set in
+		// createFromDB()
 		public var microBloggingBuddyId:int = -1;
 		public var userName:String;
 		public var gatewayJid:String;
+		public var avatarUrl:String;
 		public var profileUrl:String;
 
+		//----------------------------------------
+		//  DISPLAY NAME
+		//----------------------------------------
+		
 		private var _displayName:String;
+		[Bindable(event="changeSave")]
 		public function get displayName():String
 		{
 			return _displayName;
@@ -40,84 +64,49 @@ package com.cleartext.ximpp.models.valueObjects
 			if(_displayName != value)
 			{
 				_displayName = value;
-				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
+				dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 			}
 		}
 		
-		public function get isMicroBlogging():Boolean
-		{
-			return false;
-		}
-		public function get isGroup():Boolean
-		{
-			return false;
-		}
-		public function get isGateway():Boolean
-		{
-			return false;
-		}
-		public function get isChatRoom():Boolean
-		{
-			return false;
-		}
+		//----------------------------------------
+		//  OVERRIDEN PROPERTIES FROM HAS AVATAR BASE
+		//----------------------------------------
 		
-		public var avatarUrl:String;
-		public var avatarHash:String;
-		
-		private var _avatar:BitmapData;
-		[Bindable (event="avatarChanged")]
-		public function get avatar():BitmapData
-		{
-			return _avatar;
-		}
-		public function set avatar(value:BitmapData):void
-		{
-			if(_avatar != value)
-			{
-				_avatar = value;
-				dispatchEvent(new BuddyEvent(BuddyEvent.AVATAR_CHANGED));
-			}
-		}
-
-		private var _avatarString:String;
-		[Bindable (event="buddyChanged")]
-		public function get avatarString():String
-		{
-			return _avatarString;
-		}
-		public function set avatarString(value:String):void
-		{
-			if(avatarString != value)
-			{
-				_avatarString = value;
-				AvatarUtils.stringToAvatar(avatarString, this, "avatar");
-				dispatchEvent(new BuddyEvent(BuddyEvent.CHANGED));
-			}
-		}
-
-		[Bindable (event="buddyChanged")]
-		public function get nickName():String
+		override public function get nickname():String
 		{
 			return displayName + " (@" + userName + ")";
 		}
 		
-		private var _jid:String;
-		public function get jid():String
+		override public function get jid():String
 		{
-			return (_jid) ? _jid : userName + "@" + gatewayJid;
+			return (super.jid) ? super.jid : userName + "@" + gatewayJid;
 		}
-		public function set jid(value:String):void
+
+		//--------------------------------------------------
+		//
+		//  AVATAR METHODS
+		//
+		//--------------------------------------------------		
+
+		//----------------------------------------
+		//  SET AVATAR URL
+		//----------------------------------------
+		
+		public function setAvatarUrl(url:String):void
 		{
-			if(_jid != value)
+			if(avatarUrl != url || (!avatar && url))
 			{
-				_jid = value;
+				avatarUrl = url;
+				avatar = null;
+				var image:Image = new Image();
+				image.addEventListener(Event.COMPLETE, imageCompleteHandler);
+				image.load(avatarUrl);
 			}
 		}
 		
-		public function MicroBloggingBuddy()
-		{
-			super();
-		}
+		//----------------------------------------
+		//  IMAGE COMPLETE HANDLER
+		//----------------------------------------
 		
 		private function imageCompleteHandler(event:Event):void
 		{
@@ -139,17 +128,9 @@ package com.cleartext.ximpp.models.valueObjects
 			avatarString = AvatarUtils.avatarToString(avatar);
 		}
 
-		public function setAvatarUrl(url:String):void
-		{
-			if(avatarUrl != url || (!avatar && url))
-			{
-				avatarUrl = url;
-				avatar = null;
-				var image:Image = new Image();
-				image.addEventListener(Event.COMPLETE, imageCompleteHandler);
-				image.load(avatarUrl);
-			}
-		}
+		//----------------------------------------
+		//  SET JID AND HASH
+		//----------------------------------------
 		
 		public function setJidAndHash(newJid:String, hash:String, xmpp:XMPPModel):void
 		{
@@ -162,6 +143,16 @@ package com.cleartext.ximpp.models.valueObjects
 				xmpp.getAvatarForMBlogBuddy(jid);
 			}
 		}
+		
+		//--------------------------------------------------
+		//
+		//  DATABASE METHODS
+		//
+		//--------------------------------------------------		
+
+		//----------------------------------------
+		//  CREATE FROM DATABASE
+		//----------------------------------------
 		
 		public static function createFromDB(obj:Object):MicroBloggingBuddy
 		{
@@ -179,12 +170,16 @@ package com.cleartext.ximpp.models.valueObjects
 			return newMicroBloggingBuddy;
 		}
 		
+		//----------------------------------------
+		//  CREATE DATABASE VALUES
+		//----------------------------------------
+		
 		public function toDatabaseValues():Array
 		{
 			return [
 				new DatabaseValue("displayName", displayName),
 				new DatabaseValue("userName", userName),
-				new DatabaseValue("jid", _jid),
+				new DatabaseValue("jid", super.jid),
 				new DatabaseValue("avatarUrl", avatarUrl),
 				new DatabaseValue("avatarHash", avatarHash),
 				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),

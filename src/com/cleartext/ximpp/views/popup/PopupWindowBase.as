@@ -164,7 +164,7 @@ package com.cleartext.ximpp.views.popup
 				o.selected = false;
 				o.data = d;
 				if(d is Buddy)
-					o.nickName = d.nickName;
+					o.nickname = d.nickname;
 				result.push(o);
 			}
 			return result;

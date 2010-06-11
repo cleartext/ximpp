@@ -5,6 +5,7 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.valueObjects.BuddyRequest;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.ximpp.models.valueObjects.UserAccount;
@@ -318,7 +319,7 @@ package com.cleartext.ximpp.models
 				updateStmt("userAccounts", values, [new DatabaseValue("userId", userAccount.userId)]);
 		}
 		
-		public function saveBuddy(buddy:Buddy):void
+		public function saveBuddy(buddy:IBuddy):void
 		{
 			appModel.log("Saving buddy : " + buddy.jid + " buddyId: " + buddy.buddyId, true);
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY || buddy is UserAccount)
@@ -327,7 +328,7 @@ package com.cleartext.ximpp.models
 			if(buddy.buddyId == -1)
 				buddy.buddyId = insertStmt("buddies", buddy.toDatabaseValues(settings.userId));
 			else
-				updateStmt("buddies", buddy.toDatabaseValues(settings.userId), [new DatabaseValue("jid", buddy.jid)]);
+				updateStmt("buddies", buddy.toDatabaseValues(settings.userId), [new DatabaseValue("buddyId", buddy.buddyId)]);
 		}
 
 		public function saveRequest(request:BuddyRequest):void
@@ -337,7 +338,7 @@ package com.cleartext.ximpp.models
 			if(request.buddyRequestId == -1)
 				request.buddyRequestId = insertStmt("buddyRequests", request.toDatabaseValues(settings.userId));
 			else
-				updateStmt("buddyRequests", request.toDatabaseValues(settings.userId), [new DatabaseValue("jid", request.jid)]);
+				updateStmt("buddyRequests", request.toDatabaseValues(settings.userId), [new DatabaseValue("buddyRequestId", request.buddyRequestId)]);
 		}
 
 		public function saveMicroBloggingBuddy(buddy:MicroBloggingBuddy):void
@@ -346,7 +347,7 @@ package com.cleartext.ximpp.models
 			updateStmt("microBloggingBuddies", buddy.toDatabaseValues(), [new DatabaseValue("microBloggingBuddyId", buddy.microBloggingBuddyId)]);
 		}
 
-		public function removeBuddy(buddy:Buddy):void
+		public function removeBuddy(buddy:IBuddy):void
 		{
 			appModel.log("Deleting buddy : " + buddy.jid + " buddyId: " + buddy.buddyId, true);
 			execute("DELETE FROM buddies WHERE buddyId = " + buddy.buddyId);
@@ -370,7 +371,7 @@ package com.cleartext.ximpp.models
 			var len:int = chatsToOpen.length;
 			while(index < len)
 			{
-				chats.getChat(chatsToOpen[index] as Buddy);
+				chats.getChat(chatsToOpen[index] as IBuddy);
 				index++;
 				if(start + maxTimeForProcess < getTimer())
 				{
@@ -384,11 +385,11 @@ package com.cleartext.ximpp.models
 		
 		public function loadMessages(chat:Chat, syncnonusly:Boolean=true):void
 		{
-			var buddy:Buddy = chat.buddy;
+			var buddy:IBuddy = chat.buddy;
 			var buddyArray:Array = (buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? buddies.microBloggingBuddies.toArray() : [buddy];
 			if(buddyArray.length == 0)
 			{
-				if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
 				return;
 			}
@@ -396,7 +397,7 @@ package com.cleartext.ximpp.models
 			appModel.log("Loading messages with " + chat.buddy.jid, true);
 			var sql:String = "Select * from messages WHERE userid=" + settings.userId + " AND (";
 			
-			for each(var b:Buddy in buddyArray)
+			for each(var b:IBuddy in buddyArray)
 			{
 				sql += "sender='" + b.jid + "' OR recipient='" + b.jid + "' OR ";
 			}
