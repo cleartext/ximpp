@@ -49,7 +49,10 @@ package com.cleartext.ximpp.models.valueObjects
 			_isGateway = jid.indexOf("@") == -1;
 			
 			if(jid == ALL_MICRO_BLOGGING_JID)
+			{
 				_status.value = Status.AVAILABLE;
+				_status.imutable = true;
+			}
 		}
 		
 		//--------------------------------------------------

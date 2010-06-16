@@ -1,22 +1,19 @@
 package com.cleartext.ximpp.views.messages
 {
-	import com.cleartext.ximpp.events.BuddyModelEvent;
 	import com.cleartext.ximpp.models.BuddyModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
-	import com.cleartext.ximpp.models.valueObjects.Group;
 	import com.cleartext.ximpp.models.valueObjects.Message;
-	import com.cleartext.ximpp.views.buddies.BuddyRenderer;
 	import com.universalsprout.flex.components.list.ISproutListData;
 	import com.universalsprout.flex.components.list.SproutList;
 	
 	import mx.binding.utils.BindingUtils;
-	import mx.collections.ArrayCollection;
+	import mx.containers.HDividedBox;
+	import mx.controls.List;
 	import mx.core.ClassFactory;
-	import mx.core.IInvalidating;
 
-	public class MessageSproutList extends SproutList
+	public class MessageSproutList extends HDividedBox
 	{
 		[Autowire(bean="settings", property="global")]
 		[Bindable]
@@ -25,26 +22,25 @@ package com.cleartext.ximpp.views.messages
 		[Autowire]
 		public var buddies:BuddyModel;
 		
-		private var participantList:SproutList;
+		private var participantList:List;
+		private var messageList:SproutList;
 		
 		public function get chat():Chat
 		{
 			return data as Chat;
 		}
 		
-		private var _participants:ArrayCollection;
-		public function get participants():ArrayCollection
+		public function get participantListWidth():Number
 		{
-			return _participants;
+			if(participantList)
+				return width-getDividerAt(0).x;
+			else
+				return -1;
 		}
-		public function set participants(value:ArrayCollection):void
+		public function set participantListWidth(value:Number):void
 		{
-			if(_participants != value)
-			{
-				_participants = value;
-				if(participantList)
-					participantList.dataProvider = participants;
-			}
+			if(participantList)
+				callLater(function(v:Number):void { getDividerAt(0).x = width-v; }, [value]);
 		}
 		
 		override public function set data(value:Object):void
@@ -53,47 +49,60 @@ package com.cleartext.ximpp.views.messages
 			
 			if(chat)
 			{
-				dataProvider = chat.messages;
+				messageList.dataProvider = chat.messages;
 				if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
-					itemRenderer = new ClassFactory(AllMicroBloggingRenderer);
+					messageList.itemRenderer = new ClassFactory(AllMicroBloggingRenderer);
 				else if(chat.isChatRoom)
-					itemRenderer = new ClassFactory(MUCRenderer);
+					messageList.itemRenderer = new ClassFactory(MUCRenderer);
 				else if(chat.isMicroBlogging || chat.isGroup)
-					itemRenderer = new ClassFactory(MicroBloggingRenderer);
+					messageList.itemRenderer = new ClassFactory(MicroBloggingRenderer);
 				else
-					itemRenderer = new ClassFactory(ChatRenderer);
-
-				participants = chat.buddy.participants;
-				
-				if(chat.buddy is Group)
-					(chat.buddy as Group).addEventListener(BuddyModelEvent.REFRESH, refreshHandler);
+					messageList.itemRenderer = new ClassFactory(ChatRenderer);
+					
+				if(chat.buddy.participants)
+				{
+					if(!participantList)
+					{
+						participantList = new List();
+						participantList.selectable = false;
+						participantList.setStyle("borderStyle", "none");
+						participantList.percentHeight = 100;
+						addChild(participantList);
+					}
+					participantList.dataProvider = chat.buddy.participants;
+				}
+				else if(participantList)
+				{
+					removeChild(participantList);
+					participantList = null;
+				}
 			}
 		}
 
 		public function MessageSproutList()
 		{
 			super();
+			percentWidth = 100;
+			percentHeight = 100;
+
+			messageList = new SproutList();
+			messageList.percentWidth = 100;
+			messageList.percentHeight = 100;
 		}
 		
-		private function refreshHandler(event:BuddyModelEvent):void
+		public function set animate(value:Boolean):void
 		{
-			participants = chat.buddy.participants;
+			messageList.animate = value;
 		}
 		
 		public function setSort(value:Boolean):void
 		{
 			if(chat)
 			{
-				for each(var message:Message in dataProvider)
+				for each(var message:Message in messageList.dataProvider)
 				{
 					if(message.sortBySentDate != value)
-					{
 						message.sortBySentDate = value;
-						
-						var item:IInvalidating = itemRenderersByDataUid[message.uid] as IInvalidating;
-						if(item)
-							item.invalidateProperties();
-					}
 				}
 				chat.messages.refresh();
 			}
@@ -104,12 +113,9 @@ package com.cleartext.ximpp.views.messages
 			super.createChildren();
 			BindingUtils.bindSetter(setSort, global, "sortBySentDate");
 			
-			if(!participantList)
+			if(!contains(messageList))
 			{
-				participantList = new SproutList();
-				participantList.itemRenderer = new ClassFactory(BuddyRenderer);
-				participantList.dataProvider = participants;
-				addChild(participantList);
+				addChildAt(messageList,0);
 			}
 		}
 		
@@ -120,9 +126,9 @@ package com.cleartext.ximpp.views.messages
 				var previousJid:String;
 				var previousMillis:Number = 0;
 				
-				for each(var data:ISproutListData in dataProvider)
+				for each(var data:ISproutListData in messageList.dataProvider)
 				{
-					var item:Object = itemRenderersByDataUid[data.uid];
+					var item:Object = messageList.itemRenderersByDataUid[data.uid];
 					if(item && item.hasOwnProperty("showTopRow") && item.hasOwnProperty("message"))
 					{
 						var thisJid:String = chat.isChatRoom ? item.message.groupChatSender : item.message.sender;
@@ -135,11 +141,6 @@ package com.cleartext.ximpp.views.messages
 			}
 
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
-			
-			setChildIndex(participantList, numChildren-1);
-			
-			participantList.setActualSize(200, 400);
-			participantList.move(unscaledWidth-240, 40);
 		}
 	}
 }

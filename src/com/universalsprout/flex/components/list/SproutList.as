@@ -31,7 +31,7 @@ package com.universalsprout.flex.components.list
 		
 		protected var collection:ListCollectionView;
 		protected var list:IList;
-		protected var itemRenderersByDataUid:Dictionary = new Dictionary();
+		public var itemRenderersByDataUid:Dictionary = new Dictionary();
 	
 		protected var resetItemRenderers:Boolean = true;
 		

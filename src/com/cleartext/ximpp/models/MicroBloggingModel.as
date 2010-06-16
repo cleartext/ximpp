@@ -9,6 +9,9 @@ package com.cleartext.ximpp.models
 	public class MicroBloggingModel
 	{
 		[Autowire]
+		public var appModel:ApplicationModel;
+		
+		[Autowire]
 		public var database:DatabaseModel;
 		
 		[Autowire]
@@ -65,6 +68,9 @@ package com.cleartext.ximpp.models
 				
 			if(jid)
 				buddy.setJidAndHash(jid, avatarHash, xmpp);
+				
+			if(buddy.jid != buddy.nickname)
+				appModel.nicknames[buddy.jid] = buddy.nickname;
 
 			return buddy;
 		}

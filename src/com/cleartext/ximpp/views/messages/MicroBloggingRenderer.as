@@ -193,7 +193,8 @@ package com.cleartext.ximpp.views.messages
 	
 						avatar.data = mBlogSender;
 					}
-					nameTextField.text = mBlogSender.nickname; 
+					nameTextField.text = appModel.nicknames[mBlogSender.jid];
+//					nameTextField.text = mBlogSender.nickname; 
 				}
 				else if(chatBuddy)
 				{

@@ -29,12 +29,13 @@ package com.cleartext.ximpp.views.messages
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.containers.ViewStack;
-	import mx.core.Container;
 	import mx.core.ScrollPolicy;
 	import mx.effects.Fade;
 	import mx.effects.Move;
 	import mx.events.CloseEvent;
+	import mx.events.DividerEvent;
 	import mx.events.FlexEvent;
+	import mx.events.ResizeEvent;
 	import mx.utils.StringUtil;
 	
 	public class MessageCanvas extends Canvas
@@ -82,6 +83,8 @@ package com.cleartext.ximpp.views.messages
 		private var searchBox:SearchBox;
 		private var messageStack:ViewStack;
 		private var customScroll:CustomScrollbar;
+
+		private var participantListWidth:Number = 180;
 
 		private var searchTerms:Array = [];
 		
@@ -228,12 +231,27 @@ package com.cleartext.ximpp.views.messages
 			sproutList.animate = settings.global.animateMessageList;
 			sproutList.horizontalScrollPolicy = "off";
 			sproutList.data = chat;
+			sproutList.participantListWidth = participantListWidth;
+			sproutList.addEventListener(DividerEvent.DIVIDER_RELEASE, sproutList_dividerReleaseHandler);
+			sproutList.addEventListener(ResizeEvent.RESIZE, sproutList_dividerReleaseHandler);
 			messageStack.addChild(sproutList);
 
 			chat.messages.filterFunction = filterMessages;
 			chat.messages.refresh();
 	
 			selectChatHandler(null);
+		}
+		
+		private function sproutList_dividerReleaseHandler(event:Event):void
+		{
+			var s:MessageSproutList = event.target as MessageSproutList;
+			callLater(setPLW, [s]);
+		}
+		
+		private function setPLW(s:MessageSproutList):void
+		{
+			if(s.participantListWidth > 0)
+				participantListWidth = s.participantListWidth;
 		}
 		
 		private function removeChatHandler(event:ChatEvent):void
@@ -262,7 +280,7 @@ package com.cleartext.ximpp.views.messages
 			avatarCanvas.removeChild(avatarToRemove);
 			avatars.removeItemAt(avatars.getItemIndex(avatarToRemove));
 
-			for each(var s:Container in messageStack.getChildren())
+			for each(var s:MessageSproutList in messageStack.getChildren())
 			{
 				if(s.data == avatarToRemove.chat)
 				{
@@ -290,11 +308,12 @@ package com.cleartext.ximpp.views.messages
 			inputCanvas.buddy = chat.buddy;
 
 			// set message list
-			for each(var s:Container in messageStack.getChildren())
+			for each(var s:MessageSproutList in messageStack.getChildren())
 			{
 				if(s.data == chat)
 				{
 					messageStack.selectedChild = s;
+					s.participantListWidth = participantListWidth;
 					break;
 				}
 			}

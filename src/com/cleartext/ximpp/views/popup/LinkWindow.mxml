@@ -47,7 +47,13 @@
 					if(result.id != idCounter)
 						return;
 					
-					if(result.hasOwnProperty("reputation"))
+					if(result.hasOwnProperty("redirected_to"))
+					{
+						success = true;
+						idCounter = webRoot.checkUrl(result.redirected_to);
+						textArea.htmlText += "<br/><b>Redirects&nbsp;to:</b>&nbsp;" + result.redirected_to ;
+					}
+					else if(result.hasOwnProperty("reputation"))
 					{
 						if(result.reputation == 0)
 						{
@@ -59,12 +65,6 @@
 							textArea.htmlText += "<br/><b>Score: <FONT color='#FF3333'>" + result.reputation + "</FONT></b>";
 							textArea.htmlText += "<br/><b>Category:</b> " + result.url_category;
 						}
-					}
-
-					if(result.hasOwnProperty("redirected_to"))
-					{
-						success = true;
-						textArea.htmlText += "<br/><b>Redirects&nbsp;to:</b>&nbsp;" + result.redirected_to ;
 					}
 
 					if(result.hasOwnProperty("malware_category"))

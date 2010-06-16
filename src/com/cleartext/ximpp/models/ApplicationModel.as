@@ -26,6 +26,7 @@ package com.cleartext.ximpp.models
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
 	
@@ -67,6 +68,9 @@ package com.cleartext.ximpp.models
 		[Autowire]
 		[Bindable]
 		public var chats:ChatModel;
+		
+		// a dictionary of nicknames, with jids as keys
+		public var nicknames:Dictionary;
 		
 		public var currentVersion:String;
 		
@@ -161,6 +165,8 @@ package com.cleartext.ximpp.models
 		public function ApplicationModel()
 		{
 			super();
+			
+			nicknames = new Dictionary();
 			
 			statusTimer = new Timer(60000);
 			statusTimer.addEventListener(TimerEvent.TIMER, statusTimerHandler);

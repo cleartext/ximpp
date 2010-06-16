@@ -574,6 +574,9 @@ package com.cleartext.ximpp.models
 				buddy.nickname = event.stanza["name"];
 				buddy.subscription = subscription;
 				
+				if(buddy.nickname != buddy.jid)
+					appModel.nicknames[buddy.jid] = buddy.nickname;
+				
 				requests.setSubscription(jid, buddy.nickname, buddy.subscription);
 			}
 			buddies.refresh();
@@ -767,7 +770,10 @@ package com.cleartext.ximpp.models
 			var buddyJid:String = stanza.from;
 			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
 			var buddy:MicroBloggingBuddy = mBlogBuddies.getBuddyByJid(buddyJid);
-			buddy.avatarString = avatarString;
+			if(buddy)
+				buddy.avatarString = avatarString;
+			else
+				appModel.log("[XMPPModel].mBlogVCardHandler() could not find mblog buddy with jid : " + buddyJid, true);
 		}
 		
 		//------------------------------------------------------------------

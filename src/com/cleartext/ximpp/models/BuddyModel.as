@@ -14,11 +14,12 @@ package com.cleartext.ximpp.models
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
-	
-	import org.swizframework.Swiz;
 
 	public class BuddyModel extends EventDispatcher
 	{
+		[Autowire]
+		public var appModel:ApplicationModel;
+		
 		[Autowire]
 		public var database:DatabaseModel;
 		
@@ -124,6 +125,10 @@ package com.cleartext.ximpp.models
 			buddies.addItem(buddy);
 			buddiesByJid[buddy.jid] = buddy;
 			buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler, false, 0, true);
+
+			if(buddy.jid != buddy.nickname)
+				appModel.nicknames[buddy.jid] = buddy.nickname;
+
 			if(save)
 				buddy.dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 		}
@@ -132,6 +137,8 @@ package com.cleartext.ximpp.models
 		{
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				return;
+			
+			delete appModel.nicknames[buddy.jid];
 			
 			var index:int = buddies.list.getItemIndex(buddy);
 			if(index != -1)

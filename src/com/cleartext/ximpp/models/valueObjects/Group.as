@@ -14,12 +14,38 @@ package com.cleartext.ximpp.models.valueObjects
 			super(jid);
 			this.buddies = buddies;
 			
-			buddies.addEventListener(BuddyModelEvent.REFRESH, dispatchEvent);
+			buddies.addEventListener(BuddyModelEvent.REFRESH, refreshHandler);
+			
+			refreshHandler(null);
 		}
 		
+		private function refreshHandler(event:BuddyModelEvent):void
+		{
+			var tmp:Array = new Array();
+			for each(var b:Buddy in buddies.getBuddiesByGroup(jid))
+			{
+				tmp.push(b.jid);
+			}
+		
+			for(var i:int=participants.length-1; i>=0; i--)
+			{
+				var index:int = tmp.indexOf(participants.getItemAt(i));
+				if(index == -1)
+					participants.removeItemAt(i);
+				else
+					tmp.splice(index, 1);
+			}
+			
+			while(tmp.length > 0)
+			{
+				participants.addItem(tmp.pop());
+			}
+		}
+		
+		private var _participants:ArrayCollection = new ArrayCollection();
 		override public function get participants():ArrayCollection
 		{
-			return new ArrayCollection(buddies.getBuddiesByGroup(jid));
+			return _participants;
 		}
 	}
 }

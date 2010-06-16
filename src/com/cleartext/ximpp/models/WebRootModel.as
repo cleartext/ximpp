@@ -63,12 +63,6 @@ package com.cleartext.ximpp.models
 			{
 				result = json.urls[0];
 				result.milliseconds = getTimer() - startTime;
-				
-//				output.text += "ID:\t\t\t" + val.id + "\n";
-//				output.text += "TIME:\t\t\t" + (getTimer() - startTime)/1000 + " seconds" + "\n";
-//				output.text += "REPUTATION:\t" + val.reputation + "\n";
-//				output.text += "CATEGORY:\t" + val.url_category + "\n";
-//				output.text += "REDIRECT:\t" + val.redirected_to + "\n\n";
 			}
 			else
 			{

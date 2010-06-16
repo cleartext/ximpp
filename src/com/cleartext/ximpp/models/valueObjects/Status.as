@@ -27,8 +27,11 @@ package com.cleartext.ximpp.models.valueObjects
 		public static const ERROR:String = "error";
 		public static const CLOSE:String = "close";
 		
+		public var imutable:Boolean;
+		
 		public function Status(value:String=UNKNOWN)
 		{
+			super();
 			this.value = value;
 			numUnread = 0;
 		}
@@ -43,7 +46,7 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			// when setting a buddy's status to OFFLINE, we don't want
 			// to overwrite the UNSUBSCIRBED value
-			if(value == OFFLINE && this.value == UNSUBSCRIBED)
+			if(imutable || value == OFFLINE && this.value == UNSUBSCRIBED)
 				return;
 			
 			if(_value != value)
