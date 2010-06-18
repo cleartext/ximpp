@@ -7,6 +7,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.IBuddy;
 			import mx.events.FlexEvent;
 			import mx.collections.ArrayCollection;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
@@ -44,31 +45,35 @@
 				var newGroupName:String = groupNameInput.text;
 				var selectedBuddies:Array = getSelected(list);
 				
-				for each(var buddy:Buddy in buddies.buddies.source)
+				for each(var b:IBuddy in buddies.buddies.source)
 				{
-					var index:int = buddy.groups.indexOf(groupName);
-					// if the buddy already has the group
-					if(index != -1)
+					var buddy:Buddy = b as Buddy;
+					if(buddy)
 					{
-						// if we don't want the buddy, remove the group
-						if(selectedBuddies.indexOf(buddy)==-1)
+						var index:int = buddy.groups.indexOf(groupName);
+						// if the buddy already has the group
+						if(index != -1)
 						{
-							buddy.groups.splice(index, 1);
+							// if we don't want the buddy, remove the group
+							if(selectedBuddies.indexOf(buddy)==-1)
+							{
+								buddy.groups.splice(index, 1);
+								xmpp.modifyRosterItem(buddy);
+							}
+							// if the groupname has changed, then update it
+							else if(newGroupName != groupName)
+							{
+								buddy.groups.splice(index, 1, newGroupName);
+								xmpp.modifyRosterItem(buddy);
+							}
+						}
+						// if the buddy doesn't have the group and it is selected
+						// then add it
+						else if(selectedBuddies.indexOf(buddy)!=-1)
+						{
+							buddy.groups.push(newGroupName);
 							xmpp.modifyRosterItem(buddy);
 						}
-						// if the groupname has changed, then update it
-						else if(newGroupName != groupName)
-						{
-							buddy.groups.splice(index, 1, newGroupName);
-							xmpp.modifyRosterItem(buddy);
-						}
-					}
-					// if the buddy doesn't have the group and it is selected
-					// then add it
-					else if(selectedBuddies.indexOf(buddy)!=-1)
-					{
-						buddy.groups.push(newGroupName);
-						xmpp.modifyRosterItem(buddy);
 					}
 				}
 				

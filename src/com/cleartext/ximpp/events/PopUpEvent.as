@@ -29,7 +29,6 @@ package com.cleartext.ximpp.events
 		
 		public var buddy:IBuddy;
 		public var group:String;
-		public var presenceRequest:Boolean = false;
 		public var messageString:String;
 		
 		public function PopUpEvent(type:String)
@@ -42,7 +41,6 @@ package com.cleartext.ximpp.events
 			var event:PopUpEvent = new PopUpEvent(type);
 			event.buddy = buddy;
 			event.group = group;
-			event.presenceRequest = presenceRequest;
 			event.messageString = messageString;
 			return event;
 		}

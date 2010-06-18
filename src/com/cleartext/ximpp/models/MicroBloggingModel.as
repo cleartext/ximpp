@@ -69,9 +69,6 @@ package com.cleartext.ximpp.models
 			if(jid)
 				buddy.setJidAndHash(jid, avatarHash, xmpp);
 				
-			if(buddy.jid != buddy.nickname)
-				appModel.nicknames[buddy.jid] = buddy.nickname;
-
 			return buddy;
 		}
 		

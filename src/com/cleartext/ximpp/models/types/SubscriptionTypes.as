@@ -20,8 +20,9 @@ package com.cleartext.ximpp.models.types
 		// when removing buddies from roster list)
 		public static const UNSUBSCRIBE:String = "unsubscribe";
 		
-		// the sencder no longer wants to publish their
-		// status to the recipient
+		// the sender no longer wants to publish their
+		// status to the recipient or the sender is refusing
+		// a request
 		public static const UNSUBSCRIBED:String = "unsubscribed";
 	}
 }

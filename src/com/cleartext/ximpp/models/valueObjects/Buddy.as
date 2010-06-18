@@ -238,34 +238,6 @@ package com.cleartext.ximpp.models.valueObjects
 		//  DATABASE METHODS
 		//
 		//--------------------------------------------------		
-
-		//----------------------------------------
-		//  CREATE FROM DATABASE
-		//----------------------------------------
-		
-		public static function createFromDB(obj:Object):Buddy
-		{
-			var newBuddy:Buddy = new Buddy(obj["jid"]);
-
-			newBuddy.buddyId = obj["buddyId"];
-			newBuddy.nickname = obj["nickName"];
-			newBuddy.lastSeen = obj["lastSeen"];
-			newBuddy.customStatus = obj["customStatus"];
-			newBuddy.sendTo = obj["sendTo"];
-			newBuddy.avatarHash = obj["avatarHash"];
-			newBuddy.subscription = obj["subscription"];
-			newBuddy.avatarString = obj["avatar"];
-			newBuddy.openTab = obj["openTab"];
-			newBuddy.autoOpenTab = obj["autoOpenTab"];
-			newBuddy.unreadMessages = obj["unreadMessages"];
-
-			var groups:Array = (obj["groups"] as String).split(",");
-			if(groups.length == 1 && groups[0] == "")
-				groups = [];
-			newBuddy.groups = groups;
-
-			return newBuddy;
-		}
 		
 		//----------------------------------------
 		//  CREATE DATABASE VALUES
@@ -286,7 +258,8 @@ package com.cleartext.ximpp.models.valueObjects
 				new DatabaseValue("avatarHash", avatarHash),
 				new DatabaseValue("openTab", openTab),
 				new DatabaseValue("autoOpenTab", autoOpenTab),
-				new DatabaseValue("unreadMessages", unreadMessages)
+				new DatabaseValue("unreadMessages", unreadMessages),
+				new DatabaseValue("buddyType", "rosterItem")
 				];
 		}
 	}

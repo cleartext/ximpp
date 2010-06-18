@@ -1,34 +1,57 @@
 package com.cleartext.ximpp.models
 {
 	import com.cleartext.ximpp.events.ChatRoomEvent;
+	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
+	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
-	
-	import mx.collections.ArrayCollection;
 
 	public class ChatRoomModel extends EventDispatcher
 	{
-		private var _chatRooms:ArrayCollection;
-		public function get chatRooms():ArrayCollection
+		[Autowire]
+		public var appModel:ApplicationModel;
+		
+		private function get xmpp():XMPPModel
 		{
-			return _chatRooms;
+			return appModel.xmpp;
+		}
+		
+		private function get buddies():BuddyModel
+		{
+			return appModel.buddies;
 		}
 		
 		public function ChatRoomModel(target:IEventDispatcher=null)
 		{
 			super(target);
-			_chatRooms = new ArrayCollection();
 		}
 		
 		public function join(roomJid:String, nickname:String, password:String):void
 		{
-			// send presence and register for presence messages from this roomJid
+			var buddy:IBuddy = buddies.getBuddyByJid(roomJid);
+			var chatRoom:ChatRoom = buddy as ChatRoom;
+
+			if(buddy && !chatRoom)
+			{
+				throw Error("that jid already exists as a buddy can not create as chat room.");
+			}
+			else if(!chatRoom)
+			{
+				chatRoom = new ChatRoom(roomJid);
+			}
+			
+			chatRoom.ourNickname = nickname;
+			chatRoom.password = password;
+			
+			buddies.addBuddy(chatRoom);
+			xmpp.joinChatRoom(roomJid, nickname, password);
 		}
 		
-		public function presenceHandler(event:ChatRoomEvent):void
+		public function leave(chatRoom:ChatRoom):void
 		{
-			
+			buddies.removeBuddy(chatRoom);
+			xmpp.leaveChatRoom(chatRoom.jid, chatRoom.ourNickname);
 		}
 		
 		public function messageHandler(event:ChatRoomEvent):void
@@ -45,6 +68,5 @@ package com.cleartext.ximpp.models
 		{
 			
 		}
-		
 	}
 }

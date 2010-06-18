@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.valueObjects.IBuddy;
 			import com.cleartext.ximpp.models.BuddyModel;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
 			import com.cleartext.ximpp.models.XMPPModel;
@@ -18,22 +19,24 @@
 			public var groupName:String;
 
 			[Autowire]
-			[Bindable]
 			public var xmpp:XMPPModel;
 			
 			[Autowire]
-			[Bindable]
 			public var buddies:BuddyModel;
 			
 			override protected function submit(event:Event):void
 			{
-				for each(var buddy:Buddy in buddies.buddies.source)
+				for each(var b:IBuddy in buddies.buddies.source)
 				{
-					var index:int = buddy.groups.indexOf(groupName);
-					if(index != -1)
+					var buddy:Buddy = b as Buddy;
+					if(buddy)
 					{
-						buddy.groups.splice(index, 1);
-						xmpp.modifyRosterItem(buddy);
+						var index:int = buddy.groups.indexOf(groupName);
+						if(index != -1)
+						{
+							buddy.groups.splice(index, 1);
+							xmpp.modifyRosterItem(buddy);
+						}
 					}
 				}
 				closeWindow();

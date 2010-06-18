@@ -4,7 +4,6 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.events.FormEvent;
 	import com.cleartext.ximpp.events.UserAccountEvent;
 	import com.cleartext.ximpp.events.XmppErrorEvent;
-	import com.cleartext.ximpp.models.types.BuddyTypes;
 	import com.cleartext.ximpp.models.types.ChatStateTypes;
 	import com.cleartext.ximpp.models.types.IQTypes;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
@@ -12,6 +11,7 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
 	import com.cleartext.ximpp.models.valueObjects.FormField;
 	import com.cleartext.ximpp.models.valueObjects.FormObject;
+	import com.cleartext.ximpp.models.valueObjects.Group;
 	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.ISubscribable;
 	import com.cleartext.ximpp.models.valueObjects.Message;
@@ -58,6 +58,9 @@ package com.cleartext.ximpp.models
 
 		namespace mucOwner = "http://jabber.org/protocol/muc#owner";
 		public var MUC_OWNER_NS:String = "http://jabber.org/protocol/muc#owner";
+
+		namespace mucUser = "http://jabber.org/protocol/muc#user";
+		public var MUC_USER_NS:String = "http://jabber.org/protocol/muc#user";
 
 		namespace vCardTemp = "vcard-temp";
 		public var V_CARD_TEMP_NS:String = "vcard-temp";
@@ -108,6 +111,11 @@ package com.cleartext.ximpp.models
 			return appModel.chats;
 		}
 		
+		private function get chatRooms():ChatRoomModel
+		{
+			return appModel.chatRooms;
+		}
+		
 		private function get soundColor():SoundAndColorModel
 		{
 			return appModel.soundColor;
@@ -125,7 +133,7 @@ package com.cleartext.ximpp.models
 		// a dictionary to store the nicknames that we have used to 
 		// log into various chat rooms the key of the dictonary is the 
 		// jid of the chat room
-		private var chatRoomNicknames:Dictionary = new Dictionary();
+		// private var chatRoomNicknames:Dictionary = new Dictionary();
 		
 		// a dictionary to store the variables that we want to associate
 		// with iq queries the key is the id of the iq stanza the we
@@ -223,7 +231,7 @@ package com.cleartext.ximpp.models
 		 		(appModel.localStatus.value == Status.OFFLINE) ? 
 		 		Status.OFFLINE : Status.ERROR;
 
-	 		for each(var buddy:Buddy in buddies.buddies.source)
+	 		for each(var buddy:IBuddy in buddies.buddies.source)
 	 			buddy.status.value = Status.OFFLINE;
 		}
 
@@ -339,14 +347,13 @@ package com.cleartext.ximpp.models
 					(buddy as Buddy).resource = messageStanza.from.resource;
 
 				buddy.isTyping = false;
-
 				database.saveMessage(message);
 			}
 
 			buddy.lastSeen = message.receivedTimestamp.time;
 			buddy.unreadMessages++;
 			chats.addMessage(buddy, message);
-			
+
 			// play sounds & increment unread messages for the mblog buddy
 			if(buddy.isMicroBlogging)
 			{
@@ -394,25 +401,23 @@ package com.cleartext.ximpp.models
 			if(fromJid == settings.userAccount.jid)
 				return;
 			
+			var chatRoom:ChatRoom = buddy as ChatRoom;
 			// if this is from a chat room that we have asked to join
-			if(chatRoomNicknames.hasOwnProperty(fromJid))
+			if(chatRoom)
 			{
-				// if the resource of the jid is equal to the nickname that 
-				// we requested for this room, then open the chat, or show
-				// an error on unavailable
-				if(stanza.from.resource == chatRoomNicknames[fromJid])
+				try
 				{
-					if(stanza.type == Status.AVAILABLE)
-						chats.getChat(fromJid, true, BuddyTypes.CHAT_ROOM);
-					else if(stanza.type == Status.UNAVAILABLE)
-						chats.getChat(fromJid, false, BuddyTypes.CHAT_ROOM).buddy.status.value = Status.ERROR;
-					else if(stanza.type == Status.ERROR)
-						Swiz.dispatchEvent(new XmppErrorEvent(
-								XmppErrorEvent.ERROR, 
-								"Unable to join chat room: " + fromJid + " with nickname: " + stanza.from.resource, 
-								fromJid, stanza.error));
+					var jid:String = stanza.getXML().mucUser::x[0].mucUser::item[0].@jid;
+					var index:int = jid.indexOf("/");
+					if(index != -1)
+						jid = jid.substr(0,index);
+						
+					chatRoom.setPresence(jid, stanza.type, stanza.from.resource);
 				}
-				
+				catch(e:Error)
+				{
+					trace(e);
+				}
 				return;
 			}
 
@@ -492,7 +497,8 @@ package com.cleartext.ximpp.models
 			var buddiesToDelete:Dictionary = new Dictionary();
 			
 			for each(buddy in buddies.buddies.source)
-				buddiesToDelete[buddy.jid] = buddy;
+				if(!(buddy is ChatRoom) && !(buddy is Group))
+					buddiesToDelete[buddy.jid] = buddy;
 
 			for each(var item:XML in stanza.query.jabberRoster::item)
 			{
@@ -573,9 +579,6 @@ package com.cleartext.ximpp.models
 				buddy.groups = event.stanza["groups"];
 				buddy.nickname = event.stanza["name"];
 				buddy.subscription = subscription;
-				
-				if(buddy.nickname != buddy.jid)
-					appModel.nicknames[buddy.jid] = buddy.nickname;
 				
 				requests.setSubscription(jid, buddy.nickname, buddy.subscription);
 			}
@@ -711,7 +714,6 @@ package com.cleartext.ximpp.models
 		
 		private function vCardHandler(stanza:IqStanza):void
 		{
-			namespace vCardTemp = "vcard-temp";
 			var xml:XML = stanza.getXML();
 			
 			var buddyJid:String = stanza.from;
@@ -920,7 +922,6 @@ package com.cleartext.ximpp.models
 		
 		public function joinChatRoom(roomJid:String, nickname:String, password:String=""):void
 		{
-			chatRoomNicknames[roomJid] = nickname;
 			xmpp.send('<presence to="' + roomJid + "/" + nickname + '">' + (password=="" ? '' : '<password>' + password + '</password>') + "<x xmlns='" + MUC_NS + "'/></presence>");
 		}
 		
@@ -928,10 +929,9 @@ package com.cleartext.ximpp.models
 		// LEAVE CHAT ROOM
 		//-------------------------------
 		
-		public function leaveChatRoom(roomJid:String):void
+		public function leaveChatRoom(roomJid:String, nickname:String):void
 		{
-			delete chatRoomNicknames[roomJid];
-			xmpp.send('<presence type="unavailable" to="' + roomJid + "/" + chatRoomNicknames[roomJid] +'" />');
+			xmpp.send('<presence type="unavailable" to="' + roomJid + "/" + nickname +'" />');
 		}
 		
 		//------------------------------------------------------------------

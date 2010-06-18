@@ -329,6 +329,7 @@
 		
 		<mx:CheckBox
 			id="microBloggingCheckBox"
+			visible="false"
 			bottom="5" right="5"
 			labelPlacement="right"
 			label="send status to micro-blogging networks?"

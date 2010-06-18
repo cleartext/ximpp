@@ -26,6 +26,9 @@ package com.cleartext.ximpp.models
 		[Autowire]
 		public var buddies:BuddyModel;
 		
+		[Autowire]
+		public var xmpp:XMPPModel;
+		
 		public var chatsByJid:Dictionary;
 		
 		private var chats:Array;
@@ -74,13 +77,25 @@ package com.cleartext.ximpp.models
 							buddy = new ChatRoom(buddyOrJid as String);
 							break;
 						case BuddyTypes.GROUP :
-							buddy = new Group(buddyOrJid as String, buddies);
+							buddy = new Group(buddyOrJid as String);
+							buddies.addBuddy(buddy);
+							(buddy as Group).refresh(buddies);
 							break;
 						default :
 							buddy = new Buddy(buddyOrJid as String);
 							break;
 					}
 				}
+				
+				var chatRoom:ChatRoom = buddy as ChatRoom;
+				if(chatRoom)
+				{
+					if(xmpp.connected)
+						xmpp.joinChatRoom(chatRoom.jid, chatRoom.ourNickname, chatRoom.password);
+					else
+						return null;
+				}
+				
 				
 				chat = new Chat(buddy);
 				database.loadMessages(chat, !select);
@@ -142,18 +157,18 @@ package com.cleartext.ximpp.models
 			dispatchEvent(new ChatEvent(ChatEvent.REMOVE_CHAT, chat, i));
 			
 			if(buddy is ChatRoom)
-			{
-				appModel.xmpp.leaveChatRoom(buddy.jid);
-			}
+				appModel.chatRooms.leave(buddy as ChatRoom);
 		}
 		
 		public function addMessage(buddy:IBuddy, message:Message):void
 		{
 			var limit:int = buddy.isMicroBlogging ? settings.global.numTimelineMessages : settings.global.numChatMessages;			
 			
-			if(buddy.autoOpenTab || chatsByJid.hasOwnProperty(buddy.jid))
+			if(chatsByJid.hasOwnProperty(buddy.jid))
 				getChat(buddy).addMessage(message, limit);
-				
+			else if(buddy.autoOpenTab)
+				getChat(buddy);
+			
 			if(buddy.isMicroBlogging)
 				getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY).addMessage(message, limit);
 		}

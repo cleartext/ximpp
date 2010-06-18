@@ -4,7 +4,9 @@ package com.cleartext.ximpp.models
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.BuddyRequest;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
 	import com.cleartext.ximpp.models.valueObjects.DatabaseValue;
+	import com.cleartext.ximpp.models.valueObjects.Group;
 	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.cleartext.ximpp.models.valueObjects.MicroBloggingBuddy;
@@ -234,6 +236,52 @@ package com.cleartext.ximpp.models
 			loadUserSettings(1);
 		}
 
+		private function createIBuddy(obj:Object):IBuddy
+		{
+			var type:String = obj["buddyType"];
+
+			var newBuddy:IBuddy;
+			switch(type)
+			{
+				case "rosterItem" :
+					var buddy:Buddy = new Buddy(obj["jid"]);
+					var groups:Array = (obj["groups"] as String).split(",");
+					if(groups.length == 1 && groups[0] == "")
+						groups = [];
+					buddy.groups = groups;
+					buddy.sendTo = obj["sendTo"];
+					buddy.subscription = obj["subscription"];
+					newBuddy = buddy;
+					break;
+				case "group" :
+					var group:Group = new Group(obj["jid"]);
+					group.refresh(buddies);
+					newBuddy = group;
+					break;
+				case "chatRoom" :
+					var chatRoom:ChatRoom = new ChatRoom(obj["jid"]);
+					var np:Array = (obj["groups"] as String).split(",");
+					chatRoom.ourNickname = np[0];
+					chatRoom.password = np[1];
+					newBuddy = chatRoom;
+					break;
+				default :
+					throw new Error("Can not create new buddy");
+					return;
+			}
+			
+			newBuddy.buddyId = obj["buddyId"];
+			newBuddy.nickname = obj["nickName"];
+			newBuddy.lastSeen = obj["lastSeen"];
+			newBuddy.customStatus = obj["customStatus"];
+			newBuddy.avatarHash = obj["avatarHash"];
+			newBuddy.avatarString = obj["avatar"];
+			newBuddy.openTab = obj["openTab"];
+			newBuddy.autoOpenTab = obj["autoOpenTab"];
+			newBuddy.unreadMessages = obj["unreadMessages"];
+			return newBuddy;
+		}
+		
 		public function loadBuddyData(data:Array=null, index:int=0):void
 		{
 			var start:int = getTimer();
@@ -242,7 +290,7 @@ package com.cleartext.ximpp.models
 			{
 				while(index>=0)
 				{
-					buddies.addBuddy(Buddy.createFromDB(data[index]), false);
+					buddies.addBuddy(createIBuddy(data[index]), false);
 					index--;
 					if(start + maxTimeForProcess < getTimer())
 					{

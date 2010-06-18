@@ -9,21 +9,16 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.ChatRoomModel;
 			import mx.events.FlexEvent;
 			import com.cleartext.ximpp.models.valueObjects.Buddy;
-			import com.cleartext.ximpp.models.BuddyModel;
 			import mx.events.CloseEvent;
-			import com.cleartext.ximpp.models.XMPPModel;
-			import com.cleartext.ximpp.models.DatabaseModel;
 			import com.cleartext.ximpp.models.SettingsModel;
-			import com.cleartext.ximpp.models.ApplicationModel;
 
 			[Autowire]
-			[Bindable]
-			public var xmpp:XMPPModel;
+			public var chatRooms:ChatRoomModel;
 			
 			[Autowire]
-			[Bindable]
 			public var settings:SettingsModel;
 			
 			override protected function init(event:FlexEvent):void
@@ -43,41 +38,22 @@
 				if(!isValid)
 					return;
 
-				xmpp.joinChatRoom(room.text + "@" + host.text, nickname.text, password.text);
+				chatRooms.join(room.text + "@" + host.text, nickname.text, password.text);
 				closeWindow();
 			}
 			
 			override protected function validateForm():void
 			{
-				if(host.text != "" && room.text != "")
-				{
-					createButton.enabled = true;
-					isValid = validateNickname();
-				}
-				else
-				{
-					createButton.enabled = false;
-					isValid = false;
-				}
+				isValid = validateNickname() && host.text != "" && room.text != "";
 			}
 			
 			private function validateNickname():Boolean
 			{
 				return nickname.text != "" &&
 					nickname.text.indexOf("@") == -1 &&
-					nickname.text.indexOf("/") == -1 && 
-					nickname.text.indexOf(" ") == -1;
+					nickname.text.indexOf("/") == -1; 
 			}
-			
-			private function createChatRoom():void
-			{
-				if(host.text != "" && room.text != "")
-				{
-					xmpp.createChatRoom(room.text + "@" + host.text);
-					closeWindow();
-				}
-			}
-			
+						
 		]]>
 	</mx:Script>
 
@@ -96,16 +72,12 @@
 
 		<mx:FormItem label="Your nick name:">
 			<mx:VBox>
-				<mx:TextInput width="250" id="nickname" change="validateInput(event, 'you must enter a nick name without a \'@\', \'/\' or a space', validateNickname)" focusOut="validateInput(event, 'you must enter a nick name without a \'@\', \'/\' or a space', validateNickname)"/>
+				<mx:TextInput width="250" id="nickname" change="validateInput(event, 'you must enter a nick name without a \'@\' or a \'/\'', validateNickname)" focusOut="validateInput(event, 'you must enter a nick name without a \'@\' or a \'/\'', validateNickname)"/>
 			</mx:VBox>
 		</mx:FormItem>
 
 		<mx:FormItem label="Password (optional):">
 			<mx:TextInput width="250" id="password" displayAsPassword="true"/>
-		</mx:FormItem>
-		
-		<mx:FormItem>
-			<mx:Button label="create new chat room" id="createButton" click="createChatRoom()" valid="false"/>
 		</mx:FormItem>
 
     </mx:Form>

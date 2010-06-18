@@ -1,28 +1,20 @@
 package com.cleartext.ximpp.models.valueObjects
 {
-	import com.cleartext.ximpp.events.BuddyModelEvent;
 	import com.cleartext.ximpp.models.BuddyModel;
 	
 	import mx.collections.ArrayCollection;
 	
 	public class Group extends BuddyBase
 	{
-		private var buddies:BuddyModel;
-		
-		public function Group(jid:String, buddies:BuddyModel)
+		public function Group(jid:String)
 		{
 			super(jid);
-			this.buddies = buddies;
-			
-			buddies.addEventListener(BuddyModelEvent.REFRESH, refreshHandler);
-			
-			refreshHandler(null);
 		}
-		
-		private function refreshHandler(event:BuddyModelEvent):void
+
+		public function refresh(buddies:BuddyModel):void
 		{
 			var tmp:Array = new Array();
-			for each(var b:Buddy in buddies.getBuddiesByGroup(jid))
+			for each(var b:IBuddy in buddies.getBuddiesByGroup(jid))
 			{
 				tmp.push(b.jid);
 			}
@@ -46,6 +38,25 @@ package com.cleartext.ximpp.models.valueObjects
 		override public function get participants():ArrayCollection
 		{
 			return _participants;
+		}
+		
+		override public function toDatabaseValues(userId:int):Array
+		{
+			return [
+				new DatabaseValue("userId", userId),
+				new DatabaseValue("jid", jid),
+				new DatabaseValue("nickname", getNickname()),
+				new DatabaseValue("groups", ""),
+				new DatabaseValue("lastSeen", lastSeen),
+				new DatabaseValue("subscription", ""),
+				new DatabaseValue("avatar", avatarString),
+				new DatabaseValue("customStatus", customStatus),
+				new DatabaseValue("avatarHash", avatarHash),
+				new DatabaseValue("openTab", openTab),
+				new DatabaseValue("autoOpenTab", autoOpenTab),
+				new DatabaseValue("unreadMessages", unreadMessages),
+				new DatabaseValue("buddyType","group")
+				];
 		}
 	}
 }

@@ -376,18 +376,7 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		public function toDatabaseValues(userId:int):Array
 		{
-			return [
-				new DatabaseValue("userId", userId),
-				new DatabaseValue("jid", jid),
-				new DatabaseValue("nickname", getNickname()),
-				new DatabaseValue("lastSeen", lastSeen),
-				new DatabaseValue("avatar", avatarString),
-				new DatabaseValue("customStatus", customStatus),
-				new DatabaseValue("avatarHash", avatarHash),
-				new DatabaseValue("openTab", openTab),
-				new DatabaseValue("autoOpenTab", autoOpenTab),
-				new DatabaseValue("unreadMessages", unreadMessages),
-				];
+			throw new Error("need te extend BuddyBase.toDatabaseValues()");
 		}
 	}
 }

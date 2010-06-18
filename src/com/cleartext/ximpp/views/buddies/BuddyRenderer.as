@@ -7,6 +7,7 @@ package com.cleartext.ximpp.views.buddies
 	import com.cleartext.ximpp.models.XMPPModel;
 	import com.cleartext.ximpp.models.types.SubscriptionTypes;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
+	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
 	import com.cleartext.ximpp.models.valueObjects.IBuddy;
 	import com.cleartext.ximpp.models.valueObjects.Status;
 	import com.cleartext.ximpp.views.common.Avatar;
@@ -107,7 +108,7 @@ package com.cleartext.ximpp.views.buddies
 			
 			
 			// add or remove subscription request if required
-			if(subscribedTo && !subscribeItem)
+			if(!subscribedTo && !subscribeItem)
 			{
 				subscribeItem = new ContextMenuItem("resend subscription request", true);
 				subscribeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, sendSubscription);

@@ -26,7 +26,6 @@ package com.cleartext.ximpp.models
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
 	
@@ -38,39 +37,31 @@ package com.cleartext.ximpp.models
 	public class ApplicationModel extends EventDispatcher
 	{
 		[Autowire]
-		[Bindable]
 		public var soundColor:SoundAndColorModel;
 		
 		[Autowire]
-		[Bindable]
 		public var settings:SettingsModel;
 		
 		[Autowire]
-		[Bindable]
 		public var database:DatabaseModel;
 		
 		[Autowire]
-		[Bindable]
 		public var xmpp:XMPPModel;
 		
 		[Autowire]
-		[Bindable]
 		public var buddies:BuddyModel;
 		
 		[Autowire]
-		[Bindable]
 		public var mBlogBuddies:MicroBloggingModel;
 		
 		[Autowire]
-		[Bindable]
 		public var requests:BuddyRequestModel;
 		
 		[Autowire]
-		[Bindable]
 		public var chats:ChatModel;
 		
-		// a dictionary of nicknames, with jids as keys
-		public var nicknames:Dictionary;
+		[Autowire]
+		public var chatRooms:ChatRoomModel;
 		
 		public var currentVersion:String;
 		
@@ -165,8 +156,6 @@ package com.cleartext.ximpp.models
 		public function ApplicationModel()
 		{
 			super();
-			
-			nicknames = new Dictionary();
 			
 			statusTimer = new Timer(60000);
 			statusTimer.addEventListener(TimerEvent.TIMER, statusTimerHandler);
@@ -327,7 +316,7 @@ package com.cleartext.ximpp.models
 			database.removeEventListener(LoadingEvent.WORKSTREAM_LOADED, loadChats);
 			
 			var chatsToOpen:Array = new Array();
-			for each(var buddy:Buddy in buddies.buddies.source)
+			for each(var buddy:IBuddy in buddies.buddies.source)
 				if(buddy.openTab && buddy!=Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					chatsToOpen.push(buddy);
 			
@@ -396,12 +385,12 @@ package com.cleartext.ximpp.models
 		{
 			log("[ApplicationModel].sendMessage() " + buddy.jid + " : " + messageString + " : " + save);
 			
-			if(buddy is Group)
+			if(buddy is Group || buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
-				var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.BROADCAST_WINDOW);
-				popupEvent.messageString = messageString;
-				popupEvent.buddy = buddy;
-				Swiz.dispatchEvent(popupEvent);
+				var popUpEvent:PopUpEvent = new PopUpEvent(PopUpEvent.BROADCAST_WINDOW);
+				popUpEvent.messageString = messageString;
+				popUpEvent.buddy = buddy;
+				Swiz.dispatchEvent(popUpEvent);
 			}
 			else
 			{

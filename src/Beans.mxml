@@ -19,6 +19,8 @@
 
 	<models:ChatModel id="chats" />
 
+	<models:ChatRoomModel id="chatRooms" />
+
 	<models:WebRootModel id="webroot" />
 
 	<models:ApplicationModel id="appModel" />
