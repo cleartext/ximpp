@@ -34,7 +34,7 @@ package com.cleartext.ximpp.models
 
 			if(buddy && !chatRoom)
 			{
-				throw Error("that jid already exists as a buddy can not create as chat room.");
+				throw Error("that jid already exists as a buddy: can not create as chat room.");
 			}
 			else if(!chatRoom)
 			{
@@ -50,23 +50,8 @@ package com.cleartext.ximpp.models
 		
 		public function leave(chatRoom:ChatRoom):void
 		{
-			buddies.removeBuddy(chatRoom);
-			xmpp.leaveChatRoom(chatRoom.jid, chatRoom.ourNickname);
-		}
-		
-		public function messageHandler(event:ChatRoomEvent):void
-		{
-			
-		}
-		
-		public function errorHandler(event:ChatRoomEvent):void
-		{
-			
-		}
-		
-		public function iqHandler(event:ChatRoomEvent):void
-		{
-			
+			if(!chatRoom.status.isOffline())
+				xmpp.leaveChatRoom(chatRoom.jid, chatRoom.ourNickname);
 		}
 	}
 }

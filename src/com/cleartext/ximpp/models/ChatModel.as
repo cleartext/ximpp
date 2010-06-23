@@ -25,10 +25,7 @@ package com.cleartext.ximpp.models
 		
 		[Autowire]
 		public var buddies:BuddyModel;
-		
-		[Autowire]
-		public var xmpp:XMPPModel;
-		
+				
 		public var chatsByJid:Dictionary;
 		
 		private var chats:Array;
@@ -50,6 +47,12 @@ package com.cleartext.ximpp.models
 			
 			chats = new Array();
 			chatsByJid = new Dictionary();
+		}
+		
+		[Mediate(event="ChatEvent.OPEN_ME")]
+		public function openChatHandler(event:ChatEvent):void
+		{
+			getChat(event.buddy, event.select);
 		}
 		
 		public function getChat(buddyOrJid:Object, select:Boolean=false, type:String=BuddyTypes.BUDDY):Chat
@@ -86,16 +89,6 @@ package com.cleartext.ximpp.models
 							break;
 					}
 				}
-				
-				var chatRoom:ChatRoom = buddy as ChatRoom;
-				if(chatRoom)
-				{
-					if(xmpp.connected)
-						xmpp.joinChatRoom(chatRoom.jid, chatRoom.ourNickname, chatRoom.password);
-					else
-						return null;
-				}
-				
 				
 				chat = new Chat(buddy);
 				database.loadMessages(chat, !select);

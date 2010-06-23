@@ -66,6 +66,10 @@ package com.cleartext.ximpp.views.buddies
 				function():void
 				{
 					chats.getChat(buddy, true);
+					
+					var chatRoom:ChatRoom = buddy as ChatRoom;
+					if(chatRoom && xmpp.connected && chatRoom.status.isOffline())
+						xmpp.joinChatRoom(chatRoom.jid, chatRoom.ourNickname, chatRoom.password);
 				});
 			addEventListener(MouseEvent.ROLL_OUT,
 				function():void

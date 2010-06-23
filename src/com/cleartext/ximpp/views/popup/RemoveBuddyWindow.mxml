@@ -8,6 +8,9 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import com.cleartext.ximpp.models.ChatRoomModel;
+			import com.cleartext.ximpp.models.valueObjects.ChatRoom;
+			import com.cleartext.ximpp.models.BuddyModel;
 			import com.cleartext.ximpp.models.valueObjects.IBuddy;
 			import com.cleartext.ximpp.models.ChatModel;
 			import com.cleartext.ximpp.models.types.SubscriptionTypes;
@@ -19,12 +22,33 @@
 			public var buddy:IBuddy;
 
 			[Autowire]
-			[Bindable]
 			public var xmpp:XMPPModel;
+			
+			[Autowire]
+			public var buddies:BuddyModel;
+			
+			[Autowire]
+			public var chatRooms:ChatRoomModel;
+			
+			[Autowire]
+			public var chats:ChatModel;
 			
 			override protected function submit(event:Event):void
 			{
-				xmpp.removeFromRoster(buddy.jid)
+				if(buddy is Buddy)
+				{
+					xmpp.removeFromRoster(buddy.jid);
+				}
+				else
+				{
+					if(buddy is ChatRoom)
+					{
+						chatRooms.leave(buddy as ChatRoom);
+					}
+					buddies.removeBuddy(buddy);
+					chats.removeChat(buddy);
+				}
+				
 				closeWindow();
 			}
 			

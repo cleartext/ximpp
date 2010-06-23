@@ -407,12 +407,31 @@ package com.cleartext.ximpp.models
 			{
 				try
 				{
-					var jid:String = stanza.getXML().mucUser::x[0].mucUser::item[0].@jid;
-					var index:int = jid.indexOf("/");
-					if(index != -1)
-						jid = jid.substr(0,index);
+					var x:Object = stanza.getXML().mucUser::x[0];
+					
+					if(x)
+					{
+						// if status code is 201, then send an iq telling the server
+						// to create the room with default settings
+						var status:Object = x.mucUser::status;
+						if(status && status[0] && status[0].@code=='201')
+						{
+							sendIq(fromJid,
+								IQTypes.SET,
+								<query xmlns={MUC_OWNER_NS}><x xmlns={JABBER_DATA_NS} type="submit" /></query>,
+								createDefaultChatRoomHandler,
+								chatRoom);
+							return;
+						}
+	
+						var jid:String = x.mucUser::item[0].@jid;
+						var index:int = jid.indexOf("/");
+						if(index != -1)
+							jid = jid.substr(0,index);
 						
-					chatRoom.setPresence(jid, stanza.type, stanza.from.resource);
+						
+						chatRoom.setPresence(jid, stanza.type, stanza.from.resource, "");
+					}
 				}
 				catch(e:Error)
 				{
@@ -932,6 +951,21 @@ package com.cleartext.ximpp.models
 		public function leaveChatRoom(roomJid:String, nickname:String):void
 		{
 			xmpp.send('<presence type="unavailable" to="' + roomJid + "/" + nickname +'" />');
+		}
+		
+		//-------------------------------
+		// CREATE DEFAULT CHAT ROOM
+		//-------------------------------
+		
+		private function createDefaultChatRoomHandler(stanza:IqStanza):void
+		{
+			var id:String = stanza.id;
+			if(iqVariables.hasOwnProperty(id))
+			{
+				var chatRoom:ChatRoom = iqVariables[id] as ChatRoom;
+				chatRoom.status.value = Status.AVAILABLE;
+				chats.getChat(chatRoom, true);
+			}
 		}
 		
 		//------------------------------------------------------------------

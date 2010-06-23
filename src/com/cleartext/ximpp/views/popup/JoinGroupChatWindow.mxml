@@ -37,7 +37,7 @@
 			{
 				if(!isValid)
 					return;
-
+				
 				chatRooms.join(room.text + "@" + host.text, nickname.text, password.text);
 				closeWindow();
 			}

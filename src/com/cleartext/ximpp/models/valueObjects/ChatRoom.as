@@ -1,8 +1,12 @@
 package com.cleartext.ximpp.models.valueObjects
 {
+	import com.cleartext.ximpp.events.ChatEvent;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	
+	import org.swizframework.Swiz;
 	
 	public class ChatRoom extends BuddyBase
 	{
@@ -23,6 +27,18 @@ package com.cleartext.ximpp.models.valueObjects
 		public function setPresence(jid:String, statusType:String, nickname:String, oldNickname:String=""):void
 		{
 			var participant:ChatRoomParticipant;
+			
+			if(nickname == ourNickname)
+			{
+				status.setFromStanzaType(statusType);
+				
+				if(!status.isOffline())
+				{
+					Swiz.dispatchEvent(new ChatEvent(ChatEvent.OPEN_ME, null, -1, true, this)); 
+				}
+				return;
+			}
+			
 			for each(participant in participants)
 			{
 				if((oldNickname && participant.nickname == oldNickname) ||

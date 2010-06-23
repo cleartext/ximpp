@@ -16,8 +16,6 @@ package com.cleartext.ximpp.models
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
-	
-	import org.swizframework.Swiz;
 
 	public class BuddyModel extends EventDispatcher
 	{
@@ -140,15 +138,19 @@ package com.cleartext.ximpp.models
 			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				return;
 			
-			var index:int = buddies.list.getItemIndex(buddy);
-			if(index != -1)
+			for(var i:int=buddies.source.length-1; i>=0; i--)
 			{
-				database.removeBuddy(buddy);
-				buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
-				buddies.list.removeItemAt(index);
-				delete buddiesByJid[buddy.jid];
+				if(buddy == buddies.source[i])
+				{
+					database.removeBuddy(buddy);
+					buddies.source.splice(i,1);
+
+					buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
+					delete buddiesByJid[buddy.jid];
+					refresh();
+					break;
+				}
 			}
-			refresh();
 		}
 
 		public function getBuddyByJid(jid:String):IBuddy
