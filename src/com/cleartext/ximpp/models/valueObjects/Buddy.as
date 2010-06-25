@@ -36,7 +36,7 @@ package com.cleartext.ximpp.models.valueObjects
 			{name: "openTab", type: "BOOLEAN"},
 			{name: "autoOpenTab", type: "BOOLEAN", defaultVal: "TRUE"},
 			{name: "unreadMessages", type: "INTEGER"},
-			{name: "buddyType", type: "TEXT", defaultVal: "rosterItem"}
+			{name: "buddyType", type: "TEXT", defaultVal: "'rosterItem'"}
 		];
 		
 		//----------------------------------------

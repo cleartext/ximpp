@@ -165,7 +165,7 @@ package com.cleartext.ximpp.models
 
 		private function buddyFilter(buddy:IBuddy):Boolean
 		{
-			if(!settings.global.showOfflineBuddies && buddy.status.isOffline())
+			if(!settings.global.showOfflineBuddies && buddy.status.isOffline() && !(buddy is ChatRoom) && !(buddy is Group))
 				return false;
 			
 			if(searchString != "" && 
