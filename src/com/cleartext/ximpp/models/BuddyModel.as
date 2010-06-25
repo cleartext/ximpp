@@ -33,7 +33,7 @@ package com.cleartext.ximpp.models
 		public static const ALL_BUDDIES_GROUP:String = "All Buddies";
 		public static const OPEN_TABS:String = "Open Tabs";
 		public static const UNASIGNED:String = "No Group";
-		public static const CHAT_ROOMS:String = "Group Chat";
+		public static const CHAT_ROOMS:String = "Group Chats";
 		
 		private var buddiesByJid:Dictionary;
 

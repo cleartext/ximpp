@@ -238,7 +238,7 @@
 					addCanvas.setStyle("backgroundColor", 0xffffff);
 					addCanvas.setStyle("borderColor", 0x898989);
 					addCanvas.setStyle("borderStyle", "solid");
-					for each(var label:String in ["Add buddy", "Add gateway", "Add group", "Join conference chat"])
+					for each(var label:String in ["Add buddy", "Add gateway", "Add group", "Join group chat"])
 					{
 						var btn:LinkButton = new LinkButton();
 						btn.label = label;

@@ -8,7 +8,7 @@ package com.cleartext.ximpp.models.valueObjects
 	import mx.collections.ArrayCollection;
 	import mx.utils.UIDUtil;
 
-	public class BuddyBase extends HasAvatarBase implements IBuddy
+	public class BuddyBase extends HasAvatarBase implements IBuddy, IHasStatus
 	{
 		//----------------------------------------
 		//  CONSTRUCTOR
@@ -272,6 +272,11 @@ package com.cleartext.ximpp.models.valueObjects
 		public function get status():Status
 		{
 			return _status;
+		}
+		public function setStatus(value:String):void
+		{
+			status.setFromStanzaType(value);
+			dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 		}
 			
 		//----------------------------------------

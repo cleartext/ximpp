@@ -90,6 +90,12 @@ package com.cleartext.ximpp.models
 					}
 				}
 				
+				
+				if((buddy is ChatRoom) && !appModel.xmpp.connected)
+				{
+					return null;
+				}
+
 				chat = new Chat(buddy);
 				database.loadMessages(chat, !select);
 				var index:int = 0;
@@ -139,7 +145,6 @@ package com.cleartext.ximpp.models
 			chats.splice(i, 1);
 			delete chatsByJid[buddy.jid];
 
-
 			if(chat == selectedChat)
 			{
 				if(chats.length == 0)
@@ -150,7 +155,9 @@ package com.cleartext.ximpp.models
 			dispatchEvent(new ChatEvent(ChatEvent.REMOVE_CHAT, chat, i));
 			
 			if(buddy is ChatRoom)
+			{
 				appModel.chatRooms.leave(buddy as ChatRoom);
+			}
 		}
 		
 		public function addMessage(buddy:IBuddy, message:Message):void

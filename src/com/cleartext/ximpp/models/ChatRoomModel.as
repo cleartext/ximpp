@@ -52,6 +52,8 @@ package com.cleartext.ximpp.models
 		{
 			if(!chatRoom.status.isOffline())
 				xmpp.leaveChatRoom(chatRoom.jid, chatRoom.ourNickname);
+
+			chatRoom.participants.removeAll();
 		}
 	}
 }

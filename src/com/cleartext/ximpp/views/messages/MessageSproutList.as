@@ -3,6 +3,7 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.models.BuddyModel;
 	import com.cleartext.ximpp.models.valueObjects.Buddy;
 	import com.cleartext.ximpp.models.valueObjects.Chat;
+	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.universalsprout.flex.components.list.ISproutListData;
@@ -59,11 +60,12 @@ package com.cleartext.ximpp.views.messages
 				else
 					messageList.itemRenderer = new ClassFactory(ChatRenderer);
 					
-				if(chat.buddy.participants)
+				if(chat.buddy is ChatRoom)
 				{
 					if(!participantList)
 					{
 						participantList = new List();
+						participantList.itemRenderer = new ClassFactory(ChatRoomParticipantRenderer);
 						participantList.selectable = false;
 						participantList.setStyle("borderStyle", "none");
 						participantList.percentHeight = 100;
@@ -88,6 +90,7 @@ package com.cleartext.ximpp.views.messages
 			messageList = new SproutList();
 			messageList.percentWidth = 100;
 			messageList.percentHeight = 100;
+			messageList.verticalScrollPolicy = "on";
 		}
 		
 		public function set animate(value:Boolean):void

@@ -96,6 +96,6 @@
 	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}" showEditButton="false"/>
 	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" icon="{Constants.Gateways}" showEditButton="false"/>
 	<common:SideButton text="{BuddyModel.UNASIGNED}" click="clickHandler(event)" icon="{Constants.NoGroup}" showEditButton="false"/>
-	<common:SideButton text="{BuddyModel.CHAT_ROOMS}" click="clickHandler(event)" icon="{Constants.NoGroup}" showEditButton="false"/>
+	<common:SideButton text="{BuddyModel.CHAT_ROOMS}" click="clickHandler(event)" icon="{Constants.DefaultGroupIcon}" showEditButton="false"/>
 
 </mx:VBox>
