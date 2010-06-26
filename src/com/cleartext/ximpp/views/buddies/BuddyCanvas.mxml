@@ -278,7 +278,7 @@
 					case "Add group" :
 						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_GROUP_WINDOW))
 						break;
-					case "Join conference chat" :
+					case "Join group chat" :
 						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.JOIN_GROUP_CHAT))
 						break;
 				}
