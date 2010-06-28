@@ -5,7 +5,7 @@ package com.cleartext.ximpp.models.valueObjects
 	import mx.collections.ArrayCollection;
 	
 	[Bindable]
-	public interface IBuddy extends IHasAvatar, ISproutListData
+	public interface IBuddy extends IHasAvatar, ISproutListData, IHasStatus, IHasJid
 	{
 		// storred in database
 		
@@ -39,8 +39,6 @@ package com.cleartext.ximpp.models.valueObjects
 		
 		function get tempAvatarHash():String;
 		function set tempAvatarHash(value:String):void;
-
-		function get status():Status;
 		
 		function get participants():ArrayCollection;
 		

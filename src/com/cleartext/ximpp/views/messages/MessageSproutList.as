@@ -5,6 +5,7 @@ package com.cleartext.ximpp.views.messages
 	import com.cleartext.ximpp.models.valueObjects.Chat;
 	import com.cleartext.ximpp.models.valueObjects.ChatRoom;
 	import com.cleartext.ximpp.models.valueObjects.GlobalSettings;
+	import com.cleartext.ximpp.models.valueObjects.Group;
 	import com.cleartext.ximpp.models.valueObjects.Message;
 	import com.universalsprout.flex.components.list.ISproutListData;
 	import com.universalsprout.flex.components.list.SproutList;
@@ -60,7 +61,7 @@ package com.cleartext.ximpp.views.messages
 				else
 					messageList.itemRenderer = new ClassFactory(ChatRenderer);
 					
-				if(chat.buddy is ChatRoom)
+				if(chat.buddy is ChatRoom || chat.buddy is Group)
 				{
 					if(!participantList)
 					{

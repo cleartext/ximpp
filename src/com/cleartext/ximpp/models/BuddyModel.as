@@ -218,13 +218,13 @@ package com.cleartext.ximpp.models
 					var unreadCompare:int = clamp(buddy2.unreadMessages - buddy1.unreadMessages);
 					if(unreadCompare != 0)
 						return unreadCompare;
-					var sCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());
+					var sCompare:int = clamp(buddy1.statusSortIndex - buddy2.statusSortIndex);
 					if(sCompare != 0)
 						return sCompare;
 					return clamp(buddy1.nickname.localeCompare(buddy2.nickname));
 
 				case BuddySortTypes.STATUS :
-					var statusCompare:int = clamp(buddy1.status.sortNumber() - buddy2.status.sortNumber());
+					var statusCompare:int = clamp(buddy1.statusSortIndex - buddy2.statusSortIndex);
 					if(statusCompare != 0)
 						return statusCompare;
 					return clamp(buddy1.nickname.localeCompare(buddy2.nickname));

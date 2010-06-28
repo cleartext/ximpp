@@ -243,16 +243,6 @@ package com.cleartext.ximpp.models
 			var newBuddy:IBuddy;
 			switch(type)
 			{
-				case "rosterItem" :
-					var buddy:Buddy = new Buddy(obj["jid"]);
-					var groups:Array = (obj["groups"] as String).split(",");
-					if(groups.length == 1 && groups[0] == "")
-						groups = [];
-					buddy.groups = groups;
-					buddy.sendTo = obj["sendTo"];
-					buddy.subscription = obj["subscription"];
-					newBuddy = buddy;
-					break;
 				case "group" :
 					var group:Group = new Group(obj["jid"]);
 					group.refresh(buddies);
@@ -266,8 +256,15 @@ package com.cleartext.ximpp.models
 					newBuddy = chatRoom;
 					break;
 				default :
-					throw new Error("Can not create new buddy");
-					return;
+					var buddy:Buddy = new Buddy(obj["jid"]);
+					var groups:Array = (obj["groups"] as String).split(",");
+					if(groups.length == 1 && groups[0] == "")
+						groups = [];
+					buddy.groups = groups;
+					buddy.sendTo = obj["sendTo"];
+					buddy.subscription = obj["subscription"];
+					newBuddy = buddy;
+					break;
 			}
 			
 			newBuddy.buddyId = obj["buddyId"];

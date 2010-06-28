@@ -4,7 +4,7 @@ package com.cleartext.ximpp.models.valueObjects
 	
 	import flash.events.EventDispatcher;
 	
-	public class ChatRoomParticipant extends EventDispatcher implements IHasStatus
+	public class ChatRoomParticipant extends EventDispatcher implements IHasStatus, IHasJid
 	{
 		private var _nickname:String;
 		[Bindable(event="changeSave")]
@@ -45,6 +45,15 @@ package com.cleartext.ximpp.models.valueObjects
 		{
 			_status.setFromStanzaType(value);
 			dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
+		}
+		
+		//----------------------------------------
+		//  STATUS SORT INDEX
+		//----------------------------------------
+		
+		public function get statusSortIndex():int
+		{
+			return status.sortNumber();
 		}
 		
 		public var affiliation:String;

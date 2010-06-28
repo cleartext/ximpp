@@ -6,12 +6,6 @@ package com.cleartext.ximpp.models.valueObjects
 	[Bindable]
 	public interface IHasAvatar extends IEventDispatcher
 	{
-		function get jid():String;
-		function set jid(value:String):void;
-
-		function get nickname():String
-		function set nickname(value:String):void
-		
 		function get avatar():BitmapData;
 		function set avatar(value:BitmapData):void
 

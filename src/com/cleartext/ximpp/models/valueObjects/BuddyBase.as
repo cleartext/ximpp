@@ -280,6 +280,15 @@ package com.cleartext.ximpp.models.valueObjects
 		}
 			
 		//----------------------------------------
+		//  STATUS SORT INDEX
+		//----------------------------------------
+		
+		public function get statusSortIndex():int
+		{
+			return status.sortNumber();
+		}
+		
+		//----------------------------------------
 		//  PARTICIPANTS
 		//----------------------------------------
 		

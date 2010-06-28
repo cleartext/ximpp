@@ -1,6 +1,7 @@
 package com.cleartext.ximpp.views.messages
 {
 	import com.cleartext.ximpp.events.HasAvatarEvent;
+	import com.cleartext.ximpp.models.valueObjects.IHasJid;
 	import com.cleartext.ximpp.models.valueObjects.IHasStatus;
 	import com.cleartext.ximpp.views.common.StatusIcon;
 	import com.universalsprout.flex.components.list.IDisposable;
@@ -45,13 +46,13 @@ package com.cleartext.ximpp.views.messages
 				return;
 
 			if(participant)
-				participant.removeEventListener(HasAvatarEvent.CHANGE_DISPLAY, participantChangedHandler);
+				participant.removeEventListener(HasAvatarEvent.CHANGE_SAVE, participantChangedHandler);
 			
 			_data = value;
 
 			if(participant)
 			{
-				participant.addEventListener(HasAvatarEvent.CHANGE_DISPLAY, participantChangedHandler);
+				participant.addEventListener(HasAvatarEvent.CHANGE_SAVE, participantChangedHandler);
 			}
 			
 			participantChangedHandler(null);
@@ -94,14 +95,15 @@ package com.cleartext.ximpp.views.messages
 				return;
 	
 			// set values
-			nameLabel.text = participant.nickname;
-			
+			nameLabel.text = (participant as IHasJid).nickname;
 			statusIcon.status.value = participant.status.value;
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
+			
+			nameLabel.width = unscaledWidth - 40;
 			
 			var g:Graphics = graphics;
 			g.clear();
