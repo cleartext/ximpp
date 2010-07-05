@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.esm.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Add Buddy"
+	submitButtonLabel="add"
+	>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.seesmic.as3.xmpp.JID;
+			import mx.controls.CheckBox;
+			import mx.collections.ArrayCollection;
+			import com.cleartext.esm.models.types.SubscriptionTypes;
+			import mx.events.FlexEvent;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.BuddyModel;
+			import mx.events.CloseEvent;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.DatabaseModel;
+			import com.cleartext.esm.models.SettingsModel;
+			import com.cleartext.esm.models.ApplicationModel;
+
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			override protected function init(event:FlexEvent):void
+			{
+				list.dataProvider = wrapArray(buddies.groups.toArray());
+			}
+			
+			override protected function submit(event:Event):void
+			{
+				xmpp.addToRoster(newJid.text, nickname.text, getSelected(list));
+				closeWindow();
+			}
+			
+			override protected function validateForm():void
+			{
+				isValid = newJid.text != "";
+			}
+			
+		]]>
+	</mx:Script>
+	
+    <mx:Form>
+		<mx:FormItem label="buddy id:">
+			<mx:VBox>
+				<mx:TextInput id="newJid" change="validateInput(event, 'jid can not be empty')" focusOut="validateInput(event, 'jid can not be empty')"/>
+			</mx:VBox>
+		</mx:FormItem>
+
+		<mx:FormItem label="nickname:">
+			<mx:TextInput id="nickname" />
+		</mx:FormItem>
+
+		<mx:FormItem label="groups:">
+			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox focusEnabled="false" change="data.selected = !data.selected"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:List>
+		</mx:FormItem>
+
+    </mx:Form>
+
+	<mx:ControlBar/>
+	
+</popup:PopupWindowBase>

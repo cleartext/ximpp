@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.esm.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Subscription Request"
+	submitButtonLabel="ok"
+	isValid="true">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.charts.BubbleChart;
+			import flash.sampler.NewObjectSample;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.types.SubscriptionTypes;
+			import mx.events.CloseEvent;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.DatabaseModel;
+			import com.cleartext.esm.models.SettingsModel;
+			import com.cleartext.esm.models.ApplicationModel;
+
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			override protected function submit(event:Event):void
+			{
+				if(buddies.containsJid(buddy.jid))
+				{
+					buddy.nickname = nickname.text;
+					buddies.addBuddy(buddy);
+					buddies.refresh();
+					
+					xmpp.modifyRosterItem(buddy);
+				}
+				else if(addUser.selected)
+				{
+					xmpp.addToRoster(buddy.jid, nickname.text, null);
+				}
+				
+//				if(subscriptionPanel.publishYes.selected)
+//					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
+//				else
+//					xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.UNSUBSCRIBED);
+				
+				closeWindow();
+			}
+			
+			private var _buddy:Buddy;
+			public function get buddy():Buddy
+			{
+				return _buddy;
+			}
+			public function set buddy(value:Buddy):void
+			{
+				_buddy = value;
+				
+				labelText.text= buddy.nickname + ' wants to know when you are online.';
+
+				nickname.text = buddy.nickname;
+				
+				addUserItem.visible = addUserItem.includeInLayout = !buddies.containsJid(buddy.jid);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Form>
+		<mx:Text id="labelText" />
+		
+		<mx:FormItem label="nickname:">
+			<mx:TextInput id="nickname"/>
+		</mx:FormItem>
+
+		<mx:FormItem id="addUserItem" >
+			<mx:CheckBox id="addUser" selected="true" label="add to buddy list?" />
+		</mx:FormItem>
+		
+	</mx:Form>
+	
+	<mx:ControlBar />
+
+</popup:PopupWindowBase>

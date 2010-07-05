@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:FormItem xmlns:mx="http://www.adobe.com/2006/mxml" label="subscription:" >
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.types.SubscriptionTypes;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			
+			[Bindable]
+			[Autowire]
+			public var xmpp:XMPPModel;
+			
+			[Bindable]
+			[Inspectable]
+			public var showSubscribe:Boolean = true;
+			
+			[Bindable]
+			[Inspectable]
+			public var showPublish:Boolean = true;
+			
+			public var autoSend:Boolean = true;
+			
+			private var _buddy:Buddy;
+			public function get buddy():Buddy
+			{
+				return _buddy
+			}
+			public function set buddy(value:Buddy):void
+			{
+				_buddy = value;
+				
+				if(buddy.subscribedTo)
+					subscribeYes.selected = true;
+				else
+					subscribeNo.selected = true;
+				
+				if(buddy.publishTo)
+					publishYes.selected = true;
+				else
+					publishNo.selected = true;
+
+				subscribeLabel.text = "ask to see when " + buddy.nickname + " is online"; 
+				publishLabel.text = "allow " + buddy.nickname + " to see when you are online";
+				
+				
+			}
+			
+			private function subscribeChangeHandler():void
+			{
+				if(!autoSend)
+					return;
+
+				subscribe.enabled = false;
+				subscribeLabel.text = "subscirption message sent";
+				xmpp.sendSubscribe(buddy.jid, (subscribeYes.selected) ? SubscriptionTypes.SUBSCRIBE : SubscriptionTypes.UNSUBSCRIBE);
+			}
+			
+			private function publishChangeHandler():void
+			{
+				if(!autoSend)
+					return;
+
+				publish.enabled = false;
+				publishLabel.text = "publish message sent";
+				xmpp.sendSubscribe(buddy.jid, (publishYes.selected) ? SubscriptionTypes.SUBSCRIBED : SubscriptionTypes.UNSUBSCRIBED);
+			}
+			
+		]]>
+
+	</mx:Script>
+
+	<mx:HBox includeInLayout="{showSubscribe}" visible="{showSubscribe}">
+		<mx:RadioButtonGroup id="subscribe" change="subscribeChangeHandler()"/>
+		<mx:RadioButton id="subscribeYes" label="yes" groupName="subscribe" paddingTop="0"/>
+		<mx:RadioButton id="subscribeNo" label="no"  groupName="subscribe" paddingTop="0"/>
+		<mx:Text id="subscribeLabel" text="ask to see when they are online" width="255" />
+	</mx:HBox>
+	<mx:HBox includeInLayout="{showPublish}" visible="{showPublish}">
+		<mx:RadioButtonGroup id="publish" change="publishChangeHandler()"/>
+		<mx:RadioButton id="publishYes" label="yes" groupName="publish" paddingTop="0"/>
+		<mx:RadioButton id="publishNo" label="no"  groupName="publish" paddingTop="0"/>
+		<mx:Text id="publishLabel" text="allow them to see when you are online" width="255" />
+	</mx:HBox>
+
+</mx:FormItem>

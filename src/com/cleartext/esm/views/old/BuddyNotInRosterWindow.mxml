@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.esm.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Buddy Not In Buddy List"
+	submitButtonLabel="Add Buddy"
+	isValid="true">
+	
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.esm.models.valueObjects.Message;
+			import flash.sampler.NewObjectSample;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.types.SubscriptionTypes;
+			import mx.events.CloseEvent;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.DatabaseModel;
+			import com.cleartext.esm.models.SettingsModel;
+			import com.cleartext.esm.models.ApplicationModel;
+
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			override protected function submit(event:Event):void
+			{
+				xmpp.addToRoster(jid, nickname.text, getSelected(list));
+				closeWindow();
+			}
+			
+			private var _jid:String;
+			public function get jid():String
+			{
+				return _jid;
+			}
+			public function set jid(value:String):void
+			{
+				_jid = value;
+				invalidateProperties();
+			}
+			
+			private var _messageString:String;
+			public function get messageString():String
+			{
+				return _messageString;
+			}
+			public function set messageString(value:String):void
+			{
+				_messageString = value;
+				invalidateProperties();
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if(messageString)
+				{
+					explanationText.text = "You have received a presence stanza from " + 
+						jid + " of type " + messageString + ", do you want to add them to your buddy list?";
+				}
+				else
+				{
+					explanationText.text = "You have received a message from " + 
+						jid + ", do you want to add them to your buddy list?";
+				}
+
+				jidLabel.text = jid;
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Form>
+
+		<mx:Text id="explanationText"  width="450"/>
+		
+		<mx:FormItem label="jid:">
+			<mx:Label id="jidLabel" />
+		</mx:FormItem>
+
+		<mx:FormItem label="nickname:">
+			<mx:TextInput id="nickname" />
+		</mx:FormItem>
+
+		<mx:FormItem label="groups:">
+			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox focusEnabled="false" change="data.selected = !data.selected"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:List>
+		</mx:FormItem>
+
+	</mx:Form>
+	
+	<mx:ControlBar />
+
+</popup:PopupWindowBase>

@@ -183,7 +183,7 @@ package com.universalsprout.flex.components.list
 
 			for each(item in itemRenderersByDataUid)
 			{
-				if(item.visible && !collection.contains(item.data));
+				if(item.visible && !collection.contains(item.data))
 				{
 					item.setVisible(false, true);
 					item.setIncludeInLayout(false, true);

@@ -122,6 +122,9 @@ package com.universalsprout.flex.components.list
 		
 		public function dispose():void
 		{
+			if(data && data is IEventDispatcher)
+				(data as IEventDispatcher).removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, dataChangedHandler);
+			
 //			removeEventListener(Event.REMOVED_FROM_STAGE, removeFromStageHandler);
 //			(data as ISproutListData).removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, dataChangedHandler);
 		}

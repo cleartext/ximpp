@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				windowComplete="windowCompleteHandler()"
+				autoExit="true"
+				xmlns:swiz="http://swiz.swizframework.org"
+				showStatusBar="false" 
+				xmlns:views="com.cleartext.esm.views.*"
+				>
+	<fx:Script>
+		<![CDATA[
+		import mx.managers.PopUpManagerChildList;
+		import mx.containers.Canvas;
+		import mx.managers.LayoutManager;
+		import mx.rpc.soap.LoadEvent;
+		import com.cleartext.esm.events.LoadingEvent;
+		import mx.controls.ProgressBarMode;
+		import mx.controls.ProgressBar;
+		import flash.utils.getTimer;
+		import mx.events.FlexEvent;
+		import mx.managers.PopUpManager;
+		import mx.containers.Panel;
+		import flash.utils.setTimeout;
+		import mx.core.Application;
+		import mx.controls.Alert;
+		import mx.events.CloseEvent;
+		import com.cleartext.esm.assets.Constants;
+		import mx.managers.ToolTipManager;
+		
+		private function windowCompleteHandler():void
+		{
+			progressBar.setProgress(0.75, 4);
+			ToolTipManager.showDelay=100;
+			nativeApplication.addEventListener(Event.EXITING, exitHandler);
+			
+			mainView.appModel.addEventListener(LoadingEvent.BUDDIES_LOADING, progressHandler);
+			mainView.appModel.addEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
+			mainView.appModel.addEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
+			mainView.appModel.addEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
+			mainView.appModel.init();
+			panel.setStyle("borderColor", mainView.soundColor.backgroundColor);
+		}
+		
+		private function progressHandler(event:LoadingEvent):void
+		{
+			switch(event.type)
+			{
+				case LoadingEvent.BUDDIES_LOADING:
+					progressBar.label = "Loading Buddies";
+					progressBar.setProgress(1 + event.loaded/event.total, 4);
+					break;
+				case LoadingEvent.WORKSTREAM_LOADING:
+					progressBar.label = "Loading Workstream";
+					if(event.total > 0)
+						progressBar.setProgress(2 + event.loaded/event.total, 4);
+					break;
+				case LoadingEvent.CHATS_LOADING:
+					progressBar.label = "Loading Open Chats";
+					progressBar.setProgress(3 + event.loaded/event.total, 4);
+					break;
+			}
+		}
+		
+		private function initCompleteHandler(event:LoadingEvent):void
+		{
+			mainView.appModel.removeEventListener(LoadingEvent.BUDDIES_LOADING, progressHandler);
+			mainView.appModel.removeEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
+			mainView.appModel.removeEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
+			mainView.appModel.removeEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
+			
+			removeElement(modalScreen);
+		}
+		
+		private function exitHandler(event:Event):void
+		{
+			mainView.appModel.shutDown();
+		}
+		
+		]]>
+	</fx:Script>
+	
+<fx:Declarations>
+	<swiz:SwizConfig
+		strict="true"
+		mediateBubbledEvents="true"
+		eventPackages="com.cleartext.esm.events"
+		viewPackages="com.cleartext.esm.views"
+		injectionEvent="preinitialize"
+		beanLoaders="{[Beans]}" />
+</fx:Declarations>
+
+	<fx:Style source="com/cleartext/esm/css/defaultStyles.css"/>
+	<fx:Style source="com/cleartext/esm/css/scrollSkins.css"/>
+	
+	<views:MainView id="mainView"/>
+
+	<mx:Canvas id="modalScreen" 
+			   backgroundAlpha="0.5" backgroundColor="0x666666" 
+			   width="100%" height="100%">
+		<mx:Panel 
+			id="panel" 
+			width="300" height="100" 
+			layout="absolute" 
+			title="Initialising" 
+			titleStyleName="whiteBoldBig"
+			borderAlpha="0.8"
+			horizontalCenter="0" verticalCenter="0">
+			<mx:ProgressBar 
+				id="progressBar" 
+				horizontalCenter="0" verticalCenter="0" 
+				mode="manual" label="Initialising Database"/>
+		</mx:Panel>
+	</mx:Canvas>
+	
+</s:WindowedApplication>

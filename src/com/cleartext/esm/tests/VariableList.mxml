@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:list="com.universalsprout.flex.components.list.*" creationComplete="init()" xmlns:listTest="listTest.*" backgroundColor="0xffffff">
+	<mx:Script>
+		<![CDATA[
+			import org.swizframework.util.TemplateUtil;
+			import com.cleartext.esm.views.messages.MicroBloggingRenderer;
+			import com.cleartext.esm.models.valueObjects.Message;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.views.buddies.BuddyRenderer;
+			import com.cleartext.esm.models.valueObjects.Status;
+			import flash.utils.getTimer;
+			import mx.collections.Sort;
+			import mx.utils.ObjectUtil;
+			import mx.utils.StringUtil;
+			import mx.collections.ArrayCollection;
+
+			private var maxMessages:Number = 10000;
+
+			[Bindable]
+			private var buddyData:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var messageData:ArrayCollection = new ArrayCollection();
+		
+			private var timer:Timer = new Timer(3000);
+		
+			private function sortFunction(buddy1:Buddy, buddy2:Buddy, fields:Object=null):int
+			{
+				var nameCompare:int = ObjectUtil.compare(buddy1.nickname, buddy2.nickname);
+				
+				if(buddy1.status.value == buddy2.status.value)
+					return nameCompare;
+				
+				return buddy1.status.sortNumber() - buddy2.status.sortNumber();
+			}
+		
+			private function populate():void
+			{
+		
+				for(var i:int=0; i<100; i++)
+				{
+					var b:Buddy = new Buddy("testJid@test.com");
+					b.nickname = (i + " " + randomString(4,8) + "@" + randomString(4,8) + ".com");
+					buddyData.addItem(b);
+					
+					var message:Message = new Message();
+					message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
+					message.displayMessage = randomString(10,140,4);
+					messageData.addItem(message);
+				}
+				
+			}
+			
+			private function trim():void
+			{
+				for(var i:int=0; i<100; i++)
+				{
+					if(buddyData.length > 0)
+						buddyData.removeItemAt(Math.floor(buddyData.length/2));
+					if(messageData.length > 0)
+						messageData.removeItemAt(Math.floor(messageData.length/2));
+				}
+			}
+			
+			private function resort():void
+			{
+				messageData.refresh();
+			}
+			
+			private function messageFilter(message:Message):Boolean
+			{
+				return message.displayMessage.indexOf(seachText.text) != -1;
+			}
+		
+			private function init():void
+			{
+				var sort:Sort = new Sort();
+				sort.compareFunction = sortFunction;
+				buddyData.sort = sort;
+				
+				buddyData.refresh();
+				
+				messageData.filterFunction = messageFilter;
+
+				populate();		
+
+				timer.addEventListener(TimerEvent.TIMER,
+					function():void
+					{
+						for each(var buddy:Buddy in buddyData)
+						{
+							var index:int = Math.random() * Status.USER_TYPES.length;
+							buddy.status.value = Status.USER_TYPES[index];
+							buddy.status.numUnread = Math.round(Math.random() * 300);
+							buddy.customStatus = ((buddy.status.value == Status.OFFLINE) ? "" : randomString(5, 100, 4));
+						}
+						
+						var message:Message = new Message();
+						message.sender = randomString(4,8) + "@" + randomString(4,8) + ".com";
+						message.displayMessage = randomString(40,140,4);
+						messageData.addItemAt(message,0);
+						
+						if(messageData.length > maxMessages+1)
+						{
+							while(messageData.length > maxMessages)
+								messageData.removeItemAt(0);
+						}
+						
+						buddyData.refresh();
+						
+					});
+				timer.start();
+			}
+
+			public static function randomString(minLength:int, maxLength:int, caseStyle:int=0):String
+			{
+				/*
+				 * 0 lowercase
+				 * 1 uppercase
+				 * 2 title case
+				 * 3 sentence case
+				 * 4 prose
+				 */
+				var upperCaseLetters:Array = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ").split("");
+				var lowerCaseLetters:Array = ("abcdefghijklmnopqrstuvwxyz").split("");
+				var fullStop:String = ". ";
+				var comma:String = ", ";
+				var space:String = " ";
+				var maxWordLength:int = 9;
+	
+				var length:int = Math.round(Math.random() * (maxLength-minLength) + minLength);
+				var result:String = "";
+				var char:String = space;
+				var wordLength:int=0;
+				for(var i:int=0; i<length; i++)
+				{
+					if((char == space && caseStyle==2) || char == fullStop)
+					{
+						char = randomItem(upperCaseLetters) as String;
+						wordLength++;
+					}
+					else
+					{
+						var random:Number = Math.random();
+						if(wordLength <= 2)
+						{
+							random += wordLength*0.04;
+						}
+	
+						if(caseStyle >= 2 &&
+							((wordLength > maxWordLength) || 
+							(random < 0.15 && char != fullStop && char != space && char != comma)))
+						{
+							if(caseStyle == 4 && random < 0.01 && i<length-20 && i>20)
+							{
+								char = fullStop;
+								i++;
+							}
+							else if(caseStyle == 4 && random < 0.02 && i<length-10 && i>10)
+							{
+								char = comma;
+								i++;
+							}
+							else if(char != space && i<length-4)
+							{
+								char = space;
+							}
+							wordLength = 0;
+						}
+						else
+						{
+							var previousChar:String = char;
+							while(previousChar == char)
+							{
+								char = randomItem(lowerCaseLetters) as String;
+							}
+							wordLength++;
+						}
+					}
+					result += char;
+				}
+				
+				if(caseStyle == 1)
+				{
+					result = result.toUpperCase();
+				}
+				else if(caseStyle >= 3)
+				{
+					result = result.slice(1,-1);
+					result = (randomItem(upperCaseLetters) as String) + result + ".";
+				}
+				return result;
+			}
+			
+			public static function randomItem(array:Array):Object
+			{
+				var index:int = Math.floor(Math.random() * array.length+1)-1;
+				if(index == array.length)
+					index --;
+				return array[index];
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Style>
+@namespace s "library://ns.adobe.com/flex/spark";
+
+.lGreyBold
+{
+	color: #888888;
+	font-weight: bold;
+}
+
+.dGreyBold
+{
+	color: #333333;
+	font-weight: bold;
+}
+
+.blackBold
+{
+	color: #000000;
+	font-weight: bold;
+}
+
+.lGreyNormal
+{
+	color: #888888;
+}		
+
+.dGreyNormal
+{
+	color: #333333;
+}
+
+.blackNormal
+{
+	color: #000000;
+}
+
+	</mx:Style>
+
+	<mx:HBox>
+		<mx:Button label="populate()" click="populate()" />
+		<mx:Button label="trim()" click="trim()" />
+		<mx:Button label="stop()" click="timer.stop()" />
+		<mx:Button label="play()" click="timer.start()" />
+		<mx:CheckBox id="animateCheckBox" label="animate" selected="true" />
+		<mx:TextInput id="seachText" change="resort()" />
+	</mx:HBox>
+		
+	<mx:HDividedBox
+		liveDragging="false"
+		left="10" right="10" top="30" bottom="10">
+		<list:SproutList
+			id="buddies"
+			animate="true"
+			width="100%" height="100%"
+			dataProvider="{buddyData}"
+			itemRenderer="{new ClassFactory(BuddyRenderer)}"/>
+		<list:SproutList
+			id="messages"
+			animate="false"
+			width="100%" height="100%"
+			dataProvider="{messageData}"
+			itemRenderer="{new ClassFactory(MicroBloggingRenderer)}"/>
+		
+	</mx:HDividedBox>
+
+</mx:WindowedApplication>

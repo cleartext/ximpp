@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.esm.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="XML Input"
+	submitButtonLabel="send"
+	isValid="true">
+	
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.esm.models.XMPPModel;
+
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+
+			override protected function submit(event:Event):void
+			{
+				if(xmpp.connected)
+					xmpp.sendXmlString(textArea.text);
+				closeWindow();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label styleName="blackBoldBig" text="Caution, do no use this unless you know what you are doing." />
+	<mx:TextArea width="500" height="300" id="textArea" />
+	
+	<mx:ControlBar />
+
+</popup:PopupWindowBase>

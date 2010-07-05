@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.esm.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="Checking Link"
+	submitButtonLabel="visit link anyway"
+	isValid="true">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import com.cleartext.esm.events.LinkEvent;
+			import com.cleartext.esm.models.WebRootModel;
+			import mx.events.FlexEvent;
+			import com.cleartext.esm.models.utils.LinkUitls;
+			
+			[Autowire]
+			[Bindable]
+			public var webRoot:WebRootModel;
+			
+			[Bindable]
+			public var url:String;
+			
+			private var idCounter:int;
+			
+			override protected function submit(event:Event):void
+			{
+				var request:URLRequest = new URLRequest(url);
+				navigateToURL(request);
+				closeWindow();
+			}
+			
+			override protected function init(event:FlexEvent):void
+			{
+				idCounter = webRoot.checkUrl(url);
+			}
+			
+			[Mediate (event="LinkEvent.LINK_RESULT")]
+			public function linkResultHandler(event:LinkEvent):void
+			{
+				var result:Object = event.result;
+				
+				var success:Boolean = false;
+				if(result.hasOwnProperty("id"))
+				{
+					// this is not the result we are looking for
+					if(result.id != idCounter)
+						return;
+					
+					if(result.hasOwnProperty("redirected_to"))
+					{
+						success = true;
+						idCounter = webRoot.checkUrl(result.redirected_to);
+						textArea.htmlText += "<br/><b>Redirects&nbsp;to:</b>&nbsp;" + result.redirected_to ;
+					}
+					else if(result.hasOwnProperty("reputation"))
+					{
+						if(result.reputation == 0)
+						{
+							submit(null);
+						}
+						else
+						{
+							success = true;
+							textArea.htmlText += "<br/><b>Score: <FONT color='#FF3333'>" + result.reputation + "</FONT></b>";
+							textArea.htmlText += "<br/><b>Category:</b> " + result.url_category;
+						}
+					}
+
+					if(result.hasOwnProperty("malware_category"))
+					{
+						success = true;
+						textArea.htmlText += "<br/><b>Malware Category:</b>&nbsp;" + result.malware_category ;
+					}
+
+					if(result.hasOwnProperty("malware_name"))
+					{
+						success = true;
+						textArea.htmlText += "<br/><b>Malware Name:</b>&nbsp;<FONT color='#FF3333'>" + result.malware_name + "</FONT>";
+					}
+				}
+
+				if(!success)
+					textArea.htmlText += "<br/><FONT color='#FF3333'><b>ERROR:</b></FONT> " + result.toString();
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:Text width="300" height="100%" id="textArea" htmlText="{'&lt;B&gt;' + url + '&lt;/B&gt;&lt;BR/&gt;'}" />
+	
+	<mx:ControlBar/>
+
+</popup:PopupWindowBase>

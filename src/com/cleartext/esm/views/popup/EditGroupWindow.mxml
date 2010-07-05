@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<popup:PopupWindowBase
+	xmlns:popup="com.cleartext.esm.views.popup.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	title="Edit Group"
+	submitButtonLabel="done" >
+	
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.esm.models.valueObjects.IBuddy;
+			import mx.events.FlexEvent;
+			import mx.collections.ArrayCollection;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.BuddyModel;
+			import mx.events.CloseEvent;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.DatabaseModel;
+			import com.cleartext.esm.models.SettingsModel;
+			import com.cleartext.esm.models.ApplicationModel;
+
+			[Autowire]
+			[Bindable]
+			public var xmpp:XMPPModel;
+			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			public var groupName:String;
+			
+			override protected function init(event:FlexEvent):void
+			{
+				groupNameInput.text = groupName;
+				
+				var realPeople:Array = wrapArray(buddies.realPeople);
+
+				for each(var b:Object in realPeople)
+					b.selected = b.data.groups.indexOf(groupName)!=-1;
+
+				list.dataProvider = realPeople;
+			}
+			
+			override protected function submit(event:Event):void
+			{
+				var newGroupName:String = groupNameInput.text;
+				var selectedBuddies:Array = getSelected(list);
+				
+				for each(var b:IBuddy in buddies.buddies.source)
+				{
+					var buddy:Buddy = b as Buddy;
+					if(buddy)
+					{
+						var index:int = buddy.groups.indexOf(groupName);
+						// if the buddy already has the group
+						if(index != -1)
+						{
+							// if we don't want the buddy, remove the group
+							if(selectedBuddies.indexOf(buddy)==-1)
+							{
+								buddy.groups.splice(index, 1);
+								xmpp.modifyRosterItem(buddy);
+							}
+							// if the groupname has changed, then update it
+							else if(newGroupName != groupName)
+							{
+								buddy.groups.splice(index, 1, newGroupName);
+								xmpp.modifyRosterItem(buddy);
+							}
+						}
+						// if the buddy doesn't have the group and it is selected
+						// then add it
+						else if(selectedBuddies.indexOf(buddy)!=-1)
+						{
+							buddy.groups.push(newGroupName);
+							xmpp.modifyRosterItem(buddy);
+						}
+					}
+				}
+				
+				closeWindow();
+			}
+			
+			override protected function validateForm():void
+			{
+				isValid = groupNameInput.text != "" && getSelected(list).length > 0;
+			}
+		]]>
+	</mx:Script>
+	
+	
+    <mx:Form>
+		<mx:FormItem label="Group name:">
+			<mx:VBox>
+				<mx:TextInput id="groupNameInput" change="validateInput(event, 'group name can not be empty')" focusOut="validateInput(event, 'group name can not be empty')"/>
+			</mx:VBox>
+		</mx:FormItem>
+
+		<mx:FormItem label="Buddies:">
+			<mx:List id="list" width="250" labelField="nickname" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
+				click="validateInput(event,'need to select at least one buddy')" focusOut="validateInput(event, 'need to select at least one buddy')">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox focusEnabled="false" selectedField="selected" change="data.selected = !data.selected"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:List>
+		</mx:FormItem>
+		
+    </mx:Form>
+    
+    <mx:ControlBar />
+
+</popup:PopupWindowBase>

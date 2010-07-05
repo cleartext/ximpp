@@ -1,28 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <swiz:BeanLoader
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:mx="library://ns.adobe.com/flex/halo"
 	xmlns:swiz="http://swiz.swizframework.org"
-	xmlns:models="com.cleartext.ximpp.models.*">
+	xmlns:models="com.cleartext.esm.models.*"
+	>
 
-	<models:SoundAndColorModel id="soundColor" />
-
-	<models:SettingsModel id="settings" />
-
-	<models:DatabaseModel id="database" />
-
-	<models:XMPPModel id="xmpp" />
-
-	<models:BuddyModel id="buddies" />
-	
-	<models:MicroBloggingModel id="microBlogging" />
-
-	<models:BuddyRequestModel id="requests" />
-
-	<models:ChatModel id="chats" />
-
-	<models:ChatRoomModel id="chatRooms" />
-
-	<models:WebRootModel id="webroot" />
-
-	<models:ApplicationModel id="appModel" />
+	<fx:Declarations>
+		<models:SoundAndColorModel id="soundColor" />
+		<models:SettingsModel id="settings" />
+		<models:DatabaseModel id="database" />
+		<models:XMPPModel id="xmpp" />
+		<models:BuddyModel id="buddies" />
+		<models:MicroBloggingModel id="microBlogging" />
+		<models:BuddyRequestModel id="requests" />
+		<models:ChatModel id="chats" />
+		<models:ChatRoomModel id="chatRooms" />
+		<models:WebRootModel id="webroot" />
+		<models:ApplicationModel id="appModel" />
+	</fx:Declarations>
 
 </swiz:BeanLoader>	

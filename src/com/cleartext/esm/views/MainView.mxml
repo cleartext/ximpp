@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas
+	width="100%" height="100%"
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:header="com.cleartext.esm.views.header.*"
+	xmlns:buddies="com.cleartext.esm.views.buddies.*" 
+	xmlns:messages="com.cleartext.esm.views.messages.*"
+	creationComplete="init()"
+	>
+
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.esm.assets.Constants;
+			import com.cleartext.esm.events.ApplicationEvent;
+			import com.cleartext.esm.events.FormEvent;
+			import com.cleartext.esm.events.LinkEvent;
+			import com.cleartext.esm.events.PopUpEvent;
+			import com.cleartext.esm.events.SendButtonEvent;
+			import com.cleartext.esm.events.XmppErrorEvent;
+			import com.cleartext.esm.models.ApplicationModel;
+			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.SoundAndColorModel;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.views.popup.AddGatewayWindow;
+			import com.cleartext.esm.views.popup.AddGroupWindow;
+			import com.cleartext.esm.views.popup.BroadcastWindow;
+			import com.cleartext.esm.views.popup.ChangePasswordWindow;
+			import com.cleartext.esm.views.popup.EditBuddyWindow;
+			import com.cleartext.esm.views.popup.EditGroupWindow;
+			import com.cleartext.esm.views.popup.ErrorWindow;
+			import com.cleartext.esm.views.popup.FormWindow;
+			import com.cleartext.esm.views.popup.JoinGroupChatWindow;
+			import com.cleartext.esm.views.popup.LinkWindow;
+			import com.cleartext.esm.views.popup.PopupWindowBase;
+			import com.cleartext.esm.views.popup.PreferenceWindow;
+			import com.cleartext.esm.views.popup.RemoveBuddyWindow;
+			import com.cleartext.esm.views.popup.RemoveGroupWindow;
+			import com.cleartext.esm.views.popup.SearchWindow;
+			import com.cleartext.esm.views.popup.XmlInputWindow;
+			
+			import flash.net.navigateToURL;
+			
+			import mx.controls.Alert;
+			import mx.core.Application;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.UIComponent;
+			import mx.core.mx_internal;
+			import mx.events.AIREvent;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.swizframework.Swiz;
+
+			[Autowire]
+			[Bindable]
+			public var appModel:ApplicationModel;		
+		
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			[Autowire]
+			[Bindable]
+			public var soundColor:SoundAndColorModel;
+			
+			[Autowire(bean="xmpp", property="connected")]
+			[Bindable]
+			public var xmppConnected:Boolean;
+		
+			private function init():void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(AIREvent.APPLICATION_ACTIVATE, applicationActivateHandler);
+			}
+			
+			private function applicationActivateHandler(event:AIREvent):void
+			{
+				NativeApplication.nativeApplication.icon.bitmaps = [Constants.appIconBmd];
+			}
+			
+			//----------------------------------------------
+			// MISC WINDOWS
+			//----------------------------------------------
+				
+			[Mediate(event="PopUpEvent.CHANGE_PASSWORD_WINDOW")]
+			public function showChangePasswordWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new ChangePasswordWindow());
+			}
+
+			[Mediate(event="XmppErrorEvent.ERROR")]
+			public function showErrorWindow(event:XmppErrorEvent):void
+			{
+				var window:ErrorWindow = new ErrorWindow();
+				window.message = event.message;
+				if(event.errorXML)
+					window.message +=  "\n\nDetails:\n\n" + event.errorXML.toXMLString();
+				initializePopUp(window);
+			}
+
+			[Mediate(event="FormEvent.NEW_FORM")]
+			public function showFormWindow(event:FormEvent):void
+			{
+				var window:FormWindow = new FormWindow();
+				window.form = event.form;
+				initializePopUp(window);
+			}
+
+			[Mediate(event="PopUpEvent.PREFERENCES_WINDOW")]
+			public function showPreferencesWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new PreferenceWindow());
+			}
+
+			[Mediate(event="LinkEvent.LINK_CLICKED")]
+			public function showLinkWindow(event:LinkEvent):void
+			{
+				if(appModel.settings.global.checkUrls)
+				{
+					var window:LinkWindow = new LinkWindow();
+					window.url = event.url;
+					initializePopUp(window);
+				}
+				else
+				{
+					navigateToURL(new URLRequest(event.url));
+				}
+			}
+
+			[Mediate(event="PopUpEvent.BROADCAST_WINDOW")]
+			public function showSendToAllWindow(event:PopUpEvent):void
+			{
+				var window:BroadcastWindow = new BroadcastWindow();
+				initializePopUp(window);
+
+				window.group = event.buddy;
+				window.message = event.messageString;
+			}
+
+			[Mediate(event="PopUpEvent.XML_INPUT_WINDOW")]
+			public function showXmlInputWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new XmlInputWindow());
+			}
+			
+			[Mediate(event="PopUpEvent.SEARCH_WINDOW")]
+			public function showSearchWindow(event:PopUpEvent):void
+			{
+				var window:SearchWindow = new SearchWindow();
+				window.appModel = appModel;
+				window.open();
+			}
+
+			[Mediate(event="PopUpEvent.JOIN_GROUP_CHAT")]
+			public function showGroupChatWindow(event:PopUpEvent):void
+			{
+				var window:JoinGroupChatWindow = new JoinGroupChatWindow();
+				initializePopUp(window);
+			}
+
+			//----------------------------------------------
+			// BUDDY WINDOWS
+			//----------------------------------------------
+				
+			[Mediate(event="PopUpEvent.ADD_BUDDY_WINDOW")]
+			public function showAddBuddyWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new EditBuddyWindow());
+			}
+
+			[Mediate(event="PopUpEvent.EDIT_BUDDY_WINDOW")]
+			public function showEditBuddyWindow(event:PopUpEvent):void
+			{
+				var buddy:Buddy = event.buddy as Buddy;
+				if(!buddy)
+					return;
+				
+				var window:EditBuddyWindow = new EditBuddyWindow();
+				initializePopUp(window);
+
+				window.buddy = buddy;
+			}
+
+			[Mediate(event="PopUpEvent.DELETE_BUDDY_WINDOW")]
+			public function showRemoveBuddyWindow(event:PopUpEvent):void
+			{
+				var window:RemoveBuddyWindow = new RemoveBuddyWindow();
+				initializePopUp(window);
+
+				window.buddy = event.buddy;
+			}
+
+			//----------------------------------------------
+			// GROUP WINDOWS
+			//----------------------------------------------
+				
+			[Mediate(event="PopUpEvent.ADD_GROUP_WINDOW")]
+			public function showAddGroupWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddGroupWindow());
+			}
+
+			[Mediate(event="PopUpEvent.EDIT_GROUP_WINDOW")]
+			public function showEditGroupWindow(event:PopUpEvent):void
+			{
+				var window:EditGroupWindow = new EditGroupWindow();
+				window.groupName = event.group;
+				initializePopUp(window);
+			}
+
+
+			[Mediate(event="PopUpEvent.DELETE_GROUP_WINDOW")]
+			public function showRemoveGroupWindow(event:PopUpEvent):void
+			{
+				var window:RemoveGroupWindow = new RemoveGroupWindow();
+				window.groupName = event.group;
+				initializePopUp(window);
+			}
+
+			//----------------------------------------------
+			// GATEWAY WINDOWS
+			//----------------------------------------------
+				
+			[Mediate(event="PopUpEvent.ADD_GATEWAY_WINDOW")]
+			public function showAddGatewayWindow(event:PopUpEvent):void
+			{
+				initializePopUp(new AddGatewayWindow());
+			}
+			
+			private function initializePopUp(window:IFlexDisplayObject):void
+			{
+				window.addEventListener(CloseEvent.CLOSE, 
+					function():void
+					{
+						PopUpManager.removePopUp(window);
+					});
+				PopUpManager.addPopUp(window, this, true);
+				PopUpManager.centerPopUp(window);
+				((window as PopupWindowBase).defaultButton as Button).setFocus();
+			}
+			
+			[Mediate(event="ApplicationEvent.NOTIFY")]
+			public function notify(event:ApplicationEvent):void
+			{
+				NativeApplication.nativeApplication.icon.bitmaps = [Constants.appIconWarningBmd];
+				
+				if(NativeApplication.supportsDockIcon)
+				{
+					var dock:DockIcon = NativeApplication.nativeApplication.icon as DockIcon;
+					dock.bounce(NotificationType.INFORMATIONAL);
+				}
+				else if (NativeApplication.supportsSystemTrayIcon)
+				{
+					stage.nativeWindow.notifyUser(NotificationType.INFORMATIONAL);
+				}
+			}
+
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				var g:Graphics = graphics;
+				g.clear();
+	
+				g.beginFill(soundColor.backgroundColor);
+				g.drawRect(0, 0, unscaledWidth, unscaledHeight);
+	
+				var matrix:Matrix = new Matrix();
+
+				var w:Number = unscaledWidth/2 - 100;
+				var r:Number = Math.tan(Math.atan(w/50) - Math.atan(50/w)) * w;
+				matrix.createGradientBox(unscaledWidth, 100, Math.PI/2, 0, Constants.TOP_BAR_HEIGHT+headerCanvas.height);
+				g.beginGradientFill(GradientType.LINEAR, [soundColor.backgroundColor, soundColor.backgroundAccent], [0.8, 0.8], [0, 255], matrix);
+				g.drawCircle(unscaledWidth/2, Constants.TOP_BAR_HEIGHT+headerCanvas.height+5-r, r+50);
+
+				matrix.createGradientBox(50, unscaledHeight);
+				g.beginGradientFill(GradientType.LINEAR, [soundColor.backgroundAccent, soundColor.backgroundColor], [1.0, 1.0], [0, 255], matrix);
+				g.drawRect(0, 0, 50, unscaledHeight);
+				
+				matrix.createGradientBox(50, unscaledHeight, Math.PI, unscaledWidth-50);
+				g.beginGradientFill(GradientType.LINEAR, [soundColor.backgroundAccent, soundColor.backgroundColor], [1.0, 1.0], [0, 255], matrix);
+				g.drawRect(unscaledWidth-50, 0, 50, unscaledHeight);
+			}
+
+		]]>
+	</mx:Script>
+	
+	<header:HeaderCanvas id="headerCanvas"/>
+	<mx:VDividedBox 
+		top="{headerCanvas.height}" 
+		bottom="0" 
+		right="50" left="50" >
+		<mx:HDividedBox height="70%" width="100%" >
+			<buddies:BuddyCanvas
+				backgroundColor="0xffffff"
+				id="buddyCanvas"
+				minWidth="250"
+				width="30%"/>
+			<messages:MessageCanvas
+				id="chatCanvas"
+				minWidth="400"
+				width="70%"/>
+		</mx:HDividedBox>
+		
+		<mx:HDividedBox 
+				width="100%" height="200"
+				includeInLayout="{appModel.showConsole}"
+				visible="{appModel.showConsole}">
+			<mx:Canvas
+					backgroundColor="0xffffff"
+					width="100%" height="100%"
+					>
+				<mx:Label text="Application Log"/>
+				<mx:CheckBox x="105" label="enabled" selected="{appModel.logEnabled}" change="appModel.logEnabled = !appModel.logEnabled" />
+				<mx:Button label="clear" right="10" click="appModel.resetLog()" />
+				<mx:TextArea
+					id="logConsole"
+					y="30"
+					width="100%" height="100%"
+					text="{appModel.logText}"
+					editable="false"
+					updateComplete="logConsole.verticalScrollPosition = logConsole.maxVerticalScrollPosition"
+					verticalScrollPolicy="on"
+					/>
+			</mx:Canvas>
+			<mx:Canvas
+					backgroundColor="0xffffff"
+					width="100%" height="100%"
+					>
+				<mx:Label text="XML Console"/>
+				<mx:CheckBox x="85" label="enabled" selected="{appModel.xmlConsoleEnabled}" change="appModel.xmlConsoleEnabled = !appModel.xmlConsoleEnabled" />
+				<mx:Button label="xml input" right="65" click="Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.XML_INPUT_WINDOW))"/>
+				<mx:Button label="clear" right="10" click="appModel.resetXmlConsole()" />
+				<mx:TextArea
+					id="xmlConsole"
+					y="30"
+					width="100%" height="100%"
+					text="{appModel.xmlConsoleText}"
+					editable="false"
+					updateComplete="xmlConsole.verticalScrollPosition = xmlConsole.maxVerticalScrollPosition"
+					verticalScrollPolicy="on"
+					/>
+			</mx:Canvas>
+		</mx:HDividedBox>
+	</mx:VDividedBox>
+
+	<mx:Button
+		upIcon="{Constants.SendUp}"
+		overIcon="{Constants.SendDown}"
+		downIcon="{Constants.SendUp}"
+		disabledIcon="{Constants.SendDisabled}"
+		toolTip="send message"
+		focusEnabled="false"
+		enabled="{xmppConnected}"
+		right="10" y="{30 + headerCanvas.height}"
+		width="50" height="50"
+		click="Swiz.dispatchEvent(new SendButtonEvent(SendButtonEvent.SEND_CLICKED));"/>
+
+	<buddies:GroupSelectors
+		x="9" y="{headerCanvas.height + Constants.TOP_BAR_HEIGHT + Constants.AVATAR_TAB_HEIGHT}" />
+		
+</mx:Canvas>

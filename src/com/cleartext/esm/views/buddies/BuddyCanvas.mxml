@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox 
+	clipContent="false"
+	creationComplete="init()"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:buddies="com.cleartext.esm.views.buddies.*"
+	width="100%" height="100%"
+	verticalGap="0" 
+	xmlns:list="com.universalsprout.flex.components.list.*"
+	xmlns:common="com.cleartext.esm.views.common.*" xmlns:s="library://ns.adobe.com/flex/spark"
+	>
+	<mx:Script>
+		<![CDATA[
+			import com.cleartext.esm.assets.Constants;
+			import com.cleartext.esm.events.BuddyRequestEvent;
+			import com.cleartext.esm.events.CustomStatusEvent;
+			import com.cleartext.esm.events.InputTextEvent;
+			import com.cleartext.esm.events.PopUpEvent;
+			import com.cleartext.esm.events.UserAccountEvent;
+			import com.cleartext.esm.models.ApplicationModel;
+			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.BuddyRequestModel;
+			import com.cleartext.esm.models.ChatModel;
+			import com.cleartext.esm.models.DatabaseModel;
+			import com.cleartext.esm.models.SettingsModel;
+			import com.cleartext.esm.models.SoundAndColorModel;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.types.BuddySortTypes;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.valueObjects.Status;
+			import com.hurlant.crypto.symmetric.NullPad;
+			import com.universalsprout.flex.components.list.SproutListEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.controls.Label;
+			import mx.controls.LinkButton;
+			import mx.events.CollectionEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.swizframework.Swiz;
+			
+			[Autowire]
+			[Bindable]
+			public var appModel:ApplicationModel;
+			
+			[Autowire]
+			[Bindable]
+			public var settings:SettingsModel;
+			
+			[Autowire]
+			[Bindable]
+			public var buddies:BuddyModel;
+			
+			[Autowire]
+			[Bindable]
+			public var requests:BuddyRequestModel;
+			
+			[Autowire]
+			[Bindable]
+			public var xmppModel:XMPPModel;
+			
+			[Autowire]
+			[Bindable]
+			public var database:DatabaseModel;
+			
+			[Autowire]
+			[Bindable]
+			public var chats:ChatModel;
+			
+			[Autowire]
+			[Bindable]
+			public var soundColor:SoundAndColorModel;
+			
+			public var addCanvas:VBox;
+			
+			[Bindable]
+			private var showingAddCanvas:Boolean = false;
+			
+			private function init():void
+			{
+				userAccountChanged(null);
+				
+				requests.requests.addEventListener(CollectionEvent.COLLECTION_CHANGE, setRequestIcon);
+				setRequestIcon();
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				// STATUS PANEL
+
+				var g:Graphics = statusCanvas.graphics;
+				var w:Number = statusCanvas.width-1;
+				var h:Number = statusCanvas.height;
+				
+				g.clear();
+
+				var m:Matrix = new Matrix();
+				m.createGradientBox(w, h, Math.PI/2, 0, 0);
+				g.beginGradientFill(GradientType.LINEAR, [0x9b9b9b, 0xf3f3f3], [1, 1], [0x00, 0xFF], m);  
+				g.drawRect(0, 0, w, h);
+				
+				g.beginFill(0x909090);
+				g.drawRect(0,0,w,Constants.TOP_ROW_HEIGHT/2);
+				g.endFill();
+				
+				g.lineStyle(1, 0xffffff);
+				g.drawRect(0,0,w,h);
+				
+				g.lineStyle(1, 0xc1c1c1);
+				g.moveTo(0,h);
+				g.lineTo(w,h);
+
+				// FILTER PANEL
+
+				g = filterCanvas.graphics;
+				w = filterCanvas.width;
+				h = filterCanvas.height;
+				
+				g.clear();
+
+				m = new Matrix();
+				m.createGradientBox(w, h, Math.PI/2, 0, 0);
+				g.beginGradientFill(GradientType.LINEAR, [0xa1a4a7, 0x4f5051], [1, 1], [0x00, 0xFF], m);  
+				g.drawRect(0, 0, w, h);
+				
+				g.beginFill(0x292a2a);
+				g.drawRect(0,0,w,1);
+				
+				g.beginFill(0x47484a);
+				g.drawRect(0,1,w,1);
+				
+				g.endFill();
+				g.lineStyle(1, 0x848688);
+				g.moveTo(0,h);
+				g.lineTo(0,2);
+				g.lineTo(w-1,2);
+				g.lineTo(w-1,h);
+				
+				// request header
+				g = requestHeader.graphics;
+				w = requestHeader.width;
+				h = requestHeader.height;
+				
+				g.clear();
+				m.createGradientBox(w, h, Math.PI/2, 0, 0);
+				g.beginGradientFill(GradientType.LINEAR, [0xb4b4b4, 0xf0f0f0], [1, 1], [0x00, 0xFF], m);  
+				g.drawRect(0, 0, w, h);
+
+				g.beginFill(0x444444);
+				g.drawRect(0, 0, w, h);
+				g.drawRect(1, 1, w-2, h-1);
+				
+				// bottom panel
+				g = bottomPanel.graphics;
+				w = bottomPanel.width;
+				h = bottomPanel.height;
+				
+				g.clear();
+				m.createGradientBox(w, h, Math.PI/2, 0, 0);
+				g.beginGradientFill(GradientType.LINEAR, [0xb4b4b4, 0xf0f0f0], [1, 1], [0x00, 0xFF], m);  
+				g.drawRect(0, 0, w, h);
+				
+				g.beginFill(0x444444);
+				g.drawRect(0, 0, w, h);
+				g.drawRect(1, 1, w-2, h-1);
+			}
+			
+			private function userPresenceChangeHandler():void
+			{
+				appModel.setUserPresence(statusComboBox.selectedItem, customStatusInput.text);
+				// reset the list so there is no item selected in the list
+				statusComboBox.selectedItem = null;
+				// make sure the label is displaying the current status
+				// (it will want to display the value just selected)
+				statusComboBox.prompt = appModel.serverSideStatus.value;
+				
+				if(xmppModel.connected && microBloggingCheckBox.selected && customStatusInput.text != "")
+				{
+					chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, customStatusInput.text));
+				}
+			}
+			
+			[Mediate (event="UserAccountEvent.REFRESH")]
+			public function userAccountChanged(event:UserAccountEvent):void
+			{
+				avatar.data = settings.userAccount;
+			}
+			
+			[Mediate (event="BuddyRequestEvent.NEW_REQUEST")]
+			public function showRequestPanel(event:BuddyRequestEvent):void
+			{
+				if(event)
+					requestCanvas.visible = requestCanvas.includeInLayout = true;
+				else
+					requestCanvas.visible = requestCanvas.includeInLayout = !requestCanvas.visible;
+				
+				setRequestIcon();
+				callLater(invalidateDisplayList);
+			}
+			
+			[Mediate (event="BuddyRequestEvent.REMOVE_REQUEST")]
+			public function hideRequestPanel(event:BuddyRequestEvent):void
+			{
+				if(requests.requests.length == 0)
+				{
+					requestCanvas.visible = requestCanvas.includeInLayout = false;
+					setRequestIcon();
+					callLater(invalidateDisplayList);
+				}
+			}
+			
+			private function setRequestIcon(event:Event=null):void
+			{
+				var newIcon:Class;
+				
+				if(requests.requests.length > 0)
+				{
+					newIcon = (requestCanvas.visible) ? Constants.RequestDown1 : Constants.RequestUp1;
+				}
+				else
+				{
+					newIcon = (requestCanvas.visible) ? Constants.RequestDown : Constants.RequestUp;
+				}
+
+				requestButton.setStyle("icon", newIcon);
+			}
+			
+			public function showAddCanvas(event:MouseEvent):void
+			{
+				if(showingAddCanvas)
+					return;
+				
+				if(!addCanvas)
+				{
+					addCanvas = new VBox();
+					addCanvas.setStyle("backgroundColor", 0xffffff);
+					addCanvas.setStyle("borderColor", 0x898989);
+					addCanvas.setStyle("borderStyle", "solid");
+					for each(var label:String in ["Add buddy", "Add gateway", "Add group", "Join group chat"])
+					{
+						var btn:LinkButton = new LinkButton();
+						btn.label = label;
+						btn.width = 160;
+						btn.setStyle("rollOverColor", soundColor.themeColor);
+						btn.setStyle("selectionColor", soundColor.themeColor);
+						btn.setStyle("textAlign", "left");
+						btn.addEventListener(MouseEvent.CLICK, linkButtonClickHandler, false, 0, true);
+						addCanvas.addChild(btn);
+					}
+					addCanvas.setActualSize(110, 75);
+				}
+				PopUpManager.addPopUp(addCanvas, this);
+				var point:Point = bottomPanel.localToGlobal(new Point(0,-addCanvas.height));
+				addCanvas.move(point.x+3, point.y);
+				callLater(systemManager.addEventListener, [MouseEvent.CLICK, hideAddCanvas]);
+				showingAddCanvas = true;
+			}
+			
+			private function hideAddCanvas(event:MouseEvent):void
+			{
+				systemManager.removeEventListener(MouseEvent.CLICK, hideAddCanvas);
+				PopUpManager.removePopUp(addCanvas);
+				showingAddCanvas = false;
+			}
+			
+			private function linkButtonClickHandler(event:MouseEvent):void
+			{
+				switch(event.target.label)
+				{
+					case "Add buddy" :
+						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_BUDDY_WINDOW))
+						break;
+					case "Add gateway" :
+						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_GATEWAY_WINDOW))
+						break;
+					case "Add group" :
+						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_GROUP_WINDOW))
+						break;
+					case "Join group chat" :
+						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.JOIN_GROUP_CHAT))
+						break;
+				}
+			}
+			
+			
+		]]>
+	</mx:Script>
+
+	<mx:Canvas id="statusCanvas" 
+		width="100%" height="{Constants.TOP_BAR_HEIGHT}"
+		clipContent="false">
+
+		<mx:Label
+			y="5" x="5" 
+			text="Status" 
+			color="0xffffff" 
+			fontWeight="bold"/>
+
+		<common:StatusIcon
+			statusString="{appModel.serverSideStatus.value}"
+			right="135" y="5"
+			scaleX="1.2" scaleY="1.2"
+			/>
+		
+		<s:DropDownList
+			id="statusComboBox"
+			prompt="{appModel.serverSideStatus.value}"
+			dataProvider="{new ArrayCollection(Status.USER_TYPES)}"
+			change="userPresenceChangeHandler()"
+			right="5" y="3" width="110"
+			alpha="0.9"
+			/>
+			
+		<common:DefaultTextInput
+			id="customStatusInput"
+			enabled="{xmppModel.connected}"
+			valueCommit="userPresenceChangeHandler()"
+			defaultText="custom status..."
+			keyDown="if(event.keyCode==Keyboard.ENTER) userPresenceChangeHandler()"
+			top="29" height="33"
+			right="5" left="15"
+			text="{settings.userAccount.customStatus}"
+			borderStyle="none"
+			focusAlpha="0.5"
+			/>
+		
+		<s:CheckBox
+			id="microBloggingCheckBox"
+			visible="false"
+			bottom="5" right="5"
+			label="send status to micro-blogging networks?"
+			fontSize="9.5"
+			color="#B0B0B0"
+			selected="{settings.global.sendStatusToMicroBlogging}"
+			click="settings.global.sendStatusToMicroBlogging = microBloggingCheckBox.selected; database.saveGlobalSettings()"
+			/>
+
+		<common:Avatar
+			id="avatar"
+			width="48"
+			height="48"
+			x="-40" y="30"
+			border="false">
+			<common:filters>
+				<mx:DropShadowFilter distance="0" blurX="4" blurY="4" />
+			</common:filters>
+		</common:Avatar>
+
+	</mx:Canvas>
+	
+	<mx:Canvas id="filterCanvas"
+		width="100%"
+		height="{Constants.AVATAR_TAB_HEIGHT}">
+		
+		<s:Label styleName="whiteBoldBig" x="14" y="11" text="{buddies.groupName}" />
+		
+		<s:CheckBox label="show offline?"
+			x="{lastSeenButton.x + 1}" y="11"
+			selected="{settings.global.showOfflineBuddies}"
+			change="buddies.showOfflineBuddies = !settings.global.showOfflineBuddies"
+			/>
+		
+		<common:SearchBox width="{filterCanvas.width - 110}" height="24" x="5" y="32" search="buddies.searchString = event.searchString"/>
+		
+		<mx:Button
+			id="lastSeenButton"
+			right="75" y="32"
+			skin="{null}"
+			upSkin="{Constants.TimeUp}"
+			downSkin="{Constants.TimeUp}"
+			overSkin="{Constants.TimeUp}"
+			disabledSkin="{Constants.TimeSelected}"
+			enabled="{settings.global.buddySortMethod != BuddySortTypes.LAST_SEEN}"
+			click="buddies.sortType = BuddySortTypes.LAST_SEEN"
+			buttonMode="true"
+			toolTip="sort by last seen"
+			/>
+		<mx:Button
+			right="52" y="32"
+			skin="{null}"
+			upSkin="{Constants.StatusUp}"
+			downSkin="{Constants.StatusUp}"
+			overSkin="{Constants.StatusUp}"
+			disabledSkin="{Constants.StatusSelected}"
+			enabled="{settings.global.buddySortMethod != BuddySortTypes.STATUS}"
+			click="buddies.sortType = BuddySortTypes.STATUS"
+			buttonMode="true"
+			toolTip="sort by status"
+			/>
+		<mx:Button
+			right="29" y="32"
+			skin="{null}"
+			upSkin="{Constants.UnreadUp}"
+			downSkin="{Constants.UnreadUp}"
+			overSkin="{Constants.UnreadUp}"
+			disabledSkin="{Constants.UnreadSelected}"
+			enabled="{settings.global.buddySortMethod != BuddySortTypes.UNREAD_MESSAGES}"
+			click="buddies.sortType = BuddySortTypes.UNREAD_MESSAGES"
+			buttonMode="true"
+			toolTip="sort by un-read messages"
+			/>
+		<mx:Button
+			right="5" y="32"
+			skin="{null}"
+			upSkin="{Constants.AbcUp}"
+			downSkin="{Constants.AbcUp}"
+			overSkin="{Constants.AbcUp}"
+			disabledSkin="{Constants.AbcSelected}"
+			enabled="{settings.global.buddySortMethod != BuddySortTypes.ALPHABETICAL}"
+			click="buddies.sortType = BuddySortTypes.ALPHABETICAL"
+			buttonMode="true"
+			toolTip="sort alphabetically"
+			/>
+	</mx:Canvas>
+
+	<mx:VDividedBox 
+		width="100%" height="100%" 
+		verticalGap="6" 
+		dividerAffordance="6"
+		dividerAlpha="0"
+		liveDragging="true"
+		dividerSkin="{null}"
+		clipContent="false"
+		>
+		<buddies:BuddySproutList
+			backgroundColor="0xffffff"
+			id="buddyList" 
+			virtualList="false"
+			animate="{settings.global.animateBuddyList}"
+			horizontalScrollPolicy="off"
+			dataProvider="{buddies.buddies}"
+			height="100%" width="100%"
+			itemRenderer="{new ClassFactory(BuddyRenderer)}"/>
+		
+		<mx:Canvas 
+			id="requestCanvas"
+			clipContent="false"
+			backgroundColor="0x444444"
+			width="100%" height="150"
+			visible="{requests.requests.length > 0}"
+			includeInLayout="false"
+			>
+			<mx:Canvas id="requestHeader" 
+				y="-5"
+				width="100%" height="27">
+				<mx:Label horizontalCenter="0" y="6"
+					text="Buddy Requests" styleName="whiteBold" />
+			</mx:Canvas>
+			<list:SproutList
+				id="requestList"
+				backgroundColor="0xffffff" 
+				virtualList="false"
+				animate="{settings.global.animateBuddyList}"
+				horizontalScrollPolicy="off"
+				dataProvider="{requests.requests}"
+				x="1" y="{requestHeader.height-5}"
+				width="{buddyList.width-2}" height="100%"
+				itemRenderer="{new ClassFactory(BuddyRequestRenderer)}"/>
+		</mx:Canvas>
+	</mx:VDividedBox>
+	
+	<mx:Canvas id="bottomPanel" height="23" width="100%">
+
+		<mx:Button
+			enabled="{xmppModel.connected}"
+			toolTip="{(xmppModel.connected) ? 'add' : 'go online to add'}"
+			x="1" y="1"
+			width="23" height="22"
+			id="addButton"
+			click="showAddCanvas(event)"
+			skin="{null}"
+			upIcon="{(!showingAddCanvas) ? Constants.AddUp :  Constants.AddDown}"
+			overIcon="{(!showingAddCanvas) ? Constants.AddUp :  Constants.AddDown}"
+			downIcon="{Constants.AddDown}"
+			disabledIcon="{(!showingAddCanvas) ? Constants.AddUp :  Constants.AddDown}"
+			/>
+
+		<mx:Button
+			id="requestButton"
+			x="24" y="1"
+			height="22" width="23"
+			click="showRequestPanel(null)"
+			skin="{null}"
+			/>
+	</mx:Canvas>
+
+</mx:VBox>
