@@ -38,6 +38,7 @@ package com.cleartext.esm.models
 		private var buddiesByJid:Dictionary;
 
 		private var _buddies:ArrayCollection;
+		[Bindable(event="propertyChange")]
 		public function get buddies():ArrayCollection
 		{
 			return _buddies;

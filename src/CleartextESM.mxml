@@ -80,15 +80,15 @@
 		]]>
 	</fx:Script>
 	
-<fx:Declarations>
-	<swiz:SwizConfig
-		strict="true"
-		mediateBubbledEvents="true"
-		eventPackages="com.cleartext.esm.events"
-		viewPackages="com.cleartext.esm.views"
-		injectionEvent="preinitialize"
-		beanLoaders="{[Beans]}" />
-</fx:Declarations>
+	<fx:Declarations>
+		<swiz:SwizConfig
+			strict="true"
+			mediateBubbledEvents="true"
+			eventPackages="com.cleartext.esm.events"
+			viewPackages="com.cleartext.esm.views"
+			injectionEvent="preinitialize"
+			beanLoaders="{[Beans]}" />
+	</fx:Declarations>
 
 	<fx:Style source="com/cleartext/esm/css/defaultStyles.css"/>
 	<fx:Style source="com/cleartext/esm/css/scrollSkins.css"/>

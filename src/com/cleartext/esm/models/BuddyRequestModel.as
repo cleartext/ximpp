@@ -26,6 +26,7 @@ package com.cleartext.esm.models
 		public var settings:SettingsModel;
 
 		private var _requests:ArrayCollection;
+		[Bindable(event="propertyChange")]
 		public function get requests():ArrayCollection
 		{
 			return _requests;

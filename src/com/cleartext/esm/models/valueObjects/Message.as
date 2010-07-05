@@ -8,10 +8,9 @@ package com.cleartext.esm.models.valueObjects
 		public var sortBySentDate:Boolean;
 		
 		public static const CREATE_MESSAGES_TABLE:String =
-			"CREATE TABLE IF NOT EXISTS messages (" +
+			"CREATE TABLE IF NOT EXISTS messages(" +
 			"messageId INTEGER PRIMARY KEY AUTOINCREMENT, " +
 			"userId INTEGER, " +
-			"timestamp DATE, " +
 			"sender TEXT, " +
 			"recipient TEXT, " +
 			"type TEXT, " +
@@ -20,13 +19,10 @@ package com.cleartext.esm.models.valueObjects
 			"displayMessage TEXT, " + 
 			"senderId INTEGER, " +
 			"originalSenderId INTEGER, " +
-			"rawxml TEXT);"; 
+			"rawxml TEXT," +
+			"sentTimestamp NUMERIC, " +
+			"receivedTimestamp NUMERIC);";
 			
-		public static const TABLE_MODS:Array = [
-			{name: "sentTimestamp", type: "NUMERIC"},
-			{name: "receivedTimestamp", type: "NUMERIC"}
-		];
-		
 		public var messageId:int = -1;
 		
 		public var sentTimestamp:Date;

@@ -176,40 +176,104 @@ package com.cleartext.esm.models
 					}
 					else if(table.name == "messages")
 					{
-						mods = Message.TABLE_MODS.slice();
-						
+						var hasTimestamp:Boolean = false;
+						mods = [{name: "sentTimestamp", type: "NUMERIC"}, {name: "receivedTimestamp", type: "NUMERIC"}];
 						for each(column in table.columns)
 						{
 							for(i=0; i<mods.length; i++)
 							{
 								if(column.name == mods[i].name)
 									mods.splice(i,1);
+								else if(column.name == "timestamp")
+									hasTimestamp = true;
 							}
 						}
 						
-						for each(mod in mods)
+						if(hasTimestamp)
 						{
-							sql = "ALTER TABLE messages ADD COLUMN " + mod.name + " " + mod.type;
-							if(mod.hasOwnProperty("defaultVal"))
-								sql += " DEFAULT " + mod.defaultVal;
-							appModel.log("Updating message table structure", true);
+							for each(mod in mods)
+							{
+								sql = "ALTER TABLE messages ADD COLUMN " + mod.name + " " + mod.type;
+								if(mod.hasOwnProperty("defaultVal"))
+									sql += " DEFAULT " + mod.defaultVal;
+								appModel.log("Updating message table structure", true);
+								execute(sql);
+							}
+							
+							// find out the receivedTimestamp based on timestamp
+							appModel.log("Setting receivedTimestamp feild", true);
+							sql = "UPDATE messages SET receivedTimestamp=strftime('%s',timestamp)*1000 WHERE receivedTimestamp is null";
 							execute(sql);
+							
+							// find out the sentTimestamp based on timestamp
+							appModel.log("Setting sentTimestamp feild", true);
+							sql = "UPDATE messages SET sentTimestamp=strftime('%s',timestamp)*1000 WHERE sentTimestamp is null";
+							execute(sql);
+							
+							// compact now cause we are about to do a lot of work on the db
+							syncConn.compact();
+							
+							// start transaction 
+							syncConn.begin();
+							
+							var stmt:SQLStatement = new SQLStatement();
+							stmt.sqlConnection = syncConn;
+							
+							// create a temporary table
+							stmt.text = "CREATE TEMPORARY TABLE messages_tmp(" +
+								"messageId INTEGER PRIMARY KEY AUTOINCREMENT, " +
+								"userId INTEGER, " +
+								"sender TEXT, " +
+								"recipient TEXT, " +
+								"type TEXT, " +
+								"subject TEXT, " +
+								"plainMessage TEXT, " +
+								"displayMessage TEXT, " + 
+								"senderId INTEGER, " +
+								"originalSenderId INTEGER, " +
+								"rawxml TEXT," +
+								"sentTimestamp NUMERIC, " +
+								"receivedTimestamp NUMERIC);";
+							stmt.execute();
+							
+							// copy across the values we want (everything except timestamp)
+							stmt.text = "INSERT INTO messages_tmp SELECT " +
+								"messageId, userId, " +
+								"sender, recipient, " +
+								"type, subject, " +
+								"plainMessage, displayMessage, " +
+								"senderId, originalSenderId, " +
+								"rawxml, sentTimestamp, " +
+								"receivedTimestamp FROM messages";
+							stmt.execute();
+							
+							// get rid of original table
+							stmt.text = "DROP TABLE messages";
+							stmt.execute();
+							
+							// create nice new table
+							stmt.text = Message.CREATE_MESSAGES_TABLE;
+							stmt.execute();
+							
+							// copy across old valuse
+							stmt.text = "INSERT INTO messages SELECT * FROM messages_tmp";
+							stmt.execute();
+							
+							// get rid of temporary table
+							stmt.text = "DROP TABLE messages_tmp";
+							stmt.execute();
+							
+							// done !! - so commit transaction and compact again
+							syncConn.commit();
+							syncConn.compact();
 						}
-						
-						appModel.log("Setting receivedTimestamp feild", true);
-						sql = "UPDATE messages SET receivedTimestamp=strftime('%s',timestamp)*1000 WHERE receivedTimestamp is null";
-						execute(sql);
-						
-						appModel.log("Setting sentTimestamp feild", true);
-						sql = "UPDATE messages SET sentTimestamp=strftime('%s',timestamp)*1000 WHERE sentTimestamp is null";
-						execute(sql);
 					}
 				}
 				appModel.log("Database successfully created", true);
 			}
 			catch (error:Error)
 			{
-				appModel.log(error);
+				appModel.log(error, true);
 				appModel.fatalError("Could not create database.");
 			}
 		}
