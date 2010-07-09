@@ -2,22 +2,26 @@ package com.cleartext.esm.views.popup
 {
 	import com.cleartext.esm.models.SoundAndColorModel;
 	import com.cleartext.esm.models.valueObjects.Buddy;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
+	import com.cleartext.esm.models.valueObjects.IBuddy;
 	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
 	
-	import mx.containers.ControlBar;
-	import mx.containers.TitleWindow;
-	import mx.controls.Button;
-	import mx.controls.List;
+	import mx.collections.ArrayCollection;
 	import mx.controls.TextInput;
 	import mx.controls.ToolTip;
 	import mx.core.UIComponent;
 	import mx.events.CloseEvent;
 	import mx.events.FlexEvent;
 	import mx.managers.ToolTipManager;
+	
+	import spark.components.Button;
+	import spark.components.Group;
+	import spark.components.List;
+	import spark.components.TitleWindow;
 
 	public class PopupWindowBase extends TitleWindow
 	{
@@ -60,46 +64,35 @@ package com.cleartext.esm.views.popup
 		{
 			super();
 			
-			addEventListener(FlexEvent.CREATION_COMPLETE, init);
+			addEventListener(FlexEvent.CONTENT_CREATION_COMPLETE, init);
 		}
 
+		protected function init(event:Event):void
+		{
+			//override me
+		}
+		
 		override protected function createChildren():void
 		{
 			super.createChildren();
-
-			var cb:ControlBar = controlBar as ControlBar;
 			
-			if(cb)
+			if(!submitButton)
 			{
-				cb.setConstraintValue("horizontalAlign", "center");
-				
-				if(!submitButton)
-				{
-					submitButton = new Button();
-					submitButton.addEventListener(MouseEvent.CLICK, submit);
-					submitButton.label = submitButtonLabel;
-					submitButton.enabled = isValid;
-					cb.addChild(submitButton);
-					defaultButton = submitButton;
-				}
-				
-				if(!cancelButton && showCancelButton)
-				{
-					cancelButton = new Button();
-					cancelButton.addEventListener(MouseEvent.CLICK, cancelHandler);
-					cancelButton.label = "cancel";
-					cb.addChild(cancelButton);
-				}
+				submitButton = new Button();
+				submitButton.addEventListener(MouseEvent.CLICK, submit);
+				submitButton.label = submitButtonLabel;
+				submitButton.enabled = isValid;
+				controlBarContent.push(submitButton);
+				defaultButton = submitButton;
 			}
-			setStyle("borderAlpha", 0.8);
-			setStyle("borderColor", soundAndColor.backgroundColor);
-			setStyle("titleStyleName", "whiteBoldBig");
-		}
-
-
-		protected function init(event:FlexEvent):void
-		{
-			// override me
+			
+			if(!cancelButton && showCancelButton)
+			{
+				cancelButton = new Button();
+				cancelButton.addEventListener(MouseEvent.CLICK, cancelHandler);
+				cancelButton.label = "Cancel";
+				controlBarContent.push(cancelButton);
+			}
 		}
 		
 		protected function submit(event:Event):void
@@ -155,17 +148,15 @@ package com.cleartext.esm.views.popup
 			return result;
 		}
 		
-		public function wrapArray(array:Array):Array
+		public function wrapArray(array:Array):ArrayCollection
 		{
-			var result:Array = new Array();
+			var result:ArrayCollection = new ArrayCollection();
 			for each(var d:Object in array)
 			{
 				var o:Object = new Object();
 				o.selected = false;
 				o.data = d;
-				if(d is Buddy)
-					o.nickname = d.nickname;
-				result.push(o);
+				result.addItem(o);
 			}
 			return result;
 		}
@@ -193,7 +184,5 @@ package com.cleartext.esm.views.popup
 
  			dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
  		}
-		
-		
 	}
 }

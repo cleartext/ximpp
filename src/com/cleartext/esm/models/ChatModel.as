@@ -5,7 +5,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.Group;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	
@@ -80,9 +80,9 @@ package com.cleartext.esm.models
 							buddy = new ChatRoom(buddyOrJid as String);
 							break;
 						case BuddyTypes.GROUP :
-							buddy = new Group(buddyOrJid as String);
+							buddy = new BuddyGroup(buddyOrJid as String);
 							buddies.addBuddy(buddy);
-							(buddy as Group).refresh(buddies);
+							(buddy as BuddyGroup).refresh(buddies);
 							break;
 						default :
 							buddy = new Buddy(buddyOrJid as String);

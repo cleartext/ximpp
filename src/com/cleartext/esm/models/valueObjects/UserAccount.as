@@ -15,6 +15,7 @@ package com.cleartext.esm.models.valueObjects
 			"nickname TEXT, " +
 			"password TEXT, " +
 			"server TEXT, " +
+			"port INTEGER, " +
 			"customStatus TEXT, " +
 			"avatar TEXT, " + 
 			"avatarHash TEXT, " + 
@@ -23,6 +24,10 @@ package com.cleartext.esm.models.valueObjects
 			"mBlogUseChatAvatar BOOLEAN, " + 
 			"mBlogAvatar TEXT, " + 
 			"mBlogAvatarUrl TEXT);";
+
+		public static const TABLE_MODS:Array = [
+			{name: "port", type: "INTEGER", defaultVal: "5222"}
+		];
 		
 		public function UserAccount()
 		{
@@ -35,6 +40,7 @@ package com.cleartext.esm.models.valueObjects
 		public var accountName:String = "new account";
 		public var password:String;
 		public var server:String;
+		public var port:uint;
 		
 		public var mBlogDisplayName:String;
 		public var mBlogPrivateJid:Boolean;
@@ -52,6 +58,7 @@ package com.cleartext.esm.models.valueObjects
 			newUserAccount.nickname = obj["nickname"];			
 			newUserAccount.password = obj["password"];			
 			newUserAccount.server = obj["server"];
+			newUserAccount.port = obj["port"];
 			newUserAccount.customStatus = obj["customStatus"];
 			newUserAccount.avatarHash = obj["avatarHash"];
 			
@@ -59,6 +66,7 @@ package com.cleartext.esm.models.valueObjects
 			newUserAccount.mBlogPrivateJid = obj["mBlogPrivateJid"];
 			newUserAccount.mBlogUseChatAvatar = obj["mBlogUseChatAvatar"];
 			newUserAccount.mBlogAvatarUrl = obj["mBlogAvatarUrl"];
+			
 
 			newUserAccount.avatarString = obj["avatar"];
 //			AvatarUtils.stringToAvatar(obj["mBlogAvatar"], newUserAccount, "mBlogAvatar");
@@ -80,6 +88,7 @@ package com.cleartext.esm.models.valueObjects
 				new DatabaseValue("nickname", nickname),
 				new DatabaseValue("password", password),
 				new DatabaseValue("server", server),
+				new DatabaseValue("port", port),
 				new DatabaseValue("customStatus", customStatus),
 				new DatabaseValue("avatarHash", avatarHash),
 				new DatabaseValue("avatar", avatarString),

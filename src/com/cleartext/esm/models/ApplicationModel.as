@@ -11,7 +11,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.utils.LinkUitls;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.Group;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.Status;
@@ -386,7 +386,7 @@ package com.cleartext.esm.models
 		{
 			log("[ApplicationModel].sendMessage() " + buddy.jid + " : " + messageString + " : " + save);
 			
-			if(buddy is Group || buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			if(buddy is BuddyGroup || buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
 				var popUpEvent:PopUpEvent = new PopUpEvent(PopUpEvent.BROADCAST_WINDOW);
 				popUpEvent.messageString = messageString;

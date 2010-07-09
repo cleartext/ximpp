@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Window
-	xmlns:mx="http://www.adobe.com/2006/mxml" 
+<s:Window
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
 	title="Search Database" 
 	width="800" height="600" 
-	layout="absolute" 
 	xmlns:messages="com.cleartext.esm.views.messages.*" 
 	minHeight="400" minWidth="500"
 	creationComplete="init()">
 	
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
 			import mx.controls.dataGridClasses.DataGridColumn;
 			import mx.utils.ObjectUtil;
@@ -48,10 +49,12 @@
 			}
 					
 		]]>
-	</mx:Script>
+	</fx:Script>
 	
-	<mx:DateFormatter id="df" formatString="EEE DD MMM YY, JJ:NN:SS" />
-	
+	<fx:Declarations>
+		<mx:DateFormatter id="df" formatString="EEE DD MMM YY, JJ:NN:SS" />
+	</fx:Declarations>
+		
 	<mx:TextInput id="searchString" left="10" top="10" right="60" enter="doSearch()"/>
 	<mx:Button id="button" label="go" width="40" right="10" top="10" focusEnabled="false" click="doSearch()"/>
 	
@@ -74,4 +77,4 @@
 		</mx:Canvas>
 	</mx:VDividedBox>
 	
-</mx:Window>
+</s:Window>

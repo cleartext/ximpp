@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <popup:PopupWindowBase
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	title="Checking Link"
-	submitButtonLabel="visit link anyway"
+	submitButtonLabel="Visit link anyway"
 	isValid="true">
 	
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
 			import mx.rpc.events.ResultEvent;
 			import com.cleartext.esm.events.LinkEvent;
@@ -30,7 +32,7 @@
 				closeWindow();
 			}
 			
-			override protected function init(event:FlexEvent):void
+			override protected function init(event:Event):void
 			{
 				idCounter = webRoot.checkUrl(url);
 			}
@@ -85,10 +87,10 @@
 			}
 			
 		]]>
-	</mx:Script>
+	</fx:Script>
 
 	<mx:Text width="300" height="100%" id="textArea" htmlText="{'&lt;B&gt;' + url + '&lt;/B&gt;&lt;BR/&gt;'}" />
 	
-	<mx:ControlBar/>
-
+	<popup:controlBarContent />
+	
 </popup:PopupWindowBase>

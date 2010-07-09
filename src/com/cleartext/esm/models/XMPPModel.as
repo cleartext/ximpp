@@ -8,10 +8,10 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.types.IQTypes;
 	import com.cleartext.esm.models.types.SubscriptionTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
 	import com.cleartext.esm.models.valueObjects.FormField;
 	import com.cleartext.esm.models.valueObjects.FormObject;
-	import com.cleartext.esm.models.valueObjects.Group;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.ISubscribable;
 	import com.cleartext.esm.models.valueObjects.Message;
@@ -205,7 +205,7 @@ package com.cleartext.esm.models
 
 				xmpp.setJID(account.jid);
 				xmpp.setPassword(account.password);
-				xmpp.setServer(account.server);
+				xmpp.setServer(account.server, account.port);
 				xmpp.setupTLS(TLSEvent, TLSConfig, TLSEngine, TLSSocket, true, true, true);
 				xmpp.connect();
 			}
@@ -516,7 +516,7 @@ package com.cleartext.esm.models
 			var buddiesToDelete:Dictionary = new Dictionary();
 			
 			for each(buddy in buddies.buddies.source)
-				if(!(buddy is ChatRoom) && !(buddy is Group))
+				if(!(buddy is ChatRoom) && !(buddy is BuddyGroup))
 					buddiesToDelete[buddy.jid] = buddy;
 
 			for each(var item:XML in stanza.query.jabberRoster::item)
@@ -1032,12 +1032,13 @@ package com.cleartext.esm.models
 		// DISCOVERY INFO
 		//-------------------------------
 
-		public function discoveryInfo(toJid:String):void
+		public function discoveryInfo(toJid:String, handler:Function=null):void
 		{
 			sendIq(toJid,
 					IQTypes.GET,
 					<query xmlns={DISCO_INFO_NS}/>,
-					discoveryInfoHandler);
+					discoveryInfoHandler,
+					handler);
 		}
 		
 		//-------------------------------
@@ -1049,19 +1050,24 @@ package com.cleartext.esm.models
 			var fromJid:String = iqStanza.from;
 			var bareJid:String = (fromJid.indexOf("/") == -1) ? fromJid : fromJid.substr(0, fromJid.indexOf("/"));
 			var buddy:Buddy = appModel.getBuddyByJid(bareJid) as Buddy;
-			if(!buddy)
-				return;
-			
+
 			if(iqStanza.query)
 			{
 				var featuresXML:XMLList = iqStanza.query.discoInfo::feature as XMLList;
-				if(featuresXML && featuresXML.length() > 0)
+				if(buddy && featuresXML && featuresXML.length() > 0)
 				{
 					for each(var feature:XML in featuresXML)
 					{
 						var ns:String = feature.attribute("var").toString();
 						buddy.features.push(ns);
 					}
+				}
+				
+				var id:String = iqStanza.id;
+				if(iqVariables.hasOwnProperty(id))
+				{
+					(iqVariables[id] as Function)(iqStanza.query);
+					delete iqVariables[id];
 				}
 			}
 		}
@@ -1113,7 +1119,9 @@ package com.cleartext.esm.models
 		//-------------------------------
 		//  FIND TRANSPORTS
 		//-------------------------------
-
+		
+		// get all the transports on the server, put them in an
+		// array and pass that array into a handler function
 		public function findTransports(handler:Function):void
 		{
 			sendIq(settings.userAccount.host,
@@ -1173,7 +1181,8 @@ package com.cleartext.esm.models
 					var f:FormField = new FormField();
 					f.label = field.@label;
 					f.type = field.@type;
-					f.value = field.value;
+					if(field.jabberData::value)
+						f.value = field.jabberData::value;
 					f.varName = field.attribute("var").toString();
 					f.required = field.hasOwnProperty("required");
 					form.fields.push(f);

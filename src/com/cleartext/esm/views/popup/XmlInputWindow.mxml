@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <popup:PopupWindowBase
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	title="XML Input"
-	submitButtonLabel="send"
+	submitButtonLabel="Send"
 	isValid="true">
 	
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
 			import com.cleartext.esm.models.XMPPModel;
 
 			[Autowire]
-			[Bindable]
 			public var xmpp:XMPPModel;
 
 			override protected function submit(event:Event):void
@@ -22,11 +23,11 @@
 			}
 			
 		]]>
-	</mx:Script>
+	</fx:Script>
 	
 	<mx:Label styleName="blackBoldBig" text="Caution, do no use this unless you know what you are doing." />
 	<mx:TextArea width="500" height="300" id="textArea" />
 	
-	<mx:ControlBar />
-
+	<popup:controlBarContent />
+	
 </popup:PopupWindowBase>

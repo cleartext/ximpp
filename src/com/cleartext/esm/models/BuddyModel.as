@@ -6,7 +6,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.types.MicroBloggingTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.Group;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
 	
@@ -174,7 +174,7 @@ package com.cleartext.esm.models
 
 		private function buddyFilter(buddy:IBuddy):Boolean
 		{
-			if(!settings.global.showOfflineBuddies && buddy.status.isOffline() && !(buddy is ChatRoom) && !(buddy is Group))
+			if(!settings.global.showOfflineBuddies && buddy.status.isOffline() && !(buddy is ChatRoom) && !(buddy is BuddyGroup))
 				return false;
 			
 			if(searchString != "" && 
@@ -187,7 +187,7 @@ package com.cleartext.esm.models
 			
 			if(buddy.isMicroBlogging)
 				return groupName == MICRO_BLOGGING_GROUP;
-			else if(buddy is Group || buddy is ChatRoom)
+			else if(buddy is BuddyGroup || buddy is ChatRoom)
 				return groupName == CHAT_ROOMS;
 			else if(buddy.isGateway)
 				return groupName == GATEWAY_GROUP;
@@ -281,7 +281,7 @@ package com.cleartext.esm.models
 			
 			for each(var ib:IBuddy in buddies.source)
 			{
-				var g:Group = ib as Group;
+				var g:BuddyGroup = ib as BuddyGroup;
 				if(g)
 					g.refresh(this);
 			}

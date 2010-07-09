@@ -1,25 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <popup:PopupWindowBase
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	xmlns:mx="http://www.adobe.com/2006/mxml"
-	xmlns:common="com.cleartext.esm.views.common.*"
+	xmlns:common="com.cleartext.esm.views.common.*" 
 	title="Add Buddy"
-	submitButtonLabel="add">
+	submitButtonLabel="Add">
 	
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
-			import com.cleartext.esm.models.valueObjects.IBuddy;
-			import com.cleartext.esm.models.ChatModel;
 			import com.cleartext.esm.models.ApplicationModel;
-			import mx.controls.Alert;
-			import com.cleartext.esm.models.valueObjects.Status;
-			import mx.events.FlexEvent;
+			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ChatModel;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.types.SubscriptionTypes;
 			import com.cleartext.esm.models.utils.AvatarUtils;
 			import com.cleartext.esm.models.valueObjects.Buddy;
-			import com.cleartext.esm.models.types.SubscriptionTypes;
+			import com.cleartext.esm.models.valueObjects.IBuddy;
+			import com.cleartext.esm.models.valueObjects.Status;
+			
+			import mx.controls.Alert;
 			import mx.events.CloseEvent;
-			import com.cleartext.esm.models.BuddyModel;
-			import com.cleartext.esm.models.XMPPModel;
+			import mx.events.CollectionEvent;
+			import mx.events.CollectionEventKind;
+			import mx.events.FlexEvent;
 
 			[Autowire]
 			[Bindable]
@@ -37,7 +42,7 @@
 			[Bindable]
 			public var chats:ChatModel;
 			
-			override protected function init(event:FlexEvent):void
+			override protected function init(event:Event):void
 			{
 				super.init(event);
 				list.dataProvider = wrapArray(buddies.groups.toArray());
@@ -99,7 +104,7 @@
 					return;
 				
 				title = "Edit Buddy";
-				submitButton.label = "done";
+				submitButton.label = "Save";
 				isValid = true;
 				
 				if(buddies.gatewayNames.indexOf(buddy.host) != -1)
@@ -123,6 +128,8 @@
 
 				for each(var g:Object in list.dataProvider)
 					g.selected = buddy.groups.indexOf(g.data) != -1;
+					
+				list.dataProvider.dispatchEvent(new CollectionEvent(CollectionEvent.COLLECTION_CHANGE, false, false, CollectionEventKind.REFRESH));
 
 				dispatchEvent(new Event("buddySet"));
 			}
@@ -166,7 +173,7 @@
 				isValid = jidTextInput.text.length > 0;
 			}
 		]]>
-	</mx:Script>
+	</fx:Script>
 	
 	<mx:Text id="customLabel" paddingLeft="20" width="400"/>
 	
@@ -200,17 +207,25 @@
 		</mx:FormItem>
 
 		<mx:FormItem label="Groups:" enabled="{(buddy as Object).isGateway || !mBlogCheckbox.selected}">
-			<mx:List id="list" width="250" labelField="data" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" >
-				<mx:itemRenderer>
-					<mx:Component>
-						<mx:CheckBox selectedField="selected" focusEnabled="false" change="data.selected = !data.selected"/>
-					</mx:Component>
-				</mx:itemRenderer>
-			</mx:List>
+			<s:List id="list" width="250" height="220"
+					focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]">
+				<s:itemRenderer>
+					<fx:Component>
+						<s:ItemRenderer>
+							<s:layout>
+								<s:HorizontalLayout verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5" />
+							</s:layout>
+							<s:CheckBox selected="{data.selected}" click="data.selected = !data.selected"/>
+							<s:Label text="{data.data}" />
+						</s:ItemRenderer>
+					</fx:Component>
+				</s:itemRenderer>
+			</s:List>
+
 		</mx:FormItem>
 
 	</mx:Form>
 
-	<mx:ControlBar/>
-
+	<popup:controlBarContent />
+	
 </popup:PopupWindowBase>

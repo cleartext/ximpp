@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	title="Add Gateway"
+	title="Add Twitter"
 	submitButtonLabel="Add"
 	>
 	
@@ -18,6 +18,8 @@
 			[Autowire]
 			public var xmpp:XMPPModel;
 			
+			private var transportJids:Array;
+			
 			override protected function submit(event:Event):void
 			{
 				xmpp.addTransport(list.selectedItem as String);
@@ -26,9 +28,35 @@
 			
 			override protected function init(event:Event):void
 			{
-				xmpp.findTransports(function(dp:Array):void { list.dataProvider = new ArrayCollection(dp); });
+				// get the list of transports
+				// go through each one and do a disco#info looking for
+				// <identity category="gateway" type="twitter" name="Twitter Transport" />
+				xmpp.findTransports(foundTransportJids);
+				
+				// register to twitter gateway and get the url back
+				
+				// now render the url in a webkit browser
+				
+				// get the pin and type into a text field
+				
+				//now submit
 			}
-
+			
+			private function foundTransportJids(array:Array):void
+			{
+				transportJids = array;
+				
+				for each(var jid:String in transportJids)
+				{
+					xmpp.discoveryInfo(jid, discoveryInfoHandler);
+				}
+			}
+			
+			private function discoveryInfoHandler(xml:Object):void
+			{
+				
+			}
+			
 			override protected function validateForm():void
 			{
 				isValid = list.selectedItem != null;
@@ -37,8 +65,8 @@
 		]]>
 	</fx:Script>
 	
-	<s:List id="list" width="250" height="380" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]" change="validateForm()"/>
-
+	<s:Label width="400" text="Finding Twitter gateway..." />
+	
 	<popup:controlBarContent />
 	
 </popup:PopupWindowBase>

@@ -5,7 +5,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
 	import com.cleartext.esm.models.valueObjects.GlobalSettings;
-	import com.cleartext.esm.models.valueObjects.Group;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.universalsprout.flex.components.list.ISproutListData;
 	import com.universalsprout.flex.components.list.SproutList;
@@ -61,7 +61,7 @@ package com.cleartext.esm.views.messages
 				else
 					messageList.itemRenderer = new ClassFactory(ChatRenderer);
 					
-				if(chat.buddy is ChatRoom || chat.buddy is Group)
+				if(chat.buddy is ChatRoom || chat.buddy is BuddyGroup)
 				{
 					if(!participantList)
 					{

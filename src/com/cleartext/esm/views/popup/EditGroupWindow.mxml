@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <popup:PopupWindowBase
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	xmlns:mx="http://www.adobe.com/2006/mxml"
 	title="Edit Group"
-	submitButtonLabel="done" >
+	submitButtonLabel="Add" >
 	
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
-			import com.cleartext.esm.models.valueObjects.IBuddy;
-			import mx.events.FlexEvent;
-			import mx.collections.ArrayCollection;
-			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.ApplicationModel;
 			import com.cleartext.esm.models.BuddyModel;
-			import mx.events.CloseEvent;
-			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
-			import com.cleartext.esm.models.ApplicationModel;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.valueObjects.IBuddy;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
 
 			[Autowire]
 			[Bindable]
@@ -28,52 +31,73 @@
 			
 			public var groupName:String;
 			
-			override protected function init(event:FlexEvent):void
+			override protected function init(event:Event):void
 			{
-				groupNameInput.text = groupName;
-				
-				var realPeople:Array = wrapArray(buddies.realPeople);
+				var realPeople:ArrayCollection = wrapArray(buddies.realPeople);
 
-				for each(var b:Object in realPeople)
-					b.selected = b.data.groups.indexOf(groupName)!=-1;
-
+				if(groupName)
+				{
+					groupNameInput.text = groupName;
+					
+					submitButtonLabel = "Save";
+					
+					for each(var b:Object in realPeople)
+						b.selected = b.data.groups.indexOf(groupName)!=-1;
+				}
 				list.dataProvider = realPeople;
 			}
 			
 			override protected function submit(event:Event):void
 			{
-				var newGroupName:String = groupNameInput.text;
 				var selectedBuddies:Array = getSelected(list);
-				
-				for each(var b:IBuddy in buddies.buddies.source)
+				var newGroupName:String = groupNameInput.text;
+				var buddy:Buddy;
+
+				if(groupName)
 				{
-					var buddy:Buddy = b as Buddy;
-					if(buddy)
+					// if this is the currently selected group, then set
+					// the selected group to the new group
+					if(buddies.groupName == groupName)
+						buddies.groupName = newGroupName;
+					
+					for each(var b:IBuddy in buddies.buddies.source)
 					{
-						var index:int = buddy.groups.indexOf(groupName);
-						// if the buddy already has the group
-						if(index != -1)
+						buddy = b as Buddy;
+						if(buddy)
 						{
-							// if we don't want the buddy, remove the group
-							if(selectedBuddies.indexOf(buddy)==-1)
+							var index:int = buddy.groups.indexOf(groupName);
+							// if the buddy already has the group
+							if(index != -1)
 							{
-								buddy.groups.splice(index, 1);
-								xmpp.modifyRosterItem(buddy);
+								// if we don't want the buddy, remove the group
+								if(selectedBuddies.indexOf(buddy)==-1)
+								{
+									buddy.groups.splice(index, 1);
+									xmpp.modifyRosterItem(buddy);
+								}
+								// if the groupname has changed, then update it
+								else if(newGroupName != groupName)
+								{
+									buddy.groups.splice(index, 1, newGroupName);
+									xmpp.modifyRosterItem(buddy);
+								}
 							}
-							// if the groupname has changed, then update it
-							else if(newGroupName != groupName)
+							// if the buddy doesn't have the group and it is selected
+							// then add it
+							else if(selectedBuddies.indexOf(buddy)!=-1)
 							{
-								buddy.groups.splice(index, 1, newGroupName);
+								buddy.groups.push(newGroupName);
 								xmpp.modifyRosterItem(buddy);
 							}
 						}
-						// if the buddy doesn't have the group and it is selected
-						// then add it
-						else if(selectedBuddies.indexOf(buddy)!=-1)
-						{
-							buddy.groups.push(newGroupName);
-							xmpp.modifyRosterItem(buddy);
-						}
+					}
+				}
+				else
+				{
+					for each(buddy in selectedBuddies)
+					{
+						buddy.groups.push(newGroupName);
+						xmpp.modifyRosterItem(buddy);
 					}
 				}
 				
@@ -85,8 +109,7 @@
 				isValid = groupNameInput.text != "" && getSelected(list).length > 0;
 			}
 		]]>
-	</mx:Script>
-	
+	</fx:Script>
 	
     <mx:Form>
 		<mx:FormItem label="Group name:">
@@ -96,18 +119,25 @@
 		</mx:FormItem>
 
 		<mx:FormItem label="Buddies:">
-			<mx:List id="list" width="250" labelField="nickname" rowCount="8" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
-				click="validateInput(event,'need to select at least one buddy')" focusOut="validateInput(event, 'need to select at least one buddy')">
-				<mx:itemRenderer>
-					<mx:Component>
-						<mx:CheckBox focusEnabled="false" selectedField="selected" change="data.selected = !data.selected"/>
-					</mx:Component>
-				</mx:itemRenderer>
-			</mx:List>
+			<s:List id="list" width="250" height="340"
+				focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
+				click="validateInput(event,'need to select at least one buddy')" 
+				focusOut="validateInput(event, 'need to select at least one buddy')">
+				<s:itemRenderer>
+					<fx:Component>
+						<s:ItemRenderer>
+							<s:layout>
+								<s:HorizontalLayout verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5" />
+							</s:layout>
+							<s:CheckBox selected="{data.selected}" click="data.selected = !data.selected"/>
+							<s:Label text="{data.data.nickname}" />
+						</s:ItemRenderer>
+					</fx:Component>
+				</s:itemRenderer>
+			</s:List>
 		</mx:FormItem>
-		
     </mx:Form>
     
-    <mx:ControlBar />
-
+	<popup:controlBarContent />
+	
 </popup:PopupWindowBase>

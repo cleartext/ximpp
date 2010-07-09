@@ -8,9 +8,9 @@ package com.cleartext.esm.models.valueObjects
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	
-	public class Group extends BuddyBase
+	public class BuddyGroup extends BuddyBase
 	{
-		public function Group(jid:String)
+		public function BuddyGroup(jid:String)
 		{
 			super(jid);
 			

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <popup:PopupWindowBase
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	xmlns:mx="http://www.adobe.com/2006/mxml"
 	title="Edit Group"
-	submitButtonLabel="done" >
+	submitButtonLabel="Submit" >
 	
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
 			import mx.controls.Label;
 			import mx.controls.TextInput;
@@ -36,7 +38,7 @@
 			private var vars:Dictionary = new Dictionary();
 			private var required:Array = new Array();
 			
-			override protected function init(event:FlexEvent):void
+			override protected function init(event:Event):void
 			{
 				title = "Request from " + form.from;
 				instructions.text = form.instructions;
@@ -55,6 +57,7 @@
 							break;
 						case "text-multi" :
 							child = new TextArea();
+							child.height = 75;
 							(child as TextArea).text = field.value.toString();
 							break;
 						case "text-private" :
@@ -119,11 +122,14 @@
 				isValid = true;
 			}
 		]]>
-	</mx:Script>
+	</fx:Script>
 	
-	<mx:Text width="400" id="instructions"/>
-    <mx:Form id="mxmlForm" />
+    <mx:Form id="mxmlForm">
+		<mx:FormItem>
+			<mx:Text width="200" id="instructions"/>
+		</mx:FormItem>
+	</mx:Form>
     
-    <mx:ControlBar />
-
+	<popup:controlBarContent />
+	
 </popup:PopupWindowBase>

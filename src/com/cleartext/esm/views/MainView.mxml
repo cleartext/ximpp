@@ -23,7 +23,6 @@
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.valueObjects.Buddy;
 			import com.cleartext.esm.views.popup.AddGatewayWindow;
-			import com.cleartext.esm.views.popup.AddGroupWindow;
 			import com.cleartext.esm.views.popup.BroadcastWindow;
 			import com.cleartext.esm.views.popup.ChangePasswordWindow;
 			import com.cleartext.esm.views.popup.EditBuddyWindow;
@@ -199,7 +198,7 @@
 			[Mediate(event="PopUpEvent.ADD_GROUP_WINDOW")]
 			public function showAddGroupWindow(event:PopUpEvent):void
 			{
-				initializePopUp(new AddGroupWindow());
+				initializePopUp(new EditGroupWindow());
 			}
 
 			[Mediate(event="PopUpEvent.EDIT_GROUP_WINDOW")]
@@ -238,7 +237,6 @@
 					});
 				PopUpManager.addPopUp(window, this, true);
 				PopUpManager.centerPopUp(window);
-				((window as PopupWindowBase).defaultButton as Button).setFocus();
 			}
 			
 			[Mediate(event="ApplicationEvent.NOTIFY")]

@@ -1,28 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <popup:PopupWindowBase
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	title="Post To..."
 	submitButtonLabel="Post"
 	isValid="true">
 	
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
-			import com.cleartext.esm.models.valueObjects.IBuddy;
-			import com.cleartext.esm.models.valueObjects.Message;
-			import mx.events.FlexEvent;
 			import com.cleartext.esm.events.InputTextEvent;
-			import org.swizframework.Swiz;
-			import flash.sampler.NewObjectSample;
-			import mx.controls.CheckBox;
-			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.ApplicationModel;
 			import com.cleartext.esm.models.BuddyModel;
-			import com.cleartext.esm.models.types.SubscriptionTypes;
-			import mx.events.CloseEvent;
-			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
-			import com.cleartext.esm.models.ApplicationModel;
+			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.types.SubscriptionTypes;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.valueObjects.IBuddy;
+			import com.cleartext.esm.models.valueObjects.Message;
+			
+			import flash.sampler.NewObjectSample;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.CheckBox;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.swizframework.Swiz;
 
 			[Autowire]
 			[Bindable]
@@ -38,7 +44,7 @@
 			public function set group(value:IBuddy):void
 			{
 				_group = value;
-				list.dataProvider = buddies.getBuddiesByGroup(_group.jid);
+				list.dataProvider = new ArrayCollection(buddies.getBuddiesByGroup(_group.jid));
 			}
 			
 			override protected function submit(event:Event):void
@@ -77,22 +83,24 @@
 			}
 			
 		]]>
-	</mx:Script>
+	</fx:Script>
 	
 	<mx:Text text="Send to the following services:" selectable="false"/>
-	<mx:List id="list"
-		width="250" labelField="nickname" focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]"
-		height="400">
-		<mx:itemRenderer>
-			<mx:Component>
-				<mx:CheckBox
-					focusEnabled="false" 
-					selected="{data.sendTo}" 
-					change="data.sendTo = !data.sendTo" />
-			</mx:Component>
-		</mx:itemRenderer>
-	</mx:List>
+	<s:List id="list" width="250" height="380"
+			alternatingItemColors="[#f3f3f3, #ffffff]">
+		<s:itemRenderer>
+			<fx:Component>
+				<s:ItemRenderer>
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5" />
+					</s:layout>
+					<s:CheckBox selected="{data.sendTo}" click="data.sendTo = !data.sendTo"/>
+					<s:Label text="{data.nickname}" />
+				</s:ItemRenderer>
+			</fx:Component>
+		</s:itemRenderer>
+	</s:List>
 	
-	<mx:ControlBar />
-
+	<popup:controlBarContent />
+	
 </popup:PopupWindowBase>

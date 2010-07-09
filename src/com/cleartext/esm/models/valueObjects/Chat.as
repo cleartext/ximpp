@@ -31,7 +31,7 @@ package com.cleartext.esm.models.valueObjects
 		
 		public function get isGroup():Boolean
 		{
-			return buddy is Group;
+			return buddy is BuddyGroup;
 		}
 		
 		public function get isChatRoom():Boolean

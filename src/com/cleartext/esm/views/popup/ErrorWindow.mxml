@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <popup:PopupWindowBase
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	xmlns:mx="http://www.adobe.com/2006/mxml"
 	title="Error"
-	submitButtonLabel="done" 
+	submitButtonLabel="Ok" 
 	showCancelButton="false"
 	isValid="true">
 	
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
 		
 			[Bindable]
@@ -18,10 +20,10 @@
 				closeWindow();
 			}
 		]]>
-	</mx:Script>
+	</fx:Script>
 	
 	<mx:Text width="400" text="{message}" minHeight="80"/>
     
-    <mx:ControlBar />
-
+	<popup:controlBarContent />
+	
 </popup:PopupWindowBase>

@@ -6,7 +6,7 @@ package com.cleartext.esm.views.common
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.Group;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.IHasAvatar;
 	
 	import flash.display.BitmapData;
@@ -215,7 +215,7 @@ package com.cleartext.esm.views.common
 					bmd = Constants.defaultMUCBmd;
 				else if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					bmd = Constants.defaultWorkstreamBmd;
-				else if(buddy && buddy is Group)
+				else if(buddy && buddy is BuddyGroup)
 					bmd = Constants.defaultGroupBmd;
 				else
 					bmd = Constants.defaultAvatarBmd;

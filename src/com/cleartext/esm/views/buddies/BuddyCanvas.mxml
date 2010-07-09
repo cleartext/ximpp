@@ -359,17 +359,17 @@
 		
 		<s:Label styleName="whiteBoldBig" x="14" y="11" text="{buddies.groupName}" />
 		
-		<s:CheckBox label="show offline?"
+		<!--<s:CheckBox label="show offline?"
 			x="{lastSeenButton.x + 1}" y="11"
 			selected="{settings.global.showOfflineBuddies}"
 			change="buddies.showOfflineBuddies = !settings.global.showOfflineBuddies"
-			/>
+			/>-->
 		
-		<common:SearchBox width="{filterCanvas.width - 110}" height="24" x="5" y="32" search="buddies.searchString = event.searchString"/>
+		<common:SearchBox width="{filterCanvas.width - 86}" height="24" x="5" y="32" search="buddies.searchString = event.searchString"/>
 		
 		<mx:Button
 			id="lastSeenButton"
-			right="75" y="32"
+			right="52" y="32"
 			skin="{null}"
 			upSkin="{Constants.TimeUp}"
 			downSkin="{Constants.TimeUp}"
@@ -381,7 +381,7 @@
 			toolTip="sort by last seen"
 			/>
 		<mx:Button
-			right="52" y="32"
+			right="29" y="32"
 			skin="{null}"
 			upSkin="{Constants.StatusUp}"
 			downSkin="{Constants.StatusUp}"
@@ -392,7 +392,7 @@
 			buttonMode="true"
 			toolTip="sort by status"
 			/>
-		<mx:Button
+<!--		<mx:Button
 			right="29" y="32"
 			skin="{null}"
 			upSkin="{Constants.UnreadUp}"
@@ -404,7 +404,7 @@
 			buttonMode="true"
 			toolTip="sort by un-read messages"
 			/>
-		<mx:Button
+-->		<mx:Button
 			right="5" y="32"
 			skin="{null}"
 			upSkin="{Constants.AbcUp}"

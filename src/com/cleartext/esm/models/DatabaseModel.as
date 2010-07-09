@@ -2,11 +2,11 @@ package com.cleartext.esm.models
 {
 	import com.cleartext.esm.events.LoadingEvent;
 	import com.cleartext.esm.models.valueObjects.Buddy;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.BuddyRequest;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
 	import com.cleartext.esm.models.valueObjects.DatabaseValue;
-	import com.cleartext.esm.models.valueObjects.Group;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.MicroBloggingBuddy;
@@ -157,13 +157,9 @@ package com.cleartext.esm.models
 						mods = Buddy.TABLE_MODS.slice();
 						
 						for each(column in table.columns)
-						{
 							for(i=0; i<mods.length; i++)
-							{
 								if(column.name == mods[i].name)
 									mods.splice(i,1);
-							}
-						}
 						
 						for each(mod in mods)
 						{
@@ -174,6 +170,25 @@ package com.cleartext.esm.models
 							execute(sql);
 						}
 					}
+					else if(table.name == "userAccounts")
+					{
+						mods = UserAccount.TABLE_MODS.slice();
+						
+						for each(column in table.columns)
+							for(i=0; i<mods.length; i++)
+								if(column.name == mods[i].name)
+									mods.splice(i,1);
+						
+						for each(mod in mods)
+						{
+							sql = "ALTER TABLE userAccounts ADD COLUMN " + mod.name + " " + mod.type;
+							if(mod.hasOwnProperty("defaultVal"))
+								sql += " DEFAULT " + mod.defaultVal;
+							appModel.log("Updating userAccount table structure", true);
+							execute(sql);
+						}
+					}
+					
 					else if(table.name == "messages")
 					{
 						var hasTimestamp:Boolean = false;
@@ -308,7 +323,7 @@ package com.cleartext.esm.models
 			switch(type)
 			{
 				case "group" :
-					var group:Group = new Group(obj["jid"]);
+					var group:BuddyGroup = new BuddyGroup(obj["jid"]);
 					group.refresh(buddies);
 					newBuddy = group;
 					break;

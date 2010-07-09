@@ -56,13 +56,13 @@ package com.seesmic.as3.xmpp
 		private var session_start_timeout:Timer = new Timer(30000, 1);
 		
 		
-		public function XMPP(jid:String=null, password:String=null, server:String=null)
+		public function XMPP(jid:String=null, password:String=null, server:String=null, port:uint=5222)
 		{
 			if(jid) setJID(jid);
 
 			if(password) this.password = password;
 			//trace('Connecting for ' + jid.toString() + ' on ' + server);
-			if(server) setServer(server);
+			if(server) setServer(server, port);
 			rootStanzas['{jabber:client}iq'] =  IqStanza;
 			rootStanzas['{jabber:client}message'] = MessageStanza;
 			rootStanzas['{jabber:client}presence'] = PresenceStanza;				
@@ -95,14 +95,14 @@ package com.seesmic.as3.xmpp
 			return this;
 		}
 		
-		public function setServer(server:String):XMPP {
+		public function setServer(server:String, port:uint=5222):XMPP {
 			if(server) {
 				this.server = server;
 				if(!host) host = server;
 			}
 			stream_start = "<stream:stream to=\"" + host + "\" xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' version='1.0'>";
 			stream_end = "</stream:stream>";
-			setup(this.server, 5222);
+			setup(this.server, port);
 			socket.addEventListener(StreamEvent.DISCONNECTED, handleDisconnected);
 			socket.addEventListener(StreamEvent.CONNECT_FAILED, handleConnectFailed);
 			socket.addEventListener(StreamEvent.COMM_IN,
