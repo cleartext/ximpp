@@ -183,7 +183,7 @@ package com.universalsprout.flex.components.list
 
 			for each(item in itemRenderersByDataUid)
 			{
-				if(item.visible && !collection.contains(item.data))
+				if(item.visible)// && !collection.contains(item.data))
 				{
 					item.setVisible(false, true);
 					item.setIncludeInLayout(false, true);
@@ -191,39 +191,36 @@ package com.universalsprout.flex.components.list
 			}
 
 			var itemWidth:Number = unscaledWidth - viewMetricsAndPadding.left - viewMetricsAndPadding.right;
-			var extraRenderers:int = 10;
+			var extraRenderers:int = 5;
 
 			var yCounter:Number = 0;
 			var vGap:Number = getStyle("verticalGap");
 
 			var childIndex:int = 0;
+			addingItem = false;
 
 			for each(var data:ISproutListData in collection)
 			{
 				var item:ISproutListRenderer = itemRenderersByDataUid[data.uid]; 
-				if(item)
-				{
-					addingItem = false;
-				}
-				else
+				
+				if(!item)
 				{
 					item = itemRenderer.newInstance();
 					item.data = data;
 					item.addEventListener(ResizeEvent.RESIZE, itemsResizeHandler, false, 0, true);
 					itemRenderersByDataUid[data.uid] = item;
 					addChildAt(DisplayObject(item), childIndex);
-					callLater(invalidateDisplayList);
-					callLater(function():void { addingItem = false; });
 					addingItem = true;
+					callLater(function():void { addingItem = false; invalidateDisplayList()});
 				}
-
-				if(!item.visible)
+				else
 				{
 					item.setVisible(true, true);
 					item.setIncludeInLayout(true, true);
 					setChildIndex(DisplayObject(item), childIndex);
-					invalidateDisplayList();
 				}
+
+				childIndex++;
 
 				if(animate && !addingItem)
 					item.yTo = yCounter;
@@ -234,8 +231,6 @@ package com.universalsprout.flex.components.list
 				
 				if(virtualList && (yCounter > verticalScrollPosition + unscaledHeight))
 					extraRenderers--;
-				
-				childIndex++;
 
 				if(extraRenderers < 1)
 				{
@@ -244,6 +239,7 @@ package com.universalsprout.flex.components.list
 					bottomOfListComponent.move(0, estimatedHeight-10);
 					return;
 				}
+				
 			}
 			bottomOfListComponent.includeInLayout = false;
 		}

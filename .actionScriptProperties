@@ -13,21 +13,6 @@
     <sourceAttachmentPath/>
   </compiler>
   <applications>
-    <application path="com/cleartext/esm/tests/AvatarTabTest.mxml">
-      <airExcludes/>
-    </application>
-    <application path="com/cleartext/esm/tests/LinkTest.mxml">
-      <airExcludes/>
-    </application>
-    <application path="com/cleartext/esm/tests/MemoryTest.mxml">
-      <airExcludes/>
-    </application>
-    <application path="com/cleartext/esm/tests/RegexTest.mxml">
-      <airExcludes/>
-    </application>
-    <application path="com/cleartext/esm/tests/VariableList.mxml">
-      <airExcludes/>
-    </application>
     <application path="CleartextESM.mxml">
       <airExcludes/>
     </application>

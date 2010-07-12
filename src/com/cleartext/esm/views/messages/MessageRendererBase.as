@@ -46,7 +46,7 @@ package com.cleartext.esm.views.messages
 		
 		public function MessageRendererBase()
 		{
-			super(NaN, 32);
+			super(NaN, NaN);
 
 			df = new DateFormatter();
 			df.formatString = "EEE MMM D YYYY at L:NN:SS A";

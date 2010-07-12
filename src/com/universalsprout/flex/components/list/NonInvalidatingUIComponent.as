@@ -107,7 +107,7 @@ public class NonInvalidatingUIComponent extends UIComponent
     }
     override public function set includeInLayout(value:Boolean):void
     {
-        if (_includeInLayout != value)
+        if (includeInLayout != value)
         	setIncludeInLayout(value);
     }
     

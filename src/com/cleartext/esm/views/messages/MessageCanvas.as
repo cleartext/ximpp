@@ -227,7 +227,7 @@ package com.cleartext.esm.views.messages
 			avatars.addItemAt(avatar, event.index);
 			avatarCanvas.addChildAt(avatar, 0);
 			
-			var sproutList:MessageSproutList = new MessageSproutList();
+			var sproutList:MessageDividedBox = new MessageDividedBox();
 			sproutList.animate = settings.global.animateMessageList;
 			sproutList.horizontalScrollPolicy = "off";
 			sproutList.data = chat;
@@ -244,11 +244,11 @@ package com.cleartext.esm.views.messages
 		
 		private function sproutList_dividerReleaseHandler(event:Event):void
 		{
-			var s:MessageSproutList = event.target as MessageSproutList;
+			var s:MessageDividedBox = event.target as MessageDividedBox;
 			callLater(setPLW, [s]);
 		}
 		
-		private function setPLW(s:MessageSproutList):void
+		private function setPLW(s:MessageDividedBox):void
 		{
 			if(s.participantListWidth > 0)
 				participantListWidth = s.participantListWidth;
@@ -280,7 +280,7 @@ package com.cleartext.esm.views.messages
 			avatarCanvas.removeChild(avatarToRemove);
 			avatars.removeItemAt(avatars.getItemIndex(avatarToRemove));
 
-			for each(var s:MessageSproutList in messageStack.getChildren())
+			for each(var s:MessageDividedBox in messageStack.getChildren())
 			{
 				if(s.data == avatarToRemove.chat)
 				{
@@ -308,7 +308,7 @@ package com.cleartext.esm.views.messages
 			inputCanvas.buddy = chat.buddy;
 
 			// set message list
-			for each(var s:MessageSproutList in messageStack.getChildren())
+			for each(var s:MessageDividedBox in messageStack.getChildren())
 			{
 				if(s.data == chat)
 				{
