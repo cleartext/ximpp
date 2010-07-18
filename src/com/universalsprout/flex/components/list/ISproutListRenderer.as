@@ -12,7 +12,6 @@ package com.universalsprout.flex.components.list
 		function set yTo(value:Number):void
 		
 		function setIncludeInLayout(value:Boolean, noEvent:Boolean=false):void
-		
 		function setWidth(widthVal:Number):Number;
 	}
 }

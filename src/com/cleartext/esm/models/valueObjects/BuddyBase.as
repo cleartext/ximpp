@@ -2,6 +2,7 @@ package com.cleartext.esm.models.valueObjects
 {
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.events.StatusEvent;
+	import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 	
 	import flash.display.BitmapData;
 	
@@ -193,6 +194,25 @@ package com.cleartext.esm.models.valueObjects
 			if(_unreadMessages != value)
 			{
 				_unreadMessages = value;
+				dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
+			}
+		}
+		
+		//----------------------------------------
+		//  MICROBLOGGING SERVICE TYPE
+		//----------------------------------------
+		
+		private var _microBloggingServiceType:String = MicroBloggingServiceTypes.OTHER;
+		[Bindable (event="changeSave")]
+		public function get microBloggingServiceType():String
+		{
+			return _microBloggingServiceType;
+		}
+		public function set microBloggingServiceType(value:String):void
+		{
+			if(microBloggingServiceType != value)
+			{
+				_microBloggingServiceType = value;
 				dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 			}
 		}

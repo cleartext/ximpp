@@ -36,7 +36,8 @@ package com.cleartext.esm.models.valueObjects
 			{name: "openTab", type: "BOOLEAN"},
 			{name: "autoOpenTab", type: "BOOLEAN", defaultVal: "TRUE"},
 			{name: "unreadMessages", type: "INTEGER"},
-			{name: "buddyType", type: "TEXT"}
+			{name: "buddyType", type: "TEXT"},
+			{name: "microBloggingServiceType", type: "TEXT"}
 		];
 		
 		//----------------------------------------
@@ -259,7 +260,8 @@ package com.cleartext.esm.models.valueObjects
 				new DatabaseValue("openTab", openTab),
 				new DatabaseValue("autoOpenTab", autoOpenTab),
 				new DatabaseValue("unreadMessages", unreadMessages),
-				new DatabaseValue("buddyType", "rosterItem")
+				new DatabaseValue("buddyType", "rosterItem"),
+				new DatabaseValue("microBloggingServiceType", microBloggingServiceType)
 				];
 		}
 	}

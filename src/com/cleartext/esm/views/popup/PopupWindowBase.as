@@ -6,8 +6,10 @@ package com.cleartext.esm.views.popup
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.ui.Keyboard;
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
@@ -65,8 +67,15 @@ package com.cleartext.esm.views.popup
 			super();
 			
 			addEventListener(FlexEvent.CONTENT_CREATION_COMPLETE, init);
+			addEventListener(KeyboardEvent.KEY_DOWN, myKeyDownHandler);
 		}
-
+		
+		protected function myKeyDownHandler(event:KeyboardEvent):void
+		{
+			if(event.keyCode == Keyboard.ENTER && isValid)
+				submit(null);
+		}
+		
 		protected function init(event:Event):void
 		{
 			//override me
@@ -83,7 +92,6 @@ package com.cleartext.esm.views.popup
 				submitButton.label = submitButtonLabel;
 				submitButton.enabled = isValid;
 				controlBarContent.push(submitButton);
-				defaultButton = submitButton;
 			}
 			
 			if(!cancelButton && showCancelButton)

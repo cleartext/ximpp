@@ -188,33 +188,6 @@
 
 	<mx:ViewStack id="tabs" creationPolicy="all" width="460" height="250" y="60" x="20">
 		
-		<mx:Canvas label="Global Settings">
-			<s:CheckBox label="Auto connect" id="autoConnectCheckBox"/>
-			<s:CheckBox y="30" label="Show offline buddies" id="showOfflineBuddiesCheckBox"/>
-			<s:CheckBox y="60" label="Animate buddy list" id="animateBuddyListCheckBox"/>
-			<s:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox"/>
-			<s:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox"/>
-			<s:CheckBox y="150" label="Check urls" id="checkUrlsCheckBox"/>
-			
-			<s:Button label="Check for updates" click="appModel.checkForUpdates(true)" right="0" />
-			
-			<s:Label right="106" y="34" text="Sort messages by"/>
-			<s:DropDownList right="0" width="102" y="30" id="messageSortComboBox" dataProvider="{new ArrayCollection(['date sent', 'date received'])}"/>
-			
-			<s:Label right="78" y="64" text="Max workstream messages"/>
-			<mx:NumericStepper right="0" y="60" maximum="1000" minimum="0" id="numTimelineMessages" />
-			
-			<s:Label right="78" y="94" text="Max chat messages" />
-			<mx:NumericStepper right="0" y="90" maximum="1000" minimum="0" id="numChatMessages" />
-			
-			<s:Label right="86" y="124" text="Url shortening"/>
-			<s:DropDownList right="0" width="82" id="urlShortenComboBox" y="120" dataProvider="{new ArrayCollection(UrlShortener.types)}"/>
-			
-			<s:Label right="124" y="154" text="Set away (0 = never)"/>
-			<mx:NumericStepper right="56" y="150" maximum="120" minimum="0" id="awayTimeout" />
-			<s:Label right="0" y="154" text="minutes"/>
-		</mx:Canvas>
-
 		<mx:Canvas label="Account Settings">
 			<mx:Form horizontalCenter="0">
 				<mx:FormItem label="Nickname:">
@@ -257,6 +230,33 @@
 			</mx:Form>
 		</mx:Canvas>
 		
+		<mx:Canvas label="Global Settings">
+			<s:CheckBox label="Auto connect" id="autoConnectCheckBox"/>
+			<s:CheckBox y="30" label="Show offline buddies" id="showOfflineBuddiesCheckBox"/>
+			<s:CheckBox y="60" label="Animate buddy list" id="animateBuddyListCheckBox"/>
+			<s:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox"/>
+			<s:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox"/>
+			<s:CheckBox y="150" label="Check urls" id="checkUrlsCheckBox"/>
+			
+			<s:Button label="Check for updates" click="appModel.checkForUpdates(true)" right="0" />
+			
+			<s:Label right="106" y="34" text="Sort messages by"/>
+			<s:DropDownList right="0" width="102" y="30" id="messageSortComboBox" dataProvider="{new ArrayCollection(['date sent', 'date received'])}"/>
+			
+			<s:Label right="78" y="64" text="Max workstream messages"/>
+			<mx:NumericStepper right="0" y="60" maximum="1000" minimum="0" id="numTimelineMessages" />
+			
+			<s:Label right="78" y="94" text="Max chat messages" />
+			<mx:NumericStepper right="0" y="90" maximum="1000" minimum="0" id="numChatMessages" />
+			
+			<s:Label right="86" y="124" text="Url shortening"/>
+			<s:DropDownList right="0" width="82" id="urlShortenComboBox" y="120" dataProvider="{new ArrayCollection(UrlShortener.types)}"/>
+			
+			<s:Label right="124" y="154" text="Set away (0 = never)"/>
+			<mx:NumericStepper right="56" y="150" maximum="120" minimum="0" id="awayTimeout" />
+			<s:Label right="0" y="154" text="minutes"/>
+		</mx:Canvas>
+
 	</mx:ViewStack>
 	
 	<popup:controlBarContent />

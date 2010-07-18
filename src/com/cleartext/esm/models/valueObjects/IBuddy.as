@@ -27,6 +27,9 @@ package com.cleartext.esm.models.valueObjects
 		function get unreadMessages():int;
 		function set unreadMessages(value:int):void;
 		
+		function get microBloggingServiceType():String;
+		function set microBloggingServiceType(value:String):void;
+		
 		// not storred in database
 		
 		function get isPerson():Boolean;

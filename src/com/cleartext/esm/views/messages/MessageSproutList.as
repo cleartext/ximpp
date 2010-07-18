@@ -39,7 +39,6 @@ package com.cleartext.esm.views.messages
 
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
-
 			if(chat && !chat.isMicroBlogging && !chat.isGroup)
 			{
 				var previousJid:String;

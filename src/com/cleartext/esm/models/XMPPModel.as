@@ -6,6 +6,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.events.XmppErrorEvent;
 	import com.cleartext.esm.models.types.ChatStateTypes;
 	import com.cleartext.esm.models.types.IQTypes;
+	import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 	import com.cleartext.esm.models.types.SubscriptionTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
@@ -564,16 +565,23 @@ package com.cleartext.esm.models
 			// and if if exists on the server
 			
 			var mblogComponentJid:String = "cleartext." + settings.userAccount.host;
-			if(!buddies.containsJid(mblogComponentJid))
+			var mblogComponent:IBuddy = buddies.getBuddyByJid(mblogComponentJid);
+			if(mblogComponent)
+			{
+				mblogComponent.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
+			}
+			else
 			{
 				// findTransports() gives us a list of jids available on the server
 				findTransports(
 					function(jids:Array):void
 					{
+						// if the component exists on the server, then add it to our roster
 						if(jids.indexOf(mblogComponentJid) != -1)
 						{
 							b = new Buddy(mblogComponentJid);
-							b.nickname = "Cleartext Microblogging";
+							b.nickname = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
+							b.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
 							b.isMicroBlogging = true;
 							
 							buddies.addBuddy(b);

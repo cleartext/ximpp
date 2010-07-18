@@ -14,12 +14,14 @@
 			import com.cleartext.esm.models.BuddyModel;
 			import com.cleartext.esm.models.ChatModel;
 			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 			import com.cleartext.esm.models.types.SubscriptionTypes;
 			import com.cleartext.esm.models.utils.AvatarUtils;
 			import com.cleartext.esm.models.valueObjects.Buddy;
 			import com.cleartext.esm.models.valueObjects.IBuddy;
 			import com.cleartext.esm.models.valueObjects.Status;
 			
+			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.events.CloseEvent;
 			import mx.events.CollectionEvent;
@@ -47,7 +49,7 @@
 				super.init(event);
 				list.dataProvider = wrapArray(buddies.groups.toArray());
 				
-				gatewayComboBox.dataProvider = buddies.gatewayNames;
+				gatewayComboBox.dataProvider = new ArrayCollection(buddies.gatewayNames);
 			}
 			
 			override protected function submit(event:Event):void
@@ -56,7 +58,7 @@
 				{
 					var newJid:String = jidTextInput.text;
 					if(gatewayComboBox.selectedIndex > 0)
-						newJid = newJid.replace("@", "\\40") + "@" + gatewayComboBox.selectedLabel;
+						newJid = newJid.replace("@", "\\40") + "@" + gatewayComboBox.selectedItem;
 
 					// make sure we set the private var so we don't reset the other values
 					_buddy = new Buddy(newJid);
@@ -68,6 +70,8 @@
 				buddy.avatar = avatarInput.bitmapData;
 				buddy.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
 				buddy.isMicroBlogging = mBlogCheckbox.selected;
+				if(mBlogCheckbox.selected)
+					buddy.microBloggingServiceType = microBloggingServiceTypeComboBox.selectedItem;
 				
 				if(avatarInput.bitmapData == null)
 					buddy.avatarHash = null;
@@ -107,7 +111,7 @@
 				submitButton.label = "Save";
 				isValid = true;
 				
-				if(buddies.gatewayNames.indexOf(buddy.host) != -1)
+				if(!buddy.isGateway && buddies.gatewayNames.indexOf(buddy.host) != -1)
 				{
 					jidTextInput.text = buddy.username.replace("\\40", "@");
 					gatewayComboBox.selectedItem = buddy.host;
@@ -116,7 +120,8 @@
 				{
 					jidTextInput.text = buddy.jid;
 				}
-
+				
+				
 				jidTextInput.enabled = false;
 				gatewayComboBox.enabled = false;
 
@@ -125,6 +130,8 @@
 				openTabCheckBox.selected = buddy.autoOpenTab;
 				
 				mBlogCheckbox.selected = buddy.isMicroBlogging;
+				if(buddy.isMicroBlogging)
+					microBloggingServiceTypeComboBox.selectedItem = buddy.microBloggingServiceType;
 
 				for each(var g:Object in list.dataProvider)
 					g.selected = buddy.groups.indexOf(g.data) != -1;
@@ -184,7 +191,7 @@
 		</mx:FormItem>
 		
 		<mx:FormItem label="Gateway:">
-			<mx:ComboBox id="gatewayComboBox" />
+			<s:DropDownList id="gatewayComboBox" />
 		</mx:FormItem>
 		
 		<mx:FormItem label="Nickname:">
@@ -199,9 +206,17 @@
 		</mx:FormItem>
 		
 		<mx:FormItem>
-			<mx:CheckBox label="Add to work stream?" id="mBlogCheckbox"/>
+			<s:CheckBox label="Add to work stream?" id="mBlogCheckbox"/>
 		</mx:FormItem>
 
+		<mx:FormItem label="Microblogging Service:">
+			<s:DropDownList id="microBloggingServiceTypeComboBox"
+							dataProvider="{new ArrayCollection(MicroBloggingServiceTypes.TYPES)}" 
+							enabled="{mBlogCheckbox.selected}"
+							selectedIndex="0"
+							/>
+		</mx:FormItem>
+		
 		<mx:FormItem>
 			<mx:CheckBox label="Open new tab when message received?" id="openTabCheckBox" selected="true"/>
 		</mx:FormItem>

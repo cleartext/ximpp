@@ -1,6 +1,7 @@
 package com.cleartext.esm.models
 {
 	import com.cleartext.esm.events.LoadingEvent;
+	import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.BuddyRequest;
@@ -355,6 +356,9 @@ package com.cleartext.esm.models
 			newBuddy.openTab = obj["openTab"];
 			newBuddy.autoOpenTab = obj["autoOpenTab"];
 			newBuddy.unreadMessages = obj["unreadMessages"];
+			newBuddy.microBloggingServiceType = obj["microBloggingServiceType"];
+			if(MicroBloggingServiceTypes.TYPES.indexOf(newBuddy.microBloggingServiceType) == -1)
+				newBuddy.microBloggingServiceType = MicroBloggingServiceTypes.OTHER;
 			return newBuddy;
 		}
 		
@@ -733,7 +737,7 @@ package com.cleartext.esm.models
 			for each(var s:String in searchTerms)
 				sql += "plainMessage LIKE '%" + s + "%' OR ";
 			sql = sql.substr(0, sql.length-4);
-			sql += ") ORDER BY " + sortType;
+			sql += ") ORDER BY " + sortType + " DESC";
 			
 			var result:SQLResult = execute(sql);
 			if(result && result.data)

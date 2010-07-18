@@ -32,11 +32,11 @@ package com.universalsprout.flex.components.list
 		protected var collection:ListCollectionView;
 		protected var list:IList;
 		public var itemRenderersByDataUid:Dictionary = new Dictionary();
-	
+		
 		protected var resetItemRenderers:Boolean = true;
 		
 		protected var bottomOfListComponent:UIComponent;
-
+		
 		private var addingItem:Boolean = false;
 		
 		private var _itemRenderer:IFactory;
@@ -69,7 +69,7 @@ package com.universalsprout.flex.components.list
 				collection.removeEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler);
 				collection.removeEventListener("listChanged", listChangedHandler);
 			}
-	
+			
 			if (value is Array)
 			{
 				collection = new ArrayCollection(value as Array);
@@ -86,7 +86,7 @@ package com.universalsprout.flex.components.list
 			{
 				var colTemp:ArrayCollection = new ArrayCollection();
 				for each(var item:Object in Dictionary)
-					colTemp.addItem(item);
+				colTemp.addItem(item);
 				collection = colTemp;
 			}
 			else if (value is XML)
@@ -103,11 +103,11 @@ package com.universalsprout.flex.components.list
 					tmp.push(value);
 				collection = new ArrayCollection(tmp);
 			}
-	
+			
 			collection.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler, false, 0, true);
 			collection.addEventListener("listChanged", listChangedHandler, false, 0, true);
 			listChangedHandler(null);
-	
+			
 			resetItemRenderers = true;
 			invalidateProperties();
 		}
@@ -122,7 +122,7 @@ package com.universalsprout.flex.components.list
 			if(list)
 				list.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangeHandler, false, 0, true);
 		}
-	
+		
 		protected function collectionChangeHandler(event:CollectionEvent):void
 		{
 			if(event.kind == CollectionEventKind.RESET)
@@ -135,7 +135,7 @@ package com.universalsprout.flex.components.list
 				invalidateDisplayList();
 			}
 		}
-				
+		
 		override protected function createChildren():void
 		{
 			super.createChildren();
@@ -180,7 +180,7 @@ package com.universalsprout.flex.components.list
 			
 			if(addingItem)
 				return;
-
+			
 			for each(item in itemRenderersByDataUid)
 			{
 				if(item.visible)// && !collection.contains(item.data))
@@ -189,16 +189,16 @@ package com.universalsprout.flex.components.list
 					item.setIncludeInLayout(false, true);
 				}
 			}
-
+			
 			var itemWidth:Number = unscaledWidth - viewMetricsAndPadding.left - viewMetricsAndPadding.right;
 			var extraRenderers:int = 5;
-
+			
 			var yCounter:Number = 0;
 			var vGap:Number = getStyle("verticalGap");
-
+			
 			var childIndex:int = 0;
 			addingItem = false;
-
+			
 			for each(var data:ISproutListData in collection)
 			{
 				var item:ISproutListRenderer = itemRenderersByDataUid[data.uid]; 
@@ -219,9 +219,9 @@ package com.universalsprout.flex.components.list
 					item.setIncludeInLayout(true, true);
 					setChildIndex(DisplayObject(item), childIndex);
 				}
-
+				
 				childIndex++;
-
+				
 				if(animate && !addingItem)
 					item.yTo = yCounter;
 				else
@@ -231,7 +231,7 @@ package com.universalsprout.flex.components.list
 				
 				if(virtualList && (yCounter > verticalScrollPosition + unscaledHeight))
 					extraRenderers--;
-
+				
 				if(extraRenderers < 1)
 				{
 					var estimatedHeight:Number = (yCounter+vGap)/childIndex * collection.length;
