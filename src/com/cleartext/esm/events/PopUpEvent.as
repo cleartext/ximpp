@@ -10,6 +10,8 @@ package com.cleartext.esm.events
 		public static const SEARCH_WINDOW:String = "searchWindow";
 		public static const XML_INPUT_WINDOW:String = "xmlInputWindow";
 
+		public static const ADD_TWITTER_WINDOW:String = "addTwitterWindow";
+
 		public static const ADD_GATEWAY_WINDOW:String = "addGatewayWindow";
 
 		public static const JOIN_GROUP_CHAT:String = "joinGroupChatWindow";

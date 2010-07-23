@@ -36,9 +36,6 @@ package com.cleartext.esm.models.valueObjects
 		function get isGateway():Boolean;
 		function get isMicroBlogging():Boolean;
 		function set isMicroBlogging(value:Boolean):void;
-
-		function get isTyping():Boolean;
-		function set isTyping(value:Boolean):void;
 		
 		function get tempAvatarHash():String;
 		function set tempAvatarHash(value:String):void;

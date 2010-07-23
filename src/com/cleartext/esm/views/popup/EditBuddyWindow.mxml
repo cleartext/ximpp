@@ -70,9 +70,7 @@
 				buddy.avatar = avatarInput.bitmapData;
 				buddy.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
 				buddy.isMicroBlogging = mBlogCheckbox.selected;
-				if(mBlogCheckbox.selected)
-					buddy.microBloggingServiceType = microBloggingServiceTypeComboBox.selectedItem;
-				
+
 				if(avatarInput.bitmapData == null)
 					buddy.avatarHash = null;
 
@@ -130,8 +128,6 @@
 				openTabCheckBox.selected = buddy.autoOpenTab;
 				
 				mBlogCheckbox.selected = buddy.isMicroBlogging;
-				if(buddy.isMicroBlogging)
-					microBloggingServiceTypeComboBox.selectedItem = buddy.microBloggingServiceType;
 
 				for each(var g:Object in list.dataProvider)
 					g.selected = buddy.groups.indexOf(g.data) != -1;
@@ -208,20 +204,12 @@
 		<mx:FormItem>
 			<s:CheckBox label="Add to work stream?" id="mBlogCheckbox"/>
 		</mx:FormItem>
-
-		<mx:FormItem label="Microblogging Service:">
-			<s:DropDownList id="microBloggingServiceTypeComboBox"
-							dataProvider="{new ArrayCollection(MicroBloggingServiceTypes.TYPES)}" 
-							enabled="{mBlogCheckbox.selected}"
-							selectedIndex="0"
-							/>
-		</mx:FormItem>
 		
 		<mx:FormItem>
 			<mx:CheckBox label="Open new tab when message received?" id="openTabCheckBox" selected="true"/>
 		</mx:FormItem>
 
-		<mx:FormItem label="Groups:" enabled="{(buddy as Object).isGateway || !mBlogCheckbox.selected}">
+		<mx:FormItem label="Groups:" enabled="{!((buddy as Object).isGateway || mBlogCheckbox.selected)}">
 			<s:List id="list" width="250" height="220"
 					focusEnabled="false" alternatingItemColors="[#f3f3f3, #ffffff]">
 				<s:itemRenderer>

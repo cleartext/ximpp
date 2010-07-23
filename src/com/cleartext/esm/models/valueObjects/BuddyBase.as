@@ -255,19 +255,6 @@ package com.cleartext.esm.models.valueObjects
 		public function set isMicroBlogging(value:Boolean):void
 		{
 		}
-		
-		//----------------------------------------
-		//  IS TYPING
-		//----------------------------------------
-		
-		[Bindable (event="isTypingChange")]
-		public function get isTyping():Boolean
-		{
-			return false;
-		}
-		public function set isTyping(value:Boolean):void
-		{
-		}
 
 		//----------------------------------------
 		//  TEMP AVATAR HASH

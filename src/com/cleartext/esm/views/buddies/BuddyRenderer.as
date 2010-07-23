@@ -353,7 +353,8 @@ package com.cleartext.esm.views.buddies
 			// set values
 			customStatusLabel.text = buddy.customStatus;
 			nameLabel.text = buddy.nickname;
-			statusIcon.status.value = buddy.status.value;
+			statusIcon.statusString = buddy.status.value;
+			statusIcon.isTyping = buddy.status.isTyping;
 			if(unreadMessageBadge.count != buddy.unreadMessages)
 			{
 				unreadMessageBadge.count = buddy.unreadMessages;

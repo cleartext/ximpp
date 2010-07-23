@@ -4,7 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:popup="com.cleartext.esm.views.popup.*"
-	title="Checking Link"
+	title="Checking Link..."
 	submitButtonLabel="Visit link anyway"
 	isValid="true">
 	

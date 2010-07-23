@@ -1,5 +1,6 @@
 package com.cleartext.esm.views.common
 {
+	import com.cleartext.esm.assets.Constants;
 	import com.cleartext.esm.events.StatusEvent;
 	import com.cleartext.esm.models.valueObjects.Status;
 	
@@ -38,73 +39,84 @@ package com.cleartext.esm.views.common
 		public function StatusIcon()
 		{
 			super();
-			status.addEventListener(StatusEvent.STATUS_CHANGED, statusChanged);
 		}
 		
-		private var _status:Status = new Status();
-		public function get status():Status
-		{
-			return _status;
-		}
 		private var colour:uint = DEFAULT;
 		private var baseColour:uint = DEFAULT_B;
 		
-		public function statusChanged(event:StatusEvent):void
+		private var _statusString:String;
+		public function set statusString(value:String):void
 		{
-			switch(status.value)
+			if(_statusString != value)
 			{
-				case Status.AVAILABLE :
-					colour = GREEN;
-					baseColour = GREEN_B;
-					break;
-				case Status.AWAY :
-					colour = ORANGE;
-					baseColour = ORANGE_B;
-					break;
-				case Status.BUSY :
-					colour = RED;
-					baseColour = RED_B;
-					break;
-				case Status.CONNECTING :
-					colour = TURQUOISE;
-					baseColour = TURQUOISE_B;
-					break;
-				case Status.EXTENDED_AWAY :
-					colour = ORANGE;
-					baseColour = ORANGE_B;
-					break;
-				case Status.ERROR :
-					colour = RED;
-					baseColour = RED_B;
-					break;
-				default :
-					colour = DEFAULT;
-					baseColour = DEFAULT_B;
-					break;
+				_statusString = value;
+				switch(value)
+				{
+					case Status.AVAILABLE :
+						colour = GREEN;
+						baseColour = GREEN_B;
+						break;
+					case Status.AWAY :
+						colour = ORANGE;
+						baseColour = ORANGE_B;
+						break;
+					case Status.BUSY :
+						colour = RED;
+						baseColour = RED_B;
+						break;
+					case Status.CONNECTING :
+						colour = TURQUOISE;
+						baseColour = TURQUOISE_B;
+						break;
+					case Status.EXTENDED_AWAY :
+						colour = ORANGE;
+						baseColour = ORANGE_B;
+						break;
+					case Status.ERROR :
+						colour = RED;
+						baseColour = RED_B;
+						break;
+					default :
+						colour = DEFAULT;
+						baseColour = DEFAULT_B;
+						break;
+				}
+				invalidateDisplayList();
 			}
-			
-			invalidateDisplayList();
 		}
 		
-		public function set statusString(statusString:String):void
+		private var _isTyping:Boolean = false;
+		public function set isTyping(value:Boolean):void
 		{
-			_status.value = statusString;
+			if(_isTyping != value)
+			{
+				_isTyping = value;
+				invalidateDisplayList();
+			}
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			var g:Graphics = graphics;
 			g.clear();
-
-			var matr1:Matrix = new Matrix();
-			matr1.createGradientBox(SIZE, SIZE, Math.PI/2, 0, 0);
-			g.beginGradientFill(GradientType.LINEAR, [colour, baseColour], [1, 1], [0x00, 0xFF], matr1);  
-			g.drawCircle(SIZE/2, SIZE/2, SIZE/2);
 			
-			g.beginGradientFill(GradientType.LINEAR, [0x636363, 0xe5e5e5], [1, 1], [0x00, 0xFF], matr1);
-			g.drawCircle(SIZE/2, SIZE/2, SIZE/2);
-			g.drawCircle(SIZE/2, SIZE/2, SIZE/2-1);
+			if(_isTyping)
+			{
+				var bmd:BitmapData = new Constants.IsTyping().bitmapData;
+				g.beginBitmapFill(bmd);
+				g.drawRect(0,0,SIZE,SIZE);
+			}
+			else
+			{
+				var matr1:Matrix = new Matrix();
+				matr1.createGradientBox(SIZE, SIZE, Math.PI/2, 0, 0);
+				g.beginGradientFill(GradientType.LINEAR, [colour, baseColour], [1, 1], [0x00, 0xFF], matr1);  
+				g.drawCircle(SIZE/2, SIZE/2, SIZE/2);
+				
+				g.beginGradientFill(GradientType.LINEAR, [0x636363, 0xe5e5e5], [1, 1], [0x00, 0xFF], matr1);
+				g.drawCircle(SIZE/2, SIZE/2, SIZE/2);
+				g.drawCircle(SIZE/2, SIZE/2, SIZE/2-1);
+			}
 		}
-
 	}
 }

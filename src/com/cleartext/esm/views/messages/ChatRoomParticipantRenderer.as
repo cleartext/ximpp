@@ -96,7 +96,8 @@ package com.cleartext.esm.views.messages
 	
 			// set values
 			nameLabel.text = (participant as IHasJid).nickname;
-			statusIcon.status.value = participant.status.value;
+			statusIcon.statusString = participant.status.value;
+			statusIcon.isTyping = participant.status.isTyping;
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void

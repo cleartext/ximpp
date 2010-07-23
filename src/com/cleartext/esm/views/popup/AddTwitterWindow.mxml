@@ -6,67 +6,109 @@
 	xmlns:popup="com.cleartext.esm.views.popup.*"
 	title="Add Twitter"
 	submitButtonLabel="Add"
+	height="180"
 	>
 	
 	<fx:Script>
 		<![CDATA[
+			import com.cleartext.esm.events.XmppErrorEvent;
+			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.SettingsModel;
 			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
+			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.valueObjects.FormField;
+			import com.cleartext.esm.models.valueObjects.FormObject;
+			import com.seesmic.as3.xmpp.IqStanza;
 			
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			
+			import org.swizframework.Swiz;
+			
 			[Autowire]
 			public var xmpp:XMPPModel;
 			
-			private var transportJids:Array;
+			[Autowire]
+			public var buddies:BuddyModel;
 			
+			private var formObject:FormObject;
+			
+			// start by getting the list of transports available
+			override protected function init(event:Event):void
+			{
+				xmpp.addTransport(xmpp.twitterGatewayJid, twitterFormHandler);
+			}
+			
+			// create the form object and try to find the url value
+			private function twitterFormHandler(iqStanza:IqStanza):void
+			{
+				namespace jabberData = "jabber:x:data";
+				var x:Object = iqStanza.query.jabberData::x;
+				if(x && x[0])
+				{
+					// create the form
+					formObject = xmpp.createForm(x[0], iqStanza.from);
+					
+					var url:String;
+					var hasPin:Boolean = false;
+					for each(var field:FormField in formObject.fields)
+					{
+						if(field.varName == "url")
+							url = field.value.toString();
+						else if(field.varName == "pin")
+							hasPin = true;
+					}
+					
+					// if we have the url and a pin field, then go
+					// to the url
+					if(url && hasPin)
+					{
+						message.htmlText = 
+							"<font color='#0033ff'><u><a href='" + url + 
+							"'>Click here</a></u></font> to enter your " +
+							"details into twitter, then type in your pin in the box below.";
+						pin.visible = true;
+						return;
+					}
+				}
+				
+				// if we didn't get a valid form, then let the user
+				// know
+				message.htmlText = "ERROR :: unknown form type";
+			}
+			
+			// set the pin value of the form object and submit it
 			override protected function submit(event:Event):void
 			{
-				xmpp.addTransport(list.selectedItem as String);
+				for each(var field:FormField in formObject.fields)
+					if(field.varName == "pin")
+						field.value = pin.text;
+					
+				xmpp.submitForm(formObject);
+				
 				closeWindow();
 			}
 			
-			override protected function init(event:Event):void
-			{
-				// get the list of transports
-				// go through each one and do a disco#info looking for
-				// <identity category="gateway" type="twitter" name="Twitter Transport" />
-				xmpp.findTransports(foundTransportJids);
-				
-				// register to twitter gateway and get the url back
-				
-				// now render the url in a webkit browser
-				
-				// get the pin and type into a text field
-				
-				//now submit
-			}
-			
-			private function foundTransportJids(array:Array):void
-			{
-				transportJids = array;
-				
-				for each(var jid:String in transportJids)
-				{
-					xmpp.discoveryInfo(jid, discoveryInfoHandler);
-				}
-			}
-			
-			private function discoveryInfoHandler(xml:Object):void
-			{
-				
-			}
-			
+			// check if the user has entered a pin
 			override protected function validateForm():void
 			{
-				isValid = list.selectedItem != null;
+				isValid = pin.text != "";
 			}
 			
 		]]>
 	</fx:Script>
 	
-	<s:Label width="400" text="Finding Twitter gateway..." />
+		<mx:Text id="message" width="400" htmlText="Connecting to Twitter gateway..." 
+				 paddingTop="10" paddingRight="10"
+				 paddingBottom="10" paddingLeft="10"/>
 	
+		<s:TextInput id="pin" width="80" change="validateForm()"
+					 visible="false"
+					 x="40" y="65"
+					 paddingTop="5" paddingRight="5" 
+					 paddingBottom="5" paddingLeft="5"/>
+		
 	<popup:controlBarContent />
 	
 </popup:PopupWindowBase>

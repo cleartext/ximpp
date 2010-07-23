@@ -204,25 +204,6 @@ package com.cleartext.esm.models.valueObjects
 		//  RESOURCE
 		//----------------------------------------
 		
-		private var _isTyping:Boolean = false;
-		[Bindable (event="isTypingChange")]
-		override public function get isTyping():Boolean
-		{
-			return _isTyping;
-		}
-		override public function set isTyping(value:Boolean):void
-		{
-			if(isTyping != value)
-			{
-				_isTyping = value;
-				dispatchEvent(new Event("isTypingChange"));
-			}
-		}
-
-		//----------------------------------------
-		//  RESOURCE
-		//----------------------------------------
-		
 		public var resource:String;
 		
 		//----------------------------------------

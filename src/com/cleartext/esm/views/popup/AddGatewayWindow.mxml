@@ -10,6 +10,7 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import com.cleartext.esm.models.SettingsModel;
 			import com.cleartext.esm.models.XMPPModel;
 			
 			import mx.collections.ArrayCollection;
@@ -17,6 +18,9 @@
 			
 			[Autowire]
 			public var xmpp:XMPPModel;
+			
+			[Autowire]
+			public var settings:SettingsModel;
 			
 			override protected function submit(event:Event):void
 			{
@@ -26,7 +30,7 @@
 			
 			override protected function init(event:Event):void
 			{
-				xmpp.findTransports(function(dp:Array):void { list.dataProvider = new ArrayCollection(dp); });
+				xmpp.discoveryItems(settings.userAccount.host, function(dp:Array):void { list.dataProvider = new ArrayCollection(dp); });
 			}
 
 			override protected function validateForm():void

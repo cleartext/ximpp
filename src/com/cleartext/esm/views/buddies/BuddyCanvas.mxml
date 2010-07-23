@@ -41,6 +41,12 @@
 			
 			import org.swizframework.Swiz;
 			
+			private static const ADD_BUDDY:String = "Add Buddy";
+			private static const ADD_TWITTER:String = "Add Twitter";
+			private static const ADD_GATEWAY:String = "Add Gateway";
+			private static const ADD_GROUP:String = "Add Group";
+			private static const JOIN_GROUP_CHAT:String = "Join Group Chat";
+			
 			[Autowire]
 			[Bindable]
 			public var appModel:ApplicationModel;
@@ -232,56 +238,59 @@
 			
 			public function showAddCanvas(event:MouseEvent):void
 			{
-				if(showingAddCanvas)
+				if(addCanvas)
 					return;
 				
-				if(!addCanvas)
+				addCanvas = new VBox();
+				addCanvas.setStyle("backgroundColor", 0xffffff);
+				addCanvas.setStyle("borderColor", 0x898989);
+				addCanvas.setStyle("borderStyle", "solid");
+				for each(var label:String in [ADD_BUDDY, ADD_TWITTER, ADD_GATEWAY, ADD_GROUP, JOIN_GROUP_CHAT])
 				{
-					addCanvas = new VBox();
-					addCanvas.setStyle("backgroundColor", 0xffffff);
-					addCanvas.setStyle("borderColor", 0x898989);
-					addCanvas.setStyle("borderStyle", "solid");
-					for each(var label:String in ["Add buddy", "Add gateway", "Add group", "Join group chat"])
-					{
-						var btn:LinkButton = new LinkButton();
-						btn.label = label;
-						btn.width = 160;
-						btn.setStyle("rollOverColor", soundColor.themeColor);
-						btn.setStyle("selectionColor", soundColor.themeColor);
-						btn.setStyle("textAlign", "left");
-						btn.addEventListener(MouseEvent.CLICK, linkButtonClickHandler, false, 0, true);
-						addCanvas.addChild(btn);
-					}
-					addCanvas.setActualSize(110, 75);
+					if(label == ADD_TWITTER && xmppModel.twitterGatewayJid && buddies.containsJid(xmppModel.twitterGatewayJid))
+						continue;
+					
+					var btn:LinkButton = new LinkButton();
+					btn.label = label;
+					btn.width = 160;
+					btn.setStyle("rollOverColor", soundColor.themeColor);
+					btn.setStyle("selectionColor", soundColor.themeColor);
+					btn.setStyle("textAlign", "left");
+					btn.addEventListener(MouseEvent.CLICK, linkButtonClickHandler, false, 0, true);
+					addCanvas.addChild(btn);
 				}
+				addCanvas.setActualSize(110, 75);
+
 				PopUpManager.addPopUp(addCanvas, this);
 				var point:Point = bottomPanel.localToGlobal(new Point(0,-addCanvas.height));
 				addCanvas.move(point.x+3, point.y);
 				callLater(systemManager.addEventListener, [MouseEvent.CLICK, hideAddCanvas]);
-				showingAddCanvas = true;
 			}
 			
 			private function hideAddCanvas(event:MouseEvent):void
 			{
 				systemManager.removeEventListener(MouseEvent.CLICK, hideAddCanvas);
 				PopUpManager.removePopUp(addCanvas);
-				showingAddCanvas = false;
+				addCanvas = null;
 			}
 			
 			private function linkButtonClickHandler(event:MouseEvent):void
 			{
 				switch(event.target.label)
 				{
-					case "Add buddy" :
+					case ADD_BUDDY :
 						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_BUDDY_WINDOW))
 						break;
-					case "Add gateway" :
+					case ADD_GATEWAY :
 						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_GATEWAY_WINDOW))
 						break;
-					case "Add group" :
+					case ADD_TWITTER :
+						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_TWITTER_WINDOW))
+						break;
+					case ADD_GROUP :
 						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.ADD_GROUP_WINDOW))
 						break;
-					case "Join group chat" :
+					case JOIN_GROUP_CHAT :
 						Swiz.dispatchEvent(new PopUpEvent(PopUpEvent.JOIN_GROUP_CHAT))
 						break;
 				}

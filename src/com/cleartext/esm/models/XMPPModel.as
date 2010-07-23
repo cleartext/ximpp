@@ -147,7 +147,10 @@ package com.cleartext.esm.models
 
 		// the seesmic xmpp object 
 		private var xmpp:XMPP;
-				
+		
+		public var cleartextComponentJid:String;
+		public var twitterGatewayJid:String;
+		
 		//------------------------------------------------------------------
 		//
 		//   CONSTRUCTOR
@@ -347,7 +350,7 @@ package com.cleartext.esm.models
 				if(buddy is Buddy)
 					(buddy as Buddy).resource = messageStanza.from.resource;
 
-				buddy.isTyping = false;
+				buddy.status.isTyping = false;
 				database.saveMessage(message);
 			}
 
@@ -381,7 +384,7 @@ package com.cleartext.esm.models
 			var buddy:Buddy = appModel.getBuddyByJid(fromJid) as Buddy;
 
 			if(buddy)
-				buddy.isTyping = (chatState == ChatStateTypes.COMPOSING);
+				buddy.status.isTyping = (chatState == ChatStateTypes.COMPOSING);
 		}
 		
 		//------------------------------------------------------------------
@@ -561,39 +564,19 @@ package com.cleartext.esm.models
 
 			gotRosterList = true;
 			
-			// now we need to check if cleartext.users.domain exists in our buddy list
-			// and if if exists on the server
-			
-			var mblogComponentJid:String = "cleartext." + settings.userAccount.host;
-			var mblogComponent:IBuddy = buddies.getBuddyByJid(mblogComponentJid);
-			if(mblogComponent)
-			{
-				mblogComponent.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
-			}
-			else
-			{
-				// findTransports() gives us a list of jids available on the server
-				findTransports(
-					function(jids:Array):void
-					{
-						// if the component exists on the server, then add it to our roster
-						if(jids.indexOf(mblogComponentJid) != -1)
-						{
-							b = new Buddy(mblogComponentJid);
-							b.nickname = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
-							b.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
-							b.isMicroBlogging = true;
-							
-							buddies.addBuddy(b);
-							appModel.chats.getChat(b, true);
-							addToRoster(b);
-						}
-					});
-			}
+			// discoveryItems() gives us a list of jids available on the server
+			discoveryItems(settings.userAccount.host,
+				function(jids:Array):void
+				{
+					for each(var j:String in jids)
+						discoveryInfo(j, testForMicroBloggingComponents);
+				});
 		}
 		
 		//-------------------------------
-		// ROSTER CHANGED HANDLER - CALLED WHENEVER THE ROSTER LIST CHANGES AFTER CONNECTION
+		// ROSTER CHANGED HANDLER
+		// 
+		// called whenever the roster list changes
 		//-------------------------------
 		
 		private function rosterListChangeHandler(event:XMPPEvent):void
@@ -630,11 +613,69 @@ package com.cleartext.esm.models
 				buddy.nickname = event.stanza["name"];
 				buddy.subscription = subscription;
 				
+				discoveryInfo(buddy.jid, testForMicroBloggingComponents);
+				
 				requests.setSubscription(jid, buddy.nickname, buddy.subscription);
 			}
 			buddies.refresh();
 		}
 
+		//-------------------------------
+		// TEST FOR MICRO BLOGGING COMPONENTS
+		//
+		// Every time we get the roster list we get a list of transports on the server
+		// and do a discovery info on them with this function as a handler. When
+		// the server tells us that a new item is added to the roster we also do a
+		// discovery info with this function as a handler.
+		//-------------------------------
+		
+		private function testForMicroBloggingComponents(iqStanza:IqStanza):void
+		{
+			// if this is a cleartext microblogging component
+			// then check it is in the roster list
+			if(iqStanza.from == "cleartext." + settings.userAccount.host)
+			{
+				cleartextComponentJid = iqStanza.from;
+				// if this is in the roster list, then check we have the right
+				// microBloggingServiceType
+				if(buddies.containsJid(cleartextComponentJid))
+				{
+					buddies.getBuddyByJid(cleartextComponentJid).microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
+				}
+				// otherwise add it to the roster
+				else
+				{
+					var b:Buddy = new Buddy(cleartextComponentJid);
+					b.nickname = "Cleartext MicroBlogging";
+					b.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
+					b.isMicroBlogging = true;
+					buddies.addBuddy(b);
+					addToRoster(b);
+				}
+			}
+			else if(iqStanza.query.discoInfo::identity)
+			{
+				// if this is the status one twitter gateway, then set
+				// the twitterGatewayJid
+				var identity:XML = iqStanza.query.discoInfo::identity[0];
+				if(identity && identity.@category == "gateway" && identity.@type == "twitter")
+				{
+					twitterGatewayJid = iqStanza.from;
+
+					// if we have the twitter gataway in the roster
+					// then make sure it has the right settings
+					if(buddies.containsJid(twitterGatewayJid))
+					{
+						var t:IBuddy = buddies.getBuddyByJid(twitterGatewayJid);
+						t.isMicroBlogging = true;
+						t.microBloggingServiceType = MicroBloggingServiceTypes.STATUS_ONE_TWITTER;
+						if(t.nickname == t.jid)
+							t.nickname = "Twitter";
+					}
+				}
+			}
+		}
+		
 		//-------------------------------
 		// ADD TO ROSTER 
 		//-------------------------------
@@ -740,6 +781,15 @@ package com.cleartext.esm.models
 			appModel.log("modifyRosterHandler");
 		}
 
+		//-------------------------------
+		//  IS TWITTER GATEWAY
+		//-------------------------------
+		
+		private function isTwitterGateway(jid:String):Boolean
+		{
+			return false;
+		}
+		
 		//------------------------------------------------------------------
 		//
 		//   VCARD HANDLERS
@@ -961,7 +1011,7 @@ package com.cleartext.esm.models
 		{
 			var x:Object = iqStanza.query.mucOwner::x;
 			if(x && x[0])
-				createForm(x[0], iqStanza.from);
+				Swiz.dispatchEvent(new FormEvent(FormEvent.NEW_FORM, createForm(x[0], iqStanza.from)));
 			else
 				Swiz.dispatchEvent(new XmppErrorEvent(XmppErrorEvent.ERROR, "unable to create new chat room at " + iqStanza.from, iqStanza.from, iqStanza.error));
 		}
@@ -1074,7 +1124,7 @@ package com.cleartext.esm.models
 				var id:String = iqStanza.id;
 				if(iqVariables.hasOwnProperty(id))
 				{
-					(iqVariables[id] as Function)(iqStanza.query);
+					(iqVariables[id] as Function)(iqStanza);
 					delete iqVariables[id];
 				}
 			}
@@ -1084,12 +1134,13 @@ package com.cleartext.esm.models
 		// DISCOVERY ITEMS
 		//-------------------------------
 
-		public function discoveryItems(toJid:String):void
+		public function discoveryItems(toJid:String, handler:Function):void
 		{
 			sendIq(toJid,
 					IQTypes.GET,
 					<query xmlns={DISCO_ITEMS_NS}/>,
-					discoveryItemsHandler);
+					discoveryItemsHandler,
+					handler);
 		}
 
 		//-------------------------------
@@ -1104,9 +1155,7 @@ package com.cleartext.esm.models
 				var result:Array = new Array();
 				for each(var item:XML in items)
 				{
-					var jid:String = item.@jid.toString();
-					if(!buddies.containsJid(jid))
-						result.push(jid);
+					result.push(item.@jid.toString());
 				}
 
 				var id:String = iqStanza.id;
@@ -1123,32 +1172,18 @@ package com.cleartext.esm.models
 		//   TRANSPORTS
 		//
 		//------------------------------------------------------------------
-		
-		//-------------------------------
-		//  FIND TRANSPORTS
-		//-------------------------------
-		
-		// get all the transports on the server, put them in an
-		// array and pass that array into a handler function
-		public function findTransports(handler:Function):void
-		{
-			sendIq(settings.userAccount.host,
-					IQTypes.GET,
-					<query xmlns={DISCO_ITEMS_NS}/>,
-					discoveryItemsHandler,
-					handler);
-		}
-		
+				
 		//-------------------------------
 		//  ADD TRANSPORT
 		//-------------------------------
 
-		public function addTransport(toJid:String):void
+		public function addTransport(toJid:String, handler:Function=null):void
 		{
 			sendIq(toJid,
 					IQTypes.GET,
 					<query xmlns={JABBER_REGISTER_NS}/>,
-					addTransportHandler);
+					addTransportHandler,
+					handler);
 		}
 		
 		//-------------------------------
@@ -1157,9 +1192,16 @@ package com.cleartext.esm.models
 
 		public function addTransportHandler(iqStanza:IqStanza):void
 		{
+			var handler:Function = iqVariables[iqStanza.id];
+			if(handler != null)
+			{
+				handler(iqStanza);
+				return;
+			}
+			
 			var x:Object = iqStanza.query.jabberData::x;
 			if(x && x[0])
-				createForm(x[0], iqStanza.from);
+				Swiz.dispatchEvent(new FormEvent(FormEvent.NEW_FORM, createForm(x[0], iqStanza.from)));
 			else
 				Swiz.dispatchEvent(new XmppErrorEvent(XmppErrorEvent.ERROR, "unable to connect to " + iqStanza.from, iqStanza.from, iqStanza.error));
 		}
@@ -1174,7 +1216,7 @@ package com.cleartext.esm.models
 		//  CREATE FORM
 		//-------------------------------
 
-		public function createForm(xml:Object, fromJid:String):void
+		public function createForm(xml:Object, fromJid:String):FormObject
 		{
 			var form:FormObject = new FormObject();
 			form.instructions = xml.jabberData::instructions;
@@ -1196,15 +1238,14 @@ package com.cleartext.esm.models
 					form.fields.push(f);
 				}
 			}
-			
-			Swiz.dispatchEvent(new FormEvent(FormEvent.NEW_FORM, form));
+			return form;
 		}
-
+		
 		//-------------------------------
 		//  SUBMIT FORM
 		//-------------------------------
 
-		public function submitForm(form:FormObject):void
+		public function submitForm(form:FormObject, handler:Function=null):void
 		{
 			var query:XML = <query xmlns={JABBER_REGISTER_NS} />;
 			var xData:XML = <x xmlns={JABBER_DATA_NS} type='submit'/>;
@@ -1220,7 +1261,8 @@ package com.cleartext.esm.models
 			sendIq(form.from,
 				IQTypes.SET,
 				query,
-				submitFormHandler);
+				submitFormHandler,
+				handler);
 		}
 
 		//-------------------------------
@@ -1229,7 +1271,12 @@ package com.cleartext.esm.models
 
 		public function submitFormHandler(iqStanza:IqStanza):void
 		{
-			if(iqStanza.type=='error')
+			var handler:Function = iqVariables[iqStanza.id];
+			if(handler != null)
+			{
+				handler(iqStanza);
+			}
+			else if(iqStanza.type=='error')
 			{
 				Swiz.dispatchEvent(new XmppErrorEvent(XmppErrorEvent.ERROR, "Sorry, " + iqStanza.from + " refused your form, please try again.", iqStanza.from, iqStanza.error));
 			}

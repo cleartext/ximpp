@@ -2,7 +2,6 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:common="com.cleartext.esm.views.common.*"
 	clipContent="false"
-	creationComplete="isTypingIcon.visible=false"
 	xmlns:s="library://ns.adobe.com/flex/spark">
 	<mx:Script>
 		<![CDATA[
@@ -165,15 +164,10 @@
 	</mx:Script>
 	
 	<common:StatusIcon
-		visible="{!(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY || buddy.isTyping)}"
-		statusString="{buddy.status.value}" 
+		visible="{buddy != Buddy.ALL_MICRO_BLOGGING_BUDDY}"
+		statusString="{buddy.status.value}"
+		isTyping="{buddy.status.isTyping}"
 		x="10" y="6"/>
-	
-	<mx:Image 
-		id="isTypingIcon"
-		source="{Constants.IsTyping}" 
-		x="10" y="6" 
-		visible="{buddy.isTyping}"/>
 	
 	<mx:Label 
 		text="{buddy.nickname}" 
