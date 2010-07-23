@@ -640,7 +640,9 @@ package com.cleartext.esm.models
 				// microBloggingServiceType
 				if(buddies.containsJid(cleartextComponentJid))
 				{
-					buddies.getBuddyByJid(cleartextComponentJid).microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
+					var cleartext:IBuddy = buddies.getBuddyByJid(cleartextComponentJid);
+					cleartext.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
+					cleartext.isMicroBlogging = true;
 				}
 				// otherwise add it to the roster
 				else
