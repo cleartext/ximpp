@@ -202,7 +202,7 @@
 					</mx:VBox>
 				</mx:FormItem>
 				<mx:FormItem label="Profile picture:" direction="horizontal">
-					<common:Avatar id="avatarInput" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" buttonMode="true" editClicked="changeAvatar()" />
+					<common:Avatar id="avatarInput" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editMode="true" editClicked="changeAvatar()" />
 				</mx:FormItem>
 				
 				<mx:FormItem label="Account id:">

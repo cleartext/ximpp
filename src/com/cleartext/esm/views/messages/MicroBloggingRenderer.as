@@ -3,6 +3,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.assets.Constants;
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.events.InputTextEvent;
+	import com.cleartext.esm.events.LinkEvent;
 	import com.cleartext.esm.models.XMPPModel;
 	import com.cleartext.esm.models.types.MicroBloggingTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
@@ -122,36 +123,33 @@ package com.cleartext.esm.views.messages
 					break;
 			}
 		}
+		
+		private function goToProfile(event:MouseEvent):void
+		{
+			if(mBlogSender && mBlogSender.profileUrl)
+				Swiz.dispatchEvent(new LinkEvent(LinkEvent.LINK_CLICKED, mBlogSender.profileUrl));
+		}
 
 		private function button_clickHandler(event:MouseEvent):void
 		{
-			if(event.target == avatar)
+			switch(event.target.data)
 			{
-				if(mBlogSender.profileUrl)
-					navigateToURL(new URLRequest(mBlogSender.profileUrl));
+				case "reply" :
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "@" + message.mBlogSender.userName + " "));
+					break;
+				case "retweet" :
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + message.mBlogSender.userName + " : " + bodyTextField.text));
+					break;
+				case "direct" :
+					var buddy:IBuddy = appModel.getBuddyByJid(message.mBlogSender.jid);
+					if(!buddy)
+					{
+						buddy = new Buddy(message.mBlogSender.jid);
+						appModel.buddies.addBuddy(buddy);
+					}
+					chats.getChat(buddy, true);
+					break;
 			}
-			else
-			{
-				switch(event.target.data)
-				{
-					case "reply" :
-						Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "@" + message.mBlogSender.userName + " "));
-						break;
-					case "retweet" :
-						Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + message.mBlogSender.userName + " : " + bodyTextField.text));
-						break;
-					case "direct" :
-						var buddy:IBuddy = appModel.getBuddyByJid(message.mBlogSender.jid);
-						if(!buddy)
-						{
-							buddy = new Buddy(message.mBlogSender.jid);
-							appModel.buddies.addBuddy(buddy);
-						}
-						chats.getChat(buddy, true);
-						break;
-				}
-			}
-			
 		}
 
 		override protected function get bodyTextWidth():Number
@@ -241,6 +239,11 @@ package com.cleartext.esm.views.messages
 						{
 							mBlogSender.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler, false, 0, true);
 							createButtons(MicroBloggingTypes.RECEIVED);
+							if(mBlogSender.profileUrl)
+							{
+								avatar.addEventListener(MouseEvent.CLICK, goToProfile);
+								avatar.buttonMode = true;
+							}
 						}
 						else
 						{
@@ -333,11 +336,19 @@ package com.cleartext.esm.views.messages
 				
 				g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xdedede], [0.5, 0.5], [95, 255], matrix);
 				g.drawRect(0, 0, width, heightTo);
+				g.endFill();
 			}
 
 			g.lineStyle(1, 0xdedede, 0.75);
 			g.moveTo(0,heightTo);
 			g.lineTo(width, heightTo);
+			g.lineStyle();
+			
+			if(searchTerms.text != "")
+			{
+				g.beginBitmapFill(new Constants.SearchUp().bitmapData, new Matrix(1,0,0,1,unscaledWidth-24-padding, 2), false);
+				g.drawRect(unscaledWidth-24-padding,2, 24,24);
+			}
 		}
 		
 	}

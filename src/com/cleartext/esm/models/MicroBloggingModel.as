@@ -27,7 +27,7 @@ package com.cleartext.esm.models
 		{
 		}
 
-		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null, displayName:String=null, avatarUrl:String=null, jid:String=null, avatarHash:String=null):MicroBloggingBuddy
+		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null, profileUrl:String=null, displayName:String=null, avatarUrl:String=null, jid:String=null, avatarHash:String=null):MicroBloggingBuddy
 		{
 			if(!idOrUserName)
 				return null;
@@ -59,6 +59,9 @@ package com.cleartext.esm.models
 				buddiesById[buddy.microBloggingBuddyId] = buddy;
 				buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 			}
+			
+			if(profileUrl != null)
+				buddy.profileUrl = profileUrl;
 			
 			if(displayName != null)
 				buddy.displayName = displayName;

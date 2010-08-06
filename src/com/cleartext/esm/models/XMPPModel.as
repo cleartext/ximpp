@@ -8,6 +8,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.types.IQTypes;
 	import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 	import com.cleartext.esm.models.types.SubscriptionTypes;
+	import com.cleartext.esm.models.utils.LinkUitls;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
@@ -34,6 +35,7 @@ package com.cleartext.esm.models
 	import flash.utils.Dictionary;
 	
 	import mx.controls.Alert;
+	import mx.states.AddChild;
 	
 	import org.swizframework.Swiz;
 	
@@ -366,8 +368,9 @@ package com.cleartext.esm.models
 			// play sounds & increment unread messages for the mblog buddy
 			if(buddy.isMicroBlogging)
 			{
-				soundColor.play(SoundAndColorModel.NEW_SOCIAL);
 				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessages++;
+				chats.addMessage(Buddy.ALL_MICRO_BLOGGING_BUDDY, message);
+				soundColor.play(SoundAndColorModel.NEW_SOCIAL);
 			}
 			else
 			{
@@ -641,23 +644,37 @@ package com.cleartext.esm.models
 			if(iqStanza.from == cleartextComponentPrefix + settings.userAccount.host)
 			{
 				cleartextComponentJid = iqStanza.from;
+				var cleartextComponent:IBuddy = buddies.getBuddyByJid(cleartextComponentJid);
 				// if this is in the roster list, then check we have the right
 				// microBloggingServiceType
-				if(buddies.containsJid(cleartextComponentJid))
+				if(cleartextComponent)
 				{
-					var cleartext:IBuddy = buddies.getBuddyByJid(cleartextComponentJid);
-					cleartext.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
-					cleartext.isMicroBlogging = true;
+					cleartextComponent.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
+					var c:Boolean = false;
+					if(cleartextComponent.nickname == cleartextComponent.jid)
+					{
+						cleartextComponent.nickname = "Cleartext MicroBlogging";
+						c = true;
+					}
+					if(!cleartextComponent.isMicroBlogging)
+					{
+						cleartextComponent.isMicroBlogging = true;
+						c = true;
+					}
+					if(c)
+					{
+						modifyRosterItem(cleartextComponent);
+					}
 				}
 				// otherwise add it to the roster
 				else
 				{
-					var b:Buddy = new Buddy(cleartextComponentJid);
-					b.nickname = "Cleartext MicroBlogging";
-					b.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
-					b.isMicroBlogging = true;
-					buddies.addBuddy(b);
-					addToRoster(b);
+					cleartextComponent = new Buddy(cleartextComponentJid);
+					cleartextComponent.nickname = "Cleartext MicroBlogging";
+					cleartextComponent.microBloggingServiceType = MicroBloggingServiceTypes.CLEARTEXT_MICROBLOGGING;
+					cleartextComponent.isMicroBlogging = true;
+					buddies.addBuddy(cleartextComponent);
+					addToRoster(cleartextComponent);
 				}
 			}
 			else if(iqStanza.query.discoInfo::identity)
@@ -673,11 +690,24 @@ package com.cleartext.esm.models
 					// then make sure it has the right settings
 					if(buddies.containsJid(twitterGatewayJid))
 					{
-						var t:IBuddy = buddies.getBuddyByJid(twitterGatewayJid);
-						t.isMicroBlogging = true;
-						t.microBloggingServiceType = MicroBloggingServiceTypes.STATUS_ONE_TWITTER;
-						if(t.nickname == t.jid)
-							t.nickname = "Twitter";
+						var twitterGateway:IBuddy = buddies.getBuddyByJid(twitterGatewayJid);
+						twitterGateway.microBloggingServiceType = MicroBloggingServiceTypes.STATUS_ONE_TWITTER;
+
+						var change:Boolean = false;
+						if(twitterGateway.nickname == twitterGateway.jid)
+						{
+							twitterGateway.nickname = "Twitter";
+							change = true;
+						}
+						if(!twitterGateway.isMicroBlogging)
+						{
+							twitterGateway.isMicroBlogging = true;
+							change = true;
+						}
+						if(change)
+						{
+							modifyRosterItem(twitterGateway);
+						}
 					}
 				}
 			}
@@ -949,7 +979,9 @@ package com.cleartext.esm.models
 		
 		public function sendMessage(toJid:String, body:String, subject:String=null, type:String='chat', chatState:String=null, customTags:Array=null):MessageStanza
 		{
-			return xmpp.sendMessage(toJid, body, subject, type, chatState, customTags);
+			var msg:MessageStanza = xmpp.sendMessage(toJid, body, subject, type, chatState, customTags);
+			msg.body = LinkUitls.escapeHTML(msg.body);
+			return msg;
 		}
 		
 		//------------------------------------------------------------------
@@ -960,10 +992,19 @@ package com.cleartext.esm.models
 		
 		public function sendSubscribe(toJid:String, type:String):void
 		{
+			var xmlString:String = '<presence to="' + toJid + '" type="' + type;
+			
 			if(type == SubscriptionTypes.SUBSCRIBE)
+			{
 				requests.sending(toJid);
+				xmlString += '"><nick xmlns="http://jabber.org/protocol/nick">' + settings.userAccount.nickname + '</nick></presence>';
+			}
+			else
+			{
+				xmlString += '" />';
+			}
 
-			xmpp.send('<presence to="' + toJid + '" type="' + type + '" />');
+			xmpp.send(xmlString);
 		}
 		
 		//-------------------------------

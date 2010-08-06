@@ -199,7 +199,7 @@
 
 		<mx:FormItem label="Profile picture:">
 			<mx:HBox>
-				<common:Avatar id="avatarInput" buttonMode="true" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editClicked="changeAvatar()"/>
+				<common:Avatar id="avatarInput" editMode="true" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editClicked="changeAvatar()"/>
 				<mx:Button label="remove" click="avatarInput.bitmapData=null" />
 			</mx:HBox>
 		</mx:FormItem>

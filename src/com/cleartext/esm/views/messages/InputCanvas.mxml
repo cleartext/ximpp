@@ -5,24 +5,25 @@
 	xmlns:s="library://ns.adobe.com/flex/spark">
 	<mx:Script>
 		<![CDATA[
-			import com.cleartext.esm.models.valueObjects.IBuddy;
-			import com.cleartext.esm.models.ApplicationModel;
-			import com.cleartext.esm.events.InputTextEvent;
-			import mx.utils.StringUtil;
 			import com.cleartext.esm.assets.Constants;
-			import com.cleartext.esm.models.utils.LinkResult;
-			import com.cleartext.esm.models.utils.LinkUitls;
-			import com.cleartext.esm.models.valueObjects.UrlShortener;
+			import com.cleartext.esm.events.CustomStatusEvent;
+			import com.cleartext.esm.events.InputTextEvent;
+			import com.cleartext.esm.events.SendButtonEvent;
+			import com.cleartext.esm.models.ApplicationModel;
+			import com.cleartext.esm.models.BuddyModel;
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
-			import com.cleartext.esm.models.BuddyModel;
-			import mx.events.FlexEvent;
-			import com.cleartext.esm.events.SendButtonEvent;
-			import com.cleartext.esm.events.CustomStatusEvent;
-			import com.cleartext.esm.models.valueObjects.Status;
-			import com.cleartext.esm.models.valueObjects.Message;
 			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.utils.LinkResult;
+			import com.cleartext.esm.models.utils.LinkUitls;
 			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.valueObjects.IBuddy;
+			import com.cleartext.esm.models.valueObjects.Message;
+			import com.cleartext.esm.models.valueObjects.Status;
+			import com.cleartext.esm.models.valueObjects.UrlShortener;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.StringUtil;
 			
 			public var messageCanvas:MessageCanvas;
 			
@@ -70,6 +71,7 @@
 			public function send(event:SendButtonEvent=null):void
 			{
 				var trimedText:String = StringUtil.trim(inputTextArea.text);
+				
 				if(trimedText.length != 0 && buddy)
 					appModel.sendMessageTo(buddy, trimedText);
 

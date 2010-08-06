@@ -153,6 +153,10 @@ package com.cleartext.esm.models
 				var schema:SQLSchemaResult = syncConn.getSchemaResult();
 				for each (var table:SQLTableSchema in schema.tables)
 				{
+					// ------------------------------------------
+					// BUDDY TABLE MODS
+					// ------------------------------------------
+					
 					if(table.name == "buddies")
 					{
 						mods = Buddy.TABLE_MODS.slice();
@@ -171,6 +175,11 @@ package com.cleartext.esm.models
 							execute(sql);
 						}
 					}
+					
+					// ------------------------------------------
+					// USER ACCOUNT TABLE MODS
+					// ------------------------------------------
+					
 					else if(table.name == "userAccounts")
 					{
 						mods = UserAccount.TABLE_MODS.slice();
@@ -189,6 +198,33 @@ package com.cleartext.esm.models
 							execute(sql);
 						}
 					}
+					
+					// ------------------------------------------
+					// MICRO BLOGGING BUDDY TABLE MODS
+					// ------------------------------------------
+
+					else if(table.name == "microBloggingBuddies")
+					{
+						mods = MicroBloggingBuddy.TABLE_MODS.slice();
+						
+						for each(column in table.columns)
+							for(i=0; i<mods.length; i++)
+								if(column.name == mods[i].name)
+									mods.splice(i,1);
+						
+						for each(mod in mods)
+						{
+							sql = "ALTER TABLE microBloggingBuddies ADD COLUMN " + mod.name + " " + mod.type;
+							if(mod.hasOwnProperty("defaultVal"))
+								sql += " DEFAULT " + mod.defaultVal;
+							appModel.log("Updating microBloggingBuddies table structure", true);
+							execute(sql);
+						}
+					}
+					
+					// ------------------------------------------
+					// MESSAGE TABLE MODS
+					// ------------------------------------------
 					
 					else if(table.name == "messages")
 					{

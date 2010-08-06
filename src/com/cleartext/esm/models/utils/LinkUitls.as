@@ -39,23 +39,27 @@ package com.cleartext.esm.models.utils
 			"XN--HLCJ6AYA9ESC7A","XN--JXALPDLP","XN--KGBECHTV",
 			"XN--ZCKZAH","YE","YT","YU","ZA","ZM","ZW"];
 		
-//		public static function escapeHTML(str:String):String
-//		{
-//			str = str.replace(/&/g, "&amp;");
-//			str = str.replace(/</g, "&lt;");
-//			str = str.replace(/>/g, "&gt;");
-//			str = str.replace(new RegExp('"', "g"), "&quot;");
-//			return str;
-//		}
-//		
-//		public static function unescapeHTML(str:String):String
-//		{
-//			str = str.replace(/&amp;/g, "&");
-//			str = str.replace(/&lt;/g, "<");
-//			str = str.replace(/&gt;/g, ">");
-//			str = str.replace(/&quot;/g, "&quot;");
-//			return str;
-//		}
+		public static function escapeHTML(str:String):String
+		{
+			if(!str)
+				return str;
+			str = str.replace(/&/g, "&amp;");
+			str = str.replace(/</g, "&lt;");
+			str = str.replace(/>/g, "&gt;");
+			str = str.replace(new RegExp('"', "g"), "&quot;");
+			return str;
+		}
+		
+		public static function unescapeHTML(str:String):String
+		{
+			if(!str)
+				return str;
+			str = str.replace(/&amp;/g, "&");
+			str = str.replace(/&lt;/g, "<");
+			str = str.replace(/&gt;/g, ">");
+			str = str.replace(/&quot;/g, "&quot;");
+			return str;
+		}
 		
 		public static function getStartTag(linkColour:uint=0x0033ff):String
 		{

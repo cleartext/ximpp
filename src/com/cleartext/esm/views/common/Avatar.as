@@ -4,9 +4,9 @@ package com.cleartext.esm.views.common
 	import com.cleartext.esm.events.AvatarEvent;
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.models.valueObjects.Buddy;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.IHasAvatar;
 	
 	import flash.display.BitmapData;
@@ -135,18 +135,19 @@ package com.cleartext.esm.views.common
 		}
 		
 		private var showEditIcon:Boolean = false;
-		private var buttonModeChanged:Boolean = false;
+		private var editModeChanged:Boolean = false;
+		private var _editMode:Boolean = false;
 		[Inspectable]
-		override public function get buttonMode():Boolean
+		public function get editMode():Boolean
 		{
-			return super.buttonMode;
+			return _editMode;
 		}
-		override public function set buttonMode(value:Boolean):void
+		public function set editMode(value:Boolean):void
 		{
-			if(super.buttonMode != value)
+			if(editMode != value)
 			{
-				super.buttonMode = value;
-				buttonModeChanged = true;
+				_editMode = value;
+				editModeChanged = true;
 				invalidateProperties();
 			}
 		}
@@ -155,9 +156,9 @@ package com.cleartext.esm.views.common
 		{
 			super.commitProperties();
 			
-			if(buttonModeChanged)
+			if(editModeChanged)
 			{
-				if(buttonMode)
+				if(editMode)
 				{
 					addEventListener(MouseEvent.ROLL_OVER, rollOverHandler, false, 0, true);
 					addEventListener(MouseEvent.ROLL_OUT, rollOutHandler, false, 0, true);
@@ -169,7 +170,7 @@ package com.cleartext.esm.views.common
 					removeEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
 					removeEventListener(MouseEvent.CLICK, clickHandler);
 				}
-				buttonModeChanged = false;
+				editModeChanged = false;
 			}
 		}
 		

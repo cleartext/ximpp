@@ -118,6 +118,9 @@
 			[Mediate(event="LinkEvent.LINK_CLICKED")]
 			public function showLinkWindow(event:LinkEvent):void
 			{
+				if(!event.url)
+					return;
+				
 				if(appModel.settings.global.checkUrls)
 				{
 					var window:LinkWindow = new LinkWindow();

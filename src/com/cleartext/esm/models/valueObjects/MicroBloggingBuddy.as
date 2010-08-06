@@ -28,6 +28,10 @@ package com.cleartext.esm.models.valueObjects
 			"avatar TEXT, " +
 			"gatewayJid TEXT);";
 		
+		public static const TABLE_MODS:Array = [
+			{name: "profileUrl", type: "TEXT"}
+		];
+
 		//----------------------------------------
 		//  CONSTRUCTOR
 		//----------------------------------------
@@ -47,7 +51,6 @@ package com.cleartext.esm.models.valueObjects
 		public var userName:String;
 		public var gatewayJid:String;
 		public var avatarUrl:String;
-		public var profileUrl:String;
 
 		//----------------------------------------
 		//  DISPLAY NAME
@@ -64,6 +67,25 @@ package com.cleartext.esm.models.valueObjects
 			if(_displayName != value)
 			{
 				_displayName = value;
+				dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
+			}
+		}
+
+		//----------------------------------------
+		//  PROFILE URL
+		//----------------------------------------
+		
+		private var _profileUrl:String;
+		[Bindable(event="changeSave")]
+		public function get profileUrl():String
+		{
+			return _profileUrl;
+		}
+		public function set profileUrl(value:String):void
+		{
+			if(_profileUrl != value)
+			{
+				_profileUrl = value;
 				dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 			}
 		}
@@ -166,6 +188,7 @@ package com.cleartext.esm.models.valueObjects
 			newMicroBloggingBuddy.avatarHash = obj["avatarHash"];
 			newMicroBloggingBuddy.gatewayJid = obj["gatewayJid"];
 			newMicroBloggingBuddy.avatarString = obj["avatar"];
+			newMicroBloggingBuddy.profileUrl = obj["profileUrl"];
 			
 			return newMicroBloggingBuddy;
 		}
@@ -183,7 +206,8 @@ package com.cleartext.esm.models.valueObjects
 				new DatabaseValue("avatarUrl", avatarUrl),
 				new DatabaseValue("avatarHash", avatarHash),
 				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),
-				new DatabaseValue("gatewayJid", gatewayJid)
+				new DatabaseValue("gatewayJid", gatewayJid),
+				new DatabaseValue("profileUrl", profileUrl)
 				];
 		}
 

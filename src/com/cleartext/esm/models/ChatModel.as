@@ -162,16 +162,10 @@ package com.cleartext.esm.models
 		
 		public function addMessage(buddy:IBuddy, message:Message):void
 		{
-			var limit:int = buddy.isMicroBlogging ? settings.global.numTimelineMessages : settings.global.numChatMessages;			
-			
 			if(chatsByJid.hasOwnProperty(buddy.jid))
-				getChat(buddy).addMessage(message, limit);
+				getChat(buddy).addMessage(message, buddy.isMicroBlogging ? settings.global.numTimelineMessages : settings.global.numChatMessages);
 			else if(buddy.autoOpenTab)
 				getChat(buddy);
-			
-			if(buddy.isMicroBlogging)
-				getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY).addMessage(message, limit);
 		}
-		
 	}
 }

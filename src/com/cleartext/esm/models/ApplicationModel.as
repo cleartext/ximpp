@@ -358,12 +358,6 @@ package com.cleartext.esm.models
 				});
 		}
 		
-//		[Mediate(event="UserAccountEvent.CHANGED")]
-//		public function userIdChanged(event:UserAccountEvent):void
-//		{
-//			database.loadBuddyData();
-//		}
-		
 		public function getBuddyByJid(jid:String):IBuddy
 		{
 			if(!jid || jid=="")
@@ -459,15 +453,17 @@ package com.cleartext.esm.models
 									newMessage.plainMessage = text;
 								
 								newMessage.searchTerms = new Array();
-								for each(var term:String in sBuddy..searchTerms)
-								{
+								for each(var term:String in sBuddy.*::searchTerm)
 									newMessage.searchTerms.push(term);
-								}
 								
 								newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
-										String(sBuddy.*::userName), sBuddy.*::serviceJid, 
-										sBuddy.*::displayName, sBuddy.*::avatar.(@type=='url'),
-										sBuddy.*::jid, sBuddy.*::avatar.(@type=='hash'));
+										String(sBuddy.*::userName),
+										sBuddy.*::serviceJid, 
+										null,
+										sBuddy.*::displayName, 
+										sBuddy.*::avatar.(@type=='url'),
+										sBuddy.*::jid, 
+										sBuddy.*::avatar.(@type=='hash'));
 							}
 							
 							var osBuddy:Object = x.*::buddy.(@type=="originalSender");
@@ -475,12 +471,14 @@ package com.cleartext.esm.models
 							if(osBuddy)
 							{
 								newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(
-										String(osBuddy.*::userName), osBuddy.*::serviceJid, 
-										osBuddy.*::displayName, osBuddy.*::avatar.(@type=='url'),
-										osBuddy.*::jid, osBuddy.*::avatar.(@type=='hash'));
+										String(osBuddy.*::userName),
+										osBuddy.*::serviceJid, 
+										null,
+										osBuddy.*::displayName, 
+										osBuddy.*::avatar.(@type=='url'),
+										osBuddy.*::jid, 
+										osBuddy.*::avatar.(@type=='hash'));
 							}
-							
-							
 						}
 						
 						// if it has an atom, then it is probably jaiku or identi.ca
@@ -512,7 +510,12 @@ package com.cleartext.esm.models
 							if(!displayName)
 								displayName = "";
 								
-							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(idString, newMessage.sender, displayName, avatarUrl);
+							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
+									idString, 
+									null,
+									newMessage.sender, 
+									displayName, 
+									avatarUrl);
 						
 							// if there is a title on the atom, then it should be just the plain message
 							if(x.atom::title)
@@ -522,9 +525,11 @@ package com.cleartext.esm.models
 								{
 									case "jaiku@jaiku.com" :
 										linkVals = ["http://www.jaiku.com/channel/", "", "http://", ".jaiku.com/"];
+										newMessage.mBlogSender.profileUrl = "http://" + newMessage.mBlogSender.userName + ".jaiku.com/";
 										break;
 									case "update@identi.ca" :
 										linkVals = ["http://identi.ca/tag/", "", "http://identi.ca/", ""];
+										newMessage.mBlogSender.profileUrl = "http://identi.ca/" + newMessage.mBlogSender.userName;
 										break;
 								}
 							}
@@ -553,8 +558,14 @@ package com.cleartext.esm.models
 
 				if(result && result.length > 0)
 				{
-					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(result[4], newMessage.sender, result[3], result[2]);
+					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
+						result[4],
+						newMessage.sender, 
+						null,
+						result[3],
+						result[2]);
 					newMessage.plainMessage = String(result[5]);
+					newMessage.mBlogSender.profileUrl = "http://twitter.com/" + newMessage.mBlogSender.userName;
 					linkVals = ["http://twitter.com/search?q=%23", "", "http://twitter.com/", ""];
 				}
 			}
