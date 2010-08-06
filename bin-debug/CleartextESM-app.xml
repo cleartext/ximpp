@@ -24,18 +24,21 @@
 	<name>Cleartext-ESM</name>
 
 	<!-- An application version designator (such as "v1", "2.5", or "Alpha 1"). Required. -->
-	<version>100</version>
+	<version>v99.1.7</version>
 
 	<!-- Description, displayed in the AIR application installer.
 	     May have multiple values for each language. See samples or xsd schema file. Optional. -->
-	<!-- <description></description> -->
+	<description>Cleartext ESM Desktop is designed to integrate (Jabber/XMPP) instant messaging, microblogging and social messaging streams.</description>
 
 	<!-- Copyright information. Optional -->
-	<!-- <copyright></copyright> -->
+	<copyright>Cleartext 2010</copyright>
 
 	<!-- Publisher ID. Used if you're updating an application created prior to 1.5.3 -->
-	<!-- <publisherID></publisherID> -->
-
+	<publisherID>B05B129E7FA830D1B1AA746E523B1072E1B319F9.1</publisherID>
+	
+	<!-- ALTERNATE Publisher ID. FOR DEV USE - NOT FOR GENERAL USE Used if you're updating an application created prior to 1.5.3 -->
+	<!--publisherID>3395DBA9EA499F0012513956EFF2D74EA2665EC5.1</publisherID-->
+	
 	<!-- Settings for the application's initial window. Required. -->
 	<initialWindow>
 		<!-- The main SWF or HTML file of the application. Required. -->
@@ -43,7 +46,7 @@
 		<content>CleartextESM.swf</content>
 		
 		<!-- The title of the main window. Optional. -->
-		<title>Cleartext / ESM</title>
+		<title>Cleartext - Enterprise Social Messaging</title>
 
 		<!-- The type of system chrome to use (either "standard" or "none"). Optional. Default standard. -->
 		<!-- <systemChrome></systemChrome> -->
@@ -90,12 +93,12 @@
 
 	<!-- The icon the system uses for the application. For at least one resolution,
 		 specify the path to a PNG file included in the AIR package. Optional. -->
-	<!-- <icon>
-		<image16x16></image16x16>
+	<icon>
+<!-- 	<image16x16></image16x16>
 		<image32x32></image32x32>
-		<image48x48></image48x48>
-		<image128x128></image128x128>
-	</icon> -->
+		<image48x48></image48x48> 
+		<image128x128>com/cleartext/esm/assets/icon.png</image128x128>-->
+	</icon>
 
 	<!-- Whether the application handles the update when a user double-clicks an update version
 	of the AIR file (true), or the default AIR application installer handles the update (false).
