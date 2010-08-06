@@ -24,6 +24,9 @@
 			
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				xmpp.addTransport(list.selectedItem as String);
 				closeWindow();
 			}

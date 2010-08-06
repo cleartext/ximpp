@@ -6,7 +6,8 @@
 	xmlns:popup="com.cleartext.esm.views.popup.*"
 	title="Post To..."
 	submitButtonLabel="Post"
-	isValid="true">
+	creationComplete="isValid=true"
+	>
 	
 	<fx:Script>
 		<![CDATA[
@@ -49,6 +50,9 @@
 			
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				if(_group != Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				{
 					var msg:Message = new Message();
@@ -68,11 +72,10 @@
 				{
 					if(buddy.sendTo)
 					{
-						appModel.log("calling [ApplicationModel].sendMessage()");
+						appModel.log("calling [BroadcastWindow].sendMessage()");
 						appModel.sendMessageTo(buddy, message, _group == Buddy.ALL_MICRO_BLOGGING_BUDDY);
 					}
 				}
-
 				closeWindow();
 			}
 			

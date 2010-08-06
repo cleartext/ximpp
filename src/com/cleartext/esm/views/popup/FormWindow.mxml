@@ -94,6 +94,9 @@
 			
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				for each(var field:FormField in form.fields)
 				{
 					if(field.varName)

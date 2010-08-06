@@ -86,6 +86,9 @@
 		
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				// commit global values
 				settings.global.autoConnect = autoConnectCheckBox.selected;
 				settings.global.urlShortener = urlShortenComboBox.selectedItem as String;
@@ -156,6 +159,7 @@
 									avatarInput.bitmapData = newBitmapData;
 								});
 						});
+					validateForm();
 				}
 				catch (error:Error)
 				{
@@ -231,29 +235,29 @@
 		</mx:Canvas>
 		
 		<mx:Canvas label="Global Settings">
-			<s:CheckBox label="Auto connect" id="autoConnectCheckBox"/>
-			<s:CheckBox y="30" label="Show offline buddies" id="showOfflineBuddiesCheckBox"/>
-			<s:CheckBox y="60" label="Animate buddy list" id="animateBuddyListCheckBox"/>
-			<s:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox"/>
-			<s:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox"/>
-			<s:CheckBox y="150" label="Check urls" id="checkUrlsCheckBox"/>
+			<s:CheckBox label="Auto connect" id="autoConnectCheckBox" change="validateForm()"/>
+			<s:CheckBox y="30" label="Show offline buddies" id="showOfflineBuddiesCheckBox" change="validateForm()"/>
+			<s:CheckBox y="60" label="Animate buddy list" id="animateBuddyListCheckBox" change="validateForm()"/>
+			<s:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox" change="validateForm()"/>
+			<s:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox" change="validateForm()"/>
+			<s:CheckBox y="150" label="Check urls" id="checkUrlsCheckBox" change="validateForm()"/>
 			
 			<s:Button label="Check for updates" click="appModel.checkForUpdates(true)" right="0" />
 			
 			<s:Label right="106" y="34" text="Sort messages by"/>
-			<s:DropDownList right="0" width="102" y="30" id="messageSortComboBox" dataProvider="{new ArrayCollection(['date sent', 'date received'])}"/>
+			<s:DropDownList right="0" width="102" y="30" id="messageSortComboBox" dataProvider="{new ArrayCollection(['date sent', 'date received'])}" change="validateForm()"/>
 			
 			<s:Label right="78" y="64" text="Max workstream messages"/>
-			<mx:NumericStepper right="0" y="60" maximum="1000" minimum="0" id="numTimelineMessages" />
+			<mx:NumericStepper right="0" y="60" maximum="1000" minimum="0" id="numTimelineMessages" change="validateForm()"/>
 			
 			<s:Label right="78" y="94" text="Max chat messages" />
-			<mx:NumericStepper right="0" y="90" maximum="1000" minimum="0" id="numChatMessages" />
+			<mx:NumericStepper right="0" y="90" maximum="1000" minimum="0" id="numChatMessages" change="validateForm()"/>
 			
 			<s:Label right="86" y="124" text="Url shortening"/>
-			<s:DropDownList right="0" width="82" id="urlShortenComboBox" y="120" dataProvider="{new ArrayCollection(UrlShortener.types)}"/>
+			<s:DropDownList right="0" width="82" id="urlShortenComboBox" y="120" dataProvider="{new ArrayCollection(UrlShortener.types)}" change="validateForm()"/>
 			
 			<s:Label right="124" y="154" text="Set away (0 = never)"/>
-			<mx:NumericStepper right="56" y="150" maximum="120" minimum="0" id="awayTimeout" />
+			<mx:NumericStepper right="56" y="150" maximum="120" minimum="0" id="awayTimeout" change="validateForm()"/>
 			<s:Label right="0" y="154" text="minutes"/>
 		</mx:Canvas>
 

@@ -47,31 +47,6 @@ package com.cleartext.esm.models.valueObjects
 			}
 			
 			participants.refresh();
-			
-//			_participants = buddies.getBuddiesByGroup(jid);
-//			var tmp:Array = new Array();
-//			for each(var b:IBuddy in buddies.getBuddiesByGroup(jid))
-//			{
-//				if(!participants.contains(b))
-//				{
-//					
-//				}
-//				tmp.push(b.jid);
-//			}
-//		
-//			for(var i:int=participants.length-1; i>=0; i--)
-//			{
-//				var index:int = tmp.indexOf(participants.getItemAt(i));
-//				if(index == -1)
-//					participants.removeItemAt(i);
-//				else
-//					tmp.splice(index, 1);
-//			}
-//			
-//			while(tmp.length > 0)
-//			{
-//				participants.addItem(tmp.pop());
-//			}
 		}
 		
 		private function statusSort(b1:IBuddy, b2:IBuddy, fields:Object=null):int

@@ -49,6 +49,9 @@
 			
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				var selectedBuddies:Array = getSelected(list);
 				var newGroupName:String = groupNameInput.text;
 				var buddy:Buddy;

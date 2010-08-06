@@ -442,7 +442,8 @@ package com.cleartext.esm.views.messages
 		
 		private function avatarClickHandler(event:MouseEvent):void
 		{
-			chats.getChat((event.target as AvatarTab).chat.buddy, true);
+			if(event.target is AvatarTab)
+				chats.getChat((event.target as AvatarTab).chat.buddy, true);
 		}
 		
 		private function moveAvatar(avatarIndex:int, position:int, animate:Boolean=true):void

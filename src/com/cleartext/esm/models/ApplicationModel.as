@@ -10,8 +10,8 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.events.PopUpEvent;
 	import com.cleartext.esm.models.utils.LinkUitls;
 	import com.cleartext.esm.models.valueObjects.Buddy;
-	import com.cleartext.esm.models.valueObjects.ChatRoom;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
+	import com.cleartext.esm.models.valueObjects.ChatRoom;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.Status;
@@ -457,7 +457,13 @@ package com.cleartext.esm.models
 								var text:String = sBuddy.*::text;
 								if(text)
 									newMessage.plainMessage = text;
-
+								
+								newMessage.searchTerms = new Array();
+								for each(var term:String in sBuddy..searchTerms)
+								{
+									newMessage.searchTerms.push(term);
+								}
+								
 								newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
 										String(sBuddy.*::userName), sBuddy.*::serviceJid, 
 										sBuddy.*::displayName, sBuddy.*::avatar.(@type=='url'),
@@ -473,6 +479,7 @@ package com.cleartext.esm.models
 										osBuddy.*::displayName, osBuddy.*::avatar.(@type=='url'),
 										osBuddy.*::jid, osBuddy.*::avatar.(@type=='hash'));
 							}
+							
 							
 						}
 						
@@ -553,11 +560,11 @@ package com.cleartext.esm.models
 			}
 			
 			if(linkVals)
-				newMessage.displayMessage = LinkUitls.createLinks(newMessage.plainMessage, linkVals[0], linkVals[1], linkVals[2], linkVals[3]);
+				newMessage.displayMessage = LinkUitls.createLinks(newMessage.plainMessage, newMessage.searchTerms, linkVals[0], linkVals[1], linkVals[2], linkVals[3]);
 			else if(stanza.html)
 				newMessage.displayMessage = stanza.html;
 			else
-				newMessage.displayMessage = LinkUitls.createLinks(newMessage.plainMessage);
+				newMessage.displayMessage = LinkUitls.createLinks(newMessage.plainMessage, newMessage.searchTerms);
 
 			return newMessage;
 		}

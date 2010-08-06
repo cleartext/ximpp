@@ -6,7 +6,8 @@
 	xmlns:popup="com.cleartext.esm.views.popup.*"
 	title="Checking Link..."
 	submitButtonLabel="Visit link anyway"
-	isValid="true">
+	isValid="true"
+	>
 	
 	<fx:Script>
 		<![CDATA[
@@ -27,6 +28,9 @@
 			
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				var request:URLRequest = new URLRequest(url);
 				navigateToURL(request);
 				closeWindow();
@@ -40,6 +44,9 @@
 			[Mediate (event="LinkEvent.LINK_RESULT")]
 			public function linkResultHandler(event:LinkEvent):void
 			{
+				if(closing)
+					return;
+				
 				var result:Object = event.result;
 				
 				var success:Boolean = false;

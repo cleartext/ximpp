@@ -50,7 +50,11 @@ package com.cleartext.esm.views.buddies
 		private var customContextMenu:ContextMenu;
 		private var subscribeItem:ContextMenuItem;
 		private var logonItem:ContextMenuItem;
+		private var followItem:ContextMenuItem;
+		private var unFollowItem:ContextMenuItem;
+		
 		private var timerCount:int=0;
+		
 		
 		//---------------------------------------
 		// Constructor
@@ -139,11 +143,49 @@ package com.cleartext.esm.views.buddies
 				logonItem = null;
 			}
 			
+			if(xmpp.cleartextComponentHost == buddy.host)
+			{
+				if(!followItem)
+				{
+					followItem = new ContextMenuItem("follow " + buddy.username + " on cleartext microblogging", true);
+					followItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
+					customContextMenu.addItem(followItem);
+				}
+				if(!unFollowItem)
+				{
+					unFollowItem = new ContextMenuItem("unfollow " + buddy.username + " on cleartext microblogging");
+					unFollowItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
+					customContextMenu.addItem(unFollowItem);
+				}
+			}
+			else
+			{
+				if(followItem)
+				{
+					customContextMenu.removeItem(followItem);
+					followItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
+					followItem = null;
+				}
+				if(unFollowItem)
+				{
+					customContextMenu.removeItem(unFollowItem);
+					unFollowItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
+					unFollowItem = null;
+				}
+			}
+			
 			// set enabled based on connected status
 			for(var i:int=1; i<customContextMenu.numItems; i++)
 			{
 				customContextMenu.getItemAt(i).enabled = xmpp.connected;
 			}
+		}
+		
+		private function followHandler(event:ContextMenuEvent):void
+		{
+			if(!xmpp.connected)
+				return;
+			xmpp.sendMessage(xmpp.cleartextComponentJid, (event.target == unFollowItem ? "u " : "f ") + buddy.username);
 		}
 		
 		private function logonHandler(event:ContextMenuEvent):void

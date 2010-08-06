@@ -6,7 +6,8 @@
 	xmlns:popup="com.cleartext.esm.views.popup.*"
 	title="Remove Buddy"
 	submitButtonLabel="Remove"
-	isValid="true">
+	isValid="true"
+	>
 	
 	<fx:Script>
 		<![CDATA[
@@ -37,6 +38,9 @@
 			
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				if(buddy is Buddy)
 				{
 					xmpp.removeFromRoster(buddy.jid);

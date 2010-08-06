@@ -3,6 +3,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.assets.Constants;
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.events.InputTextEvent;
+	import com.cleartext.esm.models.XMPPModel;
 	import com.cleartext.esm.models.types.MicroBloggingTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
@@ -11,24 +12,40 @@ package com.cleartext.esm.views.messages
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
 	import flash.display.Graphics;
+	import flash.events.ContextMenuEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
+	import flash.text.TextField;
+	import flash.text.TextFieldAutoSize;
+	import flash.text.TextFieldType;
+	import flash.ui.ContextMenu;
+	import flash.ui.ContextMenuItem;
 	
 	import mx.controls.Button;
+	import mx.core.UITextField;
 	
 	import org.swizframework.Swiz;
 	
 	public class MicroBloggingRenderer extends MessageRendererBase
 	{		
+		[Autowire]
+		public var xmpp:XMPPModel;
+
 		protected var buttonWidth:Number = 16;
 		protected var buttons:Array = new Array();
+	
+		protected var searchTerms:UITextField;
 		
 		private var chatBuddy:IBuddy;
 		private var mBlogSender:MicroBloggingBuddy;
 		private var type:String = "";
-			
+		
+		private var avatarContextMenu:ContextMenu;
+		private var followItem:ContextMenuItem;
+		private var unFollowItem:ContextMenuItem;
+		
 		public function MicroBloggingRenderer()
 		{
 			super();
@@ -51,9 +68,6 @@ package com.cleartext.esm.views.messages
 			switch(type)
 			{
 				case MicroBloggingTypes.RECEIVED :
-					avatar.buttonMode = true;
-					avatar.addEventListener(MouseEvent.CLICK, button_clickHandler, false, 0, true);
-				
 					var reply:Button = new Button();
 					reply.data = "reply";
 					reply.addEventListener(MouseEvent.CLICK, button_clickHandler, false, 0, true);
@@ -101,6 +115,7 @@ package com.cleartext.esm.views.messages
 					directMessage.buttonMode = true;
 					buttons.push(directMessage);
 					addChild(directMessage);
+					
 					break;
 
 				default :
@@ -155,6 +170,47 @@ package com.cleartext.esm.views.messages
 			invalidateProperties();
 		}
 		
+		private function showContextMenu(event:MouseEvent):void
+		{
+			if(mBlogSender && (chatBuddy.jid == xmpp.cleartextComponentJid || chatBuddy.jid == xmpp.twitterGatewayJid))
+			{
+				if(!followItem)
+				{
+					followItem = new ContextMenuItem("follow @" + mBlogSender.userName);
+					followItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
+					avatarContextMenu.addItem(followItem);
+				}
+				if(!unFollowItem)
+				{
+					unFollowItem = new ContextMenuItem("unfollow @" + mBlogSender.userName);
+					unFollowItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
+					avatarContextMenu.addItem(unFollowItem);
+				}
+			}
+			else
+			{
+				if(followItem)
+				{
+					avatarContextMenu.removeItem(followItem);
+					followItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
+					followItem = null;
+				}
+				if(unFollowItem)
+				{
+					avatarContextMenu.removeItem(unFollowItem);
+					unFollowItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
+					unFollowItem = null;
+				}
+			}
+		}
+		
+		private function followHandler(event:ContextMenuEvent):void
+		{
+			if(!xmpp.connected)
+				return;
+			xmpp.sendMessage(chatBuddy.jid, (event.target == unFollowItem ? "u " : "f ") + mBlogSender.userName);
+		}
+		
 		override protected function commitProperties():void
 		{
 			if(message)
@@ -201,6 +257,11 @@ package com.cleartext.esm.views.messages
 					nameTextField.text = chatBuddy.nickname;
 					createButtons(null); 
 				}
+
+				searchTerms.text = (message.searchTerms && message.searchTerms.length > 0) ? message.searchTerms.join(",") : '';
+				searchTerms.width = searchTerms.textWidth + padding*4;
+				searchTerms.styleName = "blackBold";
+				searchTerms.x = width - searchTerms.width - padding;	
 				
 				nameTextField.width = nameTextField.textWidth + padding*4;
 				nameTextField.styleName = (fromThisUser) ? "lGreyBold" : "blackBold";
@@ -225,6 +286,19 @@ package com.cleartext.esm.views.messages
 		{
 			super.createChildren();
 			
+			if(!searchTerms)
+			{
+				searchTerms = new UITextField();
+				searchTerms.autoSize = TextFieldAutoSize.NONE;
+				searchTerms.ignorePadding = true;
+				searchTerms.multiline = false;
+				searchTerms.selectable = true;
+				searchTerms.type = TextFieldType.DYNAMIC;
+				searchTerms.y = padding;
+				searchTerms.wordWrap = false;
+				addChildAt(searchTerms,0);
+			}
+			
 			avatar.x = 2*padding + buttonWidth;
 			avatar.y = padding;
 
@@ -236,6 +310,13 @@ package com.cleartext.esm.views.messages
 
 			bodyTextField.x = avatarSize + 3*padding + buttonWidth;
 			bodyTextField.y = topRowHeight;
+			
+			if(!avatarContextMenu)
+			{
+				avatarContextMenu = new ContextMenu();
+				avatar.addEventListener(MouseEvent.CONTEXT_MENU, showContextMenu);
+				avatar.contextMenu = avatarContextMenu;
+			}
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void

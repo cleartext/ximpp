@@ -81,6 +81,9 @@
 			// set the pin value of the form object and submit it
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				for each(var field:FormField in formObject.fields)
 					if(field.varName == "pin")
 						field.value = pin.text;

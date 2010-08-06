@@ -193,7 +193,7 @@ package com.cleartext.esm.models
 					else if(table.name == "messages")
 					{
 						var hasTimestamp:Boolean = false;
-						mods = [{name: "sentTimestamp", type: "NUMERIC"}, {name: "receivedTimestamp", type: "NUMERIC"}];
+						mods = Message.TABLE_MODS.slice();
 						for each(column in table.columns)
 						{
 							for(i=0; i<mods.length; i++)
@@ -204,18 +204,18 @@ package com.cleartext.esm.models
 									hasTimestamp = true;
 							}
 						}
+
+						for each(mod in mods)
+						{
+							sql = "ALTER TABLE messages ADD COLUMN " + mod.name + " " + mod.type;
+							if(mod.hasOwnProperty("defaultVal"))
+								sql += " DEFAULT " + mod.defaultVal;
+							appModel.log("Updating message table structure", true);
+							execute(sql);
+						}
 						
 						if(hasTimestamp)
 						{
-							for each(mod in mods)
-							{
-								sql = "ALTER TABLE messages ADD COLUMN " + mod.name + " " + mod.type;
-								if(mod.hasOwnProperty("defaultVal"))
-									sql += " DEFAULT " + mod.defaultVal;
-								appModel.log("Updating message table structure", true);
-								execute(sql);
-							}
-							
 							// find out the receivedTimestamp based on timestamp
 							appModel.log("Setting receivedTimestamp feild", true);
 							sql = "UPDATE messages SET receivedTimestamp=strftime('%s',timestamp)*1000 WHERE receivedTimestamp is null";

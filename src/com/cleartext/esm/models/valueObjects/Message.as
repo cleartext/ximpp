@@ -22,7 +22,13 @@ package com.cleartext.esm.models.valueObjects
 			"rawxml TEXT," +
 			"sentTimestamp NUMERIC, " +
 			"receivedTimestamp NUMERIC);";
-			
+		
+		public static const TABLE_MODS:Array = [
+			{name: "sentTimestamp", type: "NUMERIC"}, 
+			{name: "receivedTimestamp", type: "NUMERIC"},
+			{name: "searchTerms", type: "TEXT"}
+		];
+		
 		public var messageId:int = -1;
 		
 		public var sentTimestamp:Date;
@@ -35,6 +41,7 @@ package com.cleartext.esm.models.valueObjects
 		public var plainMessage:String;
 		public var displayMessage:String;
 		public var groupChatSender:String;
+		public var searchTerms:Array;
 		
 		public var rawXML:String;
 		
@@ -64,6 +71,8 @@ package com.cleartext.esm.models.valueObjects
 			newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(obj["senderId"]);
 			newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(obj["originalSenderId"]);
 			newMessage.rawXML = obj["rawXML"];
+			var st:String = obj["searchTerms"];
+			newMessage.searchTerms = (st) ? st.split(',') : [];
 			
 			if(obj["timestamp"])
 			{
@@ -101,6 +110,9 @@ package com.cleartext.esm.models.valueObjects
 
 			if(mBlogOriginalSender)
 				result.push(new DatabaseValue("originalSenderId", mBlogOriginalSender.microBloggingBuddyId));
+			
+			if(searchTerms && searchTerms.length > 0)
+				result.push(new DatabaseValue("searchTerms", searchTerms.join(',')));
 			
 			return result;
 		}

@@ -69,7 +69,7 @@ package com.cleartext.esm.models.utils
 			return '</A></FONT></U>';
 		}
 
-		public static function createLinks(plainText:String, hashUrlStart:String=null, hashUrlEnd:String=null, atUrlStart:String=null, atUrlEnd:String=null):String
+		public static function createLinks(plainText:String, searchTerms:Array, hashUrlStart:String=null, hashUrlEnd:String=null, atUrlStart:String=null, atUrlEnd:String=null):String
 		{
 			var startTag:String = getStartTag();
 			
@@ -98,6 +98,21 @@ package com.cleartext.esm.models.utils
 
 			if(atUrlStart || atUrlEnd)
 				linkText = createAtLinks(linkText, atUrlStart, atUrlEnd);
+			
+//			if(searchTerms)
+//			{
+//				var result:String;
+//				for each (var sub:String in linkText.split('<'))
+//				{
+//					var split:Array = sub.split('>');
+//					result += '<' + split[0] + '>';
+//					if(split.length > 1)
+//					{
+//						result  += (split[1] as String).replace(new RegExp('(' + searchTerms.join('|') + ')', 'ig'), '<b>$1</b>');
+//					}
+//				}
+//				trace(linkText, '\n', result);
+//			}
 
 			return linkText;
 		}

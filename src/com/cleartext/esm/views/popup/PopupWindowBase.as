@@ -31,6 +31,8 @@ package com.cleartext.esm.views.popup
 		public var soundAndColor:SoundAndColorModel;
 
 		public var showCancelButton:Boolean = true;
+
+		public var closing:Boolean = false;
 		
 		protected var errorMessageToolTips:Dictionary = new Dictionary();
 
@@ -47,6 +49,11 @@ package com.cleartext.esm.views.popup
 				if(submitButton)
 					submitButton.enabled = isValid;
 			}
+
+//			if(submitButton && cancelButton)
+//			{
+//				defaultButton = isValid ? submitButton : cancelButton;
+//			}
 		}
 		
 		private var _submitButtonLabel:String;
@@ -91,6 +98,7 @@ package com.cleartext.esm.views.popup
 				submitButton.addEventListener(MouseEvent.CLICK, submit);
 				submitButton.label = submitButtonLabel;
 				submitButton.enabled = isValid;
+				defaultButton = submitButton;
 				controlBarContent.push(submitButton);
 			}
 			
@@ -99,10 +107,11 @@ package com.cleartext.esm.views.popup
 				cancelButton = new Button();
 				cancelButton.addEventListener(MouseEvent.CLICK, cancelHandler);
 				cancelButton.label = "Cancel";
+				cancelButton.focusEnabled = false;
 				controlBarContent.push(cancelButton);
 			}
 		}
-		
+				
 		protected function submit(event:Event):void
 		{
 			// override me
@@ -113,7 +122,10 @@ package com.cleartext.esm.views.popup
 			var target:UIComponent = event.currentTarget as UIComponent;
 			
 			if(!target)
+			{
+				validateForm();
 				return;
+			}
 			
 			var toolTip:ToolTip = errorMessageToolTips[target.name] as ToolTip;
 			
@@ -190,6 +202,7 @@ package com.cleartext.esm.views.popup
  			for each(var toolTip:ToolTip in errorMessageToolTips)
 				ToolTipManager.destroyToolTip(toolTip);
 
+			closing = true;
  			dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
  		}
 	}

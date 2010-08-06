@@ -7,7 +7,8 @@
 	width="800" height="600" 
 	xmlns:messages="com.cleartext.esm.views.messages.*" 
 	minHeight="400" minWidth="500"
-	creationComplete="init()">
+	creationComplete="init()"
+	>
 	
 	<fx:Script>
 		<![CDATA[

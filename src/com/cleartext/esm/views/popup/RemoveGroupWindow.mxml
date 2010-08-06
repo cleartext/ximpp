@@ -29,6 +29,9 @@
 			
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				for each(var b:IBuddy in buddies.buddies.source)
 				{
 					var buddy:Buddy = b as Buddy;

@@ -36,7 +36,7 @@
 			
 			override protected function submit(event:Event):void
 			{
-				if(!isValid)
+				if(!isValid || closing)
 					return;
 				
 				chatRooms.join(room.text + "@" + host.text, nickname.text, password.text);

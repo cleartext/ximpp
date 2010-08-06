@@ -54,6 +54,9 @@
 			
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				if(!buddy)
 				{
 					var newJid:String = jidTextInput.text;

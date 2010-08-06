@@ -50,6 +50,7 @@
 			import mx.events.AIREvent;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
+			import mx.managers.IFocusManagerComponent;
 			import mx.managers.PopUpManager;
 			
 			import org.swizframework.Swiz;
@@ -244,6 +245,9 @@
 					});
 				PopUpManager.addPopUp(window, this, true);
 				PopUpManager.centerPopUp(window);
+				var w:PopupWindowBase = window as PopupWindowBase;
+				if(w && w.defaultButton)
+					focusManager.setFocus(w.defaultButton as IFocusManagerComponent);
 			}
 			
 			[Mediate(event="ApplicationEvent.NOTIFY")]

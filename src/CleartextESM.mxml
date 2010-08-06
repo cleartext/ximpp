@@ -38,7 +38,7 @@
 			mainView.appModel.addEventListener(LoadingEvent.CHATS_LOADING, progressHandler);
 			mainView.appModel.addEventListener(LoadingEvent.WORKSTREAM_LOADING, progressHandler);
 			mainView.appModel.addEventListener(LoadingEvent.LOADING_COMPLETE, initCompleteHandler);
-			mainView.appModel.init();
+		 	mainView.appModel.init();
 			panel.setStyle("borderColor", mainView.soundColor.backgroundColor);
 		}
 		

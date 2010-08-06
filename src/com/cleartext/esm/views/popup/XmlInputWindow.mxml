@@ -17,6 +17,9 @@
 
 			override protected function submit(event:Event):void
 			{
+				if(closing)
+					return;
+
 				if(xmpp.connected)
 					xmpp.sendXmlString(textArea.text);
 				closeWindow();

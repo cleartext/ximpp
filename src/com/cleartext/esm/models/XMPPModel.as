@@ -148,7 +148,12 @@ package com.cleartext.esm.models
 		// the seesmic xmpp object 
 		private var xmpp:XMPP;
 		
+		public static const cleartextComponentPrefix:String = "cleartext.";
 		public var cleartextComponentJid:String;
+		public function get cleartextComponentHost():String
+		{
+			return cleartextComponentJid ? cleartextComponentJid.substr(cleartextComponentPrefix.length) : null;
+		}
 		public var twitterGatewayJid:String;
 		
 		//------------------------------------------------------------------
@@ -633,7 +638,7 @@ package com.cleartext.esm.models
 		{
 			// if this is a cleartext microblogging component
 			// then check it is in the roster list
-			if(iqStanza.from == "cleartext." + settings.userAccount.host)
+			if(iqStanza.from == cleartextComponentPrefix + settings.userAccount.host)
 			{
 				cleartextComponentJid = iqStanza.from;
 				// if this is in the roster list, then check we have the right
