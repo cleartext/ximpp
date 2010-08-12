@@ -93,7 +93,7 @@ package com.cleartext.esm.models
 				// create the local database file
 				var dbName:String = "ximpp.db";
 				// dbName = "ximpp32.db";
-				// dbName = new Date().time + ".db";
+				 dbName = new Date().time + ".db";
 				
 				var dbFile:File = File.applicationStorageDirectory.resolvePath(dbName);
 				appModel.log("DB Location: " + dbFile.nativePath);

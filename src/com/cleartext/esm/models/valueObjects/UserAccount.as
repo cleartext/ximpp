@@ -31,6 +31,9 @@ package com.cleartext.esm.models.valueObjects
 		
 		public function UserAccount(jid:String)
 		{
+			if(!jid)
+				jid = "";
+
 			super(jid);
 			buddyId = -2;
 		}
