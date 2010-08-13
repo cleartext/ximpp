@@ -76,12 +76,13 @@
 						appModel.sendMessageTo(buddy, message, _group == Buddy.ALL_MICRO_BLOGGING_BUDDY);
 					}
 				}
+				message = "";
 				closeWindow();
 			}
 			
-			override protected function cancelHandler(event:Event):void
+			override public function closeWindow(event:Event=null):void
 			{
-				super.cancelHandler(event);
+				super.closeWindow(event);
 				Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, message));
 			}
 			

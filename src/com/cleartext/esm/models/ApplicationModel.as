@@ -408,11 +408,16 @@ package com.cleartext.esm.models
 				}
 
 				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, (buddy is ChatRoom ? 'groupchat' : 'chat'), null, customTags);
+				var message:Message = createFromStanza(messageStanza);
+				chats.addMessage(buddy, message);
+			
+				if(buddy.isMicroBlogging)
+				{
+					chats.addMessage(Buddy.ALL_MICRO_BLOGGING_BUDDY, message);
+				}
 				
 				if(!(buddy is ChatRoom) && save)
 				{
-					var message:Message = createFromStanza(messageStanza);
-					chats.addMessage(buddy, message);
 					database.saveMessage(message);
 				}
 			}

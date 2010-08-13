@@ -75,7 +75,10 @@
 				if(trimedText.length != 0 && buddy)
 					appModel.sendMessageTo(buddy, trimedText);
 
-				callLater(function():void{inputTextArea.text = ""});
+				callLater(function():void
+					{
+						inputTextArea.text = ""
+					});
 			}
 			
 			[Mediate(event="InputTextEvent.INSERT_TEXT")]
@@ -93,7 +96,14 @@
 			{
 				if(!buddy || !buddy.isMicroBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
 					return;
-					
+				
+				if(str == "/n")
+				{
+					inputTextArea.text = "";
+					return;
+				}
+				
+				
 				var results:Array = LinkUitls.findLinks(inputTextArea.text + str);
 				for each(var lr:LinkResult in results)
 				{

@@ -198,7 +198,6 @@ package com.cleartext.esm.views.popup
  		public function closeWindow(event:Event=null):void
  		{
 			hideErrors();
-
 			closing = true;
 			if(!event)
  				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
