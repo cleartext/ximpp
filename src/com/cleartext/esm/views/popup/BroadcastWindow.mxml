@@ -82,8 +82,9 @@
 			
 			override public function closeWindow(event:Event=null):void
 			{
+				if(!closing)
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, message));
 				super.closeWindow(event);
-				Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, message));
 			}
 			
 		]]>

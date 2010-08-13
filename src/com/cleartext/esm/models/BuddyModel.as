@@ -174,7 +174,11 @@ package com.cleartext.esm.models
 
 		private function buddyFilter(buddy:IBuddy):Boolean
 		{
-			if(!settings.global.showOfflineBuddies && buddy.status.isOffline() && !(buddy is ChatRoom) && !(buddy is BuddyGroup))
+			if(searchString == "" && 
+				!settings.global.showOfflineBuddies && 
+				buddy.status.isOffline() && 
+				!(buddy is ChatRoom) && 
+				!(buddy is BuddyGroup))
 				return false;
 			
 			if(searchString != "" && 

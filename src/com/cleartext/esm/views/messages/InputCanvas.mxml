@@ -94,15 +94,14 @@
 			
 			private function shorten(str:String=" "):void
 			{
-				if(!buddy || !buddy.isMicroBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
-					return;
-				
-				if(str == "/n")
+				if(inputTextArea.text == "" &&  str == "\n")
 				{
-					inputTextArea.text = "";
+					callLater(function():void {inputTextArea.text = inputTextArea.text.substr(0, inputTextArea.text.length-2);});
 					return;
 				}
 				
+				if(!buddy || !buddy.isMicroBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
+					return;
 				
 				var results:Array = LinkUitls.findLinks(inputTextArea.text + str);
 				for each(var lr:LinkResult in results)

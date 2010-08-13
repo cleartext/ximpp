@@ -24,6 +24,9 @@ package com.seesmic.as3.xmpp
 	import flash.events.*;
 	import flash.net.Socket;
 	import flash.utils.Timer;
+	import flash.utils.setTimeout;
+	
+	import org.osmf.events.TimeEvent;
 
 	public class StreamSocket extends EventDispatcher
 	{
@@ -52,6 +55,8 @@ package com.seesmic.as3.xmpp
 		public var tlsConfig:Object;
 		public var tlsEngine:Object;
 		
+		private var stanzaBuffer:Array = new Array();
+		private var processingStanzas:Boolean = false;
 		
 		public function StreamSocket(host:String=null, port:int=0, callback:Function=null)
 		{
@@ -200,9 +205,20 @@ package com.seesmic.as3.xmpp
 		
 		private function recvBuffer():void { // an ugly hack because AS3 doesn't have an asynch XML parser
 			var incoming:String = socket.readUTFBytes(socket.bytesAvailable);
+			if(incoming)
+			{
+				stanzaBuffer.push(incoming);
+				trace("IN : " + incoming);
+				dispatchEvent(new StreamEvent(StreamEvent.COMM_IN, false, false, null, incoming));
+				if(!processingStanzas)
+					processStanzas();
+			}
+		}
+		
+		private function processStanzas():void
+		{
+			var incoming:String = stanzaBuffer.shift();
 			var tag:Array = new Array(); 
-			trace("IN : " + incoming);
-			dispatchEvent(new StreamEvent(StreamEvent.COMM_IN, false, false, null, incoming));
 			buffer += incoming;
 			if(!stream_started && buffer) { // if we're expecting a start of stream
 				if(buffer.search("\\?>") != -1) { // if there's an xml header
@@ -233,6 +249,16 @@ package com.seesmic.as3.xmpp
 				} else {
 					gotfulltag = false;
 				}
+			}
+			
+			if(stanzaBuffer.length > 0)
+			{
+				processingStanzas = true;
+				setTimeout(processStanzas, 100);
+			}
+			else
+			{
+				processingStanzas = false;
 			}
 		}
 	}
