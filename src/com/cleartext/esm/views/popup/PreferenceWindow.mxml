@@ -182,7 +182,7 @@
 		]]>
 	</fx:Script>
 	
-	<s:TabBar id="tabBar" dataProvider="{tabs}" y="10" x="20"/>
+	<s:TabBar id="tabBar" dataProvider="{tabs}" y="10" x="20" click="hideErrors()"/>
 	
 	<s:Line xFrom="0" xTo="{width-2}" yFrom="{tabBar.height + 10}" yTo="{tabBar.height + 10}">
 		<s:stroke>

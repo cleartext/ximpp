@@ -18,6 +18,7 @@ package com.cleartext.esm.views.popup
 	import mx.core.UIComponent;
 	import mx.events.CloseEvent;
 	import mx.events.FlexEvent;
+	import mx.managers.FocusManager;
 	import mx.managers.ToolTipManager;
 	
 	import spark.components.Button;
@@ -49,11 +50,6 @@ package com.cleartext.esm.views.popup
 				if(submitButton)
 					submitButton.enabled = isValid;
 			}
-
-//			if(submitButton && cancelButton)
-//			{
-//				defaultButton = isValid ? submitButton : cancelButton;
-//			}
 		}
 		
 		private var _submitButtonLabel:String;
@@ -75,6 +71,7 @@ package com.cleartext.esm.views.popup
 			
 			addEventListener(FlexEvent.CONTENT_CREATION_COMPLETE, init);
 			addEventListener(KeyboardEvent.KEY_DOWN, myKeyDownHandler);
+			addEventListener(CloseEvent.CLOSE, closeWindow);
 		}
 		
 		protected function myKeyDownHandler(event:KeyboardEvent):void
@@ -134,11 +131,7 @@ package com.cleartext.esm.views.popup
 					(target is TextInput && (target as TextInput).text == "" ||
 					target is List && getSelected(target as List).length < 1))
 			{
-				if (toolTip)
-				{
-					toolTip.visible = true;
-				}
-				else
+				if(!toolTip)
 				{
 					// Create the ToolTip instance.
 					var pt:Point = new Point(target.x, target.y);
@@ -151,7 +144,8 @@ package com.cleartext.esm.views.popup
 			}
 			else if(toolTip)
 			{
-				toolTip.visible = false;
+				ToolTipManager.destroyToolTip(toolTip);
+				delete errorMessageToolTips[target.name];
 			}
 			
 			validateForm();
@@ -183,8 +177,12 @@ package com.cleartext.esm.views.popup
  		
  		public function hideErrors():void
  		{
- 			for each(var toolTip:ToolTip in errorMessageToolTips)
-				toolTip.visible = false;
+			setFocus();
+			for each(var toolTip:ToolTip in errorMessageToolTips)
+			{
+				ToolTipManager.destroyToolTip(toolTip);
+			}
+			errorMessageToolTips = new Dictionary();
  		}
  		
  		protected function validateForm():void
@@ -197,13 +195,13 @@ package com.cleartext.esm.views.popup
  			closeWindow();
  		}
  		
- 		public function closeWindow():void
+ 		public function closeWindow(event:Event=null):void
  		{
- 			for each(var toolTip:ToolTip in errorMessageToolTips)
-				ToolTipManager.destroyToolTip(toolTip);
+			hideErrors();
 
 			closing = true;
- 			dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+			if(!event)
+ 				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
  		}
 	}
 }

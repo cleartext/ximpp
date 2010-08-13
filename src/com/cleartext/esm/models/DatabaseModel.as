@@ -91,7 +91,7 @@ package com.cleartext.esm.models
 			{
 				appModel.log("Creating and opening database", true);
 				// create the local database file
-				var dbName:String = "ximpp.db";
+				 var dbName:String = "ximpp.db";
 				// dbName = "ximpp32.db";
 				// dbName = new Date().time + ".db";
 				

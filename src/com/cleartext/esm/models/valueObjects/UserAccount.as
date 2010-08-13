@@ -26,15 +26,12 @@ package com.cleartext.esm.models.valueObjects
 			"mBlogAvatarUrl TEXT);";
 
 		public static const TABLE_MODS:Array = [
-			{name: "port", type: "INTEGER", defaultVal: "5222"}
+			{name: "port", type: "INTEGER"}
 		];
 		
-		public function UserAccount(jid:String)
+		public function UserAccount()
 		{
-			if(!jid)
-				jid = "";
-
-			super(jid);
+			super("");
 			buddyId = -2;
 		}
 		
@@ -52,14 +49,15 @@ package com.cleartext.esm.models.valueObjects
 		
 		public static function createFromDB(obj:Object, mBlogBuddies:MicroBloggingModel):UserAccount
 		{
-			var newUserAccount:UserAccount = new UserAccount(obj["jid"]);
+			var newUserAccount:UserAccount = new UserAccount();
 			
+			newUserAccount.jid = obj["jid"];
 			newUserAccount.userId = obj["userId"];
 			newUserAccount.accountName = obj["accountName"];	
 			newUserAccount.nickname = obj["nickname"];			
 			newUserAccount.password = obj["password"];			
 			newUserAccount.server = obj["server"];
-			newUserAccount.port = obj["port"];
+			newUserAccount.port = obj["port"]==null ? 5222 : obj["port"];
 			newUserAccount.customStatus = obj["customStatus"];
 			newUserAccount.avatarHash = obj["avatarHash"];
 			
