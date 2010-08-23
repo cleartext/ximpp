@@ -16,11 +16,11 @@
 			import com.cleartext.esm.events.PopUpEvent;
 			import com.cleartext.esm.events.UserAccountEvent;
 			import com.cleartext.esm.models.ApplicationModel;
+			import com.cleartext.esm.models.AvatarModel;
 			import com.cleartext.esm.models.BuddyModel;
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
 			import com.cleartext.esm.models.XMPPModel;
-			import com.cleartext.esm.models.utils.AvatarUtils;
 			import com.cleartext.esm.models.valueObjects.Status;
 			import com.cleartext.esm.models.valueObjects.UrlShortener;
 			import com.cleartext.esm.models.valueObjects.UserAccount;
@@ -56,6 +56,9 @@
 			[Bindable]
 			public var buddies:BuddyModel;
 			
+			[Autowire]
+			public var avatarModel:AvatarModel;
+			
 			override protected function init(event:Event):void
 			{
 				super.init(event);
@@ -75,7 +78,7 @@
 				
 				// load user account
 				nickname.text = settings.userAccount.nickname;
-				avatarInput.data = settings.userAccount;
+				avatarInput.avatar = avatarModel.getAvatar("userAccount");
 				jid.text = settings.userAccount.jid;
 				password.text = settings.userAccount.password;
 				server.text = settings.userAccount.server;
@@ -111,17 +114,17 @@
 					p = 5222;
 				settings.userAccount.port = p;
 				
-				if(avatarInput.bitmapData)
-				{
-					settings.userAccount.avatar = avatarInput.bitmapData;
-					settings.userAccount.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
-					settings.userAccount.avatarHash = SHA1.hashBytes(avatarInput.bitmapData.getPixels(avatarInput.bitmapData.rect));
-				}
-				else
-				{
-					settings.userAccount.avatar = null;
-					settings.userAccount.avatarHash = "";
-				}
+//				if(avatarInput.bitmapData)
+//				{
+//					settings.userAccount.avatar = avatarInput.bitmapData;
+//					settings.userAccount.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
+//					settings.userAccount.avatarHash = SHA1.hashBytes(avatarInput.bitmapData.getPixels(avatarInput.bitmapData.rect));
+//				}
+//				else
+//				{
+//					settings.userAccount.avatar = null;
+//					settings.userAccount.avatarHash = "";
+//				}
 				
 				database.saveUserAccount(settings.userAccount);
 				
@@ -151,12 +154,12 @@
 								function():void
 								{
 									var loadedBitmap:Bitmap = loader.content as Bitmap;
-									var newBitmapData:BitmapData = new BitmapData(AvatarUtils.AVATAR_SIZE, AvatarUtils.AVATAR_SIZE);
-									var scale:Number = AvatarUtils.AVATAR_SIZE / Math.max(loadedBitmap.width, loadedBitmap.height);
-									var tx:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
-									var ty:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
+									var newBitmapData:BitmapData = new BitmapData(AvatarModel.AVATAR_SIZE, AvatarModel.AVATAR_SIZE);
+									var scale:Number = AvatarModel.AVATAR_SIZE / Math.max(loadedBitmap.width, loadedBitmap.height);
+									var tx:Number = (AvatarModel.AVATAR_SIZE - loadedBitmap.width * scale)/2;
+									var ty:Number = (AvatarModel.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-									avatarInput.bitmapData = newBitmapData;
+//									avatarInput.bitmapData = newBitmapData;
 								});
 						});
 					validateForm();
@@ -202,7 +205,7 @@
 					</mx:VBox>
 				</mx:FormItem>
 				<mx:FormItem label="Profile picture:" direction="horizontal">
-					<common:Avatar id="avatarInput" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editMode="true" editClicked="changeAvatar()" />
+					<common:AvatarRenderer id="avatarInput" width="{AvatarModel.AVATAR_SIZE}" height="{AvatarModel.AVATAR_SIZE}" editMode="true" editClicked="changeAvatar()" />
 				</mx:FormItem>
 				
 				<mx:FormItem label="Account id:">

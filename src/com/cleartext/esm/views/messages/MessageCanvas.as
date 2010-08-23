@@ -200,7 +200,7 @@ package com.cleartext.esm.views.messages
 		{
 			var chat:Chat = event.chat;
 			var avatar:AvatarTab = new AvatarTab();
-			avatar.data = chat;
+			avatar.chat = chat;
 			avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
 			avatar.width = AVATAR_SIZE;
 			avatar.height = AVATAR_SIZE;
@@ -427,13 +427,13 @@ package com.cleartext.esm.views.messages
 			
 			for each(var searchTerm:String in searchTerms)
 			{
-				if(message.mBlogSender)
-				{
-					if(message.mBlogSender.userName.toLowerCase().indexOf(searchTerm) != -1)
-						return true;
-					if(message.mBlogSender.displayName.toLowerCase().indexOf(searchTerm) != -1)
-						return true;
-				}
+//				if(message.mBlogSenderId != -1)
+//				{
+//					if(message.mBlogSender.userName.toLowerCase().indexOf(searchTerm) != -1)
+//						return true;
+//					if(message.mBlogSender.displayName.toLowerCase().indexOf(searchTerm) != -1)
+//						return true;
+//				}
 				if(message.plainMessage.toLocaleLowerCase().indexOf(searchTerm) != -1)
 					return true;
 			}
@@ -456,7 +456,7 @@ package com.cleartext.esm.views.messages
 
 			if(position == 1)
 			{
-				(avatar.buddy as IBuddy).unreadMessages = 0;
+				(avatar.chat.buddy as IBuddy).unreadMessages = 0;
 				newX += SELECTOR_WIDTH;
 			}
 			else if(position >1)

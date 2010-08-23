@@ -1,7 +1,7 @@
 package com.cleartext.esm.tests
 {
 	import com.cleartext.esm.models.valueObjects.Chat;
-	import com.cleartext.esm.views.common.Avatar;
+	import com.cleartext.esm.views.common.AvatarRenderer;
 	
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
@@ -51,7 +51,7 @@ package com.cleartext.esm.tests
 			else if(_index < 0)
 				_index = Math.max(avatars.length -1, 0);
 			
-			var currentAvatar:Avatar = avatarByIndex(index);
+			var currentAvatar:AvatarRenderer = avatarByIndex(index);
 			if(currentAvatar)
 				setCurrentChat(currentAvatar.chat);
 		}
@@ -66,10 +66,10 @@ package com.cleartext.esm.tests
 			return avatars.length;
 		}
 		
-		private function avatarByIndex(i:int):Avatar
+		private function avatarByIndex(i:int):AvatarRenderer
 		{
 			if(avatars.length > 0)
-				return avatars.getItemAt(i) as Avatar;
+				return avatars.getItemAt(i) as AvatarRenderer;
 			return null;
 		}
 		
@@ -94,7 +94,7 @@ package com.cleartext.esm.tests
 			
 			if(!exists)
 			{
-				var avatar:Avatar = new Avatar();
+				var avatar:AvatarRenderer = new AvatarRenderer();
 				avatar.data = chat;
 				avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
 				avatar.width = AvatarUtils.AVATAR_SIZE;
@@ -125,14 +125,14 @@ package com.cleartext.esm.tests
 		
 		private function avatar_rollOver(event:MouseEvent):void
 		{
-			var avatar:Avatar = event.target as Avatar;
+			var avatar:AvatarRenderer = event.target as AvatarRenderer;
 			if(avatarByIndex(index) != avatar)
 				avatar.alpha = OVER_ALPHA;
 		}
 		
 		private function avatar_rollOut(event:MouseEvent):void
 		{
-			var avatar:Avatar = event.target as Avatar;
+			var avatar:AvatarRenderer = event.target as AvatarRenderer;
 			if(avatarByIndex(index) != avatar)
 				avatar.alpha = OUT_ALPHA;
 		}
@@ -197,12 +197,12 @@ package com.cleartext.esm.tests
 		
 		private function avatarClickHandler(event:MouseEvent):void
 		{
-			setCurrentChat((event.target as Avatar).chat);
+			setCurrentChat((event.target as AvatarRenderer).chat);
 		}
 		
 		private function moveAvatar(avatarIndex:int, position:int, newAlpha:Number=-1, animate:Boolean=true):void
 		{
-			var avatar:Avatar = avatarByIndex(avatarIndex);
+			var avatar:AvatarRenderer = avatarByIndex(avatarIndex);
 			
 			if(newAlpha != -1 && newAlpha != avatar.alpha)
 			{
@@ -243,7 +243,7 @@ package com.cleartext.esm.tests
 			
 			if(chat)
 			{
-				for each(var a:Avatar in avatars)
+				for each(var a:AvatarRenderer in avatars)
 				{
 					if(a.chat == chat)
 					{

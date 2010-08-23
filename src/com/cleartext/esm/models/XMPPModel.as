@@ -17,7 +17,6 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.ISubscribable;
 	import com.cleartext.esm.models.valueObjects.Message;
-	import com.cleartext.esm.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.esm.models.valueObjects.Status;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
 	import com.hurlant.crypto.tls.TLSConfig;
@@ -99,11 +98,6 @@ package com.cleartext.esm.models
 			return appModel.buddies;
 		}
 		
-		private function get mBlogBuddies():MicroBloggingModel
-		{
-			return appModel.mBlogBuddies;
-		}
-		
 		private function get requests():BuddyRequestModel
 		{
 			return appModel.requests;
@@ -122,6 +116,11 @@ package com.cleartext.esm.models
 		private function get soundColor():SoundAndColorModel
 		{
 			return appModel.soundColor;
+		}
+		
+		private function get avatarModel():AvatarModel
+		{
+			return appModel.avatarModel;
 		}
 		
 		//------------------------------------------------------------------
@@ -494,16 +493,11 @@ package com.cleartext.esm.models
 				// only set lastSeen if the buddy was offline or we are now 
 				// explicitly going online
 				if(wasOffline || buddy.status.value == Status.AVAILABLE)
-				{
 					buddy.lastSeen = new Date().time;
-				}
 				
 				var avatarHash:String = stanza.avatarHash;
-				if(avatarHash && (buddy.avatarHash != avatarHash || !buddy.avatar))
-				{
-					buddy.tempAvatarHash = avatarHash;
-					getVCard(buddy.jid);
-				}
+				if(avatarHash)
+					avatarModel.setUrlOrHash(buddy.jid, avatarHash);
 				
 				buddies.buddies.refresh();
 				database.saveBuddy(buddy);
@@ -837,7 +831,7 @@ package com.cleartext.esm.models
 		// GET VCARD
 		//-------------------------------
 		
-		private function getVCard(jid:String):void
+		public function getVCard(jid:String):void
 		{
 			sendIq(jid,
 					IQTypes.GET,
@@ -861,7 +855,7 @@ package com.cleartext.esm.models
 				gotAvatar = true;
 				var vCard:XMLList = xml.vCardTemp::vCard;
 				var serverAvatar:String = vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-				var localAvatar:String = settings.userAccount.avatarString;
+				var localAvatar:String = avatarModel.userAccountAvatar.bitmapString;
 				
 				// if we have a different avatar to the one on the server, then send a
 				// vcard back to the server
@@ -872,7 +866,8 @@ package com.cleartext.esm.models
 				}
 				else if(localAvatar == "" || localAvatar == "null")
 				{
-					settings.userAccount.avatarString = serverAvatar;
+					// make sure the hash is also set !!
+					avatarModel.setBitmapString("userAccount", serverAvatar);
 				}
 
 				// now we have the avatar, resend the presence to make sure the 
@@ -882,8 +877,7 @@ package com.cleartext.esm.models
 			else
 			{
 				var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-				var buddy:IBuddy = appModel.getBuddyByJid(buddyJid);
-				buddy.avatarString = avatarString;
+				avatarModel.setBitmapString(buddyJid, avatarString);
 			}
 		}
 		
@@ -908,11 +902,7 @@ package com.cleartext.esm.models
 			var xml:XML = stanza.getXML();
 			var buddyJid:String = stanza.from;
 			var avatarString:String = xml.vCardTemp::vCard.vCardTemp::PHOTO.vCardTemp::BINVAL;
-			var buddy:MicroBloggingBuddy = mBlogBuddies.getBuddyByJid(buddyJid);
-			if(buddy)
-				buddy.avatarString = avatarString;
-			else
-				appModel.log("[XMPPModel].mBlogVCardHandler() could not find mblog buddy with jid : " + buddyJid, true);
+			avatarModel.setBitmapString(buddyJid, avatarString);
 		}
 		
 		//------------------------------------------------------------------
@@ -961,7 +951,7 @@ package com.cleartext.esm.models
 			else if(connected)
 			{
 				var priority:String = (status.value == Status.AWAY || status.value == Status.EXTENDED_AWAY) ? "0" : "5";
-				xmpp.sendPresence(customStatus, status.toShow(), priority, toJid, (gotAvatar) ? settings.userAccount.avatarHash : "");
+				xmpp.sendPresence(customStatus, status.toShow(), priority, toJid, (gotAvatar) ? avatarModel.userAccountAvatar.urlOrHash : "");
 				appModel.serverSideStatus.value = status.value;
 			}
 			

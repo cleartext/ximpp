@@ -6,15 +6,15 @@ package com.cleartext.esm.models.valueObjects
 	[Bindable]
 	public interface IHasAvatar extends IEventDispatcher
 	{
-		function get avatar():BitmapData;
-		function set avatar(value:BitmapData):void
-
-		function setAvatarString(value:String):void;
-		
-		function get avatarString():String;
-		function set avatarString(value:String):void;
-		
-		function get avatarHash():String;
-		function set avatarHash(value:String):void;
+//		function get avatar():BitmapData;
+//		function set avatar(value:BitmapData):void
+//
+//		function setAvatarString(value:String):void;
+//		
+//		function get avatarString():String;
+//		function set avatarString(value:String):void;
+//		
+//		function get avatarHash():String;
+//		function set avatarHash(value:String):void;
 	}
 }

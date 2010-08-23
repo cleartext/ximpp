@@ -16,7 +16,6 @@
 			import mx.utils.ObjectUtil;
 			import com.cleartext.esm.assets.Constants;
 			import com.cleartext.esm.models.ApplicationModel;
-			import com.cleartext.esm.models.MicroBloggingModel;
 			import com.cleartext.esm.models.valueObjects.Message;
 			import com.cleartext.esm.models.DatabaseModel;
 
@@ -40,7 +39,7 @@
 			private function dataGridChangeHandler():void
 			{
 				var obj:Object = dataGrid.selectedItem;
-				messageRenderer.data = Message.createFromDB(obj, appModel.mBlogBuddies);
+				messageRenderer.data = Message.createFromDB(obj);
 				callLater(canvas.invalidateDisplayList);
 			}
 			

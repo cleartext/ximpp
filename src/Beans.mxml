@@ -11,12 +11,12 @@
 		<models:DatabaseModel id="database" />
 		<models:XMPPModel id="xmpp" />
 		<models:BuddyModel id="buddies" />
-		<models:MicroBloggingModel id="microBlogging" />
 		<models:BuddyRequestModel id="requests" />
 		<models:ChatModel id="chats" />
 		<models:ChatRoomModel id="chatRooms" />
 		<models:WebRootModel id="webroot" />
 		<models:ApplicationModel id="appModel" />
+		<models:AvatarModel id="avatarModel" />
 	</fx:Declarations>
 
 </swiz:BeanLoader>	

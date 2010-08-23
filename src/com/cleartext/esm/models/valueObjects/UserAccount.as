@@ -1,8 +1,5 @@
 package com.cleartext.esm.models.valueObjects
 {
-	import com.cleartext.esm.models.MicroBloggingModel;
-	import com.cleartext.esm.models.utils.AvatarUtils;
-	
 	import flash.display.BitmapData;
 	
 	public class UserAccount extends Buddy
@@ -47,7 +44,7 @@ package com.cleartext.esm.models.valueObjects
 		public var mBlogAvatarUrl:String;
 		public var mBlogAvatar:BitmapData;
 		
-		public static function createFromDB(obj:Object, mBlogBuddies:MicroBloggingModel):UserAccount
+		public static function createFromDB(obj:Object):UserAccount
 		{
 			var newUserAccount:UserAccount = new UserAccount();
 			
@@ -59,15 +56,12 @@ package com.cleartext.esm.models.valueObjects
 			newUserAccount.server = obj["server"];
 			newUserAccount.port = obj["port"]==null ? 5222 : obj["port"];
 			newUserAccount.customStatus = obj["customStatus"];
-			newUserAccount.avatarHash = obj["avatarHash"];
 			
 			newUserAccount.mBlogDisplayName = obj["mBlogDisplayName"];
 			newUserAccount.mBlogPrivateJid = obj["mBlogPrivateJid"];
 			newUserAccount.mBlogUseChatAvatar = obj["mBlogUseChatAvatar"];
 			newUserAccount.mBlogAvatarUrl = obj["mBlogAvatarUrl"];
 			
-			newUserAccount.avatarString = obj["avatar"];
-
 			return newUserAccount;
 		}
 		
@@ -86,8 +80,6 @@ package com.cleartext.esm.models.valueObjects
 				new DatabaseValue("server", server),
 				new DatabaseValue("port", port),
 				new DatabaseValue("customStatus", customStatus),
-				new DatabaseValue("avatarHash", avatarHash),
-				new DatabaseValue("avatar", avatarString),
 				new DatabaseValue("mBlogUseChatAvatar", mBlogUseChatAvatar),
 				new DatabaseValue("mBlogPrivateJid", mBlogPrivateJid),
 				new DatabaseValue("mBlogAvatarUrl", mBlogAvatarUrl),

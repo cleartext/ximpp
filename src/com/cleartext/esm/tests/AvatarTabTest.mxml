@@ -5,7 +5,7 @@
 			import com.cleartext.esm.models.valueObjects.Buddy;
 			import com.cleartext.esm.models.valueObjects.Chat;
 			import com.cleartext.esm.models.valueObjects.IHasAvatar;
-			import com.cleartext.esm.views.common.Avatar;
+			import com.cleartext.esm.views.common.AvatarRenderer;
 			
 			import flash.sampler.NewObjectSample;
 			

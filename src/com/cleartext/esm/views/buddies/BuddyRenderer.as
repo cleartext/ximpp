@@ -3,6 +3,7 @@ package com.cleartext.esm.views.buddies
 	import com.cleartext.esm.events.ApplicationEvent;
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.events.PopUpEvent;
+	import com.cleartext.esm.models.AvatarModel;
 	import com.cleartext.esm.models.ChatModel;
 	import com.cleartext.esm.models.XMPPModel;
 	import com.cleartext.esm.models.types.SubscriptionTypes;
@@ -10,7 +11,7 @@ package com.cleartext.esm.views.buddies
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Status;
-	import com.cleartext.esm.views.common.Avatar;
+	import com.cleartext.esm.views.common.AvatarRenderer;
 	import com.cleartext.esm.views.common.StatusIcon;
 	import com.cleartext.esm.views.common.UnreadMessageBadge;
 	import com.universalsprout.flex.components.list.SproutListRendererBase;
@@ -36,6 +37,9 @@ package com.cleartext.esm.views.buddies
 		
 		[Autowire]
 		public var xmpp:XMPPModel;
+		
+		[Autowire]
+		public var avatarModel:AvatarModel;
 		
 		private static const SMALL_HEIGHT:Number = 40;
 		private static const BIG_HEIGHT:Number = 46;
@@ -248,7 +252,7 @@ package com.cleartext.esm.views.buddies
 			{
 				buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 				if(avatar)
-					avatar.data = buddy;
+					avatar.avatar = avatarModel.getAvatar(buddy.jid);
 
 				customContextMenu = new ContextMenu();
 				customContextMenu.hideBuiltInItems();
@@ -309,7 +313,7 @@ package com.cleartext.esm.views.buddies
 		// Display Children
 		//---------------------------------------
 		
-		private var avatar:Avatar;
+		private var avatar:AvatarRenderer;
 		private var statusIcon:StatusIcon;
 		private var nameLabel:UITextField;
 		private var statusLabel:UITextField;
@@ -326,12 +330,12 @@ package com.cleartext.esm.views.buddies
 			
 			if(!avatar)
 			{
-				avatar = new Avatar();
+				avatar = new AvatarRenderer();
 				avatar.x = LEFT_PADDING;
 				avatar.y = PADDING;
 				avatar.width = AVATAR_SIZE;
 				avatar.height = AVATAR_SIZE;
-				avatar.data = buddy;
+				avatar.avatar = avatarModel.getAvatar(buddy.jid);
 				addChild(avatar);
 			}
 			

@@ -1,14 +1,17 @@
 package com.cleartext.esm.views.messages
 {
 	import com.cleartext.esm.assets.Constants;
+	import com.cleartext.esm.events.AvatarEvent;
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.events.InputTextEvent;
 	import com.cleartext.esm.events.LinkEvent;
+	import com.cleartext.esm.models.AvatarModel;
 	import com.cleartext.esm.models.XMPPModel;
 	import com.cleartext.esm.models.types.MicroBloggingTypes;
+	import com.cleartext.esm.models.valueObjects.Avatar;
+	import com.cleartext.esm.models.valueObjects.AvatarTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
-	import com.cleartext.esm.models.valueObjects.MicroBloggingBuddy;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
@@ -38,9 +41,6 @@ package com.cleartext.esm.views.messages
 		protected var buttons:Array = new Array();
 	
 		protected var searchTerms:UITextField;
-		
-		private var chatBuddy:IBuddy;
-		private var mBlogSender:MicroBloggingBuddy;
 		private var type:String = "";
 		
 		private var avatarContextMenu:ContextMenu;
@@ -55,7 +55,7 @@ package com.cleartext.esm.views.messages
 			topRowHeight = 42;
 			padding = 8;
 		}
-
+		
 		public function createButtons(type:String):void
 		{
 			if(this.type == type)
@@ -124,10 +124,46 @@ package com.cleartext.esm.views.messages
 			}
 		}
 		
+		private var _mblogAvatar:Avatar;
+		public function get mblogAvatar():Avatar
+		{
+			return _mblogAvatar;
+		}
+		public function set mblogAvatar(value:Avatar):void
+		{
+			if(mblogAvatar != value)
+			{
+				if(mblogAvatar)
+					mblogAvatar.removeEventListener(AvatarEvent.MBLOG_VALUES_CHANGE, mblogAvatarChangeHandler);
+
+				_mblogAvatar = value;
+				
+				if(mblogAvatar)
+				{
+					mblogAvatar.addEventListener(AvatarEvent.MBLOG_VALUES_CHANGE, mblogAvatarChangeHandler);
+					createButtons(MicroBloggingTypes.RECEIVED);
+					if(mblogAvatar.profileUrl)
+					{
+						avatarRenderer.addEventListener(MouseEvent.CLICK, goToProfile);
+						avatarRenderer.buttonMode = true;
+					}
+				}
+				else
+				{
+					createButtons(null);
+				}
+			}
+		}
+		
+		private function mblogAvatarChangeHandler(event:AvatarEvent):void
+		{
+			invalidateProperties();
+		}
+		
 		private function goToProfile(event:MouseEvent):void
 		{
-			if(mBlogSender && mBlogSender.profileUrl)
-				Swiz.dispatchEvent(new LinkEvent(LinkEvent.LINK_CLICKED, mBlogSender.profileUrl));
+			if(mblogAvatar && mblogAvatar.profileUrl)
+				Swiz.dispatchEvent(new LinkEvent(LinkEvent.LINK_CLICKED, mblogAvatar.profileUrl));
 		}
 
 		private function button_clickHandler(event:MouseEvent):void
@@ -135,16 +171,16 @@ package com.cleartext.esm.views.messages
 			switch(event.target.data)
 			{
 				case "reply" :
-					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "@" + message.mBlogSender.userName + " "));
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "@" + mblogAvatar.userName + " "));
 					break;
 				case "retweet" :
-					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + message.mBlogSender.userName + " : " + bodyTextField.text));
+					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + mblogAvatar.userName + " : " + bodyTextField.text));
 					break;
 				case "direct" :
-					var buddy:IBuddy = appModel.getBuddyByJid(message.mBlogSender.jid);
+					var buddy:IBuddy = appModel.getBuddyByJid(mblogAvatar.jid);
 					if(!buddy)
 					{
-						buddy = new Buddy(message.mBlogSender.jid);
+						buddy = new Buddy(mblogAvatar.jid);
 						appModel.buddies.addBuddy(buddy);
 					}
 					chats.getChat(buddy, true);
@@ -170,17 +206,17 @@ package com.cleartext.esm.views.messages
 		
 		private function showContextMenu(event:MouseEvent):void
 		{
-			if(mBlogSender && (chatBuddy.jid == xmpp.cleartextComponentJid || chatBuddy.jid == xmpp.twitterGatewayJid))
+			if(mblogAvatar && (avatar.jid == xmpp.cleartextComponentJid || avatar.jid == xmpp.twitterGatewayJid))
 			{
 				if(!followItem)
 				{
-					followItem = new ContextMenuItem("follow @" + mBlogSender.userName);
+					followItem = new ContextMenuItem("follow @" + mblogAvatar.userName);
 					followItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
 					avatarContextMenu.addItem(followItem);
 				}
 				if(!unFollowItem)
 				{
-					unFollowItem = new ContextMenuItem("unfollow @" + mBlogSender.userName);
+					unFollowItem = new ContextMenuItem("unfollow @" + mblogAvatar.userName);
 					unFollowItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
 					avatarContextMenu.addItem(unFollowItem);
 				}
@@ -206,59 +242,26 @@ package com.cleartext.esm.views.messages
 		{
 			if(!xmpp.connected)
 				return;
-			xmpp.sendMessage(chatBuddy.jid, (event.target == unFollowItem ? "u " : "f ") + mBlogSender.userName);
+			xmpp.sendMessage(avatar.jid, (event.target == unFollowItem ? "u " : "f ") + mblogAvatar.userName);
 		}
 		
 		override protected function commitProperties():void
 		{
 			if(message)
 			{
-				if(!chatBuddy || chatBuddy.jid != message.sender)
+				if(message.mBlogSenderJid)
 				{
-					if(chatBuddy)
-						chatBuddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
-
-					chatBuddy =  appModel.getBuddyByJid(message.sender);
-
-					if(chatBuddy)
-						chatBuddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler, false, 0, true);
-					
-					fromThisUser = (chatBuddy == userAccount);
+					mblogAvatar = avatarModel.getAvatar(message.mBlogSenderJid);
+					nameTextField.text = mblogAvatar.displayName; 
+					if(avatarRenderer)
+						avatarRenderer.avatar = mblogAvatar;
 				}
-				
-				if(message.mBlogSender)
+				else
 				{
-					if(mBlogSender != message.mBlogSender)
-					{
-						if(mBlogSender)
-							mBlogSender.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
-	
-						mBlogSender = message.mBlogSender;
-	
-						if(mBlogSender)
-						{
-							mBlogSender.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler, false, 0, true);
-							createButtons(MicroBloggingTypes.RECEIVED);
-							if(mBlogSender.profileUrl)
-							{
-								avatar.addEventListener(MouseEvent.CLICK, goToProfile);
-								avatar.buttonMode = true;
-							}
-						}
-						else
-						{
-							createButtons(null);
-						}
-	
-						avatar.data = mBlogSender;
-					}
-					nameTextField.text = mBlogSender.nickname; 
-				}
-				else if(chatBuddy)
-				{
-					avatar.data = chatBuddy;
-					nameTextField.text = chatBuddy.nickname;
-					createButtons(null); 
+					avatar = avatarModel.getAvatar(message.sender);
+					nameTextField.text = avatar.displayName;
+					if(avatarRenderer)
+						avatarRenderer.avatar = avatar;
 				}
 
 				searchTerms.text = (message.searchTerms && message.searchTerms.length > 0) ? message.searchTerms.join(",") : '';
@@ -302,9 +305,9 @@ package com.cleartext.esm.views.messages
 				addChildAt(searchTerms,0);
 			}
 			
-			avatar.x = 2*padding + buttonWidth;
-			avatar.y = padding;
-
+			avatarRenderer.x = 2*padding + buttonWidth;
+			avatarRenderer.y = padding;
+			
 			dateTextField.x = avatarSize + 3*padding + buttonWidth;
 			dateTextField.y = padding;
 
@@ -317,8 +320,8 @@ package com.cleartext.esm.views.messages
 			if(!avatarContextMenu)
 			{
 				avatarContextMenu = new ContextMenu();
-				avatar.addEventListener(MouseEvent.CONTEXT_MENU, showContextMenu);
-				avatar.contextMenu = avatarContextMenu;
+				avatarRenderer.addEventListener(MouseEvent.CONTEXT_MENU, showContextMenu);
+				avatarRenderer.contextMenu = avatarContextMenu;
 			}
 		}
 		

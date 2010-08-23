@@ -6,7 +6,7 @@ package com.cleartext.esm.models
 	
 	import flash.utils.Dictionary;
 	
-	public class MicroBloggingModel
+	public class MicroBloggingModel1
 	{
 		[Autowire]
 		public var appModel:ApplicationModel;
@@ -23,11 +23,11 @@ package com.cleartext.esm.models
 		
 		private var buddiesById:Dictionary = new Dictionary();
 		
-		public function MicroBloggingModel()
+		public function MicroBloggingModel1()
 		{
 		}
 
-		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null, profileUrl:String=null, displayName:String=null, avatarUrl:String=null, jid:String=null, avatarHash:String=null):MicroBloggingBuddy
+		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null, profileUrl:String=null, displayName:String=null):MicroBloggingBuddy
 		{
 			if(!idOrUserName)
 				return null;
@@ -62,16 +62,7 @@ package com.cleartext.esm.models
 			
 			if(profileUrl != null)
 				buddy.profileUrl = profileUrl;
-			
-			if(displayName != null)
-				buddy.displayName = displayName;
-			
-			if(avatarUrl != null)
-				buddy.setAvatarUrl(avatarUrl);
-				
-			if(jid)
-				buddy.setJidAndHash(jid, avatarHash, xmpp);
-				
+							
 			return buddy;
 		}
 		

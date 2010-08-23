@@ -18,6 +18,7 @@
 			import com.cleartext.esm.events.PopUpEvent;
 			import com.cleartext.esm.events.UserAccountEvent;
 			import com.cleartext.esm.models.ApplicationModel;
+			import com.cleartext.esm.models.AvatarModel;
 			import com.cleartext.esm.models.BuddyModel;
 			import com.cleartext.esm.models.BuddyRequestModel;
 			import com.cleartext.esm.models.ChatModel;
@@ -78,6 +79,10 @@
 			[Autowire]
 			[Bindable]
 			public var soundColor:SoundAndColorModel;
+
+			[Autowire]
+			[Bindable]
+			public var avatarModel:AvatarModel;
 			
 			public var addCanvas:VBox;
 			
@@ -86,8 +91,6 @@
 			
 			private function init():void
 			{
-				userAccountChanged(null);
-				
 				requests.requests.addEventListener(CollectionEvent.COLLECTION_CHANGE, setRequestIcon);
 				setRequestIcon();
 			}
@@ -189,12 +192,6 @@
 					chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
 					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, customStatusInput.text));
 				}
-			}
-			
-			[Mediate (event="UserAccountEvent.REFRESH")]
-			public function userAccountChanged(event:UserAccountEvent):void
-			{
-				avatar.data = settings.userAccount;
 			}
 			
 			[Mediate (event="BuddyRequestEvent.NEW_REQUEST")]
@@ -349,16 +346,17 @@
 			click="settings.global.sendStatusToMicroBlogging = microBloggingCheckBox.selected; database.saveGlobalSettings()"
 			/>
 
-		<common:Avatar
+		<common:AvatarRenderer
 			id="avatar"
 			width="48"
 			height="48"
 			x="-40" y="30"
-			border="false">
+			border="false"
+			avatar="{avatarModel.userAccountAvatar}">
 			<common:filters>
 				<mx:DropShadowFilter distance="0" blurX="4" blurY="4" />
 			</common:filters>
-		</common:Avatar>
+		</common:AvatarRenderer>
 
 	</mx:Canvas>
 	

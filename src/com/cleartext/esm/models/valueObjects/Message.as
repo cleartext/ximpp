@@ -1,6 +1,5 @@
 package com.cleartext.esm.models.valueObjects
 {
-	import com.cleartext.esm.models.MicroBloggingModel;
 	import com.universalsprout.flex.components.list.SproutListDataBase;
 	
 	public class Message extends SproutListDataBase
@@ -26,7 +25,8 @@ package com.cleartext.esm.models.valueObjects
 		public static const TABLE_MODS:Array = [
 			{name: "sentTimestamp", type: "NUMERIC"}, 
 			{name: "receivedTimestamp", type: "NUMERIC"},
-			{name: "searchTerms", type: "TEXT"}
+			{name: "searchTerms", type: "TEXT"},
+			{name: "mBlogSenderJid", type: "TEXT"}
 		];
 		
 		public var messageId:int = -1;
@@ -45,8 +45,10 @@ package com.cleartext.esm.models.valueObjects
 		
 		public var rawXML:String;
 		
-		public var mBlogSender:MicroBloggingBuddy;
-		public var mBlogOriginalSender:MicroBloggingBuddy;
+		public var mBlogSenderId:int = -1;
+		public var mBlogOriginalSenderId:int = -1;
+		
+		public var mBlogSenderJid:String;
 		
 		public function Message()
 		{
@@ -58,7 +60,7 @@ package com.cleartext.esm.models.valueObjects
 			return (sortBySentDate) ? sentTimestamp : receivedTimestamp;
 		}
 		
-		public static function createFromDB(obj:Object, mBlogBuddies:MicroBloggingModel):Message
+		public static function createFromDB(obj:Object):Message
 		{
 			var newMessage:Message = new Message();
 			
@@ -68,22 +70,12 @@ package com.cleartext.esm.models.valueObjects
 			newMessage.subject = obj["subject"];
 			newMessage.plainMessage = obj["plainMessage"];
 			newMessage.displayMessage = obj["displayMessage"];
-			newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(obj["senderId"]);
-			newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(obj["originalSenderId"]);
+			newMessage.mBlogSenderJid = obj["mBlogSenderJid"];
 			newMessage.rawXML = obj["rawXML"];
 			var st:String = obj["searchTerms"];
 			newMessage.searchTerms = (st) ? st.split(',') : [];
-			
-			if(obj["timestamp"])
-			{
-				newMessage.receivedTimestamp = new Date(obj["timestamp"]);
-				newMessage.sentTimestamp = new Date(obj["timestamp"]);
-			}
-			else
-			{
-				newMessage.receivedTimestamp = new Date(Number(obj["receivedTimestamp"]));
-				newMessage.sentTimestamp = new Date(Number(obj["sentTimestamp"]));
-			}
+			newMessage.receivedTimestamp = new Date(Number(obj["receivedTimestamp"]));
+			newMessage.sentTimestamp = new Date(Number(obj["sentTimestamp"]));
 
 			return newMessage;
 		}
@@ -100,17 +92,12 @@ package com.cleartext.esm.models.valueObjects
 				new DatabaseValue("subject", subject),
 				new DatabaseValue("plainMessage", plainMessage),
 				new DatabaseValue("displayMessage", displayMessage),
+				new DatabaseValue("mBlogSenderJid", mBlogSenderJid)
 				];
 
 			if(rawXML)
 				result.push(new DatabaseValue("rawxml", rawXML));
 				
-			if(mBlogSender)
-				result.push(new DatabaseValue("senderId", mBlogSender.microBloggingBuddyId));
-
-			if(mBlogOriginalSender)
-				result.push(new DatabaseValue("originalSenderId", mBlogOriginalSender.microBloggingBuddyId));
-			
 			if(searchTerms && searchTerms.length > 0)
 				result.push(new DatabaseValue("searchTerms", searchTerms.join(',')));
 			

@@ -1,10 +1,17 @@
 package com.cleartext.esm.views.messages
 {
 	import com.cleartext.esm.assets.Constants;
-	import com.cleartext.esm.events.HasAvatarEvent;
+	import com.cleartext.esm.events.AvatarEvent;
+	import com.cleartext.esm.models.BuddyModel;
+	import com.cleartext.esm.models.types.BuddyTypes;
+	import com.cleartext.esm.models.valueObjects.AvatarTypes;
+	import com.cleartext.esm.models.valueObjects.Buddy;
+	import com.cleartext.esm.models.valueObjects.BuddyBase;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
+	import com.cleartext.esm.models.valueObjects.ChatRoom;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
-	import com.cleartext.esm.views.common.Avatar;
+	import com.cleartext.esm.views.common.AvatarRenderer;
 	import com.cleartext.esm.views.common.UnreadMessageBadge;
 	
 	import flash.display.Graphics;
@@ -15,8 +22,10 @@ package com.cleartext.esm.views.messages
 	import mx.core.Container;
 	import mx.effects.Fade;
 	import mx.events.CloseEvent;
+	
+	import spark.components.Group;
 
-	public class AvatarTab extends Avatar
+	public class AvatarTab extends AvatarRenderer
 	{
 		public static const SELECTED_ALPHA:Number = 1.0;
 		public static const OVER_ALPHA:Number = 1.0;
@@ -56,14 +65,11 @@ package com.cleartext.esm.views.messages
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
 		}
 		
-		public function get chat():Chat
-		{
-			return data as Chat;
-		}
+		public var chat:Chat;
 		
-		override protected function buddyChangedHandler(event:HasAvatarEvent):void
+		override protected function avatarChangedHandler(event:AvatarEvent):void
 		{
-			super.buddyChangedHandler(event);
+			super.avatarChangedHandler(event);
 			invalidateProperties();
 		}
 		
@@ -99,8 +105,20 @@ package com.cleartext.esm.views.messages
 		{
 			super.commitProperties();
 			
-			var chatBuddy:IBuddy = buddy as IBuddy;
+			var chatBuddy:IBuddy = (chat) ? chat.buddy : null;
 
+			if(chatBuddy)
+			{
+				if(chatBuddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					type = AvatarTypes.ALL_MICRO_BLOGGING_BUDDY;
+				else if(chatBuddy is BuddyGroup)
+					type = AvatarTypes.GROUP;
+				else if(chatBuddy is ChatRoom)
+					type = AvatarTypes.CHAT_ROOM;
+				else 
+					type = AvatarTypes.BUDDY;
+			}
+			
 			if(chatBuddy && unreadMessageBadge)
 			{
 				if(chatBuddy.unreadMessages > 0)
@@ -110,7 +128,6 @@ package com.cleartext.esm.views.messages
 						chatBuddy.unreadMessages = 0;
 						return;
 					}
-
 					unreadMessageBadge.visible = true;
 				}
 

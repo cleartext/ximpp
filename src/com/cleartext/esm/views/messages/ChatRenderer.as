@@ -1,5 +1,7 @@
 package com.cleartext.esm.views.messages
 {
+	import com.cleartext.esm.models.valueObjects.AvatarTypes;
+	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
 	import flash.geom.Matrix;
@@ -32,11 +34,11 @@ package com.cleartext.esm.views.messages
 		{
 			super.commitProperties();
 			
-			avatar.visible = showTopRow;
+			avatarRenderer.visible = showTopRow;
 			dateTextField.visible = showTopRow;
 			nameTextField.visible = showTopRow;
 			
-			avatar.includeInLayout = showTopRow;
+			avatarRenderer.includeInLayout = showTopRow;
 			dateTextField.includeInLayout = showTopRow;
 			nameTextField.includeInLayout = showTopRow;
 			
@@ -65,8 +67,8 @@ package com.cleartext.esm.views.messages
 		{
 			super.createChildren();
 			
-			avatar.x = 2*padding;
-			avatar.y = 2;
+			avatarRenderer.x = 2*padding;
+			avatarRenderer.y = 2;
 
 			nameTextField.y = padding + 2;
 			nameTextField.x = avatarSize + 5*padding;

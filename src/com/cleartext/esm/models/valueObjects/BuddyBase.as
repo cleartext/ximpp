@@ -62,25 +62,25 @@ package com.cleartext.esm.models.valueObjects
 		//  AVATAR
 		//----------------------------------------
 		
-		// overriden because we use the tempAvatarHash value
-		// when a buddy's avatar hash changes, we store the new 
-		// value of avatarHash using the tempAvatarHash value and
-		// do a vcard request. We only want to set avatarHash to the
-		// new value after that request has returned and we are
-		// setting the new value of avatar
-		override public function set avatar(value:BitmapData):void
-		{
-			if(avatar != value)
-			{
-				if(tempAvatarHash)
-				{
-					avatarHash = tempAvatarHash;
-					tempAvatarHash = null;
-				}
-				
-				super.avatar = value;
-			}
-		}
+//		// overriden because we use the tempAvatarHash value
+//		// when a buddy's avatar hash changes, we store the new 
+//		// value of avatarHash using the tempAvatarHash value and
+//		// do a vcard request. We only want to set avatarHash to the
+//		// new value after that request has returned and we are
+//		// setting the new value of avatar
+//		override public function set avatar(value:BitmapData):void
+//		{
+//			if(avatar != value)
+//			{
+//				if(tempAvatarHash)
+//				{
+//					avatarHash = tempAvatarHash;
+//					tempAvatarHash = null;
+//				}
+//				
+//				super.avatar = value;
+//			}
+//		}
 	
 		//----------------------------------------
 		//  BUDDY ID

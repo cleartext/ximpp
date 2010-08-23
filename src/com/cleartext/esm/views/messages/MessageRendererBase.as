@@ -1,12 +1,15 @@
 package com.cleartext.esm.views.messages
 {
+	import com.cleartext.esm.events.AvatarEvent;
 	import com.cleartext.esm.events.LinkEvent;
 	import com.cleartext.esm.models.ApplicationModel;
+	import com.cleartext.esm.models.AvatarModel;
 	import com.cleartext.esm.models.ChatModel;
+	import com.cleartext.esm.models.valueObjects.Avatar;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
-	import com.cleartext.esm.views.common.Avatar;
+	import com.cleartext.esm.views.common.AvatarRenderer;
 	import com.universalsprout.flex.components.list.SproutListRendererBase;
 	
 	import flash.events.TextEvent;
@@ -26,12 +29,12 @@ package com.cleartext.esm.views.messages
 		[Autowire]
 		public var appModel:ApplicationModel;
 		
-		[Autowire(bean="settings", property="userAccount")]
-		public var userAccount:UserAccount;
+		[Autowire]
+		public var avatarModel:AvatarModel;
 		
 		protected var df:DateFormatter;
 
-		protected var avatar:Avatar;
+		protected var avatarRenderer:AvatarRenderer;
 		protected var nameTextField:UITextField;
 		protected var dateTextField:UITextField;
 		protected var bodyTextField:UITextField;
@@ -57,16 +60,42 @@ package com.cleartext.esm.views.messages
 			return data as Message;
 		}
 		
+		private var _avatar:Avatar;
+		public function get avatar():Avatar
+		{
+			return _avatar;
+		}
+		public function set avatar(value:Avatar):void
+		{
+			if(avatar != value)
+			{
+				if(avatar)
+					avatar.removeEventListener(AvatarEvent.MBLOG_VALUES_CHANGE, avatarValuesChangeHandler);
+				
+				_avatar = value;
+
+				if(avatar)
+					avatar.addEventListener(AvatarEvent.MBLOG_VALUES_CHANGE, avatarValuesChangeHandler);
+
+				invalidateProperties();
+			}
+		}
+		
+		protected function avatarValuesChangeHandler(event:AvatarEvent):void
+		{
+			invalidateProperties();
+		}
+		
 		override protected function commitProperties():void
 		{
 			if(message)
 			{
-				var fromBuddy:IBuddy = appModel.getBuddyByJid(message.sender);
-				fromThisUser = (fromBuddy == userAccount);
+				avatar = avatarModel.getAvatar(message.sender);
+				fromThisUser = (avatar == avatarModel.userAccountAvatar);
+				if(avatarRenderer)
+					avatarRenderer.avatar = avatar;
 				
-				avatar.data = fromBuddy;
-				
-				nameTextField.text = (fromBuddy) ? fromBuddy.nickname : "";
+				nameTextField.text = "";//(fromBuddy) ? fromBuddy.nickname : "";
 				nameTextField.width = nameTextField.textWidth + padding*4;
 				nameTextField.styleName = (fromThisUser) ? "lGreyBold" : "blackBold";
 
@@ -120,10 +149,10 @@ package com.cleartext.esm.views.messages
 			
 			if(!avatar)
 			{
-				avatar = new Avatar();
-				avatar.width = avatarSize;
-				avatar.height = avatarSize;
-				addChild(avatar);
+				avatarRenderer = new AvatarRenderer();
+				avatarRenderer.width = avatarSize;
+				avatarRenderer.height = avatarSize;
+				addChild(avatarRenderer);
 			}
 			
 			if(!dateTextField)

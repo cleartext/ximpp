@@ -2,6 +2,7 @@ package com.cleartext.esm.models
 {
 	import com.cleartext.esm.events.LoadingEvent;
 	import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
+	import com.cleartext.esm.models.valueObjects.Avatar;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.BuddyRequest;
@@ -10,7 +11,6 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.DatabaseValue;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
-	import com.cleartext.esm.models.valueObjects.MicroBloggingBuddy;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
 	
 	import flash.data.SQLColumnSchema;
@@ -59,12 +59,7 @@ package com.cleartext.esm.models
 		{
 			return appModel.buddies;
 		}
-		
-		private function get mBlogBuddies():MicroBloggingModel
-		{
-			return appModel.mBlogBuddies;
-		}
-				
+						
 		private function get requests():BuddyRequestModel
 		{
 			return appModel.requests;
@@ -73,6 +68,11 @@ package com.cleartext.esm.models
 		private function get chats():ChatModel
 		{
 			return appModel.chats;
+		}
+				
+		private function get avatarModel():AvatarModel
+		{
+			return appModel.avatarModel;
 		}
 				
 		public function close():void
@@ -133,16 +133,16 @@ package com.cleartext.esm.models
 				execute(Buddy.CREATE_BUDDIES_TABLE);
 				
 				/*
-				 * Create microBloggingBuddies table
-				 */
-				appModel.log("Creating microBloggingBuddiesTable table", true);
-				execute(MicroBloggingBuddy.CREATE_MICRO_BLOGGING_BUDDIES_TABLE);
-
-				/*
 				 * Create buddyRequests table
 				 */
 				appModel.log("Creating buddyRequests table", true);
 				execute(BuddyRequest.CREATE_BUDDY_REQUESTS_TABLE);
+				
+				/*
+				 * Create avatars table
+				 */
+				appModel.log("Creating avatars table", true);
+				execute(Avatar.CREATE_AVATARS_TABLE);
 				
 				var mods:Array;
 				var column:SQLColumnSchema;
@@ -199,28 +199,28 @@ package com.cleartext.esm.models
 						}
 					}
 					
-					// ------------------------------------------
-					// MICRO BLOGGING BUDDY TABLE MODS
-					// ------------------------------------------
-
-					else if(table.name == "microBloggingBuddies")
-					{
-						mods = MicroBloggingBuddy.TABLE_MODS.slice();
-						
-						for each(column in table.columns)
-							for(i=0; i<mods.length; i++)
-								if(column.name == mods[i].name)
-									mods.splice(i,1);
-						
-						for each(mod in mods)
-						{
-							sql = "ALTER TABLE microBloggingBuddies ADD COLUMN " + mod.name + " " + mod.type;
-							if(mod.hasOwnProperty("defaultVal"))
-								sql += " DEFAULT " + mod.defaultVal;
-							appModel.log("Updating microBloggingBuddies table structure", true);
-							execute(sql);
-						}
-					}
+//					// ------------------------------------------
+//					// MICRO BLOGGING BUDDY TABLE MODS
+//					// ------------------------------------------
+//
+//					else if(table.name == "microBloggingBuddies")
+//					{
+//						mods = MicroBloggingBuddy.TABLE_MODS.slice();
+//						
+//						for each(column in table.columns)
+//							for(i=0; i<mods.length; i++)
+//								if(column.name == mods[i].name)
+//									mods.splice(i,1);
+//						
+//						for each(mod in mods)
+//						{
+//							sql = "ALTER TABLE microBloggingBuddies ADD COLUMN " + mod.name + " " + mod.type;
+//							if(mod.hasOwnProperty("defaultVal"))
+//								sql += " DEFAULT " + mod.defaultVal;
+//							appModel.log("Updating microBloggingBuddies table structure", true);
+//							execute(sql);
+//						}
+//					}
 					
 					// ------------------------------------------
 					// MESSAGE TABLE MODS
@@ -338,7 +338,7 @@ package com.cleartext.esm.models
 			appModel.log("Loading user settings", true);
 			var result:SQLResult = execute("SELECT * FROM userAccounts WHERE userId=" + newUserId);
 			if (result && result.data)
-				settings.userAccount = UserAccount.createFromDB(result.data[0], mBlogBuddies);
+				settings.userAccount = UserAccount.createFromDB(result.data[0]);
 			else
 				appModel.fatalError("no user account with id: " + newUserId);
 		}
@@ -387,8 +387,6 @@ package com.cleartext.esm.models
 			newBuddy.nickname = obj["nickName"];
 			newBuddy.lastSeen = obj["lastSeen"];
 			newBuddy.customStatus = obj["customStatus"];
-			newBuddy.avatarHash = obj["avatarHash"];
-			newBuddy.avatarString = obj["avatar"];
 			newBuddy.openTab = obj["openTab"];
 			newBuddy.autoOpenTab = obj["autoOpenTab"];
 			newBuddy.unreadMessages = obj["unreadMessages"];
@@ -454,7 +452,7 @@ package com.cleartext.esm.models
 			{
 				var len:int = result.data.length;
 				for(var i:int=0; i<len; i++)
-					accounts.addItem(UserAccount.createFromDB(result.data[i], mBlogBuddies));
+					accounts.addItem(UserAccount.createFromDB(result.data[i]));
 			}
 			return accounts;
 		}
@@ -505,10 +503,18 @@ package com.cleartext.esm.models
 				updateStmt("buddyRequests", request.toDatabaseValues(settings.userId), [new DatabaseValue("buddyRequestId", request.buddyRequestId)]);
 		}
 
-		public function saveMicroBloggingBuddy(buddy:MicroBloggingBuddy):void
+//		public function saveMicroBloggingBuddy(buddy:MicroBloggingBuddy):void
+//		{
+//			appModel.log("Saving microblogging buddy : "  + buddy.jid + " micoBloggingBuddyId: " + buddy.microBloggingBuddyId, true);
+//			updateStmt("microBloggingBuddies", buddy.toDatabaseValues(), [new DatabaseValue("microBloggingBuddyId", buddy.microBloggingBuddyId)]);
+//		}
+		
+		public function saveAvatar(avatar:Avatar):void
 		{
-			appModel.log("Saving microblogging buddy : "  + buddy.jid + " micoBloggingBuddyId: " + buddy.microBloggingBuddyId, true);
-			updateStmt("microBloggingBuddies", buddy.toDatabaseValues(), [new DatabaseValue("microBloggingBuddyId", buddy.microBloggingBuddyId)]);
+			if(avatar.avatarId == -1)
+				avatar.avatarId = insertStmt("avatars", avatar.toDatabaseValues(settings.userId));
+			else
+				updateStmt("avatars", avatar.toDatabaseValues(settings.userId), [new DatabaseValue("avatarId", avatar.avatarId)]);
 		}
 
 		public function removeBuddy(buddy:IBuddy):void
@@ -583,7 +589,7 @@ package com.cleartext.esm.models
 				{
 					for(var i:int = result.data.length-1; i>=0; i--)
 					{
-						chat.messages.addItem(Message.createFromDB(result.data[i], mBlogBuddies));
+						chat.messages.addItem(Message.createFromDB(result.data[i]));
 					}
 					dispatchEvent(new LoadingEvent(LoadingEvent.CHAT_LOADED));
 				}
@@ -609,7 +615,7 @@ package com.cleartext.esm.models
 			var len:int = data.length;
 			while(index < len)
 			{
-				chat.messages.addItem(Message.createFromDB(data[index], mBlogBuddies));
+				chat.messages.addItem(Message.createFromDB(data[index]));
 				index++;
 				if(start + maxTimeForProcess < getTimer())
 				{
@@ -626,6 +632,22 @@ package com.cleartext.esm.models
 			{
 				dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
 			}
+		}
+		
+		public function loadAvatar(jid:String):Avatar
+		{
+			appModel.log("Loading avatar for jid: (" + jid + ")");
+			var sql:String = "SELECT * from avatars WHERE jid='" + jid + "'";
+			
+			var result:SQLResult = execute(sql);
+			
+			if (result && result.data)
+			{
+				var obj:Object = result.data[0];
+				avatarModel.setBitmapString(obj["jid"], obj["bitmapString"]);
+				return Avatar.createFromDB(obj);
+			}
+			return null;
 		}
 		
 		private function insertStmt(table:String, values:Array):int
@@ -731,35 +753,35 @@ package com.cleartext.esm.models
 			appModel.log("SQL : QUERY DURATION : " + (getTimer() - start));
 		}
 		
-		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null):MicroBloggingBuddy
-		{
-			var traceStr:String = idOrUserName + (gatewayJid ? ("@" + gatewayJid) : "");
-			var sql:String = "Select * from microBloggingBuddies WHERE ";
-			
-			if(!gatewayJid)
-				sql += "microBloggingBuddyId=" + idOrUserName;
-			else
-				sql += "userName='" + idOrUserName + "' AND gatewayJid='" + gatewayJid + "'";
-		
-			appModel.log("Loading microBloggingBuddy : " + traceStr, true);
-			var result:SQLResult = execute(sql);
-
-			if(result && result.data && result.data.length > 0)
-				return MicroBloggingBuddy.createFromDB(result.data[0]);
-			
-			// now we have to create a new buddy
-			if(!gatewayJid)
-				throw new Error("need a gatewayJid");
-
-			var buddy:MicroBloggingBuddy = new MicroBloggingBuddy();
-			buddy.userName = idOrUserName as String;
-			buddy.gatewayJid = gatewayJid;
-
-			appModel.log("Creating new microBloggingBuddy : " + traceStr, true);
-			buddy.microBloggingBuddyId = insertStmt("microBloggingBuddies", buddy.toDatabaseValues());
-			
-			return buddy;
-		}
+//		public function getMicroBloggingBuddy(idOrUserName:Object, gatewayJid:String=null):MicroBloggingBuddy
+//		{
+//			var traceStr:String = idOrUserName + (gatewayJid ? ("@" + gatewayJid) : "");
+//			var sql:String = "Select * from microBloggingBuddies WHERE ";
+//			
+//			if(!gatewayJid)
+//				sql += "microBloggingBuddyId=" + idOrUserName;
+//			else
+//				sql += "userName='" + idOrUserName + "' AND gatewayJid='" + gatewayJid + "'";
+//		
+//			appModel.log("Loading microBloggingBuddy : " + traceStr, true);
+//			var result:SQLResult = execute(sql);
+//
+//			if(result && result.data && result.data.length > 0)
+//				return MicroBloggingBuddy.createFromDB(result.data[0]);
+//			
+//			// now we have to create a new buddy
+//			if(!gatewayJid)
+//				throw new Error("need a gatewayJid");
+//
+//			var buddy:MicroBloggingBuddy = new MicroBloggingBuddy();
+//			buddy.userName = idOrUserName as String;
+//			buddy.gatewayJid = gatewayJid;
+//
+//			appModel.log("Creating new microBloggingBuddy : " + traceStr, true);
+//			buddy.microBloggingBuddyId = insertStmt("microBloggingBuddies", buddy.toDatabaseValues());
+//			
+//			return buddy;
+//		}
 		
 		public function searchMessages(searchTerms:Array):Array
 		{

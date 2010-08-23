@@ -95,8 +95,8 @@ package com.cleartext.esm.views.messages
 		{
 			super.createChildren();
 			
-			removeChild(avatar);
-			avatar = null;
+			removeChild(avatarRenderer);
+			avatarRenderer = null;
 
 			nameTextField.y = padding + 2;
 			nameTextField.x = 3*padding;

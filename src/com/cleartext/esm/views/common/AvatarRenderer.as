@@ -2,7 +2,8 @@ package com.cleartext.esm.views.common
 {
 	import com.cleartext.esm.assets.Constants;
 	import com.cleartext.esm.events.AvatarEvent;
-	import com.cleartext.esm.events.HasAvatarEvent;
+	import com.cleartext.esm.models.valueObjects.Avatar;
+	import com.cleartext.esm.models.valueObjects.AvatarTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
@@ -19,69 +20,56 @@ package com.cleartext.esm.views.common
 	
 	[Event(name="editClicked", type="com.cleartext.esm.events.AvatarEvent")]
 
-	public class Avatar extends UIComponent
+	public class AvatarRenderer extends UIComponent
 	{
-		public function Avatar()
+		public function AvatarRenderer()
 		{
 			super();
 		}
 		
 		protected var dirty:Boolean = true;
 		
-		private var _data:Object;
-		public function get data():Object
+		private var _avatar:Avatar;
+		public function get avatar():Avatar
 		{
-			return _data;
+			return _avatar;
 		}
-		public function set data(value:Object):void
+		public function set avatar(value:Avatar):void
 		{
-			if(_data != value)
+			if(value != avatar)
 			{
-				dispose();
+				if(avatar)
+					avatar.removeEventListener(AvatarEvent.BITMAP_DATA_CHANGE, avatarChangedHandler);
 				
-				_data = value;
-				
-				if(buddy)
-				{
-					buddy.addEventListener(HasAvatarEvent.AVATAR_CHANGE, buddyChangedHandler, false, 0, true);
-					buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler, false, 0, true);
-				}
+				_avatar = value;
+				if(avatar)
+					avatar.addEventListener(AvatarEvent.BITMAP_DATA_CHANGE, avatarChangedHandler);
 
-				buddyChangedHandler(null);
-			}
-		}
-		
-		public function get buddy():IHasAvatar
-		{
-			if(data is IHasAvatar)
-				return data as IHasAvatar;
-			
-			if(data is Chat)
-				return (data as Chat).buddy;
-			
-			return null;
-		}
-		
-		protected function buddyChangedHandler(event:HasAvatarEvent):void
-		{
-			bitmapData = (buddy) ? buddy.avatar : null;
-		}
-		
-		private var _bitmapData:BitmapData;
-		public function get bitmapData():BitmapData
-		{
-			return _bitmapData;
-		}
-		public function set bitmapData(value:BitmapData):void
-		{
-			if(value != bitmapData)
-			{
-				_bitmapData = value;
 				dirty = true;
 				invalidateDisplayList();
 			}
 		}
 		
+		protected function avatarChangedHandler(event:AvatarEvent):void
+		{
+			dirty = true;
+			invalidateDisplayList();
+		}
+		
+		private var _type:String = AvatarTypes.BUDDY;
+		public function get type():String
+		{
+			return _type;
+		}
+		public function set type(value:String):void
+		{
+			if(type != value)
+			{
+				_type = value;
+				dirty = true;
+				invalidateDisplayList();
+			}
+		}
 		
 		private var _border:Boolean = true;
 		public function get border():Boolean
@@ -193,15 +181,6 @@ package com.cleartext.esm.views.common
 			dispatchEvent(new AvatarEvent(AvatarEvent.EDIT_CLICKED));
 		}
 		
-		public function dispose(input:*=null):void
-		{
-			if(buddy)
-			{
-				buddy.removeEventListener(HasAvatarEvent.AVATAR_CHANGE, buddyChangedHandler);
-				buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
-			}
-		}
-		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			if(!dirty)
@@ -209,17 +188,26 @@ package com.cleartext.esm.views.common
 				
 			var g:Graphics = graphics;
 			g.clear();
-			var bmd:BitmapData = bitmapData;
+			var bmd:BitmapData;
+			if(avatar)
+				bmd = avatar.bitmapData;
 			if(!bmd)
 			{
-				if(buddy && buddy is ChatRoom)
-					bmd = Constants.defaultMUCBmd;
-				else if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
-					bmd = Constants.defaultWorkstreamBmd;
-				else if(buddy && buddy is BuddyGroup)
-					bmd = Constants.defaultGroupBmd;
-				else
-					bmd = Constants.defaultAvatarBmd;
+				switch(type) 
+				{
+					case AvatarTypes.CHAT_ROOM :
+						bmd = Constants.defaultMUCBmd;
+						break;
+					case AvatarTypes.ALL_MICRO_BLOGGING_BUDDY :
+						bmd = Constants.defaultWorkstreamBmd;
+						break;
+					case AvatarTypes.GROUP :
+						bmd = Constants.defaultGroupBmd;
+						break;
+					default :
+						bmd = Constants.defaultAvatarBmd;
+						break;
+				}
 			}
 
 			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 

@@ -9,6 +9,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.events.LoadingEvent;
 	import com.cleartext.esm.events.PopUpEvent;
 	import com.cleartext.esm.models.utils.LinkUitls;
+	import com.cleartext.esm.models.valueObjects.Avatar;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
@@ -53,9 +54,6 @@ package com.cleartext.esm.models
 		public var buddies:BuddyModel;
 		
 		[Autowire]
-		public var mBlogBuddies:MicroBloggingModel;
-		
-		[Autowire]
 		public var requests:BuddyRequestModel;
 		
 		[Autowire]
@@ -63,6 +61,9 @@ package com.cleartext.esm.models
 		
 		[Autowire]
 		public var chatRooms:ChatRoomModel;
+		
+		[Autowire]
+		public var avatarModel:AvatarModel;
 		
 		public var currentVersion:String;
 		
@@ -400,8 +401,8 @@ package com.cleartext.esm.models
 					b.appendChild(<displayName>{settings.userAccount.nickname}</displayName>);
 					b.appendChild(<userName>{userName}</userName>);
 					b.appendChild(<jid>{settings.userAccount.jid}</jid>);
-					if(settings.userAccount.avatarHash)
-						b.appendChild(<avatar type='hash'>{settings.userAccount.avatarHash}</avatar>);
+					if(avatarModel.userAccountAvatar.urlOrHash)
+						b.appendChild(<avatar type='hash'>{avatarModel.userAccountAvatar.urlOrHash}</avatar>);
 					b.appendChild(<serviceJid>{buddy.jid}</serviceJid>);
 					x.appendChild(b);
 					customTags.push(x);
@@ -409,7 +410,8 @@ package com.cleartext.esm.models
 
 				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, (buddy is ChatRoom ? 'groupchat' : 'chat'), null, customTags);
 				var message:Message = createFromStanza(messageStanza);
-				chats.addMessage(buddy, message);
+				if(chats.hasOpenChat(buddy))
+					chats.addMessage(buddy, message);
 			
 				if(buddy.isMicroBlogging)
 				{
@@ -439,11 +441,14 @@ package com.cleartext.esm.models
 
 			var linkVals:Array;
 			
+			var mBlogSenderJid:String
+			var mBlogAvatar:Avatar;
 			var customTags:Array = stanza.customTags;
 			if(customTags && customTags.length > 0)
 			{
 				for each(var x:XML in customTags)
 				{
+
 					for each(var n:Namespace in x.namespaceDeclarations())
 					{
 						// first check if it has the cleartext custom tags
@@ -451,7 +456,7 @@ package com.cleartext.esm.models
 						{
 							var sBuddy:Object = x.*::buddy.(@type=="sender");
 
-							if(sBuddy.*::jid != mBlogBuddies.userAccount.jid)
+							if(sBuddy.*::jid != settings.userAccount.jid)
 							{
 								var text:String = sBuddy.*::text;
 								if(text)
@@ -461,33 +466,29 @@ package com.cleartext.esm.models
 								for each(var term:String in sBuddy.*::searchTerm)
 									newMessage.searchTerms.push(term);
 								
-								newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
-										String(sBuddy.*::userName),
-										sBuddy.*::serviceJid, 
-										null,
-										sBuddy.*::displayName, 
-										sBuddy.*::avatar.(@type=='url'),
-										sBuddy.*::jid, 
-										sBuddy.*::avatar.(@type=='hash'));
+								mBlogSenderJid = sBuddy.*::jid;
+								newMessage.mBlogSenderJid = mBlogSenderJid;
+								mBlogAvatar = avatarModel.getAvatar(mBlogSenderJid);
+								avatarModel.setUrlOrHash(mBlogSenderJid, sBuddy.*::avatar.(@type=='hash'));
+								mBlogAvatar.userName = sBuddy.*::userName;
+								mBlogAvatar.displayName = sBuddy.*::displayName;
 							}
 							
-							var osBuddy:Object = x.*::buddy.(@type=="originalSender");
-
-							if(osBuddy)
-							{
-								newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(
-										String(osBuddy.*::userName),
-										osBuddy.*::serviceJid, 
-										null,
-										osBuddy.*::displayName, 
-										osBuddy.*::avatar.(@type=='url'),
-										osBuddy.*::jid, 
-										osBuddy.*::avatar.(@type=='hash'));
-							}
+//							var osBuddy:Object = x.*::buddy.(@type=="originalSender");
+//							if(osBuddy)
+//							{
+//								newMessage.mBlogOriginalSender = mBlogBuddies.getMicroBloggingBuddy(
+//										String(osBuddy.*::userName),
+//										osBuddy.*::serviceJid, 
+//										null,
+//										osBuddy.*::displayName);
+//										osBuddy.*::avatar.(@type=='url'),
+//										osBuddy.*::jid, 
+//										osBuddy.*::avatar.(@type=='hash'));
+//							}
 						}
-						
 						// if it has an atom, then it is probably jaiku or identi.ca
-						if(n.uri == "http://www.w3.org/2005/Atom")
+						else if(n.uri == "http://www.w3.org/2005/Atom")
 						{
 							namespace atom = "http://www.w3.org/2005/Atom";
 							var idString:String;
@@ -514,13 +515,20 @@ package com.cleartext.esm.models
 							// empty string and not null put an empty string in the db
 							if(!displayName)
 								displayName = "";
-								
-							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
-									idString, 
-									null,
-									newMessage.sender, 
-									displayName, 
-									avatarUrl);
+							
+							mBlogSenderJid = idString + "\40" + newMessage.sender;
+							newMessage.mBlogSenderJid = mBlogSenderJid;
+							mBlogAvatar = avatarModel.getAvatar(mBlogSenderJid);
+							avatarModel.setUrlOrHash(mBlogSenderJid, avatarUrl);
+							mBlogAvatar.userName = idString;
+							mBlogAvatar.displayName = displayName;
+							
+//							newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
+//									idString,
+//									null,
+//									newMessage.sender, 
+//									displayName);
+//									avatarUrl);
 						
 							// if there is a title on the atom, then it should be just the plain message
 							if(x.atom::title)
@@ -530,11 +538,11 @@ package com.cleartext.esm.models
 								{
 									case "jaiku@jaiku.com" :
 										linkVals = ["http://www.jaiku.com/channel/", "", "http://", ".jaiku.com/"];
-										newMessage.mBlogSender.profileUrl = "http://" + newMessage.mBlogSender.userName + ".jaiku.com/";
+										mBlogAvatar.profileUrl = "http://" + mBlogAvatar.userName + ".jaiku.com/";
 										break;
 									case "update@identi.ca" :
 										linkVals = ["http://identi.ca/tag/", "", "http://identi.ca/", ""];
-										newMessage.mBlogSender.profileUrl = "http://identi.ca/" + newMessage.mBlogSender.userName;
+										mBlogAvatar.profileUrl = "http://identi.ca/" + mBlogAvatar.userName;
 										break;
 								}
 							}
@@ -563,14 +571,14 @@ package com.cleartext.esm.models
 
 				if(result && result.length > 0)
 				{
-					newMessage.mBlogSender = mBlogBuddies.getMicroBloggingBuddy(
-						result[4],
-						newMessage.sender, 
-						null,
-						result[3],
-						result[2]);
+					mBlogSenderJid = result[4] + "@" + newMessage.sender;
+					newMessage.mBlogSenderJid = mBlogSenderJid;
+					mBlogAvatar = avatarModel.getAvatar(mBlogSenderJid);
+					avatarModel.setUrlOrHash(mBlogSenderJid, result[2]);
+					mBlogAvatar.userName = result[4];
+					mBlogAvatar.displayName = result[3];
+					mBlogAvatar.profileUrl = "http://twitter.com/" + result[4];
 					newMessage.plainMessage = String(result[5]);
-					newMessage.mBlogSender.profileUrl = "http://twitter.com/" + newMessage.mBlogSender.userName;
 					linkVals = ["http://twitter.com/search?q=%23", "", "http://twitter.com/", ""];
 				}
 			}

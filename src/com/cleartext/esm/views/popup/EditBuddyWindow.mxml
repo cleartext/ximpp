@@ -11,12 +11,12 @@
 	<fx:Script>
 		<![CDATA[
 			import com.cleartext.esm.models.ApplicationModel;
+			import com.cleartext.esm.models.AvatarModel;
 			import com.cleartext.esm.models.BuddyModel;
 			import com.cleartext.esm.models.ChatModel;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 			import com.cleartext.esm.models.types.SubscriptionTypes;
-			import com.cleartext.esm.models.utils.AvatarUtils;
 			import com.cleartext.esm.models.valueObjects.Buddy;
 			import com.cleartext.esm.models.valueObjects.IBuddy;
 			import com.cleartext.esm.models.valueObjects.Status;
@@ -44,6 +44,10 @@
 			[Bindable]
 			public var chats:ChatModel;
 			
+			[Autowire]
+			[Bindable]
+			public var avatarModel:AvatarModel;
+			
 			override protected function init(event:Event):void
 			{
 				super.init(event);
@@ -70,12 +74,12 @@
 				buddy.nickname = nicknameTextInput.text;
 
 				buddy.autoOpenTab = openTabCheckBox.selected;
-				buddy.avatar = avatarInput.bitmapData;
-				buddy.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
+//				buddy.avatar = avatarInput.bitmapData;
+//				buddy.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
 				buddy.isMicroBlogging = mBlogCheckbox.selected;
 
-				if(avatarInput.bitmapData == null)
-					buddy.avatarHash = null;
+//				if(avatarInput.bitmapData == null)
+//					buddy.avatarHash = null;
 
 				if(buddy.isPerson)
 					buddy.groups = getSelected(list);
@@ -127,7 +131,7 @@
 				gatewayComboBox.enabled = false;
 
 				nicknameTextInput.text = buddy.nickname;
-				avatarInput.bitmapData = buddy.avatar;
+				avatarInput.avatar = avatarModel.getAvatar(buddy.jid);
 				openTabCheckBox.selected = buddy.autoOpenTab;
 				
 				mBlogCheckbox.selected = buddy.isMicroBlogging;
@@ -159,12 +163,12 @@
 								function():void
 								{
 									var loadedBitmap:Bitmap = loader.content as Bitmap;
-									var newBitmapData:BitmapData = new BitmapData(AvatarUtils.AVATAR_SIZE, AvatarUtils.AVATAR_SIZE);
-									var scale:Number = AvatarUtils.AVATAR_SIZE / Math.max(loadedBitmap.width, loadedBitmap.height);
-									var tx:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.width * scale)/2;
-									var ty:Number = (AvatarUtils.AVATAR_SIZE - loadedBitmap.height * scale)/2;
+									var newBitmapData:BitmapData = new BitmapData(AvatarModel.AVATAR_SIZE, AvatarModel.AVATAR_SIZE);
+									var scale:Number = AvatarModel.AVATAR_SIZE / Math.max(loadedBitmap.width, loadedBitmap.height);
+									var tx:Number = (AvatarModel.AVATAR_SIZE - loadedBitmap.width * scale)/2;
+									var ty:Number = (AvatarModel.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-									avatarInput.bitmapData = newBitmapData;
+//									avatarInput.bitmapData = newBitmapData;
 								});
 						});
 				}
@@ -199,8 +203,8 @@
 
 		<mx:FormItem label="Profile picture:">
 			<mx:HBox>
-				<common:Avatar id="avatarInput" editMode="true" width="{AvatarUtils.AVATAR_SIZE}" height="{AvatarUtils.AVATAR_SIZE}" editClicked="changeAvatar()"/>
-				<mx:Button label="remove" click="avatarInput.bitmapData=null" />
+				<common:AvatarRenderer id="avatarInput" editMode="true" width="{AvatarModel.AVATAR_SIZE}" height="{AvatarModel.AVATAR_SIZE}" editClicked="changeAvatar()"/>
+				<mx:Button label="remove" click="avatarInput.avatar=null" />
 			</mx:HBox>
 		</mx:FormItem>
 		

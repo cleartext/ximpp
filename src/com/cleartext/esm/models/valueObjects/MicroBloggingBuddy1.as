@@ -2,7 +2,6 @@ package com.cleartext.esm.models.valueObjects
 {
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.models.XMPPModel;
-	import com.cleartext.esm.models.utils.AvatarUtils;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -11,7 +10,7 @@ package com.cleartext.esm.models.valueObjects
 	
 	import mx.controls.Image;
 	
-	public class MicroBloggingBuddy extends HasAvatarBase
+	public class MicroBloggingBuddy1 extends HasAvatarBase
 	{
 		//----------------------------------------
 		//  CREATE DB STRING
@@ -36,7 +35,7 @@ package com.cleartext.esm.models.valueObjects
 		//  CONSTRUCTOR
 		//----------------------------------------
 		
-		public function MicroBloggingBuddy()
+		public function MicroBloggingBuddy1()
 		{
 			super(null);
 		}
@@ -114,57 +113,57 @@ package com.cleartext.esm.models.valueObjects
 		//  SET AVATAR URL
 		//----------------------------------------
 		
-		public function setAvatarUrl(url:String):void
-		{
-			if(avatarUrl != url || (!avatar && url))
-			{
-				avatarUrl = url;
-				avatar = null;
-				var image:Image = new Image();
-				image.addEventListener(Event.COMPLETE, imageCompleteHandler);
-				image.load(avatarUrl);
-			}
-		}
+//		public function setAvatarUrl(url:String):void
+//		{
+//			if(avatarUrl != url || (!avatar && url))
+//			{
+//				avatarUrl = url;
+//				avatar = null;
+//				var image:Image = new Image();
+//				image.addEventListener(Event.COMPLETE, imageCompleteHandler);
+//				image.load(avatarUrl);
+//			}
+//		}
 		
 		//----------------------------------------
 		//  IMAGE COMPLETE HANDLER
 		//----------------------------------------
 		
-		private function imageCompleteHandler(event:Event):void
-		{
-			var avatarSize:Number = 48;
-			
-			var image:Image = event.target as Image;
-			var bitmap:Bitmap = Bitmap(image.content);
-			image.removeEventListener(Event.COMPLETE, imageCompleteHandler);
-			
-			// if the bitmap is smaller than the AVATAR_SIZE, then scale it down
-			// otherwise, just draw at the size we got it
-			var scale:Number = avatarSize / Math.max(bitmap.width, bitmap.height, avatarSize);
-			var matrix:Matrix = new Matrix(scale, 0, 0, scale);
-
-			var bmd:BitmapData = new BitmapData(Math.min(bitmap.width*scale, avatarSize), Math.min(bitmap.height*scale, avatarSize));
-			bmd.draw(bitmap, matrix);
-			
-			avatar = bmd;
-			avatarString = AvatarUtils.avatarToString(avatar);
-		}
+//		private function imageCompleteHandler(event:Event):void
+//		{
+//			var avatarSize:Number = 48;
+//			
+//			var image:Image = event.target as Image;
+//			var bitmap:Bitmap = Bitmap(image.content);
+//			image.removeEventListener(Event.COMPLETE, imageCompleteHandler);
+//			
+//			// if the bitmap is smaller than the AVATAR_SIZE, then scale it down
+//			// otherwise, just draw at the size we got it
+//			var scale:Number = avatarSize / Math.max(bitmap.width, bitmap.height, avatarSize);
+//			var matrix:Matrix = new Matrix(scale, 0, 0, scale);
+//
+//			var bmd:BitmapData = new BitmapData(Math.min(bitmap.width*scale, avatarSize), Math.min(bitmap.height*scale, avatarSize));
+//			bmd.draw(bitmap, matrix);
+//			
+//			avatar = bmd;
+//			avatarString = AvatarUtils.avatarToString(avatar);
+//		}
 
 		//----------------------------------------
 		//  SET JID AND HASH
 		//----------------------------------------
 		
-		public function setJidAndHash(newJid:String, hash:String, xmpp:XMPPModel):void
-		{
-			jid = newJid;
-
-			if(avatarHash != hash || (!avatar && hash && jid))
-			{
-				avatarHash = hash;
-				avatar = null;
-				xmpp.getAvatarForMBlogBuddy(jid);
-			}
-		}
+//		public function setJidAndHash(newJid:String, hash:String, xmpp:XMPPModel):void
+//		{
+//			jid = newJid;
+//
+//			if(avatarHash != hash || (!avatar && hash && jid))
+//			{
+//				avatarHash = hash;
+//				avatar = null;
+//				xmpp.getAvatarForMBlogBuddy(jid);
+//			}
+//		}
 		
 		//--------------------------------------------------
 		//
@@ -185,9 +184,7 @@ package com.cleartext.esm.models.valueObjects
 			newMicroBloggingBuddy.userName = obj["userName"];
 			newMicroBloggingBuddy.jid = obj["jid"];
 			newMicroBloggingBuddy.avatarUrl = obj["avatarUrl"];
-			newMicroBloggingBuddy.avatarHash = obj["avatarHash"];
 			newMicroBloggingBuddy.gatewayJid = obj["gatewayJid"];
-			newMicroBloggingBuddy.avatarString = obj["avatar"];
 			newMicroBloggingBuddy.profileUrl = obj["profileUrl"];
 			
 			return newMicroBloggingBuddy;
@@ -204,8 +201,6 @@ package com.cleartext.esm.models.valueObjects
 				new DatabaseValue("userName", userName),
 				new DatabaseValue("jid", super.jid),
 				new DatabaseValue("avatarUrl", avatarUrl),
-				new DatabaseValue("avatarHash", avatarHash),
-				new DatabaseValue("avatar", AvatarUtils.avatarToString(avatar)),
 				new DatabaseValue("gatewayJid", gatewayJid),
 				new DatabaseValue("profileUrl", profileUrl)
 				];

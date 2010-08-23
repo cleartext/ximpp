@@ -3,9 +3,9 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.events.ChatEvent;
 	import com.cleartext.esm.models.types.BuddyTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
+	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	
@@ -158,6 +158,11 @@ package com.cleartext.esm.models
 			{
 				appModel.chatRooms.leave(buddy as ChatRoom);
 			}
+		}
+		
+		public function hasOpenChat(buddy:IBuddy):Boolean
+		{
+			return chatsByJid.hasOwnProperty(buddy.jid);
 		}
 		
 		public function addMessage(buddy:IBuddy, message:Message):void

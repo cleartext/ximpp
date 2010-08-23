@@ -1,10 +1,11 @@
 package com.cleartext.esm.views.messages
 {
-	import com.cleartext.esm.views.common.Avatar;
+	import com.cleartext.esm.models.valueObjects.AvatarTypes;
+	import com.cleartext.esm.views.common.AvatarRenderer;
 	
 	public class AllMicroBloggingRenderer extends MicroBloggingRenderer
 	{
-		protected var serviceAvatar:Avatar;
+		protected var serviceAvatar:AvatarRenderer;
 		
 		public function AllMicroBloggingRenderer()
 		{
@@ -22,16 +23,16 @@ package com.cleartext.esm.views.messages
 			
 			if(!serviceAvatar)
 			{
-				serviceAvatar = new Avatar();
+				serviceAvatar = new AvatarRenderer();
 				serviceAvatar.width = avatarSize*2/3;
 				serviceAvatar.height = avatarSize*2/3;
 				serviceAvatar.border = false;
 				serviceAvatar.alpha = 0.5;
 				serviceAvatar.y = padding;
 				serviceAvatar.x = avatarSize + 3*padding + buttonWidth;	
+				serviceAvatar.type = AvatarTypes.ALL_MICRO_BLOGGING_BUDDY;
 				addChildAt(serviceAvatar, 0);
 			}
-			
 			bodyTextField.x = 1.5*avatarSize + 5*padding + buttonWidth;
 			nameTextField.x = 1.5*avatarSize + 5*padding + buttonWidth;
 			dateTextField.x = 1.5*avatarSize + 5*padding + buttonWidth;
@@ -40,9 +41,8 @@ package com.cleartext.esm.views.messages
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
-			
 			if(message)
-				serviceAvatar.data = appModel.getBuddyByJid((fromThisUser) ? message.recipient : message.sender);
+				serviceAvatar.avatar = avatarModel.getAvatar((fromThisUser) ? message.recipient : message.sender);
 		}
 		
 	}
