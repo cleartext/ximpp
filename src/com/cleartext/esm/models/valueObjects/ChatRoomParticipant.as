@@ -4,7 +4,7 @@ package com.cleartext.esm.models.valueObjects
 	
 	import flash.events.EventDispatcher;
 	
-	public class ChatRoomParticipant extends EventDispatcher implements IHasStatus, IHasJid
+	public class ChatRoomParticipant extends EventDispatcher implements IHasJidAndStatus
 	{
 		private var _nickname:String;
 		[Bindable(event="changeSave")]
@@ -20,7 +20,7 @@ package com.cleartext.esm.models.valueObjects
 				dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 			}
 		}
-		
+
 		private var _jid:String;
 		[Bindable(event="changeSave")]
 		public function get jid():String

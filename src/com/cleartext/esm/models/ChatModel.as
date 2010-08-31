@@ -2,6 +2,7 @@ package com.cleartext.esm.models
 {
 	import com.cleartext.esm.events.ChatEvent;
 	import com.cleartext.esm.models.types.BuddyTypes;
+	import com.cleartext.esm.models.valueObjects.Avatar;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
@@ -26,6 +27,9 @@ package com.cleartext.esm.models
 		[Autowire]
 		public var buddies:BuddyModel;
 				
+		[Autowire]
+		public var avatarModel:AvatarModel;
+				
 		public var chatsByJid:Dictionary;
 		
 		private var chats:Array;
@@ -37,7 +41,7 @@ package com.cleartext.esm.models
 		}
 		
 		public function get selectedIndex():int
-		{
+		{	
 			return chats.indexOf(selectedChat);
 		}
 		
@@ -74,18 +78,19 @@ package com.cleartext.esm.models
 				var buddy:IBuddy = buddyOrJid as IBuddy;
 				if(!buddy)
 				{
+					var jid:String = buddyOrJid as String;
 					switch(type)
 					{
 						case BuddyTypes.CHAT_ROOM :
-							buddy = new ChatRoom(buddyOrJid as String);
+							buddy = new ChatRoom(jid);
 							break;
 						case BuddyTypes.GROUP :
-							buddy = new BuddyGroup(buddyOrJid as String);
+							buddy = new BuddyGroup(jid);
 							buddies.addBuddy(buddy);
 							(buddy as BuddyGroup).refresh(buddies);
 							break;
 						default :
-							buddy = new Buddy(buddyOrJid as String);
+							buddy = new Buddy(jid);
 							break;
 					}
 				}

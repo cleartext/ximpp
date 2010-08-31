@@ -2,6 +2,7 @@ package com.cleartext.esm.views.messages
 {
 	import com.cleartext.esm.assets.Constants;
 	import com.cleartext.esm.events.AvatarEvent;
+	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.models.BuddyModel;
 	import com.cleartext.esm.models.types.BuddyTypes;
 	import com.cleartext.esm.models.valueObjects.AvatarTypes;
@@ -13,17 +14,22 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.views.common.AvatarRenderer;
 	import com.cleartext.esm.views.common.UnreadMessageBadge;
+	import com.cleartext.esm.views.popup.ChangePasswordWindow;
 	
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
 	
+	import flashx.textLayout.formats.Category;
+	
 	import mx.controls.Button;
 	import mx.core.Container;
+	import mx.core.IInvalidating;
 	import mx.effects.Fade;
 	import mx.events.CloseEvent;
 	
 	import spark.components.Group;
+	import spark.effects.interpolation.IInterpolator;
 
 	public class AvatarTab extends AvatarRenderer
 	{
@@ -65,11 +71,33 @@ package com.cleartext.esm.views.messages
 			addEventListener(MouseEvent.ROLL_OUT, rollOutHandler);
 		}
 		
-		public var chat:Chat;
+		private var _chat:Chat;
+		public function get chat():Chat
+		{
+			return _chat;
+		}
+		public function set chat(value:Chat):void
+		{
+			if(chat != value)
+			{
+				if(chat && chat.buddy)
+					chat.buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
+					
+				_chat = value;
+
+				if(chat && chat.buddy)
+					chat.buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
+			}
+		}
 		
 		override protected function avatarChangedHandler(event:AvatarEvent):void
 		{
 			super.avatarChangedHandler(event);
+			invalidateProperties();
+		}
+		
+		protected function buddyChangedHandler(event:HasAvatarEvent):void
+		{
 			invalidateProperties();
 		}
 		
@@ -121,17 +149,11 @@ package com.cleartext.esm.views.messages
 			
 			if(chatBuddy && unreadMessageBadge)
 			{
-				if(chatBuddy.unreadMessages > 0)
-				{
-					if(selected)
-					{
-						chatBuddy.unreadMessages = 0;
-						return;
-					}
-					unreadMessageBadge.visible = true;
-				}
-
+				if(unreadMessageBadge.count != chatBuddy.unreadMessages)
+					invalidateProperties();
 				unreadMessageBadge.count = chatBuddy.unreadMessages;
+				unreadMessageBadge.x = width - unreadMessageBadge.width + 5;
+				unreadMessageBadge.y = -unreadMessageBadge.height/2;
 			}
 		}
 		
@@ -169,8 +191,6 @@ package com.cleartext.esm.views.messages
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
-			
-			unreadMessageBadge.move(unscaledWidth - unreadMessageBadge.width + 5, -unreadMessageBadge.height/2);
 			
 			var g:Graphics = graphics;
 

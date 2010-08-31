@@ -5,7 +5,7 @@ package com.cleartext.esm.models.valueObjects
 	import mx.collections.ArrayCollection;
 	
 	[Bindable]
-	public interface IBuddy extends IHasAvatar, ISproutListData, IHasStatus, IHasJid
+	public interface IBuddy extends ISproutListData, IHasJidAndStatus
 	{
 		// storred in database
 		
@@ -36,9 +36,6 @@ package com.cleartext.esm.models.valueObjects
 		function get isGateway():Boolean;
 		function get isMicroBlogging():Boolean;
 		function set isMicroBlogging(value:Boolean):void;
-		
-		function get tempAvatarHash():String;
-		function set tempAvatarHash(value:String):void;
 		
 		function get participants():ArrayCollection;
 		

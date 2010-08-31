@@ -298,6 +298,8 @@ package com.cleartext.esm.models
 				database.addEventListener(LoadingEvent.BUDDIES_LOADED, loadWorkstream);
 				database.loadBuddyData();
 			}
+
+			avatarModel.userAccountAvatar = avatarModel.getAvatar('userAccount');
 		}
 		
 		private function loadWorkstream(event:LoadingEvent):void

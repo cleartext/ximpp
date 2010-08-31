@@ -184,10 +184,17 @@ package com.cleartext.esm.models
 					{
 						mods = UserAccount.TABLE_MODS.slice();
 						
+						var hasAvatar:Boolean = false;
 						for each(column in table.columns)
+						{
 							for(i=0; i<mods.length; i++)
+							{
 								if(column.name == mods[i].name)
 									mods.splice(i,1);
+								else if(column.name == "timestamp")
+									hasAvatar = true;
+							}
+						}
 						
 						for each(mod in mods)
 						{
@@ -197,6 +204,7 @@ package com.cleartext.esm.models
 							appModel.log("Updating userAccount table structure", true);
 							execute(sql);
 						}
+						
 					}
 					
 //					// ------------------------------------------
@@ -391,6 +399,10 @@ package com.cleartext.esm.models
 			newBuddy.autoOpenTab = obj["autoOpenTab"];
 			newBuddy.unreadMessages = obj["unreadMessages"];
 			newBuddy.microBloggingServiceType = obj["microBloggingServiceType"];
+			
+			var avatar:Avatar = avatarModel.getAvatar(newBuddy.jid);
+			avatar.displayName = newBuddy.nickname;
+			
 			if(MicroBloggingServiceTypes.TYPES.indexOf(newBuddy.microBloggingServiceType) == -1)
 				newBuddy.microBloggingServiceType = MicroBloggingServiceTypes.OTHER;
 			return newBuddy;
@@ -429,7 +441,7 @@ package com.cleartext.esm.models
 							requests.addRequest(BuddyRequest.createFromDB(result.data[j]));
 
 					appModel.log("Loading buddies", true);
-					var result:SQLResult = execute("Select * from buddies WHERE userid=" + settings.userId + " ORDER BY lastSeen DESC");
+					var result:SQLResult = execute("Select buddyId, userId, jid, nickname, groups, lastSeen, subscription, sendTo, customStatus, openTab, autoOpenTab, unreadMessages, buddyType, microBloggingServiceType from buddies WHERE userid=" + settings.userId + " ORDER BY lastSeen DESC");
 					
 					if(result && result.data)
 						loadBuddyData(result.data, result.data.length-1);
@@ -511,6 +523,8 @@ package com.cleartext.esm.models
 		
 		public function saveAvatar(avatar:Avatar):void
 		{
+			appModel.log("Saving avatar : " + avatar.jid + " avatarId: " + avatar.avatarId, true);
+
 			if(avatar.avatarId == -1)
 				avatar.avatarId = insertStmt("avatars", avatar.toDatabaseValues(settings.userId));
 			else

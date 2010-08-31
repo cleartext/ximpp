@@ -78,7 +78,7 @@
 				
 				// load user account
 				nickname.text = settings.userAccount.nickname;
-				avatarInput.avatar = avatarModel.getAvatar("userAccount");
+				avatarInput.avatar = avatarModel.userAccountAvatar;
 				jid.text = settings.userAccount.jid;
 				password.text = settings.userAccount.password;
 				server.text = settings.userAccount.server;
@@ -114,18 +114,14 @@
 					p = 5222;
 				settings.userAccount.port = p;
 				
-//				if(avatarInput.bitmapData)
-//				{
-//					settings.userAccount.avatar = avatarInput.bitmapData;
-//					settings.userAccount.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
-//					settings.userAccount.avatarHash = SHA1.hashBytes(avatarInput.bitmapData.getPixels(avatarInput.bitmapData.rect));
-//				}
-//				else
-//				{
-//					settings.userAccount.avatar = null;
-//					settings.userAccount.avatarHash = "";
-//				}
+				if(avatarInput.bitmapData)
+				{
+					avatarModel.userAccountAvatar.bitmapData = avatarInput.bitmapData;
+					avatarModel.userAccountAvatar.urlOrHash = SHA1.hashBytes(avatarInput.bitmapData.getPixels(avatarInput.bitmapData.rect));
+					avatarModel.userAccountAvatar.displayName = nickname.text;
+				}
 				
+				database.saveAvatar(avatarModel.userAccountAvatar);
 				database.saveUserAccount(settings.userAccount);
 				
 				appModel.setUserTimeout();
@@ -159,7 +155,7 @@
 									var tx:Number = (AvatarModel.AVATAR_SIZE - loadedBitmap.width * scale)/2;
 									var ty:Number = (AvatarModel.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-//									avatarInput.bitmapData = newBitmapData;
+									avatarInput.bitmapData = newBitmapData;
 								});
 						});
 					validateForm();

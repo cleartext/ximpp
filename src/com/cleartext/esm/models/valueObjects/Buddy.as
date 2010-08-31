@@ -1,11 +1,12 @@
 package com.cleartext.esm.models.valueObjects
 {
 	import com.cleartext.esm.events.HasAvatarEvent;
+	import com.cleartext.esm.models.AvatarModel;
 	import com.cleartext.esm.models.types.MicroBloggingTypes;
-	import com.cleartext.esm.models.types.SubscriptionTypes;;
+	import com.cleartext.esm.models.types.SubscriptionTypes;
 
 	[Bindable]
-	public class Buddy extends BuddyBase implements IBuddy, ISubscribable
+	public class Buddy extends BuddyBase
 	{
 		//----------------------------------------
 		//  MICRO BLOGGING CONSTANTS

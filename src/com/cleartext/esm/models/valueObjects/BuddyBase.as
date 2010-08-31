@@ -5,11 +5,13 @@ package com.cleartext.esm.models.valueObjects
 	import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 	
 	import flash.display.BitmapData;
+	import flash.events.EventDispatcher;
 	
 	import mx.collections.ArrayCollection;
+	import mx.events.EventListenerRequest;
 	import mx.utils.UIDUtil;
 
-	public class BuddyBase extends HasAvatarBase implements IBuddy, IHasStatus
+	public class BuddyBase extends EventDispatcher implements IBuddy
 	{
 		//----------------------------------------
 		//  CONSTRUCTOR
@@ -17,8 +19,8 @@ package com.cleartext.esm.models.valueObjects
 		
 		public function BuddyBase(jid:String)
 		{
-			super(jid);
-
+			super();
+			_jid = jid;
 			status.addEventListener(StatusEvent.STATUS_CHANGED,
 				function():void
 				{
@@ -26,6 +28,16 @@ package com.cleartext.esm.models.valueObjects
 				});
 		}
 
+		private var _jid:String = '';
+		public function get jid():String
+		{
+			return _jid;
+		}
+		public function set jid(value:String):void
+		{
+			_jid = value;
+		}
+		
 		//--------------------------------------------------
 		//
 		//  I SPROUT LIST DATA
@@ -59,30 +71,6 @@ package com.cleartext.esm.models.valueObjects
 		//--------------------------------------------------
 		
 		//----------------------------------------
-		//  AVATAR
-		//----------------------------------------
-		
-//		// overriden because we use the tempAvatarHash value
-//		// when a buddy's avatar hash changes, we store the new 
-//		// value of avatarHash using the tempAvatarHash value and
-//		// do a vcard request. We only want to set avatarHash to the
-//		// new value after that request has returned and we are
-//		// setting the new value of avatar
-//		override public function set avatar(value:BitmapData):void
-//		{
-//			if(avatar != value)
-//			{
-//				if(tempAvatarHash)
-//				{
-//					avatarHash = tempAvatarHash;
-//					tempAvatarHash = null;
-//				}
-//				
-//				super.avatar = value;
-//			}
-//		}
-	
-		//----------------------------------------
 		//  BUDDY ID
 		//----------------------------------------
 		
@@ -114,6 +102,29 @@ package com.cleartext.esm.models.valueObjects
 			if(customStatus != value)
 			{
 				_customStatus = value;
+				dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
+			}
+		}
+		
+		//----------------------------------------
+		//  NICKNAME
+		//----------------------------------------
+		
+		private var _nickname:String;
+		[Bindable (event="changeSave")]
+		public function get nickname():String
+		{
+			return (_nickname) ? _nickname : jid;
+		}
+		public function getNickname():String
+		{
+			return _nickname;
+		}
+		public function set nickname(value:String):void
+		{
+			if(nickname != value)
+			{
+				_nickname = value;
 				dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 			}
 		}
@@ -254,20 +265,6 @@ package com.cleartext.esm.models.valueObjects
 		}
 		public function set isMicroBlogging(value:Boolean):void
 		{
-		}
-
-		//----------------------------------------
-		//  TEMP AVATAR HASH
-		//----------------------------------------
-		
-		private var _tempAvatarHash:String;
-		public function get tempAvatarHash():String
-		{
-			return _tempAvatarHash;
-		}
-		public function set tempAvatarHash(value:String):void
-		{
-			_tempAvatarHash = value;
 		}
 
 		//----------------------------------------

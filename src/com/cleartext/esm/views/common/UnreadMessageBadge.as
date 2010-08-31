@@ -53,7 +53,7 @@ package com.cleartext.esm.views.common
 			{
 				visible = true;
 				if(count.toString() != textField.text)
-					invalidateProperties();
+					callLater(invalidateProperties);
 				textField.text = count.toString();
 				width = textField.width = textField.textWidth + 11;
 				height = textField.height = textField.textHeight;
@@ -62,11 +62,6 @@ package com.cleartext.esm.views.common
 			{
 				visible = false;
 			}
-		}
-		
-		override protected function measure():void
-		{
-			super.measure();
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void

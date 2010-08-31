@@ -17,6 +17,7 @@
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 			import com.cleartext.esm.models.types.SubscriptionTypes;
+			import com.cleartext.esm.models.valueObjects.Avatar;
 			import com.cleartext.esm.models.valueObjects.Buddy;
 			import com.cleartext.esm.models.valueObjects.IBuddy;
 			import com.cleartext.esm.models.valueObjects.Status;
@@ -48,6 +49,8 @@
 			[Bindable]
 			public var avatarModel:AvatarModel;
 			
+			private var resetAvatar:Boolean = false;
+			
 			override protected function init(event:Event):void
 			{
 				super.init(event);
@@ -69,17 +72,23 @@
 
 					// make sure we set the private var so we don't reset the other values
 					_buddy = new Buddy(newJid);
+					avatar = avatarModel.getAvatar(newJid);
 				}
 
 				buddy.nickname = nicknameTextInput.text;
+				avatar.displayName = nicknameTextInput.text;
+				// bitmapString is calculated when we set bitmapData
+				// we don't want to set the hash here so when the buddy
+				// changes their own avatar we will see the change
+				if(avatarInput.bitmapData)
+					avatar.bitmapData = avatarInput.bitmapData;
+				// if we have removed the avatar, then remove the hash
+				// so we can try and get a new avatar from the buddy
+				if(resetAvatar)
+					avatar.urlOrHash = null;
 
 				buddy.autoOpenTab = openTabCheckBox.selected;
-//				buddy.avatar = avatarInput.bitmapData;
-//				buddy.setAvatarString(AvatarUtils.avatarToString(avatarInput.bitmapData));
 				buddy.isMicroBlogging = mBlogCheckbox.selected;
-
-//				if(avatarInput.bitmapData == null)
-//					buddy.avatarHash = null;
 
 				if(buddy.isPerson)
 					buddy.groups = getSelected(list);
@@ -98,6 +107,9 @@
 				
 				closeWindow();
 			}
+			
+			[Bindable]
+			public var avatar:Avatar;
 			
 			private var _buddy:Buddy;
 			[Bindable(event="buddySet")]
@@ -126,12 +138,11 @@
 					jidTextInput.text = buddy.jid;
 				}
 				
-				
 				jidTextInput.enabled = false;
 				gatewayComboBox.enabled = false;
 
+				avatar = avatarModel.getAvatar(buddy.jid);
 				nicknameTextInput.text = buddy.nickname;
-				avatarInput.avatar = avatarModel.getAvatar(buddy.jid);
 				openTabCheckBox.selected = buddy.autoOpenTab;
 				
 				mBlogCheckbox.selected = buddy.isMicroBlogging;
@@ -168,7 +179,7 @@
 									var tx:Number = (AvatarModel.AVATAR_SIZE - loadedBitmap.width * scale)/2;
 									var ty:Number = (AvatarModel.AVATAR_SIZE - loadedBitmap.height * scale)/2;
 									newBitmapData.draw(loadedBitmap, new Matrix(scale, 0, 0, scale, tx, ty));
-//									avatarInput.bitmapData = newBitmapData;
+									avatarInput.bitmapData = newBitmapData;
 								});
 						});
 				}
@@ -203,8 +214,8 @@
 
 		<mx:FormItem label="Profile picture:">
 			<mx:HBox>
-				<common:AvatarRenderer id="avatarInput" editMode="true" width="{AvatarModel.AVATAR_SIZE}" height="{AvatarModel.AVATAR_SIZE}" editClicked="changeAvatar()"/>
-				<mx:Button label="remove" click="avatarInput.avatar=null" />
+				<common:AvatarRenderer id="avatarInput" editMode="true" width="{AvatarModel.AVATAR_SIZE}" height="{AvatarModel.AVATAR_SIZE}" editClicked="changeAvatar()" avatar="{avatar}"/>
+				<mx:Button label="remove" click="avatarInput.bitmapData = new BitmapData(AvatarModel.AVATAR_SIZE, AvatarModel.AVATAR_SIZE); resetAvatar=true" />
 			</mx:HBox>
 		</mx:FormItem>
 		

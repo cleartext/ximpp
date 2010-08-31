@@ -12,6 +12,9 @@ package com.cleartext.esm.models
 		[Autowire]
 		public var appModel:ApplicationModel;
 		
+		[Autowire]
+		public var avatarModel:AvatarModel;
+		
 		private function get xmpp():XMPPModel
 		{
 			return appModel.xmpp;

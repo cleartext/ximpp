@@ -1,8 +1,7 @@
 package com.cleartext.esm.views.messages
 {
 	import com.cleartext.esm.events.HasAvatarEvent;
-	import com.cleartext.esm.models.valueObjects.IHasJid;
-	import com.cleartext.esm.models.valueObjects.IHasStatus;
+	import com.cleartext.esm.models.valueObjects.IHasJidAndStatus;
 	import com.cleartext.esm.views.common.StatusIcon;
 	import com.universalsprout.flex.components.list.IDisposable;
 	
@@ -23,9 +22,9 @@ package com.cleartext.esm.views.messages
 		private var statusIcon:StatusIcon;
 		private var nameLabel:UITextField;
 		
-		private function get participant():IHasStatus
+		private function get participant():IHasJidAndStatus
 		{
-			return _data as IHasStatus;
+			return _data as IHasJidAndStatus;
 		}
 
 		public function ChatRoomParticipantRenderer()
@@ -95,7 +94,7 @@ package com.cleartext.esm.views.messages
 				return;
 	
 			// set values
-			nameLabel.text = (participant as IHasJid).nickname;
+			nameLabel.text = (participant as IHasJidAndStatus).nickname;
 			statusIcon.statusString = participant.status.value;
 			statusIcon.isTyping = participant.status.isTyping;
 		}

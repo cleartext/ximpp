@@ -2,6 +2,7 @@ package com.cleartext.esm.models
 {
 	import com.cleartext.esm.events.AvatarEvent;
 	import com.cleartext.esm.models.valueObjects.Avatar;
+	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.views.common.AvatarRenderer;
 	
 	import flash.display.Bitmap;
@@ -39,8 +40,6 @@ package com.cleartext.esm.models
 		
 		public function AvatarModel()
 		{
-			userAccountAvatar = new Avatar();
-			avatarCache["userAccount"] = userAccountAvatar;
 		}
 		
 		//--------------------------------
@@ -59,6 +58,7 @@ package com.cleartext.esm.models
 				
 				if(urlOrHash.search('http://')==0)
 				{
+					appModel.log('Loading avatar for ' + jid + ' with url: ' + urlOrHash);
 					var image:Image = new Image();
 					image.data = jid;
 					image.load(urlOrHash);
@@ -110,9 +110,11 @@ package com.cleartext.esm.models
 				var bmd:BitmapData = new BitmapData(Math.min(bitmap.width*scale, AVATAR_SIZE), Math.min(bitmap.height*scale, AVATAR_SIZE));
 				bmd.draw(bitmap, matrix);
 				
+				
 				var jid:String = image.data as String;
 				var avatar:Avatar = getAvatar(jid);
 				avatar.bitmapData = bmd;
+				appModel.log('Got avatar for ' + jid);
 
 				if(avatar.tempUrlOrHash)
 				{
@@ -154,8 +156,8 @@ package com.cleartext.esm.models
 				{
 					avatar = new Avatar();
 					avatar.jid = jid;
-					avatar.addEventListener(AvatarEvent.SAVE, saveHandler);
 				}
+				avatar.addEventListener(AvatarEvent.SAVE, saveHandler);
 				avatarCache[jid] = avatar;
 			}
 			return avatar;

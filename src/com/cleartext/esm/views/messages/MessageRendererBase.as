@@ -5,6 +5,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.models.ApplicationModel;
 	import com.cleartext.esm.models.AvatarModel;
 	import com.cleartext.esm.models.ChatModel;
+	import com.cleartext.esm.models.SettingsModel;
 	import com.cleartext.esm.models.valueObjects.Avatar;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
@@ -31,6 +32,9 @@ package com.cleartext.esm.views.messages
 		
 		[Autowire]
 		public var avatarModel:AvatarModel;
+		
+		[Autowire]
+		public var settings:SettingsModel;
 		
 		protected var df:DateFormatter;
 
@@ -90,12 +94,12 @@ package com.cleartext.esm.views.messages
 		{
 			if(message)
 			{
-				avatar = avatarModel.getAvatar(message.sender);
-				fromThisUser = (avatar == avatarModel.userAccountAvatar);
+				fromThisUser = (message.sender == settings.userAccount.jid);
+				avatar = fromThisUser ? avatarModel.userAccountAvatar : avatarModel.getAvatar(message.sender);
 				if(avatarRenderer)
 					avatarRenderer.avatar = avatar;
 				
-				nameTextField.text = "";//(fromBuddy) ? fromBuddy.nickname : "";
+				nameTextField.text = avatar.displayName;
 				nameTextField.width = nameTextField.textWidth + padding*4;
 				nameTextField.styleName = (fromThisUser) ? "lGreyBold" : "blackBold";
 

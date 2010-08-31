@@ -15,7 +15,6 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.FormField;
 	import com.cleartext.esm.models.valueObjects.FormObject;
 	import com.cleartext.esm.models.valueObjects.IBuddy;
-	import com.cleartext.esm.models.valueObjects.ISubscribable;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.Status;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
@@ -361,7 +360,8 @@ package com.cleartext.esm.models
 			}
 
 			buddy.lastSeen = message.receivedTimestamp.time;
-			buddy.unreadMessages++;
+			if(!chats.selectedChat || chats.selectedChat.buddy != buddy)
+				buddy.unreadMessages++;
 			chats.addMessage(buddy, message);
 
 			// play sounds & increment unread messages for the mblog buddy
@@ -458,7 +458,7 @@ package com.cleartext.esm.models
 				if(buddy)
 				{
 					sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
-					if((buddy is ISubscribable) && !(buddy as ISubscribable).subscribedTo)
+					if((buddy is Buddy) && !(buddy as Buddy).subscribedTo)
 						sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
 				}
 				// if they aren't in the roster list, then alert the user
@@ -552,6 +552,7 @@ package com.cleartext.esm.models
 				}
 				
 				buddy.nickname = item.@name;
+				avatarModel.getAvatar(jid).displayName = item.@name;
 
 				// flag used to delete buddies that are no longer in
 				// the roster list
@@ -614,6 +615,7 @@ package com.cleartext.esm.models
 				buddy.groups = event.stanza["groups"];
 				buddy.nickname = event.stanza["name"];
 				buddy.subscription = subscription;
+				avatarModel.getAvatar(jid).displayName = event.stanza["name"];
 				
 				discoveryInfo(buddy.jid, testForMicroBloggingComponents);
 				
@@ -648,6 +650,7 @@ package com.cleartext.esm.models
 					if(cleartextComponent.nickname == cleartextComponent.jid)
 					{
 						cleartextComponent.nickname = "Cleartext MicroBlogging";
+						avatarModel.getAvatar(cleartextComponentJid).displayName = "Cleartext MicroBlogging";
 						c = true;
 					}
 					if(!cleartextComponent.isMicroBlogging)
@@ -669,6 +672,7 @@ package com.cleartext.esm.models
 					cleartextComponent.isMicroBlogging = true;
 					buddies.addBuddy(cleartextComponent);
 					addToRoster(cleartextComponent);
+					avatarModel.getAvatar(cleartextComponentJid).displayName = "Cleartext MicroBlogging";
 				}
 			}
 			else if(iqStanza.query.discoInfo::identity)
@@ -691,6 +695,7 @@ package com.cleartext.esm.models
 						if(twitterGateway.nickname == twitterGateway.jid)
 						{
 							twitterGateway.nickname = "Twitter";
+							avatarModel.getAvatar(twitterGatewayJid).displayName = "Twitter";
 							change = true;
 						}
 						if(!twitterGateway.isMicroBlogging)

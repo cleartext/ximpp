@@ -5,6 +5,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.events.PopUpEvent;
 	import com.cleartext.esm.events.SearchBoxEvent;
 	import com.cleartext.esm.models.ApplicationModel;
+	import com.cleartext.esm.models.AvatarModel;
 	import com.cleartext.esm.models.BuddyModel;
 	import com.cleartext.esm.models.ChatModel;
 	import com.cleartext.esm.models.DatabaseModel;
@@ -63,6 +64,9 @@ package com.cleartext.esm.views.messages
 		[Autowire]
 		[Bindable]
 		public var chats:ChatModel;
+			
+		[Autowire]
+		public var avatarModel:AvatarModel;
 			
 		private static const ANIMATION_DURATION:Number = 350;
 
@@ -201,6 +205,7 @@ package com.cleartext.esm.views.messages
 			var chat:Chat = event.chat;
 			var avatar:AvatarTab = new AvatarTab();
 			avatar.chat = chat;
+			avatar.avatar = avatarModel.getAvatar(chat.buddy.jid);
 			avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
 			avatar.width = AVATAR_SIZE;
 			avatar.height = AVATAR_SIZE;

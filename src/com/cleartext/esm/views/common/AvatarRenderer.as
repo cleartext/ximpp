@@ -8,7 +8,6 @@ package com.cleartext.esm.views.common
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.IHasAvatar;
 	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
@@ -52,6 +51,18 @@ package com.cleartext.esm.views.common
 		
 		protected function avatarChangedHandler(event:AvatarEvent):void
 		{
+			dirty = true;
+			invalidateDisplayList();
+		}
+		
+		private var _bitmapData:BitmapData;
+		public function get bitmapData():BitmapData
+		{
+			return _bitmapData;
+		}
+		public function set bitmapData(value:BitmapData):void
+		{
+			_bitmapData = value;
 			dirty = true;
 			invalidateDisplayList();
 		}
@@ -189,8 +200,11 @@ package com.cleartext.esm.views.common
 			var g:Graphics = graphics;
 			g.clear();
 			var bmd:BitmapData;
-			if(avatar)
+			if(bitmapData)
+				bmd = bitmapData;
+			else if(avatar)
 				bmd = avatar.bitmapData;
+			
 			if(!bmd)
 			{
 				switch(type) 

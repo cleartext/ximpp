@@ -152,6 +152,7 @@ package com.cleartext.esm.views.messages
 				{
 					createButtons(null);
 				}
+				invalidateProperties();
 			}
 		}
 		
@@ -258,7 +259,8 @@ package com.cleartext.esm.views.messages
 				}
 				else
 				{
-					avatar = avatarModel.getAvatar(message.sender);
+					fromThisUser = message.sender == settings.userAccount.jid;
+					avatar = fromThisUser ? avatarModel.userAccountAvatar : avatarModel.getAvatar(message.sender);
 					nameTextField.text = avatar.displayName;
 					if(avatarRenderer)
 						avatarRenderer.avatar = avatar;
