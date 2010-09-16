@@ -44,10 +44,7 @@ package com.cleartext.esm.models.valueObjects
 		public var searchTerms:Array;
 		
 		public var rawXML:String;
-		
-		public var mBlogSenderId:int = -1;
-		public var mBlogOriginalSenderId:int = -1;
-		
+				
 		public var mBlogSenderJid:String;
 		
 		public function Message()

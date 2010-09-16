@@ -59,15 +59,16 @@
 	</fx:Script>
 
     <mx:Form>
-		<mx:FormItem label="Host address:">
-			<mx:VBox>
-				<mx:TextInput width="250" id="host" change="validateInput(event, 'you must enter a host')" focusOut="validateInput(event, 'you must enter a host')"/>
-			</mx:VBox>
-		</mx:FormItem>
 
 		<mx:FormItem label="Room:">
 			<mx:VBox>
 				<mx:TextInput width="250" id="room" change="validateInput(event, 'you must enter a room name')" focusOut="validateInput(event, 'you must enter a room name')"/>
+			</mx:VBox>
+		</mx:FormItem>
+
+		<mx:FormItem label="Host address:">
+			<mx:VBox>
+				<mx:TextInput width="250" id="host" change="validateInput(event, 'you must enter a host')" focusOut="validateInput(event, 'you must enter a host')"/>
 			</mx:VBox>
 		</mx:FormItem>
 

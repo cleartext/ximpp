@@ -19,7 +19,7 @@
 			import com.cleartext.esm.events.UserAccountEvent;
 			import com.cleartext.esm.models.ApplicationModel;
 			import com.cleartext.esm.models.AvatarModel;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.BuddyRequestModel;
 			import com.cleartext.esm.models.ChatModel;
 			import com.cleartext.esm.models.DatabaseModel;
@@ -58,7 +58,7 @@
 			
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			[Autowire]
 			[Bindable]

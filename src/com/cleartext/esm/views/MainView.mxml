@@ -18,7 +18,7 @@
 			import com.cleartext.esm.events.SendButtonEvent;
 			import com.cleartext.esm.events.XmppErrorEvent;
 			import com.cleartext.esm.models.ApplicationModel;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.SoundAndColorModel;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.valueObjects.Buddy;
@@ -61,7 +61,7 @@
 		
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			[Autowire]
 			[Bindable]
@@ -139,7 +139,7 @@
 				var window:BroadcastWindow = new BroadcastWindow();
 				initializePopUp(window);
 
-				window.group = event.buddy;
+				window.group = event.contact;
 				window.message = event.messageString;
 			}
 
@@ -183,7 +183,7 @@
 			[Mediate(event="PopUpEvent.EDIT_BUDDY_WINDOW")]
 			public function showEditBuddyWindow(event:PopUpEvent):void
 			{
-				var buddy:Buddy = event.buddy as Buddy;
+				var buddy:Buddy = event.contact as Buddy;
 				if(!buddy)
 					return;
 				
@@ -199,7 +199,7 @@
 				var window:RemoveBuddyWindow = new RemoveBuddyWindow();
 				initializePopUp(window);
 
-				window.buddy = event.buddy;
+				window.contact = event.contact;
 			}
 
 			//----------------------------------------------

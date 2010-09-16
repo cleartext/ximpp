@@ -3,7 +3,7 @@ package com.cleartext.esm.views.common
 	import com.cleartext.esm.assets.Constants;
 	import com.cleartext.esm.events.AvatarEvent;
 	import com.cleartext.esm.models.valueObjects.Avatar;
-	import com.cleartext.esm.models.valueObjects.AvatarTypes;
+	import com.cleartext.esm.models.types.AvatarTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;

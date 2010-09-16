@@ -13,13 +13,13 @@
 		<![CDATA[
 			import com.cleartext.esm.events.InputTextEvent;
 			import com.cleartext.esm.models.ApplicationModel;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.types.SubscriptionTypes;
 			import com.cleartext.esm.models.valueObjects.Buddy;
-			import com.cleartext.esm.models.valueObjects.IBuddy;
+			import com.cleartext.esm.models.valueObjects.Contact;
 			import com.cleartext.esm.models.valueObjects.Message;
 			
 			import flash.sampler.NewObjectSample;
@@ -37,12 +37,12 @@
 			
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			public var message:String;
 			
-			private var _group:IBuddy;
-			public function set group(value:IBuddy):void
+			private var _group:Contact;
+			public function set group(value:Contact):void
 			{
 				_group = value;
 				list.dataProvider = new ArrayCollection(buddies.getBuddiesByGroup(_group.jid));

@@ -1,13 +1,13 @@
 package com.cleartext.esm.models
 {
-	import com.cleartext.esm.events.BuddyModelEvent;
+	import com.cleartext.esm.events.ContactModelEvent;
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.models.types.BuddySortTypes;
 	import com.cleartext.esm.models.types.MicroBloggingTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
-	import com.cleartext.esm.models.valueObjects.ChatRoom;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.ChatRoom;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
 	
 	import flash.events.EventDispatcher;
@@ -17,7 +17,7 @@ package com.cleartext.esm.models
 	import mx.collections.Sort;
 	import mx.collections.SortField;
 
-	public class BuddyModel extends EventDispatcher
+	public class ContactModel extends EventDispatcher
 	{
 		[Autowire]
 		public var appModel:ApplicationModel;
@@ -62,7 +62,7 @@ package com.cleartext.esm.models
 			{
 				_groupName = value;
 				buddies.refresh();
-				dispatchEvent(new BuddyModelEvent(BuddyModelEvent.FILTER_CHANGED));
+				dispatchEvent(new ContactModelEvent(ContactModelEvent.FILTER_CHANGED));
 			}
 		}
 
@@ -93,7 +93,7 @@ package com.cleartext.esm.models
 				settings.global.buddySortMethod = value;
 				buddies.refresh();
 				database.saveGlobalSettings();
-				dispatchEvent(new BuddyModelEvent(BuddyModelEvent.FILTER_CHANGED));
+				dispatchEvent(new ContactModelEvent(ContactModelEvent.FILTER_CHANGED));
 			}
 		}
 		
@@ -102,10 +102,10 @@ package com.cleartext.esm.models
 			settings.global.showOfflineBuddies = value;
 			buddies.refresh();
 			database.saveGlobalSettings();
-			dispatchEvent(new BuddyModelEvent(BuddyModelEvent.FILTER_CHANGED));
+			dispatchEvent(new ContactModelEvent(ContactModelEvent.FILTER_CHANGED));
 		}
 		
-		public function BuddyModel()
+		public function ContactModel()
 		{
 			super();
 
@@ -129,7 +129,7 @@ package com.cleartext.esm.models
 			groups.sort = sort;
 		}
 		
-		public function addBuddy(buddy:IBuddy, save:Boolean=true):void
+		public function addBuddy(buddy:Contact, save:Boolean=true):void
 		{
 			if(buddy is UserAccount || buddiesByJid.hasOwnProperty(buddy.jid))
 				return;
@@ -142,27 +142,27 @@ package com.cleartext.esm.models
 				buddy.dispatchEvent(new HasAvatarEvent(HasAvatarEvent.CHANGE_SAVE));
 		}
 		
-		public function removeBuddy(buddy:IBuddy):void
+		public function removeBuddy(contact:Contact):void
 		{
-			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			if(contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				return;
 			
 			for(var i:int=buddies.source.length-1; i>=0; i--)
 			{
-				if(buddy == buddies.source[i])
+				if(contact == buddies.source[i])
 				{
-					database.removeBuddy(buddy);
+					database.removeBuddy(contact);
 					buddies.source.splice(i,1);
 
-					buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
-					delete buddiesByJid[buddy.jid];
+					contact.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangeHandler);
+					delete buddiesByJid[contact.jid];
 					refresh();
 					break;
 				}
 			}
 		}
 
-		public function getBuddyByJid(jid:String):IBuddy
+		public function getBuddyByJid(jid:String):Contact
 		{
 			return buddiesByJid[jid];
 		}
@@ -172,34 +172,34 @@ package com.cleartext.esm.models
 			return buddiesByJid.hasOwnProperty(jid);
 		}
 
-		private function buddyFilter(buddy:IBuddy):Boolean
+		private function buddyFilter(contact:Contact):Boolean
 		{
 			if(searchString == "" && 
 				!settings.global.showOfflineBuddies && 
-				buddy.status.isOffline() && 
-				!(buddy is ChatRoom) && 
-				!(buddy is BuddyGroup))
+				contact.status.isOffline() && 
+				!(contact is ChatRoom) && 
+				!(contact is BuddyGroup))
 				return false;
 			
 			if(searchString != "" && 
-					(buddy.nickname.toLowerCase().search(searchString.toLowerCase()) == -1 && 
-					buddy.jid.toLowerCase().search(searchString.toLowerCase()) == -1))
+					(contact.nickname.toLowerCase().search(searchString.toLowerCase()) == -1 && 
+						contact.jid.toLowerCase().search(searchString.toLowerCase()) == -1))
 				return false; 
 			
 			if(groupName == OPEN_TABS)
-				return buddy.openTab;
+				return contact.openTab;
 			
-			if(buddy.isMicroBlogging)
+			if(contact.isMicroBlogging)
 				return groupName == MICRO_BLOGGING_GROUP;
-			else if(buddy is BuddyGroup || buddy is ChatRoom)
+			else if(contact is BuddyGroup || contact is ChatRoom)
 				return groupName == CHAT_ROOMS;
-			else if(buddy.isGateway)
+			else if(contact.isGateway)
 				return groupName == GATEWAY_GROUP;
 			else if(groupName == ALL_BUDDIES_GROUP)
 				return true;
-			else if(buddy is Buddy)
+			else if(contact is Buddy)
 			{
-				var b:Buddy = buddy as Buddy;
+				var b:Buddy = contact as Buddy;
 				if(groupName == UNASIGNED && b.groups.length == 0)
 					return true;
 				else if(b.groups.indexOf(groupName) != -1)
@@ -209,38 +209,38 @@ package com.cleartext.esm.models
 			return false;
 		}
 		
-		private function buddySort(buddy1:IBuddy, buddy2:IBuddy, fields:Object=null):int
+		private function buddySort(c1:Contact, c2:Contact, fields:Object=null):int
 		{
 			if(groupName == MICRO_BLOGGING_GROUP)
 			{
-				if(buddy1 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				if(c1 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					return -1;
-				else if(buddy2 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				else if(c2 == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					return 1;
 			}
 
 			switch(sortType)
 			{
 				case BuddySortTypes.ALPHABETICAL :
-					return clamp(buddy1.nickname.localeCompare(buddy2.nickname));
+					return clamp(c1.nickname.localeCompare(c2.nickname));
 
 				case BuddySortTypes.LAST_SEEN :
-					return clamp(buddy2.lastSeen - buddy1.lastSeen);
+					return clamp(c2.lastSeen - c1.lastSeen);
 
 				case BuddySortTypes.UNREAD_MESSAGES :
-					var unreadCompare:int = clamp(buddy2.unreadMessages - buddy1.unreadMessages);
+					var unreadCompare:int = clamp(c2.unreadMessages - c1.unreadMessages);
 					if(unreadCompare != 0)
 						return unreadCompare;
-					var sCompare:int = clamp(buddy1.statusSortIndex - buddy2.statusSortIndex);
+					var sCompare:int = clamp(c1.statusSortIndex - c2.statusSortIndex);
 					if(sCompare != 0)
 						return sCompare;
-					return clamp(buddy1.nickname.localeCompare(buddy2.nickname));
+					return clamp(c1.nickname.localeCompare(c2.nickname));
 
 				case BuddySortTypes.STATUS :
-					var statusCompare:int = clamp(buddy1.statusSortIndex - buddy2.statusSortIndex);
+					var statusCompare:int = clamp(c1.statusSortIndex - c2.statusSortIndex);
 					if(statusCompare != 0)
 						return statusCompare;
-					return clamp(buddy1.nickname.localeCompare(buddy2.nickname));
+					return clamp(c1.nickname.localeCompare(c2.nickname));
 			}
 			return 0;
 		}
@@ -259,17 +259,17 @@ package com.cleartext.esm.models
 			var groupsTemp:ArrayCollection = new ArrayCollection();
 			var microBloggingTemp:ArrayCollection = new ArrayCollection();
 			
-			for each(var buddy:IBuddy in buddies.source)
+			for each(var contact:Contact in buddies.source)
 			{
-				if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				if(contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					continue;
 				
-				if(buddy.isMicroBlogging)
-					microBloggingTemp.addItem(buddy);
+				if(contact.isMicroBlogging)
+					microBloggingTemp.addItem(contact);
 
-				else if(!(buddy.isGateway))
+				else if(!(contact.isGateway))
 				{
-					var b:Buddy = buddy as Buddy;
+					var b:Buddy = contact as Buddy;
 					if(b)
 						for each(var group:String in b.groups)
 							if(!groupsTemp.contains(group))
@@ -283,7 +283,7 @@ package com.cleartext.esm.models
 			microBloggingBuddies.list = microBloggingTemp.list;
 			microBloggingBuddies.refresh();
 			
-			for each(var ib:IBuddy in buddies.source)
+			for each(var ib:Contact in buddies.source)
 			{
 				var g:BuddyGroup = ib as BuddyGroup;
 				if(g)
@@ -294,15 +294,15 @@ package com.cleartext.esm.models
 		private function buddyChangeHandler(event:HasAvatarEvent):void
 		{
 			refresh();
-			database.saveBuddy(event.target as IBuddy);
+			database.saveBuddy(event.target as Contact);
 		}
 		
 		public function get realPeople():Array
 		{
 			var result:Array = new Array();
-			for each(var buddy:IBuddy in buddies.source)
-				if(buddy.isPerson)
-					result.push(buddy);
+			for each(var contact:Contact in buddies.source)
+				if(contact.isPerson)
+					result.push(contact);
 			
 			return result.sortOn("nickname");
 		}
@@ -310,9 +310,9 @@ package com.cleartext.esm.models
 		public function get nonMicroBlogging():Array
 		{
 			var result:Array = new Array();
-			for each(var buddy:IBuddy in buddies.source)
-				if(!buddy.isMicroBlogging)
-					result.push(buddy);
+			for each(var contact:Contact in buddies.source)
+				if(!contact.isMicroBlogging)
+					result.push(contact);
 			
 			return result.sortOn("nickname");
 		}
@@ -321,9 +321,9 @@ package com.cleartext.esm.models
 		{
 			var result:Array = ["default (xmpp)"];
 
-			for each(var buddy:IBuddy in buddies.source)
-				if((buddy.isGateway) && buddy != Buddy.ALL_MICRO_BLOGGING_BUDDY)
-					result.push(buddy.jid);
+			for each(var contact:Contact in buddies.source)
+				if((contact.isGateway) && contact != Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					result.push(contact.jid);
 			
 			return result;
 		}
@@ -334,11 +334,11 @@ package com.cleartext.esm.models
 				groupName = MicroBloggingTypes.MICRO_BLOGGING_GROUP;
 			
 			var result:Array = new Array();
-			for each(var buddy:IBuddy in buddies.source)
+			for each(var contact:Contact in buddies.source)
 			{
-				var b:Buddy = buddy as Buddy;
+				var b:Buddy = contact as Buddy;
 				if(b && b.groups.indexOf(groupName) != -1)
-					result.push(buddy);
+					result.push(contact);
 			}
 			
 			return result.sortOn("nickname");

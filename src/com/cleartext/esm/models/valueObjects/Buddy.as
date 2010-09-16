@@ -6,7 +6,7 @@ package com.cleartext.esm.models.valueObjects
 	import com.cleartext.esm.models.types.SubscriptionTypes;
 
 	[Bindable]
-	public class Buddy extends BuddyBase
+	public class Buddy extends Contact
 	{
 		//----------------------------------------
 		//  MICRO BLOGGING CONSTANTS
@@ -169,7 +169,7 @@ package com.cleartext.esm.models.valueObjects
 		}
 
 		//----------------------------------------
-		//  IS MICRO BLOGGING BUDDY
+		//  IS MICRO BLOGGING
 		//----------------------------------------
 		
 		private var _isMicroBlogging:Boolean = false;

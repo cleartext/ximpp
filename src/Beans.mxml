@@ -10,7 +10,7 @@
 		<models:SettingsModel id="settings" />
 		<models:DatabaseModel id="database" />
 		<models:XMPPModel id="xmpp" />
-		<models:BuddyModel id="buddies" />
+		<models:ContactModel id="buddies" />
 		<models:BuddyRequestModel id="requests" />
 		<models:ChatModel id="chats" />
 		<models:ChatRoomModel id="chatRooms" />

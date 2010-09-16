@@ -2,7 +2,7 @@ package com.cleartext.esm.models
 {
 	import com.cleartext.esm.events.ChatRoomEvent;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -20,7 +20,7 @@ package com.cleartext.esm.models
 			return appModel.xmpp;
 		}
 		
-		private function get buddies():BuddyModel
+		private function get buddies():ContactModel
 		{
 			return appModel.buddies;
 		}
@@ -32,10 +32,10 @@ package com.cleartext.esm.models
 		
 		public function join(roomJid:String, nickname:String, password:String):void
 		{
-			var buddy:IBuddy = buddies.getBuddyByJid(roomJid);
-			var chatRoom:ChatRoom = buddy as ChatRoom;
+			var contact:Contact = buddies.getBuddyByJid(roomJid);
+			var chatRoom:ChatRoom = contact as ChatRoom;
 
-			if(buddy && !chatRoom)
+			if(contact && !chatRoom)
 			{
 				throw Error("that jid already exists as a buddy: can not create as chat room.");
 			}

@@ -12,14 +12,13 @@
 		<![CDATA[
 			import com.cleartext.esm.models.ApplicationModel;
 			import com.cleartext.esm.models.AvatarModel;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.ChatModel;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
 			import com.cleartext.esm.models.types.SubscriptionTypes;
 			import com.cleartext.esm.models.valueObjects.Avatar;
 			import com.cleartext.esm.models.valueObjects.Buddy;
-			import com.cleartext.esm.models.valueObjects.IBuddy;
 			import com.cleartext.esm.models.valueObjects.Status;
 			
 			import mx.collections.ArrayCollection;
@@ -35,7 +34,7 @@
 			
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			[Autowire]
 			[Bindable]

@@ -10,14 +10,14 @@
 			import com.cleartext.esm.events.InputTextEvent;
 			import com.cleartext.esm.events.SendButtonEvent;
 			import com.cleartext.esm.models.ApplicationModel;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.utils.LinkResult;
 			import com.cleartext.esm.models.utils.LinkUitls;
 			import com.cleartext.esm.models.valueObjects.Buddy;
-			import com.cleartext.esm.models.valueObjects.IBuddy;
+			import com.cleartext.esm.models.valueObjects.Contact;
 			import com.cleartext.esm.models.valueObjects.Message;
 			import com.cleartext.esm.models.valueObjects.Status;
 			import com.cleartext.esm.models.valueObjects.UrlShortener;
@@ -30,7 +30,7 @@
 			private static const CORNER_RADIUS:Number = 5;
 			
 			[Bindable]
-			public var buddy:IBuddy;
+			public var contact:Contact;
 			
 			[Bindable]
 			public var shortening:Boolean = false;
@@ -72,8 +72,8 @@
 			{
 				var trimedText:String = StringUtil.trim(inputTextArea.text);
 				
-				if(trimedText.length != 0 && buddy)
-					appModel.sendMessageTo(buddy, trimedText);
+				if(trimedText.length != 0 && contact)
+					appModel.sendMessageTo(contact, trimedText);
 
 				callLater(function():void
 					{
@@ -100,7 +100,7 @@
 					return;
 				}
 				
-				if(!buddy || !buddy.isMicroBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
+				if(!contact || !contact.isMicroBlogging || !shortenUrls.selected || shortening || (str.length==1 && str != " "))
 					return;
 				
 				var results:Array = LinkUitls.findLinks(inputTextArea.text + str);
@@ -175,14 +175,14 @@
 	</mx:Script>
 	
 	<common:StatusIcon
-		visible="{buddy != Buddy.ALL_MICRO_BLOGGING_BUDDY}"
-		statusString="{buddy.status.value}"
-		isTyping="{buddy.status.isTyping}"
+		visible="{contact != Buddy.ALL_MICRO_BLOGGING_BUDDY}"
+		statusString="{contact.status.value}"
+		isTyping="{contact.status.isTyping}"
 		x="10" y="6"/>
 	
 	<mx:Label 
-		text="{buddy.nickname}" 
-		x="{buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY ? 10 : 28}" y="6"
+		text="{contact.nickname}" 
+		x="{contact == Buddy.ALL_MICRO_BLOGGING_BUDDY ? 10 : 28}" y="6"
 		width="100%"
 		styleName="blackBold"/>
 	
@@ -192,7 +192,7 @@
 		styleName="dGreyNormal" 
 		visible="{shortening}"/>
 
-	<mx:VRule right="258" height="17" y="4" visible="{buddy.isMicroBlogging}"/>
+	<mx:VRule right="258" height="17" y="4" visible="{contact.isMicroBlogging}"/>
 
 	<s:CheckBox 
 		label="auto-shorten urls" 
@@ -200,21 +200,21 @@
 		y="3" right="130"
 		selected="{settings.global.autoShortenUrls}"
 		click="shortenURLsClickHandler()"
-		visible="{buddy.isMicroBlogging}"/>
+		visible="{contact.isMicroBlogging}"/>
 		
-	<mx:VRule right="122" height="17" y="4" visible="{buddy.isMicroBlogging}"/>		
+	<mx:VRule right="122" height="17" y="4" visible="{contact.isMicroBlogging}"/>		
 
 	<mx:Label
 		text="{inputTextArea.text.length + ' Characters'}" 
 		right="10" y="6" 
 		styleName="{(inputTextArea.text.length > 140) ? 'redBold' : 'dGreyNormal'}" 
-		visible="{buddy.isMicroBlogging}"/>
+		visible="{contact.isMicroBlogging}"/>
 
 	<common:DefaultTextInput
 		id="inputTextArea"
 		defaultText="Type message here..."
 		width="100%" bottom="0" top="{Constants.TOP_ROW_HEIGHT}" 
-		enabled="{!(!buddy || !xmpp.connected)}"
+		enabled="{!(!contact || !xmpp.connected)}"
 		keyDown="input_keyDownHandler(event)"
 		focusRoundedCorners="bl br" 
 		textInput="shorten(event.text)" 

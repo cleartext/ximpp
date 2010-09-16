@@ -11,24 +11,25 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import com.cleartext.esm.models.ChatRoomModel;
-			import com.cleartext.esm.models.valueObjects.ChatRoom;
-			import com.cleartext.esm.models.BuddyModel;
-			import com.cleartext.esm.models.valueObjects.IBuddy;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.ChatModel;
-			import com.cleartext.esm.models.types.SubscriptionTypes;
+			import com.cleartext.esm.models.ChatRoomModel;
 			import com.cleartext.esm.models.XMPPModel;
-			import mx.events.CloseEvent;
+			import com.cleartext.esm.models.types.SubscriptionTypes;
 			import com.cleartext.esm.models.valueObjects.Buddy;
+			import com.cleartext.esm.models.valueObjects.ChatRoom;
+			import com.cleartext.esm.models.valueObjects.Contact;
+			
+			import mx.events.CloseEvent;
 
 			[Bindable]
-			public var buddy:IBuddy;
+			public var contact:Contact;
 
 			[Autowire]
 			public var xmpp:XMPPModel;
 			
 			[Autowire]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			[Autowire]
 			public var chatRooms:ChatRoomModel;
@@ -41,18 +42,18 @@
 				if(closing)
 					return;
 
-				if(buddy is Buddy)
+				if(contact is Buddy)
 				{
-					xmpp.removeFromRoster(buddy.jid);
+					xmpp.removeFromRoster(contact.jid);
 				}
 				else
 				{
-					if(buddy is ChatRoom)
+					if(contact is ChatRoom)
 					{
-						chatRooms.leave(buddy as ChatRoom);
+						chatRooms.leave(contact as ChatRoom);
 					}
-					buddies.removeBuddy(buddy);
-					chats.removeChat(buddy);
+					buddies.removeBuddy(contact);
+					chats.removeChat(contact);
 				}
 				
 				closeWindow();
@@ -61,7 +62,7 @@
 		]]>
 	</fx:Script>
 
-	<mx:Text text="{'Are you sure you want to remove ' + buddy.nickname + ' ?'}" width="400" minHeight="80"/>
+	<mx:Text text="{'Are you sure you want to remove ' + contact.nickname + ' ?'}" width="400" minHeight="80"/>
 	
 	<popup:controlBarContent />
 	

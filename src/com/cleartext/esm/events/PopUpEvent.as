@@ -1,6 +1,6 @@
 package com.cleartext.esm.events
 {
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	
 	import flash.events.Event;
 
@@ -29,7 +29,7 @@ package com.cleartext.esm.events
 
 		public static const CHANGE_PASSWORD_WINDOW:String = "changePasswordWindow";
 		
-		public var buddy:IBuddy;
+		public var contact:Contact;
 		public var group:String;
 		public var messageString:String;
 		
@@ -41,7 +41,7 @@ package com.cleartext.esm.events
 		override public function clone():Event
 		{
 			var event:PopUpEvent = new PopUpEvent(type);
-			event.buddy = buddy;
+			event.contact = contact;
 			event.group = group;
 			event.messageString = messageString;
 			return event;

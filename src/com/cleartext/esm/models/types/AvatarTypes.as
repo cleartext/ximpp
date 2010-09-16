@@ -1,4 +1,4 @@
-package com.cleartext.esm.models.valueObjects
+package com.cleartext.esm.models.types
 {
 	public class AvatarTypes
 	{

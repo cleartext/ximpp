@@ -1,6 +1,6 @@
 package com.cleartext.esm.views.messages
 {
-	import com.cleartext.esm.models.BuddyModel;
+	import com.cleartext.esm.models.ContactModel;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
@@ -19,7 +19,7 @@ package com.cleartext.esm.views.messages
 		public var global:GlobalSettings;
 		
 		[Autowire]
-		public var buddies:BuddyModel;
+		public var buddies:ContactModel;
 		
 		private var participantList:List;
 		private var messageList:MessageSproutList;
@@ -50,7 +50,7 @@ package com.cleartext.esm.views.messages
 			{
 				messageList.data = chat;
 					
-				if(chat.buddy is ChatRoom || chat.buddy is BuddyGroup)
+				if(chat.contact is ChatRoom || chat.contact is BuddyGroup)
 				{
 					if(!participantList)
 					{
@@ -61,7 +61,7 @@ package com.cleartext.esm.views.messages
 						participantList.percentHeight = 100;
 						addChild(participantList);
 					}
-					participantList.dataProvider = chat.buddy.participants;
+					participantList.dataProvider = chat.contact.participants;
 				}
 				else if(participantList)
 				{

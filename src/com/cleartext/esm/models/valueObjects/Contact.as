@@ -3,6 +3,7 @@ package com.cleartext.esm.models.valueObjects
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.events.StatusEvent;
 	import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
+	import com.universalsprout.flex.components.list.ISproutListData;
 	
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
@@ -11,13 +12,13 @@ package com.cleartext.esm.models.valueObjects
 	import mx.events.EventListenerRequest;
 	import mx.utils.UIDUtil;
 
-	public class BuddyBase extends EventDispatcher implements IBuddy
+	public class Contact extends EventDispatcher implements IJidNicknameStatus, ISproutListData
 	{
 		//----------------------------------------
 		//  CONSTRUCTOR
 		//----------------------------------------
 		
-		public function BuddyBase(jid:String)
+		public function Contact(jid:String)
 		{
 			super();
 			_jid = jid;
@@ -152,7 +153,7 @@ package com.cleartext.esm.models.valueObjects
 		//  AUTO OPEN TAB
 		//----------------------------------------
 		
-		// when we receive a new message from this buddy should we
+		// when we receive a new message from this contact should we
 		// automatically open a new tab
 		private var _autoOpenTab:Boolean = true;
 		[Bindable("changeSave")]
@@ -394,7 +395,7 @@ package com.cleartext.esm.models.valueObjects
 		
 		public function toDatabaseValues(userId:int):Array
 		{
-			throw new Error("need te extend BuddyBase.toDatabaseValues()");
+			throw new Error("need te extend Contact.toDatabaseValues()");
 		}
 	}
 }

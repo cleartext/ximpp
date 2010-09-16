@@ -12,9 +12,9 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.models.valueObjects.FormField;
 	import com.cleartext.esm.models.valueObjects.FormObject;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.Status;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
@@ -92,7 +92,7 @@ package com.cleartext.esm.models
 			return appModel.database;
 		}
 		
-		private function get buddies():BuddyModel
+		private function get buddies():ContactModel
 		{
 			return appModel.buddies;
 		}
@@ -240,8 +240,8 @@ package com.cleartext.esm.models
 		 		(appModel.localStatus.value == Status.OFFLINE) ? 
 		 		Status.OFFLINE : Status.ERROR;
 
-	 		for each(var buddy:IBuddy in buddies.buddies.source)
-	 			buddy.status.value = Status.OFFLINE;
+	 		for each(var contact:Contact in buddies.buddies.source)
+	 			contact.status.value = Status.OFFLINE;
 		}
 
 		//-------------------------------
@@ -331,11 +331,11 @@ package com.cleartext.esm.models
 				return;
 			
 			var message:Message = appModel.createFromStanza(messageStanza);
-			var buddy:IBuddy = appModel.getBuddyByJid(message.sender);
+			var contact:Contact = appModel.getContactByJid(message.sender);
 			
 			// if the buddy does not exist in our buddy list, then treat it as a buddy
 			// request
-			if(!buddy)
+			if(!contact)
 			{
 				requests.receiving(message.sender, messageStanza.nick, message.plainMessage);
 				database.saveMessage(message);
@@ -344,7 +344,7 @@ package com.cleartext.esm.models
 
 			// if this is a message from a groupchat, then work out the 
 			// sender's nickname
-			if(buddy is ChatRoom)
+			if(contact is ChatRoom)
 			{
 				message.groupChatSender = event.stanza.from.resource;
 			}
@@ -352,20 +352,20 @@ package com.cleartext.esm.models
 			// if it isn't from a chatRoom
 			else
 			{
-				if(buddy is Buddy)
-					(buddy as Buddy).resource = messageStanza.from.resource;
+				if(contact is Buddy)
+					(contact as Buddy).resource = messageStanza.from.resource;
 
-				buddy.status.isTyping = false;
+				contact.status.isTyping = false;
 				database.saveMessage(message);
 			}
 
-			buddy.lastSeen = message.receivedTimestamp.time;
-			if(!chats.selectedChat || chats.selectedChat.buddy != buddy)
-				buddy.unreadMessages++;
-			chats.addMessage(buddy, message);
+			contact.lastSeen = message.receivedTimestamp.time;
+			if(!chats.selectedChat || chats.selectedChat.contact != contact)
+				contact.unreadMessages++;
+			chats.addMessage(contact, message);
 
 			// play sounds & increment unread messages for the mblog buddy
-			if(buddy.isMicroBlogging)
+			if(contact.isMicroBlogging)
 			{
 				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessages++;
 				chats.addMessage(Buddy.ALL_MICRO_BLOGGING_BUDDY, message);
@@ -388,7 +388,7 @@ package com.cleartext.esm.models
 		{
 			var chatState:String = event.stanza.chatState;
 			var fromJid:String = event.stanza.from.getBareJID();
-			var buddy:Buddy = appModel.getBuddyByJid(fromJid) as Buddy;
+			var buddy:Buddy = appModel.getContactByJid(fromJid) as Buddy;
 
 			if(buddy)
 				buddy.status.isTyping = (chatState == ChatStateTypes.COMPOSING);
@@ -406,13 +406,13 @@ package com.cleartext.esm.models
 
 			var stanza:PresenceStanza = event.stanza as PresenceStanza;
 			var fromJid:String = stanza.from.getBareJID();
-			var buddy:IBuddy = appModel.getBuddyByJid(fromJid);
+			var contact:Contact = appModel.getContactByJid(fromJid);
 			
 			// if this is our own presence we don't care
 			if(fromJid == settings.userAccount.jid)
 				return;
 			
-			var chatRoom:ChatRoom = buddy as ChatRoom;
+			var chatRoom:ChatRoom = contact as ChatRoom;
 			// if this is from a chat room that we have asked to join
 			if(chatRoom)
 			{
@@ -455,11 +455,11 @@ package com.cleartext.esm.models
 			if(stanza.type == SubscriptionTypes.SUBSCRIBE)
 			{
 				// if there are in our rosterlist, then auto-subscirbe
-				if(buddy)
+				if(contact)
 				{
-					sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBED);
-					if((buddy is Buddy) && !(buddy as Buddy).subscribedTo)
-						sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
+					sendSubscribe(contact.jid, SubscriptionTypes.SUBSCRIBED);
+					if((contact is Buddy) && !(contact as Buddy).subscribedTo)
+						sendSubscribe(contact.jid, SubscriptionTypes.SUBSCRIBE);
 				}
 				// if they aren't in the roster list, then alert the user
 				else
@@ -473,34 +473,34 @@ package com.cleartext.esm.models
 			// be handled here - using Status.setFromStanzaType()
 			else
 			{
-				if(!buddy)
+				if(!contact)
 				{
 					// we don't care about you if you aren't in our roster list
 					return;
 				}
 				
-				var wasOffline:Boolean = buddy.status.isOffline();
+				var wasOffline:Boolean = contact.status.isOffline();
 				
-				if(buddy is Buddy)
-					(buddy as Buddy).resource = stanza.from.resource;
+				if(contact is Buddy)
+					(contact as Buddy).resource = stanza.from.resource;
 
 				// setFromStanzaType also handles "unsubscribed" and "subscribed"
 				// if there is an error, then reset the customStatus, otherwise
 				// set the customStatus from the stanza
-				var error:Boolean = buddy.status.setFromStanzaType(stanza.type);
-				buddy.customStatus = (error) ? "" : stanza.status;
+				var error:Boolean = contact.status.setFromStanzaType(stanza.type);
+				contact.customStatus = (error) ? "" : stanza.status;
 				
 				// only set lastSeen if the buddy was offline or we are now 
 				// explicitly going online
-				if(wasOffline || buddy.status.value == Status.AVAILABLE)
-					buddy.lastSeen = new Date().time;
+				if(wasOffline || contact.status.value == Status.AVAILABLE)
+					contact.lastSeen = new Date().time;
 				
 				var avatarHash:String = stanza.avatarHash;
 				if(avatarHash)
-					avatarModel.setUrlOrHash(buddy.jid, avatarHash);
+					avatarModel.setUrlOrHash(contact.jid, avatarHash);
 				
 				buddies.buddies.refresh();
-				database.saveBuddy(buddy);
+				database.saveBuddy(contact);
 			}
 		}
 		
@@ -518,12 +518,12 @@ package com.cleartext.esm.models
 		{
 			appModel.log("getRosterHandler");
 			
-			var buddy:IBuddy;
+			var contact:Contact;
 			var buddiesToDelete:Dictionary = new Dictionary();
 			
-			for each(buddy in buddies.buddies.source)
-				if(!(buddy is ChatRoom) && !(buddy is BuddyGroup))
-					buddiesToDelete[buddy.jid] = buddy;
+			for each(contact in buddies.buddies.source)
+				if(!(contact is ChatRoom) && !(contact is BuddyGroup))
+					buddiesToDelete[contact.jid] = contact;
 
 			for each(var item:XML in stanza.query.jabberRoster::item)
 			{
@@ -531,11 +531,11 @@ package com.cleartext.esm.models
 				
 				// if we already have the buddy, then we just want to
 				// update the values, otherwise create a new buddy
-				buddy = appModel.getBuddyByJid(jid);
-				if(!buddy)
-					buddy = new Buddy(jid);
+				contact = appModel.getContactByJid(jid);
+				if(!contact)
+					contact = new Buddy(jid);
 				
-				var b:Buddy = buddy as Buddy;
+				var b:Buddy = contact as Buddy;
 				if(b)
 				{
 					var groups:Array = new Array();
@@ -551,19 +551,19 @@ package com.cleartext.esm.models
 					requests.setSubscription(jid, b.nickname, b.subscription);
 				}
 				
-				buddy.nickname = item.@name;
+				contact.nickname = item.@name;
 				avatarModel.getAvatar(jid).displayName = item.@name;
 
 				// flag used to delete buddies that are no longer in
 				// the roster list
-				delete buddiesToDelete[buddy.jid];
+				delete buddiesToDelete[contact.jid];
 				
 				// this adds, saves and adds an event listener to the buddy
-				buddies.addBuddy(buddy);
+				buddies.addBuddy(contact);
 			}
 			
-			for each(buddy in buddiesToDelete)
-				buddies.removeBuddy(buddy);
+			for each(contact in buddiesToDelete)
+				buddies.removeBuddy(contact);
 
 			gotRosterList = true;
 			
@@ -594,7 +594,7 @@ package com.cleartext.esm.models
 
 			// if we already have the buddy, then we just want to
 			// update the values, otherwise create a new buddy
-			var buddy:Buddy = appModel.getBuddyByJid(jid) as Buddy;
+			var buddy:Buddy = appModel.getContactByJid(jid) as Buddy;
 			
 			// NOTE we want a Buddy - a roster item here, this could
 			// lead to duplicates if someone adds a group or a chatroom
@@ -640,7 +640,7 @@ package com.cleartext.esm.models
 			if(iqStanza.from == cleartextComponentPrefix + settings.userAccount.host)
 			{
 				cleartextComponentJid = iqStanza.from;
-				var cleartextComponent:IBuddy = buddies.getBuddyByJid(cleartextComponentJid);
+				var cleartextComponent:Contact = buddies.getBuddyByJid(cleartextComponentJid);
 				// if this is in the roster list, then check we have the right
 				// microBloggingServiceType
 				if(cleartextComponent)
@@ -688,7 +688,7 @@ package com.cleartext.esm.models
 					// then make sure it has the right settings
 					if(buddies.containsJid(twitterGatewayJid))
 					{
-						var twitterGateway:IBuddy = buddies.getBuddyByJid(twitterGatewayJid);
+						var twitterGateway:Contact = buddies.getBuddyByJid(twitterGatewayJid);
 						twitterGateway.microBloggingServiceType = MicroBloggingServiceTypes.STATUS_ONE_TWITTER;
 
 						var change:Boolean = false;
@@ -716,7 +716,7 @@ package com.cleartext.esm.models
 		// ADD TO ROSTER 
 		//-------------------------------
 		
-		public function addToRoster(buddy:IBuddy):void
+		public function addToRoster(buddy:Contact):void
 		{
 			var query:XML = <query xmlns={JABBER_ROSTER_NS} />;
 			var item:XML = <item jid={buddy.jid} />;
@@ -750,7 +750,7 @@ package com.cleartext.esm.models
 			{
 				var toJid:String = iqVariables[id] as String;
 				sendSubscribe(toJid, SubscriptionTypes.SUBSCRIBE);
-				chats.getChat(appModel.getBuddyByJid(toJid), true);
+				chats.getChat(appModel.getContactByJid(toJid), true);
 				delete iqVariables[id];
 			}
 			appModel.log("addToRosterHandler");
@@ -782,7 +782,7 @@ package com.cleartext.esm.models
 		// MODIFY ROSTER ITEM
 		//-------------------------------
 		
-		public function modifyRosterItem(buddy:IBuddy):void
+		public function modifyRosterItem(buddy:Contact):void
 		{
 			var query:XML = <query xmlns={JABBER_ROSTER_NS} />;
 			var item:XML = <item jid={buddy.jid}/>
@@ -1150,7 +1150,7 @@ package com.cleartext.esm.models
 		{
 			var fromJid:String = iqStanza.from;
 			var bareJid:String = (fromJid.indexOf("/") == -1) ? fromJid : fromJid.substr(0, fromJid.indexOf("/"));
-			var buddy:Buddy = appModel.getBuddyByJid(bareJid) as Buddy;
+			var buddy:Buddy = appModel.getContactByJid(bareJid) as Buddy;
 
 			if(iqStanza.query)
 			{

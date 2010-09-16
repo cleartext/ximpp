@@ -6,7 +6,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.events.SearchBoxEvent;
 	import com.cleartext.esm.models.ApplicationModel;
 	import com.cleartext.esm.models.AvatarModel;
-	import com.cleartext.esm.models.BuddyModel;
+	import com.cleartext.esm.models.ContactModel;
 	import com.cleartext.esm.models.ChatModel;
 	import com.cleartext.esm.models.DatabaseModel;
 	import com.cleartext.esm.models.SettingsModel;
@@ -14,7 +14,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.models.types.BuddyTypes;
 	import com.cleartext.esm.models.types.ChatStateTypes;
 	import com.cleartext.esm.models.valueObjects.Chat;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.views.common.SearchBox;
 	
@@ -55,7 +55,7 @@ package com.cleartext.esm.views.messages
 		
 		[Autowire]
 		[Bindable]
-		public var buddies:BuddyModel;
+		public var buddies:ContactModel;
 		
 		[Autowire]
 		[Bindable]
@@ -136,14 +136,14 @@ package com.cleartext.esm.views.messages
 				chat.chatState = newState;
 				if(sendStanza && xmpp.connected &&
 						 chat.isPerson &&
-						 !chat.buddy.status.isOffline())
-					xmpp.sendMessage(chat.buddy.fullJid, null, null, 'chat', newState);
+						 !chat.contact.status.isOffline())
+					xmpp.sendMessage(chat.contact.fullJid, null, null, 'chat', newState);
 			}
 		}
 		
 		private function avatar_close(event:CloseEvent):void
 		{
-			chats.removeChat((event.target as AvatarTab).chat.buddy);
+			chats.removeChat((event.target as AvatarTab).chat.contact);
 		}
 				
 		override protected function createChildren():void
@@ -205,12 +205,12 @@ package com.cleartext.esm.views.messages
 			var chat:Chat = event.chat;
 			var avatar:AvatarTab = new AvatarTab();
 			avatar.chat = chat;
-			avatar.avatar = avatarModel.getAvatar(chat.buddy.jid);
+			avatar.avatar = avatarModel.getAvatar(chat.contact.jid);
 			avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
 			avatar.width = AVATAR_SIZE;
 			avatar.height = AVATAR_SIZE;
 			avatar.border = false;
-			avatar.toolTip = chat.buddy.nickname;
+			avatar.toolTip = chat.contact.nickname;
 			avatar.addEventListener(CloseEvent.CLOSE, avatar_close);
 			avatar.alpha = 0;
 			
@@ -302,7 +302,7 @@ package com.cleartext.esm.views.messages
 
 			if(!chat)
 			{
-				inputCanvas.buddy = null;
+				inputCanvas.contact = null;
 				return;
 			}
 			
@@ -310,7 +310,7 @@ package com.cleartext.esm.views.messages
 			setChatStateTo(chat, ChatStateTypes.ACTIVE);
 
 			// set input canvas
-			inputCanvas.buddy = chat.buddy;
+			inputCanvas.contact = chat.contact;
 
 			// set message list
 			for each(var s:MessageDividedBox in messageStack.getChildren())
@@ -448,7 +448,7 @@ package com.cleartext.esm.views.messages
 		private function avatarClickHandler(event:MouseEvent):void
 		{
 			if(event.target is AvatarTab)
-				chats.getChat((event.target as AvatarTab).chat.buddy, true);
+				chats.getChat((event.target as AvatarTab).chat.contact, true);
 		}
 		
 		private function moveAvatar(avatarIndex:int, position:int, animate:Boolean=true):void
@@ -461,7 +461,7 @@ package com.cleartext.esm.views.messages
 
 			if(position == 1)
 			{
-				(avatar.chat.buddy as IBuddy).unreadMessages = 0;
+				(avatar.chat.contact as Contact).unreadMessages = 0;
 				newX += SELECTOR_WIDTH;
 			}
 			else if(position >1)

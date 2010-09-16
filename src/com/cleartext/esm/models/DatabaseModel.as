@@ -8,8 +8,8 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.BuddyRequest;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.models.valueObjects.DatabaseValue;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
 	
@@ -55,7 +55,7 @@ package com.cleartext.esm.models
 			return appModel.settings;
 		}
 		
-		private function get buddies():BuddyModel
+		private function get buddies():ContactModel
 		{
 			return appModel.buddies;
 		}
@@ -329,6 +329,12 @@ package com.cleartext.esm.models
 						}
 					}
 				}
+				
+				// add all the indexes on jid fields
+				execute("CREATE INDEX IF NOT EXISTS avatarJids ON avatars (jid)");
+				execute("CREATE INDEX IF NOT EXISTS senders ON messages (sender)");
+				execute("CREATE INDEX IF NOT EXISTS recipients ON messages (recipient)");
+				
 				appModel.log("Database successfully created", true);
 			}
 			catch (error:Error)
@@ -360,24 +366,24 @@ package com.cleartext.esm.models
 			loadUserSettings(1);
 		}
 
-		private function createIBuddy(obj:Object):IBuddy
+		private function createIBuddy(obj:Object):Contact
 		{
 			var type:String = obj["buddyType"];
 
-			var newBuddy:IBuddy;
+			var newContact:Contact;
 			switch(type)
 			{
 				case "group" :
 					var group:BuddyGroup = new BuddyGroup(obj["jid"]);
 					group.refresh(buddies);
-					newBuddy = group;
+					newContact = group;
 					break;
 				case "chatRoom" :
 					var chatRoom:ChatRoom = new ChatRoom(obj["jid"]);
 					var np:Array = (obj["groups"] as String).split(",");
 					chatRoom.ourNickname = np[0];
 					chatRoom.password = np[1];
-					newBuddy = chatRoom;
+					newContact = chatRoom;
 					break;
 				default :
 					var buddy:Buddy = new Buddy(obj["jid"]);
@@ -387,25 +393,25 @@ package com.cleartext.esm.models
 					buddy.groups = groups;
 					buddy.sendTo = obj["sendTo"];
 					buddy.subscription = obj["subscription"];
-					newBuddy = buddy;
+					newContact = buddy;
 					break;
 			}
 			
-			newBuddy.buddyId = obj["buddyId"];
-			newBuddy.nickname = obj["nickName"];
-			newBuddy.lastSeen = obj["lastSeen"];
-			newBuddy.customStatus = obj["customStatus"];
-			newBuddy.openTab = obj["openTab"];
-			newBuddy.autoOpenTab = obj["autoOpenTab"];
-			newBuddy.unreadMessages = obj["unreadMessages"];
-			newBuddy.microBloggingServiceType = obj["microBloggingServiceType"];
+			newContact.buddyId = obj["buddyId"];
+			newContact.nickname = obj["nickName"];
+			newContact.lastSeen = obj["lastSeen"];
+			newContact.customStatus = obj["customStatus"];
+			newContact.openTab = obj["openTab"];
+			newContact.autoOpenTab = obj["autoOpenTab"];
+			newContact.unreadMessages = obj["unreadMessages"];
+			newContact.microBloggingServiceType = obj["microBloggingServiceType"];
 			
-			var avatar:Avatar = avatarModel.getAvatar(newBuddy.jid);
-			avatar.displayName = newBuddy.nickname;
+			var avatar:Avatar = avatarModel.getAvatar(newContact.jid);
+			avatar.displayName = newContact.nickname;
 			
-			if(MicroBloggingServiceTypes.TYPES.indexOf(newBuddy.microBloggingServiceType) == -1)
-				newBuddy.microBloggingServiceType = MicroBloggingServiceTypes.OTHER;
-			return newBuddy;
+			if(MicroBloggingServiceTypes.TYPES.indexOf(newContact.microBloggingServiceType) == -1)
+				newContact.microBloggingServiceType = MicroBloggingServiceTypes.OTHER;
+			return newContact;
 		}
 		
 		public function loadBuddyData(data:Array=null, index:int=0):void
@@ -493,16 +499,16 @@ package com.cleartext.esm.models
 				updateStmt("userAccounts", values, [new DatabaseValue("userId", userAccount.userId)]);
 		}
 		
-		public function saveBuddy(buddy:IBuddy):void
+		public function saveBuddy(contact:Contact):void
 		{
-			appModel.log("Saving buddy : " + buddy.jid + " buddyId: " + buddy.buddyId, true);
-			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY || buddy is UserAccount)
+			appModel.log("Saving buddy : " + contact.jid + " buddyId: " + contact.buddyId, true);
+			if(contact == Buddy.ALL_MICRO_BLOGGING_BUDDY || contact is UserAccount)
 				return;
 			
-			if(buddy.buddyId == -1)
-				buddy.buddyId = insertStmt("buddies", buddy.toDatabaseValues(settings.userId));
+			if(contact.buddyId == -1)
+				contact.buddyId = insertStmt("buddies", contact.toDatabaseValues(settings.userId));
 			else
-				updateStmt("buddies", buddy.toDatabaseValues(settings.userId), [new DatabaseValue("buddyId", buddy.buddyId)]);
+				updateStmt("buddies", contact.toDatabaseValues(settings.userId), [new DatabaseValue("buddyId", contact.buddyId)]);
 		}
 
 		public function saveRequest(request:BuddyRequest):void
@@ -531,10 +537,10 @@ package com.cleartext.esm.models
 				updateStmt("avatars", avatar.toDatabaseValues(settings.userId), [new DatabaseValue("avatarId", avatar.avatarId)]);
 		}
 
-		public function removeBuddy(buddy:IBuddy):void
+		public function removeBuddy(contact:Contact):void
 		{
-			appModel.log("Deleting buddy : " + buddy.jid + " buddyId: " + buddy.buddyId, true);
-			execute("DELETE FROM buddies WHERE buddyId = " + buddy.buddyId);
+			appModel.log("Deleting buddy : " + contact.jid + " buddyId: " + contact.buddyId, true);
+			execute("DELETE FROM buddies WHERE buddyId = " + contact.buddyId);
 		}
 		
 		public function removeRequest(request:BuddyRequest):void
@@ -555,7 +561,7 @@ package com.cleartext.esm.models
 			var len:int = chatsToOpen.length;
 			while(index < len)
 			{
-				chats.getChat(chatsToOpen[index] as IBuddy);
+				chats.getChat(chatsToOpen[index] as Contact);
 				index++;
 				if(start + maxTimeForProcess < getTimer())
 				{
@@ -569,28 +575,28 @@ package com.cleartext.esm.models
 		
 		public function loadMessages(chat:Chat, syncnonusly:Boolean=true):void
 		{
-			var buddy:IBuddy = chat.buddy;
-			var buddyArray:Array = (buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? buddies.microBloggingBuddies.toArray() : [buddy];
+			var contact:Contact = chat.contact;
+			var buddyArray:Array = (contact == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? buddies.microBloggingBuddies.toArray() : [contact];
 			if(buddyArray.length == 0)
 			{
-				if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				if(contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
 				return;
 			}
 
-			appModel.log("Loading messages with " + chat.buddy.jid, true);
+			appModel.log("Loading messages with " + chat.contact.jid, true);
 			var sql:String = "Select * from messages WHERE userid=" + settings.userId + " AND (";
 			
-			for each(var b:IBuddy in buddyArray)
+			for each(var c:Contact in buddyArray)
 			{
-				sql += "sender='" + b.jid + "' OR recipient='" + b.jid + "' OR ";
+				sql += "sender='" + c.jid + "' OR recipient='" + c.jid + "' OR ";
 			}
 
 			sql = sql.substr(0, sql.length-4);
 			sql += ") ORDER BY " + 
 					((settings.global.sortBySentDate) ? "sentTimestamp" : "receivedTimestamp") + 
 					" DESC LIMIT 0," + 
-					((buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? settings.global.numTimelineMessages : settings.global.numChatMessages);
+					((contact == Buddy.ALL_MICRO_BLOGGING_BUDDY) ? settings.global.numTimelineMessages : settings.global.numChatMessages);
 			
 			var result:SQLResult = execute(sql);
 
@@ -612,7 +618,7 @@ package com.cleartext.esm.models
 					loopOverMessages(result.data, 0, chat);
 				}
 			}
-			else if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			else if(chat.contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
 				dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
 			}
@@ -633,7 +639,7 @@ package com.cleartext.esm.models
 				index++;
 				if(start + maxTimeForProcess < getTimer())
 				{
-					if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					if(chat.contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					{
 						dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADING, index-1, len));
 					}
@@ -642,7 +648,7 @@ package com.cleartext.esm.models
 				}
 			}
 			
-			if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			if(chat.contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
 				dispatchEvent(new LoadingEvent(LoadingEvent.WORKSTREAM_LOADED));
 			}

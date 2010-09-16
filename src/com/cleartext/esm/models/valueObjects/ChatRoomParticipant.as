@@ -4,7 +4,7 @@ package com.cleartext.esm.models.valueObjects
 	
 	import flash.events.EventDispatcher;
 	
-	public class ChatRoomParticipant extends EventDispatcher implements IHasJidAndStatus
+	public class ChatRoomParticipant extends EventDispatcher implements IJidNicknameStatus
 	{
 		private var _nickname:String;
 		[Bindable(event="changeSave")]

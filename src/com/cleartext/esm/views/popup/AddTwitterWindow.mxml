@@ -12,7 +12,7 @@
 	<fx:Script>
 		<![CDATA[
 			import com.cleartext.esm.events.XmppErrorEvent;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.SettingsModel;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.types.MicroBloggingServiceTypes;
@@ -30,7 +30,7 @@
 			public var xmpp:XMPPModel;
 			
 			[Autowire]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			private var formObject:FormObject;
 			

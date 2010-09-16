@@ -10,12 +10,12 @@
 	<fx:Script>
 		<![CDATA[
 			import com.cleartext.esm.models.ApplicationModel;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.valueObjects.Buddy;
-			import com.cleartext.esm.models.valueObjects.IBuddy;
+			import com.cleartext.esm.models.valueObjects.Contact;
 			
 			import mx.collections.ArrayCollection;
 			import mx.events.CloseEvent;
@@ -27,7 +27,7 @@
 			
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			public var groupName:String;
 			
@@ -63,9 +63,9 @@
 					if(buddies.groupName == groupName)
 						buddies.groupName = newGroupName;
 					
-					for each(var b:IBuddy in buddies.buddies.source)
+					for each(var contact:Contact in buddies.buddies.source)
 					{
-						buddy = b as Buddy;
+						buddy = contact as Buddy;
 						if(buddy)
 						{
 							var index:int = buddy.groups.indexOf(groupName);

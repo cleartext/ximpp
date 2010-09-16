@@ -3,15 +3,14 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.assets.Constants;
 	import com.cleartext.esm.events.AvatarEvent;
 	import com.cleartext.esm.events.HasAvatarEvent;
-	import com.cleartext.esm.models.BuddyModel;
+	import com.cleartext.esm.models.ContactModel;
 	import com.cleartext.esm.models.types.BuddyTypes;
-	import com.cleartext.esm.models.valueObjects.AvatarTypes;
+	import com.cleartext.esm.models.types.AvatarTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
-	import com.cleartext.esm.models.valueObjects.BuddyBase;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.views.common.AvatarRenderer;
 	import com.cleartext.esm.views.common.UnreadMessageBadge;
 	import com.cleartext.esm.views.popup.ChangePasswordWindow;
@@ -80,13 +79,13 @@ package com.cleartext.esm.views.messages
 		{
 			if(chat != value)
 			{
-				if(chat && chat.buddy)
-					chat.buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
+				if(chat && chat.contact)
+					chat.contact.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 					
 				_chat = value;
 
-				if(chat && chat.buddy)
-					chat.buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
+				if(chat && chat.contact)
+					chat.contact.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 			}
 		}
 		
@@ -132,26 +131,26 @@ package com.cleartext.esm.views.messages
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
-			
-			var chatBuddy:IBuddy = (chat) ? chat.buddy : null;
 
-			if(chatBuddy)
+			var contact:Contact = (chat) ? chat.contact : null;
+
+			if(contact)
 			{
-				if(chatBuddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				if(contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					type = AvatarTypes.ALL_MICRO_BLOGGING_BUDDY;
-				else if(chatBuddy is BuddyGroup)
+				else if(contact is BuddyGroup)
 					type = AvatarTypes.GROUP;
-				else if(chatBuddy is ChatRoom)
+				else if(contact is ChatRoom)
 					type = AvatarTypes.CHAT_ROOM;
 				else 
 					type = AvatarTypes.BUDDY;
 			}
 			
-			if(chatBuddy && unreadMessageBadge)
+			if(contact && unreadMessageBadge)
 			{
-				if(unreadMessageBadge.count != chatBuddy.unreadMessages)
+				if(unreadMessageBadge.count != contact.unreadMessages)
 					invalidateProperties();
-				unreadMessageBadge.count = chatBuddy.unreadMessages;
+				unreadMessageBadge.count = contact.unreadMessages;
 				unreadMessageBadge.x = width - unreadMessageBadge.width + 5;
 				unreadMessageBadge.y = -unreadMessageBadge.height/2;
 			}

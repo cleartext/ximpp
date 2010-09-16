@@ -7,7 +7,6 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.models.ChatModel;
 	import com.cleartext.esm.models.SettingsModel;
 	import com.cleartext.esm.models.valueObjects.Avatar;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
 	import com.cleartext.esm.views.common.AvatarRenderer;

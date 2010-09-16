@@ -1,6 +1,6 @@
 package com.cleartext.esm.models.valueObjects
 {
-	import com.cleartext.esm.models.BuddyModel;
+	import com.cleartext.esm.models.ContactModel;
 	
 	import flash.sampler.DeleteObjectSample;
 	import flash.utils.Dictionary;
@@ -8,7 +8,7 @@ package com.cleartext.esm.models.valueObjects
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	
-	public class BuddyGroup extends BuddyBase
+	public class BuddyGroup extends Contact
 	{
 		public function BuddyGroup(jid:String)
 		{
@@ -22,39 +22,39 @@ package com.cleartext.esm.models.valueObjects
 			participants.refresh();
 		}
 
-		public function refresh(buddies:BuddyModel):void
+		public function refresh(buddies:ContactModel):void
 		{
-			var b:IBuddy;
+			var contact:Contact;
 			var bArray:Array = buddies.getBuddiesByGroup(jid);
 			
 			var buddiesToRemove:Dictionary = new Dictionary();
 			
-			for each(b in participants)
-				buddiesToRemove[b.jid] = b;
+			for each(contact in participants)
+				buddiesToRemove[contact.jid] = contact;
 			
-			for each(b in bArray)
+			for each(contact in bArray)
 			{
-				if(buddiesToRemove.hasOwnProperty(b.jid))
-					delete buddiesToRemove[b.jid];
+				if(buddiesToRemove.hasOwnProperty(contact.jid))
+					delete buddiesToRemove[contact.jid];
 				else
-					participants.addItem(b);
+					participants.addItem(contact);
 			}
 			
-			for each(b in buddiesToRemove)
+			for each(contact in buddiesToRemove)
 			{
-				var i:int = participants.getItemIndex(b);
+				var i:int = participants.getItemIndex(contact);
 				participants.removeItemAt(i);
 			}
 			
 			participants.refresh();
 		}
 		
-		private function statusSort(b1:IBuddy, b2:IBuddy, fields:Object=null):int
+		private function statusSort(c1:Contact, c2:Contact, fields:Object=null):int
 		{
-			var statusCompare:int = clamp(b1.statusSortIndex- b2.statusSortIndex);
+			var statusCompare:int = clamp(c1.statusSortIndex- c2.statusSortIndex);
 			if(statusCompare != 0)
 				return statusCompare;
-			return clamp(b1.nickname.localeCompare(b2.nickname));
+			return clamp(c1.nickname.localeCompare(c2.nickname));
 		}
 		
 		private function clamp(value:Number):int

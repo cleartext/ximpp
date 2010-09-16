@@ -12,12 +12,12 @@
 			import org.swizframework.Swiz;
 			import com.cleartext.esm.views.common.SideButton;
 			import mx.controls.Button;
-			import com.cleartext.esm.events.BuddyModelEvent;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.events.ContactModelEvent;
+			import com.cleartext.esm.models.ContactModel;
 			
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			[Autowire (bean="xmpp", property="connected")]
 			[Bindable]
@@ -91,10 +91,10 @@
 	</mx:Script>
 	
 <!--	<common:SideButton text="{BuddyModel.OPEN_TABS}" click="clickHandler(event)" icon="{Constants.Tabs}" showEditButton="false"/>-->
-	<common:SideButton text="{BuddyModel.MICRO_BLOGGING_GROUP}" click="clickHandler(event)" icon="{Constants.AllSocial}" showEditButton="false"/>
-	<common:SideButton text="{BuddyModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}" showEditButton="false"/>
-	<common:SideButton text="{BuddyModel.GATEWAY_GROUP}" click="clickHandler(event)" icon="{Constants.Gateways}" showEditButton="false"/>
-	<common:SideButton text="{BuddyModel.UNASIGNED}" click="clickHandler(event)" icon="{Constants.NoGroup}" showEditButton="false"/>
-	<common:SideButton text="{BuddyModel.CHAT_ROOMS}" click="clickHandler(event)" icon="{Constants.DefaultGroupIcon}" showEditButton="false"/>
+	<common:SideButton text="{ContactModel.MICRO_BLOGGING_GROUP}" click="clickHandler(event)" icon="{Constants.AllSocial}" showEditButton="false"/>
+	<common:SideButton text="{ContactModel.ALL_BUDDIES_GROUP}" click="clickHandler(event)" icon="{Constants.AllBuddies}" showEditButton="false"/>
+	<common:SideButton text="{ContactModel.GATEWAY_GROUP}" click="clickHandler(event)" icon="{Constants.Gateways}" showEditButton="false"/>
+	<common:SideButton text="{ContactModel.UNASIGNED}" click="clickHandler(event)" icon="{Constants.NoGroup}" showEditButton="false"/>
+	<common:SideButton text="{ContactModel.CHAT_ROOMS}" click="clickHandler(event)" icon="{Constants.DefaultGroupIcon}" showEditButton="false"/>
 
 </mx:VBox>

@@ -12,7 +12,7 @@
 			import com.cleartext.esm.models.types.MicroBloggingTypes;
 			import mx.events.FlexEvent;
 			import com.cleartext.esm.models.valueObjects.Buddy;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import mx.events.CloseEvent;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.DatabaseModel;
@@ -25,7 +25,7 @@
 			
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			override protected function init(event:FlexEvent):void
 			{

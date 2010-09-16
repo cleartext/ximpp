@@ -11,7 +11,7 @@
 			import com.cleartext.esm.models.valueObjects.Message;
 			import flash.sampler.NewObjectSample;
 			import com.cleartext.esm.models.valueObjects.Buddy;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.types.SubscriptionTypes;
 			import mx.events.CloseEvent;
 			import com.cleartext.esm.models.XMPPModel;
@@ -25,7 +25,7 @@
 
 			[Autowire]
 			[Bindable]
-			public var buddies:BuddyModel;
+			public var buddies:ContactModel;
 			
 			override protected function submit(event:Event):void
 			{

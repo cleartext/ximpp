@@ -21,7 +21,7 @@ package com.cleartext.esm.views.messages
 			if(chat)
 			{
 				dataProvider = chat.messages;
-				if(chat.buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				if(chat.contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 					itemRenderer = new ClassFactory(AllMicroBloggingRenderer);
 				else if(chat.isChatRoom)
 					itemRenderer = new ClassFactory(MUCRenderer);

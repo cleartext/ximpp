@@ -3,7 +3,6 @@ package com.cleartext.esm.views.popup
 	import com.cleartext.esm.models.SoundAndColorModel;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
 	
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;

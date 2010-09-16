@@ -9,9 +9,9 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.models.XMPPModel;
 	import com.cleartext.esm.models.types.MicroBloggingTypes;
 	import com.cleartext.esm.models.valueObjects.Avatar;
-	import com.cleartext.esm.models.valueObjects.AvatarTypes;
+	import com.cleartext.esm.models.types.AvatarTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
@@ -178,7 +178,7 @@ package com.cleartext.esm.views.messages
 					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, "RT @" + mblogAvatar.userName + " : " + bodyTextField.text));
 					break;
 				case "direct" :
-					var buddy:IBuddy = appModel.getBuddyByJid(mblogAvatar.jid);
+					var buddy:Contact = appModel.getContactByJid(mblogAvatar.jid);
 					if(!buddy)
 					{
 						buddy = new Buddy(mblogAvatar.jid);
@@ -207,7 +207,7 @@ package com.cleartext.esm.views.messages
 		
 		private function showContextMenu(event:MouseEvent):void
 		{
-			if(mblogAvatar && (avatar.jid == xmpp.cleartextComponentJid || avatar.jid == xmpp.twitterGatewayJid))
+			if(mblogAvatar && (message.sender == xmpp.cleartextComponentJid || message.sender == xmpp.twitterGatewayJid))
 			{
 				if(!followItem)
 				{
@@ -243,7 +243,7 @@ package com.cleartext.esm.views.messages
 		{
 			if(!xmpp.connected)
 				return;
-			xmpp.sendMessage(avatar.jid, (event.target == unFollowItem ? "u " : "f ") + mblogAvatar.userName);
+			xmpp.sendMessage(message.sender, (event.target == unFollowItem ? "u " : "f ") + mblogAvatar.userName);
 		}
 		
 		override protected function commitProperties():void
@@ -253,7 +253,7 @@ package com.cleartext.esm.views.messages
 				if(message.mBlogSenderJid)
 				{
 					mblogAvatar = avatarModel.getAvatar(message.mBlogSenderJid);
-					nameTextField.text = mblogAvatar.displayName; 
+					nameTextField.text = mblogAvatar.displayName + " (@" + mblogAvatar.userName + ")"; 
 					if(avatarRenderer)
 						avatarRenderer.avatar = mblogAvatar;
 				}

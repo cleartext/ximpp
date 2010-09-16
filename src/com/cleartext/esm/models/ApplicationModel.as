@@ -13,7 +13,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.Status;
 	import com.seesmic.as3.xmpp.MessageStanza;
@@ -51,7 +51,7 @@ package com.cleartext.esm.models
 		public var xmpp:XMPPModel;
 		
 		[Autowire]
-		public var buddies:BuddyModel;
+		public var buddies:ContactModel;
 		
 		[Autowire]
 		public var requests:BuddyRequestModel;
@@ -320,9 +320,9 @@ package com.cleartext.esm.models
 			database.removeEventListener(LoadingEvent.WORKSTREAM_LOADED, loadChats);
 			
 			var chatsToOpen:Array = new Array();
-			for each(var buddy:IBuddy in buddies.buddies.source)
-				if(buddy.openTab && buddy!=Buddy.ALL_MICRO_BLOGGING_BUDDY)
-					chatsToOpen.push(buddy);
+			for each(var contact:Contact in buddies.buddies.source)
+				if(contact.openTab && contact!=Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					chatsToOpen.push(contact);
 			
 			log("Loading " + chatsToOpen.length + " chats");
 
@@ -361,7 +361,7 @@ package com.cleartext.esm.models
 				});
 		}
 		
-		public function getBuddyByJid(jid:String):IBuddy
+		public function getContactByJid(jid:String):Contact
 		{
 			if(!jid || jid=="")
 				return null;
@@ -374,27 +374,27 @@ package com.cleartext.esm.models
 				return settings.userAccount;
 				
 			if(chats.chatsByJid.hasOwnProperty(jid))
-				return chats.chatsByJid[jid].buddy;
+				return chats.chatsByJid[jid].contact;
 			
 			return buddies.getBuddyByJid(jid);
 		}
 		
-		public function sendMessageTo(buddy:IBuddy, messageString:String, save:Boolean=true):void
+		public function sendMessageTo(contact:Contact, messageString:String, save:Boolean=true):void
 		{
-			log("[ApplicationModel].sendMessage() " + buddy.jid + " : " + messageString + " : " + save);
+			log("[ApplicationModel].sendMessage() " + contact.jid + " : " + messageString + " : " + save);
 			
-			if(buddy is BuddyGroup || buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			if(contact is BuddyGroup || contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 			{
 				var popUpEvent:PopUpEvent = new PopUpEvent(PopUpEvent.BROADCAST_WINDOW);
 				popUpEvent.messageString = messageString;
-				popUpEvent.buddy = buddy;
+				popUpEvent.contact = contact;
 				Swiz.dispatchEvent(popUpEvent);
 			}
 			else
 			{
 				var customTags:Array = new Array();
 
-				if(buddy.isMicroBlogging)
+				if(contact.isMicroBlogging)
 				{
 					var userName:String = settings.userAccount.jid;
 					userName = userName.substr(0, userName.indexOf("@"));
@@ -405,22 +405,22 @@ package com.cleartext.esm.models
 					b.appendChild(<jid>{settings.userAccount.jid}</jid>);
 					if(avatarModel.userAccountAvatar.urlOrHash)
 						b.appendChild(<avatar type='hash'>{avatarModel.userAccountAvatar.urlOrHash}</avatar>);
-					b.appendChild(<serviceJid>{buddy.jid}</serviceJid>);
+					b.appendChild(<serviceJid>{contact.jid}</serviceJid>);
 					x.appendChild(b);
 					customTags.push(x);
 				}
 
-				var messageStanza:MessageStanza = xmpp.sendMessage(buddy.fullJid, messageString, null, (buddy is ChatRoom ? 'groupchat' : 'chat'), null, customTags);
+				var messageStanza:MessageStanza = xmpp.sendMessage(contact.fullJid, messageString, null, (contact is ChatRoom ? 'groupchat' : 'chat'), null, customTags);
 				var message:Message = createFromStanza(messageStanza);
-				if(chats.hasOpenChat(buddy))
-					chats.addMessage(buddy, message);
+				if(chats.hasOpenChat(contact))
+					chats.addMessage(contact, message);
 			
-				if(buddy.isMicroBlogging)
+				if(contact.isMicroBlogging)
 				{
 					chats.addMessage(Buddy.ALL_MICRO_BLOGGING_BUDDY, message);
 				}
 				
-				if(!(buddy is ChatRoom) && save)
+				if(!(contact is ChatRoom) && save)
 				{
 					database.saveMessage(message);
 				}

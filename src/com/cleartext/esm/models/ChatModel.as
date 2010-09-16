@@ -7,7 +7,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.models.valueObjects.Message;
 	
 	import flash.events.EventDispatcher;
@@ -25,7 +25,7 @@ package com.cleartext.esm.models
 		public var settings:SettingsModel;
 		
 		[Autowire]
-		public var buddies:BuddyModel;
+		public var buddies:ContactModel;
 				
 		[Autowire]
 		public var avatarModel:AvatarModel;
@@ -56,17 +56,17 @@ package com.cleartext.esm.models
 		[Mediate(event="ChatEvent.OPEN_ME")]
 		public function openChatHandler(event:ChatEvent):void
 		{
-			getChat(event.buddy, event.select);
+			getChat(event.contact, event.select);
 		}
 		
-		public function getChat(buddyOrJid:Object, select:Boolean=false, type:String=BuddyTypes.BUDDY):Chat
+		public function getChat(ContactOrJid:Object, select:Boolean=false, type:String=BuddyTypes.BUDDY):Chat
 		{
 			var chat:Chat;
 
-			if(buddyOrJid is String)
-				chat = chatsByJid[buddyOrJid];
-			else if(buddyOrJid is IBuddy)
-				chat = chatsByJid[buddyOrJid.jid];
+			if(ContactOrJid is String)
+				chat = chatsByJid[ContactOrJid];
+			else if(ContactOrJid is Contact)
+				chat = chatsByJid[ContactOrJid.jid];
 			else
 				return null;
 			
@@ -75,33 +75,33 @@ package com.cleartext.esm.models
 				if(chats.length == 0)
 					select = true;
 				
-				var buddy:IBuddy = buddyOrJid as IBuddy;
-				if(!buddy)
+				var contact:Contact = ContactOrJid as Contact;
+				if(!contact)
 				{
-					var jid:String = buddyOrJid as String;
+					var jid:String = ContactOrJid as String;
 					switch(type)
 					{
 						case BuddyTypes.CHAT_ROOM :
-							buddy = new ChatRoom(jid);
+							contact = new ChatRoom(jid);
 							break;
 						case BuddyTypes.GROUP :
-							buddy = new BuddyGroup(jid);
-							buddies.addBuddy(buddy);
-							(buddy as BuddyGroup).refresh(buddies);
+							contact = new BuddyGroup(jid);
+							buddies.addBuddy(contact);
+							(contact as BuddyGroup).refresh(buddies);
 							break;
 						default :
-							buddy = new Buddy(jid);
+							contact = new Buddy(jid);
 							break;
 					}
 				}
 				
 				
-				if((buddy is ChatRoom) && !appModel.xmpp.connected)
+				if((contact is ChatRoom) && !appModel.xmpp.connected)
 				{
 					return null;
 				}
 
-				chat = new Chat(buddy);
+				chat = new Chat(contact);
 				database.loadMessages(chat, !select);
 				var index:int = 0;
 				if(selectedChat)
@@ -109,8 +109,8 @@ package com.cleartext.esm.models
 					index = chats.indexOf(selectedChat);
 				}
 				chats.splice(index, 0, chat);
-				chatsByJid[buddy.jid] = chat;
-				buddy.openTab = true;
+				chatsByJid[contact.jid] = chat;
+				contact.openTab = true;
 				
 				if(select)
 					_selectedChat = chat;
@@ -128,27 +128,27 @@ package com.cleartext.esm.models
 			return chat;
 		}
 		
-		public function removeChat(buddyOrJid:Object=null):void
+		public function removeChat(contactOrJid:Object=null):void
 		{
 			var chat:Chat;
-			var buddy:IBuddy;
+			var contact:Contact;
 
-			if(!buddyOrJid)
+			if(!contactOrJid)
 				chat = selectedChat;
-			else if(buddyOrJid is IBuddy)
-				chat = chatsByJid[buddyOrJid.jid];
-			else if(buddyOrJid is String)
-				chat = chatsByJid[buddyOrJid];
+			else if(contactOrJid is Contact)
+				chat = chatsByJid[contactOrJid.jid];
+			else if(contactOrJid is String)
+				chat = chatsByJid[contactOrJid];
 			
 			if(!chat)
 				return;
 
-			buddy = chat.buddy;
+			contact = chat.contact;
 
-			buddy.openTab = false;
+			contact.openTab = false;
 			var i:int = chats.indexOf(chat);
 			chats.splice(i, 1);
-			delete chatsByJid[buddy.jid];
+			delete chatsByJid[contact.jid];
 
 			if(chat == selectedChat)
 			{
@@ -159,23 +159,23 @@ package com.cleartext.esm.models
 			}
 			dispatchEvent(new ChatEvent(ChatEvent.REMOVE_CHAT, chat, i));
 			
-			if(buddy is ChatRoom)
+			if(contact is ChatRoom)
 			{
-				appModel.chatRooms.leave(buddy as ChatRoom);
+				appModel.chatRooms.leave(contact as ChatRoom);
 			}
 		}
 		
-		public function hasOpenChat(buddy:IBuddy):Boolean
+		public function hasOpenChat(contact:Contact):Boolean
 		{
-			return chatsByJid.hasOwnProperty(buddy.jid);
+			return chatsByJid.hasOwnProperty(contact.jid);
 		}
 		
-		public function addMessage(buddy:IBuddy, message:Message):void
+		public function addMessage(contact:Contact, message:Message):void
 		{
-			if(chatsByJid.hasOwnProperty(buddy.jid))
-				getChat(buddy).addMessage(message, buddy.isMicroBlogging ? settings.global.numTimelineMessages : settings.global.numChatMessages);
-			else if(buddy.autoOpenTab)
-				getChat(buddy);
+			if(chatsByJid.hasOwnProperty(contact.jid))
+				getChat(contact).addMessage(message, contact.isMicroBlogging ? settings.global.numTimelineMessages : settings.global.numChatMessages);
+			else if(contact.autoOpenTab)
+				getChat(contact);
 		}
 	}
 }

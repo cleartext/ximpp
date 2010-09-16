@@ -3,7 +3,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.events.BuddyRequestEvent;
 	import com.cleartext.esm.models.types.SubscriptionTypes;
 	import com.cleartext.esm.models.valueObjects.BuddyRequest;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -107,9 +107,9 @@ package com.cleartext.esm.models
 			}
 			request.timestamp = new Date();
 			request.incomming = false;
-			var buddy:IBuddy = appModel.getBuddyByJid(toJid);
-			if(buddy)
-				request.nickname = buddy.nickname;
+			var contact:Contact = appModel.getContactByJid(toJid);
+			if(contact)
+				request.nickname = contact.nickname;
 		}
 
 		public function receiving(fromJid:String, nickname:String, message:String=null):void

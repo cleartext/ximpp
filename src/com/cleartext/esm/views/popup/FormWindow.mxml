@@ -22,7 +22,7 @@
 			import mx.events.FlexEvent;
 			import mx.collections.ArrayCollection;
 			import com.cleartext.esm.models.valueObjects.Buddy;
-			import com.cleartext.esm.models.BuddyModel;
+			import com.cleartext.esm.models.ContactModel;
 			import mx.events.CloseEvent;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.DatabaseModel;

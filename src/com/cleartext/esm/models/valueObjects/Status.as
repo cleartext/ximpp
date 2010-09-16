@@ -56,21 +56,6 @@ package com.cleartext.esm.models.valueObjects
 			}
 		}
 
-		private var _edit:Boolean = false;
-		[Bindable (event="statusChanged")]
-		public function get edit():Boolean
-		{
-			return _edit;	
-		}
-		public function set edit(value:Boolean):void
-		{
-			if(edit != value)
-			{
-				_edit = value;
-				dispatchEvent(new StatusEvent(StatusEvent.STATUS_CHANGED));
-			}
-		}
-
 		private var _numUnread:int = 0;
 		[Bindable (event="statusChanged")]
 		public function get numUnread():int
@@ -84,7 +69,7 @@ package com.cleartext.esm.models.valueObjects
 				_numUnread = value;
 				dispatchEvent(new StatusEvent(StatusEvent.STATUS_CHANGED));
 			}
-		}
+		}	
 		
 		private var _isTyping:Boolean = false;
 		[Bindable (event="statusChanged")]

@@ -10,41 +10,41 @@ package com.cleartext.esm.models.valueObjects
 	
 	public class Chat extends EventDispatcher
 	{
-		public var buddy:IBuddy;
+		public var contact:Contact;
 		public var used:Boolean = true;
 		public var messages:ArrayCollection;
 		
 		public function get isPerson():Boolean
 		{
-			return buddy.isPerson;
+			return contact.isPerson;
 		}
 		
 		public function get isGateway():Boolean
 		{
-			return buddy.isGateway;
+			return contact.isGateway;
 		}
 		
 		public function get isMicroBlogging():Boolean
 		{
-			return buddy.isMicroBlogging;
+			return contact.isMicroBlogging;
 		}
 		
 		public function get isGroup():Boolean
 		{
-			return buddy is BuddyGroup;
+			return contact is BuddyGroup;
 		}
 		
 		public function get isChatRoom():Boolean
 		{
-			return buddy is ChatRoom;
+			return contact is ChatRoom;
 		}
 		
 		public var chatState:String;
 		
-		public function Chat(buddy:IBuddy)
+		public function Chat(contact:Contact)
 		{
 			super();
-			this.buddy = buddy;
+			this.contact = contact;
 			
 			messages = new ArrayCollection();
 			var sort:Sort = new Sort();

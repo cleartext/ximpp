@@ -8,7 +8,7 @@ package com.cleartext.esm.models.valueObjects
 	
 	import org.swizframework.Swiz;
 	
-	public class ChatRoom extends BuddyBase
+	public class ChatRoom extends Contact
 	{
 		public function ChatRoom(jid:String)
 		{

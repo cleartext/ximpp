@@ -7,9 +7,10 @@ package com.cleartext.esm.views.buddies
 	import com.cleartext.esm.models.ChatModel;
 	import com.cleartext.esm.models.XMPPModel;
 	import com.cleartext.esm.models.types.SubscriptionTypes;
+	import com.cleartext.esm.models.types.AvatarTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.ChatRoom;
-	import com.cleartext.esm.models.valueObjects.IBuddy;
+	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.models.valueObjects.Status;
 	import com.cleartext.esm.views.common.AvatarRenderer;
 	import com.cleartext.esm.views.common.StatusIcon;
@@ -73,9 +74,9 @@ package com.cleartext.esm.views.buddies
 			addEventListener(MouseEvent.DOUBLE_CLICK,
 				function():void
 				{
-					chats.getChat(buddy, true);
+					chats.getChat(contact, true);
 					
-					var chatRoom:ChatRoom = buddy as ChatRoom;
+					var chatRoom:ChatRoom = contact as ChatRoom;
 					if(chatRoom && xmpp.connected && chatRoom.status.isOffline())
 						xmpp.joinChatRoom(chatRoom.jid, chatRoom.ourNickname, chatRoom.password);
 				});
@@ -99,7 +100,7 @@ package com.cleartext.esm.views.buddies
 		[Mediate(event="ApplicationEvent.STATUS_TIMER")]
 		public function statusTimerHandler(event:ApplicationEvent):void
 		{
-			if(!buddy.status.isOffline())
+			if(!contact.status.isOffline())
 			{
 				timerCount++;
 				invalidateProperties();
@@ -108,15 +109,15 @@ package com.cleartext.esm.views.buddies
 		
 		private function createContextMenu(event:Event):void
 		{
-			if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+			if(contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				return;
 
-			var subscribedTo:Boolean = (buddy is Buddy) && (buddy as Buddy).subscribedTo;
+			var subscribedTo:Boolean = (contact is Buddy) && (contact as Buddy).subscribedTo;
 			
 			// label at top
-			customContextMenu.getItemAt(0).label = (buddy && xmpp.connected) ? buddy.nickname : "go online to edit";
+			customContextMenu.getItemAt(0).label = (contact && xmpp.connected) ? contact.nickname : "go online to edit";
 			// workstream label
-			customContextMenu.getItemAt(3).label = buddy.isMicroBlogging ? "remove from workstream" : "add to workstream";
+			customContextMenu.getItemAt(3).label = contact.isMicroBlogging ? "remove from workstream" : "add to workstream";
 			
 			
 			// add or remove subscription request if required
@@ -134,30 +135,30 @@ package com.cleartext.esm.views.buddies
 			}
 			
 			// add or remove gateway item if required
-			if(buddy.isGateway && buddy.status.isOffline() && !logonItem)
+			if(contact.isGateway && contact.status.isOffline() && !logonItem)
 			{
 				logonItem = new ContextMenuItem("logon", true);
 				logonItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, logonHandler);
 				customContextMenu.addItem(logonItem);
 			}
-			else if((buddy.isGateway || !buddy.status.isOffline()) && logonItem)
+			else if((contact.isGateway || !contact.status.isOffline()) && logonItem)
 			{
 				customContextMenu.removeItem(logonItem);
 				logonItem.removeEventListener(ContextMenuEvent.MENU_ITEM_SELECT, logonHandler);
 				logonItem = null;
 			}
 			
-			if(xmpp.cleartextComponentHost == buddy.host)
+			if(xmpp.cleartextComponentHost == contact.host)
 			{
 				if(!followItem)
 				{
-					followItem = new ContextMenuItem("follow " + buddy.username + " on cleartext microblogging", true);
+					followItem = new ContextMenuItem("follow " + contact.username + " on cleartext microblogging", true);
 					followItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
 					customContextMenu.addItem(followItem);
 				}
 				if(!unFollowItem)
 				{
-					unFollowItem = new ContextMenuItem("unfollow " + buddy.username + " on cleartext microblogging");
+					unFollowItem = new ContextMenuItem("unfollow " + contact.username + " on cleartext microblogging");
 					unFollowItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, followHandler);
 					customContextMenu.addItem(unFollowItem);
 				}
@@ -189,7 +190,7 @@ package com.cleartext.esm.views.buddies
 		{
 			if(!xmpp.connected)
 				return;
-			xmpp.sendMessage(xmpp.cleartextComponentJid, (event.target == unFollowItem ? "u " : "f ") + buddy.username);
+			xmpp.sendMessage(xmpp.cleartextComponentJid, (event.target == unFollowItem ? "u " : "f ") + contact.username);
 		}
 		
 		private function logonHandler(event:ContextMenuEvent):void
@@ -197,7 +198,7 @@ package com.cleartext.esm.views.buddies
 			// incase we went offline while the user was clicking
 			if(!xmpp.connected)
 				return;
-			xmpp.sendPresence(buddy.jid);
+			xmpp.sendPresence(contact.jid);
 		}
 
 		private function sendSubscription(event:ContextMenuEvent):void
@@ -205,13 +206,13 @@ package com.cleartext.esm.views.buddies
 			// incase we went offline while the user was clicking
 			if(!xmpp.connected)
 				return;
-			xmpp.sendSubscribe(buddy.jid, SubscriptionTypes.SUBSCRIBE);
+			xmpp.sendSubscribe(contact.jid, SubscriptionTypes.SUBSCRIBE);
 		}
 
 		private function editHandler(event:ContextMenuEvent):void
 		{
 			var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.EDIT_BUDDY_WINDOW);
-			popupEvent.buddy = buddy;
+			popupEvent.contact = contact;
 			Swiz.dispatchEvent(popupEvent);
 		}
 
@@ -219,23 +220,23 @@ package com.cleartext.esm.views.buddies
 		{
 			// incase we went offline while the user was clicking
 			// plus we only want to make Buddies microblogging buddies
-			if(!xmpp.connected || !(buddy is Buddy))
+			if(!xmpp.connected || !(contact is Buddy))
 				return;
 				
-			buddy.isMicroBlogging = !buddy.isMicroBlogging;
-			xmpp.modifyRosterItem(buddy);
+			contact.isMicroBlogging = !contact.isMicroBlogging;
+			xmpp.modifyRosterItem(contact);
 		}
 
 		private function deleteHandler(event:ContextMenuEvent):void
 		{
 			var popupEvent:PopUpEvent = new PopUpEvent(PopUpEvent.DELETE_BUDDY_WINDOW);
-			popupEvent.buddy = buddy;
+			popupEvent.contact = contact;
 			Swiz.dispatchEvent(popupEvent);
 		}
 
-		private function get buddy():IBuddy
+		private function get contact():Contact
 		{
-			return data as IBuddy;
+			return data as Contact;
 		}
 		
 		override public function set data(value:Object):void
@@ -243,22 +244,22 @@ package com.cleartext.esm.views.buddies
 			if(data == value)
 				return;
 
-			if(buddy)
-				buddy.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
+			if(contact)
+				contact.removeEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 			
 			super.data = value;
 
-			if(buddy)
+			if(contact)
 			{
-				buddy.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
+				contact.addEventListener(HasAvatarEvent.CHANGE_SAVE, buddyChangedHandler);
 				if(avatar)
-					avatar.avatar = avatarModel.getAvatar(buddy.jid);
+					avatar.avatar = avatarModel.getAvatar(contact.jid);
 
 				customContextMenu = new ContextMenu();
 				customContextMenu.hideBuiltInItems();
 				contextMenu = customContextMenu;
 				
-				if(buddy == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+				if(contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
 				{
 					customContextMenu.items.push(new ContextMenuItem("Can not edit My Workstream", false, false));
 				}
@@ -288,15 +289,15 @@ package com.cleartext.esm.views.buddies
 		
 		private function buddyChangedHandler(event:HasAvatarEvent):void
 		{
-			if(!buddy || buddy.status.isOffline())
+			if(!contact || contact.status.isOffline())
 			{
 				timerCount = 0;
 				previousStatus = Status.OFFLINE;
 			}
-			else if(buddy.status.value != previousStatus)
+			else if(contact.status.value != previousStatus)
 			{
 				timerCount = 0;
-				previousStatus = buddy.status.value;
+				previousStatus = contact.status.value;
 			}
 			
 			invalidateProperties();
@@ -335,7 +336,9 @@ package com.cleartext.esm.views.buddies
 				avatar.y = PADDING;
 				avatar.width = AVATAR_SIZE;
 				avatar.height = AVATAR_SIZE;
-				avatar.avatar = avatarModel.getAvatar(buddy.jid);
+				avatar.avatar = avatarModel.getAvatar(contact.jid);
+				if(contact == Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					avatar.type = AvatarTypes.ALL_MICRO_BLOGGING_BUDDY;
 				addChild(avatar);
 			}
 			
@@ -393,23 +396,23 @@ package com.cleartext.esm.views.buddies
 		{
 			super.commitProperties();
 
-			if(!buddy)
+			if(!contact)
 				return;
 	
 			// set values
-			customStatusLabel.text = buddy.customStatus;
-			nameLabel.text = buddy.nickname;
-			statusIcon.statusString = buddy.status.value;
-			statusIcon.isTyping = buddy.status.isTyping;
-			if(unreadMessageBadge.count != buddy.unreadMessages)
+			customStatusLabel.text = contact.customStatus;
+			nameLabel.text = contact.nickname;
+			statusIcon.statusString = contact.status.value;
+			statusIcon.isTyping = contact.status.isTyping;
+			if(unreadMessageBadge.count != contact.unreadMessages)
 			{
-				unreadMessageBadge.count = buddy.unreadMessages;
+				unreadMessageBadge.count = contact.unreadMessages;
 				callLater(invalidateProperties);
 			}
 			
-			if(buddy.status.isOffline())
+			if(contact.status.isOffline())
 			{
-				statusLabel.text = buddy.status.value;
+				statusLabel.text = contact.status.value;
 			}
 			else
 			{
@@ -427,7 +430,7 @@ package com.cleartext.esm.views.buddies
 				else
 					extraText += Math.floor(mins/1400) + " days";
 				
-				statusLabel.text = buddy.status.value + extraText;
+				statusLabel.text = contact.status.value + extraText;
 			}
 			
 			// What height we should be depends if there is a custom
@@ -435,7 +438,7 @@ package com.cleartext.esm.views.buddies
 			// sure the label is not visible and we should be at the 
 			// SMALL_HEIGHT
 			var h:Number;
-			if(!buddy.customStatus || buddy.customStatus == "")
+			if(!contact.customStatus || contact.customStatus == "")
 			{
 				customStatusLabel.visible = false;
 				h = SMALL_HEIGHT;
@@ -469,7 +472,7 @@ package com.cleartext.esm.views.buddies
 					});
 			}
 			
-			if(buddy.status.isOffline())
+			if(contact.status.isOffline())
 			{
 				nameLabel.styleName = "lGreyBold";
 				avatar.alpha = 0.5;
@@ -535,7 +538,7 @@ package com.cleartext.esm.views.buddies
 			}
 			
 			// bottom line
-			if(over || buddy && !buddy.status.isOffline())
+			if(over || contact && !contact.status.isOffline())
 			{
 				g.beginFill(0x000000, 0.15)
 				g.drawRect(0, unscaledHeight-1, unscaledWidth, 1);

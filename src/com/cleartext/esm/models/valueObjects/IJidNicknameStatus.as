@@ -2,7 +2,7 @@ package com.cleartext.esm.models.valueObjects
 {
 	import flash.events.IEventDispatcher;
 	
-	public interface IHasJidAndStatus extends IEventDispatcher
+	public interface IJidNicknameStatus extends IEventDispatcher
 	{
 		function get jid():String
 		function set jid(value:String):void
@@ -12,7 +12,5 @@ package com.cleartext.esm.models.valueObjects
 		
 		function get status():Status;
 		function setStatus(value:String):void
-		
-		function get statusSortIndex():int;
 	}
 }
