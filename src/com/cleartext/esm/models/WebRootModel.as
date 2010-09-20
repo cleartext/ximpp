@@ -5,6 +5,7 @@ package com.cleartext.esm.models
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
@@ -14,6 +15,8 @@ package com.cleartext.esm.models
 	import flash.utils.getTimer;
 	
 	import mx.rpc.events.FaultEvent;
+	import mx.rpc.events.ResultEvent;
+	import mx.rpc.http.HTTPService;
 	import mx.utils.Base64Encoder;
 	
 	import org.swizframework.Swiz;
@@ -30,53 +33,73 @@ package com.cleartext.esm.models
 
 		public function checkUrl(url:String):int
 		{
-			var request:URLRequest = new URLRequest();
-			request.url = "http://72.5.172.35:3128/wwss_url_checker";
-			request.method = URLRequestMethod.POST;
-
-			var encoder:Base64Encoder = new Base64Encoder();        
-			encoder.encode("test@tagged.com:wrtest");
-			
-			var authHeader:URLRequestHeader = new URLRequestHeader("Authorization", "Basic " + encoder.toString());
-			request.requestHeaders.push(authHeader);
-			request.data = '{"type":3,"ver":1,"urls":[{"id":' + ++idCounter + ',"url":"' + url + '"}]}';
-			
 			var loader:URLLoader = new URLLoader();
-			loader.addEventListener(FaultEvent.FAULT, traceHandler);
-			loader.addEventListener(IOErrorEvent.IO_ERROR, traceHandler);
-			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, traceHandler);
-
+//			loader.addEventListener(FaultEvent.FAULT, traceHandler);
+//			loader.addEventListener(IOErrorEvent.IO_ERROR, traceHandler);
+//			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, traceHandler);
+//			loader.addEventListener(Event.COMPLETE, completeHandler);
+			loader.addEventListener(FaultEvent.FAULT, faultHandler);
 			loader.addEventListener(Event.COMPLETE, completeHandler);
+			loader.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
+			var request:URLRequest = new URLRequest(url);
+			request.followRedirects = false;
 			loader.load(request);
-			
 			startTime = getTimer();
 			return idCounter;
+			
+//			var request:URLRequest = new URLRequest();
+//			request.url = "http://72.5.172.35:3128/wwss_url_checker";
+//			request.method = URLRequestMethod.POST;
+//
+//			var encoder:Base64Encoder = new Base64Encoder();        
+//			encoder.encode("test@tagged.com:wrtest");
+//			
+//			var authHeader:URLRequestHeader = new URLRequestHeader("Authorization", "Basic " + encoder.toString());
+//			request.requestHeaders.push(authHeader);
+//			request.data = '{"type":3,"ver":1,"urls":[{"id":' + ++idCounter + ',"url":"' + url + '"}]}';
+//			
+//			var loader:URLLoader = new URLLoader();
+//			loader.addEventListener(FaultEvent.FAULT, traceHandler);
+//			loader.addEventListener(IOErrorEvent.IO_ERROR, traceHandler);
+//			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, traceHandler);
+//
+//			loader.addEventListener(Event.COMPLETE, completeHandler);
+//			loader.load(request);
+//			
+//			startTime = getTimer();
+//			return idCounter;
+		}
+		
+		private function httpStatusHandler(event:HTTPStatusEvent):void
+		{
+			trace(event);
 		}
 		
 		private function completeHandler(event:Event):void
 		{
 			var loader:URLLoader = event.target as URLLoader;
-			var json:Object = JSON.decode(loader.data.toString());
-			var result:Object;
+			trace(event);
 			
-			if(json.urls && json.urls.length > 0)
-			{
-				result = json.urls[0];
-				result.milliseconds = getTimer() - startTime;
-			}
-			else
-			{
-				result = json;
-			}
-
-			Swiz.dispatchEvent(new LinkEvent(LinkEvent.LINK_RESULT, "", result));
+//			var json:Object = JSON.decode(loader.data.toString());
+//			var result:Object;
+//			
+//			if(json.urls && json.urls.length > 0)
+//			{
+//				result = json.urls[0];
+//				result.milliseconds = getTimer() - startTime;
+//			}
+//			else
+//			{
+//				result = json;
+//			}
+//
+//			Swiz.dispatchEvent(new LinkEvent(LinkEvent.LINK_RESULT, "", result));
 		}
 		
-		private function traceHandler(event:Event):void
+		private function faultHandler(event:FaultEvent):void
 		{
-			var loader:URLLoader = event.target as URLLoader;
-			var json:Object = JSON.decode(loader.data.toString());
-			Swiz.dispatchEvent(new LinkEvent(LinkEvent.LINK_RESULT, "", json));
+			var msg:String = event.fault.faultCode + "\n" + event.fault.faultDetail + "\n" + event.fault.faultString;
+			Swiz.dispatchEvent(new LinkEvent(LinkEvent.LINK_RESULT, "", msg));
 		}
 
 	}

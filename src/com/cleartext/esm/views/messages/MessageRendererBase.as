@@ -76,11 +76,12 @@ package com.cleartext.esm.views.messages
 					avatar.removeEventListener(AvatarEvent.MBLOG_VALUES_CHANGE, avatarValuesChangeHandler);
 				
 				_avatar = value;
+				
 
 				if(avatar)
 					avatar.addEventListener(AvatarEvent.MBLOG_VALUES_CHANGE, avatarValuesChangeHandler);
 
-				invalidateProperties();
+				avatarValuesChangeHandler(null);
 			}
 		}
 		

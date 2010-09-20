@@ -6,8 +6,8 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.events.SearchBoxEvent;
 	import com.cleartext.esm.models.ApplicationModel;
 	import com.cleartext.esm.models.AvatarModel;
-	import com.cleartext.esm.models.ContactModel;
 	import com.cleartext.esm.models.ChatModel;
+	import com.cleartext.esm.models.ContactModel;
 	import com.cleartext.esm.models.DatabaseModel;
 	import com.cleartext.esm.models.SettingsModel;
 	import com.cleartext.esm.models.XMPPModel;
@@ -429,7 +429,7 @@ package com.cleartext.esm.views.messages
 		{
 			if(searchTerms.length == 0)
 				return true;
-			
+
 			for each(var searchTerm:String in searchTerms)
 			{
 //				if(message.mBlogSenderId != -1)
@@ -439,7 +439,7 @@ package com.cleartext.esm.views.messages
 //					if(message.mBlogSender.displayName.toLowerCase().indexOf(searchTerm) != -1)
 //						return true;
 //				}
-				if(message.plainMessage.toLocaleLowerCase().indexOf(searchTerm) != -1)
+				if(message.searchString.indexOf(searchTerm) != -1)
 					return true;
 			}
 			return false;

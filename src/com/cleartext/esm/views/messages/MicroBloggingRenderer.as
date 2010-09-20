@@ -152,12 +152,13 @@ package com.cleartext.esm.views.messages
 				{
 					createButtons(null);
 				}
-				invalidateProperties();
+				mblogAvatarChangeHandler(null);
 			}
 		}
 		
 		private function mblogAvatarChangeHandler(event:AvatarEvent):void
 		{
+			message.userAndDisplayName = mblogAvatar.userName + " " + mblogAvatar.displayName;
 			invalidateProperties();
 		}
 		
@@ -259,7 +260,7 @@ package com.cleartext.esm.views.messages
 				}
 				else
 				{
-					fromThisUser = message.sender == settings.userAccount.jid;
+					fromThisUser = settings && message.sender == settings.userAccount.jid;
 					avatar = fromThisUser ? avatarModel.userAccountAvatar : avatarModel.getAvatar(message.sender);
 					nameTextField.text = avatar.displayName;
 					if(avatarRenderer)

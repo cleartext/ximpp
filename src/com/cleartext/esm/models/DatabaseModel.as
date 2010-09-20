@@ -664,7 +664,8 @@ package com.cleartext.esm.models
 			if (result && result.data)
 			{
 				var obj:Object = result.data[0];
-				return Avatar.createFromDB(obj, avatarModel.bitmapDataFromString(obj["bitmapString"]));
+				avatarModel.setBitmapString(obj["jid"], obj["bitmapString"]);
+				return Avatar.createFromDB(obj);
 			}
 			return null;
 		}

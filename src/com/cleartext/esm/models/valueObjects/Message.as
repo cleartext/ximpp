@@ -38,14 +38,43 @@ package com.cleartext.esm.models.valueObjects
 		public var recipient:String;
 		public var type:String;
 		public var subject:String;
-		public var plainMessage:String;
+		public var rawXML:String;
+		public var mBlogSenderJid:String;
 		public var displayMessage:String;
 		public var groupChatSender:String;
 		public var searchTerms:Array;
 		
-		public var rawXML:String;
-				
-		public var mBlogSenderJid:String;
+		private var _plainMessage:String;
+		public function get plainMessage():String
+		{
+			return _plainMessage;
+		}
+		public function set plainMessage(value:String):void
+		{
+			if(plainMessage != value)
+			{
+				_plainMessage = value;
+				searchString = (userAndDisplayName + " " + plainMessage).toLowerCase();
+			}
+		}
+		
+		private var _userAndDisplayName:String;
+		public function get userAndDisplayName():String
+		{
+			return _userAndDisplayName;
+		}
+		public function set userAndDisplayName(value:String):void
+		{
+			if(value != userAndDisplayName)
+			{
+				_userAndDisplayName = value;
+				searchString = (userAndDisplayName + " " + plainMessage).toLowerCase();
+			}
+		}
+		
+		// shortcut used for search filtering in the message list
+		public var searchString:String;
+		
 		
 		public function Message()
 		{

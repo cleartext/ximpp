@@ -4,7 +4,6 @@ package com.cleartext.esm.models.valueObjects
 	
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
-	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	import flash.utils.getTimer;
 	
@@ -101,8 +100,7 @@ package com.cleartext.esm.models.valueObjects
 				_bitmapData = value;
 				if(bitmapData)
 				{
-					var byteArray:ByteArray = bitmapData.getPixels(new Rectangle(0,0,bitmapData.width, bitmapData.height));
-//					var byteArray:ByteArray = new PNGEncoder().encode(bitmapData);
+					var byteArray:ByteArray = new PNGEncoder().encode(bitmapData);
 					var base64Enc:Base64Encoder = new Base64Encoder();
 					base64Enc.encodeBytes(byteArray);
 					bitmapString = base64Enc.flush();
@@ -134,7 +132,7 @@ package com.cleartext.esm.models.valueObjects
 			super();
 		}
 
-		public static function createFromDB(obj:Object, bmd:BitmapData):Avatar
+		public static function createFromDB(obj:Object):Avatar
 		{
 			var avatar:Avatar = new Avatar();
 			avatar.avatarId = obj["avatarId"];
@@ -144,7 +142,6 @@ package com.cleartext.esm.models.valueObjects
 			avatar.userName = obj["userName"];
 			avatar.displayName = obj["displayName"];
 			avatar.profileUrl = obj["profileUrl"];
-			avatar.bitmapData = bmd;
 			return avatar;
 		}
 		
