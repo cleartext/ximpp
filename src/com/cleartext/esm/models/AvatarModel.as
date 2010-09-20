@@ -10,8 +10,10 @@ package com.cleartext.esm.models
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.geom.Matrix;
+	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 	
 	import mx.controls.Image;
 	import mx.utils.Base64Decoder;
@@ -80,14 +82,42 @@ package com.cleartext.esm.models
 			if(!bitmapString || bitmapString.length < 10)
 				return;
 			
-			var base64Dec:Base64Decoder = new Base64Decoder();
-			base64Dec.decode(bitmapString);
-			var byteArray:ByteArray = base64Dec.toByteArray();
-			
-			var image:Image = new Image();
-			image.addEventListener(Event.COMPLETE, imageCompleteHandler);
-			image.data = jid;
-			image.load(byteArray);
+			var bmd:BitmapData = bitmapDataFromString(bitmapString);
+			if(bmd)
+			{
+				var avatar:Avatar = getAvatar(jid);
+				avatar.bitmapData = bmd;
+			}
+			else
+			{
+//				var base64Dec:Base64Decoder = new Base64Decoder();
+//				base64Dec.decode(bitmapString);
+//				var byteArray:ByteArray = base64Dec.drain();
+//				var image:Image = new Image();
+//				image.addEventListener(Event.COMPLETE, imageCompleteHandler);
+//				image.data = jid;
+//				image.load(byteArray);
+			}
+		}
+		
+		public function bitmapDataFromString(string:String):BitmapData
+		{
+			try
+			{
+				var start:int = getTimer();
+				var base64Dec:Base64Decoder = new Base64Decoder();
+				base64Dec.decode(string);
+				var byteArray:ByteArray = base64Dec.drain();
+				byteArray.position = 0;
+				var bmd:BitmapData = new BitmapData(AVATAR_SIZE, AVATAR_SIZE);
+				bmd.setPixels(new Rectangle(0,0,AVATAR_SIZE,AVATAR_SIZE), byteArray);
+				trace('*******************', (getTimer()-start));
+				return bmd;
+			}
+			catch(e:Error)
+			{
+			}
+			return null;
 		}
 		
 		//--------------------------------
@@ -109,7 +139,6 @@ package com.cleartext.esm.models
 				
 				var bmd:BitmapData = new BitmapData(Math.min(bitmap.width*scale, AVATAR_SIZE), Math.min(bitmap.height*scale, AVATAR_SIZE));
 				bmd.draw(bitmap, matrix);
-				
 				
 				var jid:String = image.data as String;
 				var avatar:Avatar = getAvatar(jid);
