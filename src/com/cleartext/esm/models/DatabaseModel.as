@@ -334,6 +334,8 @@ package com.cleartext.esm.models
 				execute("CREATE INDEX IF NOT EXISTS avatarJids ON avatars (jid)");
 				execute("CREATE INDEX IF NOT EXISTS senders ON messages (sender)");
 				execute("CREATE INDEX IF NOT EXISTS recipients ON messages (recipient)");
+				execute("CREATE INDEX IF NOT EXISTS sentTimestamps ON messages (sentTimestamp)");
+				execute("CREATE INDEX IF NOT EXISTS receivedTimestamps ON messages (receivedTimestamp)");
 				
 				appModel.log("Database successfully created", true);
 			}
