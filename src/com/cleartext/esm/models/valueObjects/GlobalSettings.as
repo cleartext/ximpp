@@ -37,7 +37,7 @@ package com.cleartext.esm.models.valueObjects
 
 		public var autoConnect:Boolean = false;
 		public var playSounds:Boolean = true;
-		public var checkUrls:Boolean = false;
+		public var checkUrls:Boolean = true;
 		
 		public function GlobalSettings()
 		{
@@ -94,8 +94,8 @@ package com.cleartext.esm.models.valueObjects
 				if(xml.playSounds)
 					playSounds = xml.playSounds == "true";
 
-//				if(xml.checkUrls)
-//					checkUrls = xml.checkUrls == "true";
+				if(xml.checkUrls)
+					checkUrls = xml.checkUrls == "true";
 				
 				fileStream.close();
 			}

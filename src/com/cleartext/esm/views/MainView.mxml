@@ -118,18 +118,18 @@
 			[Mediate(event="LinkEvent.LINK_CLICKED")]
 			public function showLinkWindow(event:LinkEvent):void
 			{
-				if(!event.url)
+				if(!event.urlOrMessage)
 					return;
 				
 				if(appModel.settings.global.checkUrls)
 				{
 					var window:LinkWindow = new LinkWindow();
-					window.url = event.url;
+					window.url = event.urlOrMessage;
 					initializePopUp(window);
 				}
 				else
 				{
-					navigateToURL(new URLRequest(event.url));
+					navigateToURL(new URLRequest(event.urlOrMessage));
 				}
 			}
 

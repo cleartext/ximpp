@@ -14,7 +14,7 @@
 		<models:BuddyRequestModel id="requests" />
 		<models:ChatModel id="chats" />
 		<models:ChatRoomModel id="chatRooms" />
-		<models:WebRootModel id="webroot" />
+		<models:ExpandUrlModel id="expandUrls" />
 		<models:ApplicationModel id="appModel" />
 		<models:AvatarModel id="avatarModel" />
 	</fx:Declarations>

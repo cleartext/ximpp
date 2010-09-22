@@ -74,7 +74,7 @@
 				messageSortComboBox.selectedItem = (settings.global.sortBySentDate) ? "date sent" : "date received";
 				awayTimeout.value = settings.global.awayTimeout;
 				playSoundsCheckBox.selected = settings.global.playSounds;
-//				checkUrlsCheckBox.selected = settings.global.checkUrls;
+				checkUrlsCheckBox.selected = settings.global.checkUrls;
 				
 				// load user account
 				nickname.text = settings.userAccount.nickname;
@@ -103,7 +103,7 @@
 				settings.global.sortBySentDate = (messageSortComboBox.selectedItem == "date sent");
 				settings.global.awayTimeout = awayTimeout.value;
 				settings.global.playSounds = playSoundsCheckBox.selected;
-//				settings.global.checkUrls = checkUrlsCheckBox.selected;
+				settings.global.checkUrls = checkUrlsCheckBox.selected;
 				
 				settings.userAccount.nickname = nickname.text;
 				settings.userAccount.jid = jid.text;
@@ -239,7 +239,7 @@
 			<s:CheckBox y="60" label="Animate buddy list" id="animateBuddyListCheckBox" change="validateForm()"/>
 			<s:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox" change="validateForm()"/>
 			<s:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox" change="validateForm()"/>
-			<!--<s:CheckBox y="150" label="Check shortened urls" id="checkUrlsCheckBox" change="validateForm()"/>-->
+			<s:CheckBox y="150" label="Check shortened urls" id="checkUrlsCheckBox" change="validateForm()"/>
 			
 			<s:Button label="Check for updates" click="appModel.checkForUpdates(true)" right="0" />
 			
