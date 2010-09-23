@@ -24,16 +24,22 @@ package com.cleartext.esm.views.messages
 	public class MessageRendererBase extends SproutListRendererBase
 	{
 		[Autowire]
-		public var chats:ChatModel;
-		
-		[Autowire]
 		public var appModel:ApplicationModel;
 		
-		[Autowire]
-		public var avatarModel:AvatarModel;
+		protected function get avatarModel():AvatarModel
+		{
+			return appModel.avatarModel;
+		}
 		
-		[Autowire]
-		public var settings:SettingsModel;
+		protected function get settings():SettingsModel
+		{
+			return appModel.settings;
+		}
+		
+		protected function get chats():ChatModel
+		{
+			return appModel.chats;
+		}
 		
 		protected var df:DateFormatter;
 

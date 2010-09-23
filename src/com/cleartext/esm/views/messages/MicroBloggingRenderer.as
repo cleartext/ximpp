@@ -5,13 +5,15 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.events.InputTextEvent;
 	import com.cleartext.esm.events.LinkEvent;
+	import com.cleartext.esm.models.ApplicationModel;
 	import com.cleartext.esm.models.AvatarModel;
 	import com.cleartext.esm.models.XMPPModel;
+	import com.cleartext.esm.models.types.AvatarTypes;
 	import com.cleartext.esm.models.types.MicroBloggingTypes;
 	import com.cleartext.esm.models.valueObjects.Avatar;
-	import com.cleartext.esm.models.types.AvatarTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.Contact;
+	import com.seesmic.as3.xmpp.XMPPEvent;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
@@ -33,9 +35,11 @@ package com.cleartext.esm.views.messages
 	import org.swizframework.Swiz;
 	
 	public class MicroBloggingRenderer extends MessageRendererBase
-	{		
-		[Autowire]
-		public var xmpp:XMPPModel;
+	{	
+		protected function get xmpp():XMPPModel
+		{
+			return appModel.xmpp;
+		}
 
 		protected var buttonWidth:Number = 16;
 		protected var buttons:Array = new Array();

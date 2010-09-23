@@ -57,6 +57,9 @@ package com.cleartext.esm.views.messages
 				fade.alphaTo = (selected) ? SELECTED_ALPHA : ((over) ? OVER_ALPHA : OUT_ALPHA);
 				fade.duration = 350;
 				fade.play();
+				
+				if(selected && chat && chat.contact)
+					chat.contact.unreadMessages = 0;
 
 				invalidateProperties();
 			}
@@ -149,7 +152,7 @@ package com.cleartext.esm.views.messages
 			if(contact && unreadMessageBadge)
 			{
 				if(unreadMessageBadge.count != contact.unreadMessages)
-					invalidateProperties();
+					callLater(invalidateProperties);
 				unreadMessageBadge.count = contact.unreadMessages;
 				unreadMessageBadge.x = width - unreadMessageBadge.width + 5;
 				unreadMessageBadge.y = -unreadMessageBadge.height/2;

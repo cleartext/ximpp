@@ -1,5 +1,7 @@
 package com.cleartext.esm.views.messages
 {
+	import com.cleartext.esm.models.ApplicationModel;
+	
 	import flash.display.GradientType;
 	import flash.display.Graphics;
 	import flash.geom.Matrix;

@@ -1,5 +1,6 @@
 package com.cleartext.esm.views.messages
 {
+	import com.cleartext.esm.models.ApplicationModel;
 	import com.cleartext.esm.models.types.AvatarTypes;
 	
 	import flash.display.GradientType;

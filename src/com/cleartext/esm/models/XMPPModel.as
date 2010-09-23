@@ -367,7 +367,8 @@ package com.cleartext.esm.models
 			// play sounds & increment unread messages for the mblog buddy
 			if(contact.isMicroBlogging)
 			{
-				Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessages++;
+				if(chats.selectedChat && chats.selectedChat.contact != Buddy.ALL_MICRO_BLOGGING_BUDDY)
+					Buddy.ALL_MICRO_BLOGGING_BUDDY.unreadMessages++;
 				chats.addMessage(Buddy.ALL_MICRO_BLOGGING_BUDDY, message);
 				soundColor.play(SoundAndColorModel.NEW_SOCIAL);
 			}
