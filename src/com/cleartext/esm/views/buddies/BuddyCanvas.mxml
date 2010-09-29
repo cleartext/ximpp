@@ -187,11 +187,11 @@
 				// (it will want to display the value just selected)
 				statusComboBox.prompt = appModel.serverSideStatus.value;
 				
-				if(xmppModel.connected && microBloggingCheckBox.selected && customStatusInput.text != "")
-				{
-					chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
-					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, customStatusInput.text));
-				}
+//				if(xmppModel.connected && microBloggingCheckBox.selected && customStatusInput.text != "")
+//				{
+//					chats.getChat(Buddy.ALL_MICRO_BLOGGING_BUDDY, true);
+//					Swiz.dispatchEvent(new InputTextEvent(InputTextEvent.INSERT_TEXT, customStatusInput.text));
+//				}
 			}
 			
 			[Mediate (event="BuddyRequestEvent.NEW_REQUEST")]
@@ -328,14 +328,16 @@
 			valueCommit="userPresenceChangeHandler()"
 			defaultText="custom status..."
 			keyDown="if(event.keyCode==Keyboard.ENTER) userPresenceChangeHandler()"
-			top="29" height="33"
+			top="29" height="55"
 			right="5" left="15"
+			horizontalScrollPolicy="off"
+			wordWrap="true"
 			text="{settings.userAccount.customStatus}"
 			borderStyle="none"
 			focusAlpha="0.5"
 			/>
 		
-		<s:CheckBox
+<!--		<s:CheckBox
 			id="microBloggingCheckBox"
 			visible="false"
 			bottom="5" right="5"
@@ -345,7 +347,7 @@
 			selected="{settings.global.sendStatusToMicroBlogging}"
 			click="settings.global.sendStatusToMicroBlogging = microBloggingCheckBox.selected; database.saveGlobalSettings()"
 			/>
-
+-->
 		<common:AvatarRenderer
 			id="avatar"
 			width="48"
