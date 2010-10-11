@@ -46,7 +46,15 @@ package com.cleartext.esm.models
 		// Colors
 		//-------------------------------
 
-		private static var COLOR_NAMES:Array = ["themeColor", "backgroundColor", "backgroundAccent"];
+		private static var COLOR_NAMES:Array = ["themeColor", "backgroundColor", "backgroundAccent", "headerColor", "headerAccent"];
+		private static var STRING_VARS:Array = ["supportLink", "helpLink"];
+		
+		/** -----------------------------------------------------------------------------
+		 * 
+		 * TO CHANGE THE DEFAULT INSTALLED COLORS AND LINKS IN THE
+		 * APP, CHANGE THE FOLLOWING VALUES
+		 * 
+		 * ---------------------------------------------------------------------------- */
 
 		// default 0xf7a136
 		public var themeColor:uint = 0xf7a136;
@@ -54,8 +62,22 @@ package com.cleartext.esm.models
 		public var backgroundColor:uint = 0x000000;
 		// default 0x3e443f
 		public var backgroundAccent:uint = 0x3e443f;
+		// default 0x000000
+		public var headerColor:uint = 0x000000;
+		// default 0x3e443f
+		public var headerAccent:uint = 0x3e443f;
 		
-		
+		// default http://getsatisfaction.com/cleartext
+		public var supportLink:String = 'http://getsatisfaction.com/cleartext';
+		// default http://help.cleartext.net/esm
+		public var helpLink:String = 'http://help.cleartext.net/esm';
+
+		/** -----------------------------------------------------------------------------
+		 * 
+		 * END VARIABLE TO CHANGE
+		 * 
+		 * ---------------------------------------------------------------------------- */
+
 		public function SoundAndColorModel()
 		{
 		}
@@ -101,6 +123,7 @@ package com.cleartext.esm.models
 			var file:File;
 			var xml:XML;
 			var colorName:String;
+			var stringName:String;
 			
 			// check for logo
 			file = new File(prefDir.nativePath + "/" + LOGO_FILE);
@@ -135,9 +158,17 @@ package com.cleartext.esm.models
 				
 				for each(colorName in COLOR_NAMES)
 				{
-					var num:Number = Number(xml[colorName]);
-					if(!isNaN(num))
+					var xmlList:XMLList= xml[colorName];
+					var num:Number = Number(xmlList);
+					if(!isNaN(num) && xmlList.length() > 0)
 						this[colorName] = num;
+				}
+				
+				for each(stringName in STRING_VARS)
+				{
+					var list:XMLList = xml[stringName];
+					if(list.length() > 0)
+						this[stringName] = list[0];
 				}
 			}
 			fileStream.close();
@@ -149,14 +180,13 @@ package com.cleartext.esm.models
 			
 			xml = <colors/>;
 			for each(colorName in COLOR_NAMES)
-			{
 				xml.appendChild(new XML("<" + colorName + ">" + toHex(this[colorName]) + "</" + colorName + ">"));
-			}
+			
+			for each (stringName in STRING_VARS)
+				xml.appendChild(new XML("<" + stringName + ">" + this[stringName] + "</" + stringName + ">"));
 
 			fileStream.writeUTFBytes(xml.toXMLString());
 			fileStream.close();
-			
-			//FlexGlobals.topLevelApplication.setStyle("chromeColor", themeColor);
 		}
 		
 		private function loadFile(file:File, context:Object):void

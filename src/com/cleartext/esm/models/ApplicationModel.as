@@ -412,7 +412,7 @@ package com.cleartext.esm.models
 
 				var messageStanza:MessageStanza = xmpp.sendMessage(contact.fullJid, messageString, null, (contact is ChatRoom ? 'groupchat' : 'chat'), null, customTags);
 				var message:Message = createFromStanza(messageStanza);
-				if(chats.hasOpenChat(contact))
+				if(!(contact is ChatRoom) && chats.hasOpenChat(contact))
 					chats.addMessage(contact, message);
 			
 				if(contact.isMicroBlogging)

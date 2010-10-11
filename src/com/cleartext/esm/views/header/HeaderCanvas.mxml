@@ -29,7 +29,7 @@
 				
 				var matr1:Matrix = new Matrix();
 				matr1.createGradientBox(unscaledWidth, unscaledHeight, Math.PI/2, 0, 0);
-				graphics.beginGradientFill(GradientType.LINEAR, [soundColor.backgroundAccent, soundColor.backgroundColor], [1, 1], [0x00, 0xFF], matr1);  
+				graphics.beginGradientFill(GradientType.LINEAR, [soundColor.headerAccent, soundColor.headerColor], [1, 1], [0x00, 0xFF], matr1);  
 				graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			}
 			
@@ -51,7 +51,7 @@
 		upIcon="{Constants.GetSatisfactionUp}"
 		overIcon="{Constants.GetSatisfactionOver}"
 		downIcon="{Constants.GetSatisfactionUp}"
-		click="navigateToURL(new URLRequest('http://getsatisfaction.com/cleartext'), '_blank');"
+		click="navigateToURL(new URLRequest(soundColor.supportLink), '_blank');"
 		skin="{null}"
 		toolTip="online support and feature request"
 		right="105" y="8" />
@@ -60,7 +60,7 @@
 		upIcon="{Constants.HelpUp}"
 		overIcon="{Constants.HelpOver}"
 		downIcon="{Constants.HelpUp}"
-		click="navigateToURL(new URLRequest('http://help.cleartext.net/esm'), '_blank');"
+		click="navigateToURL(new URLRequest(soundColor.helpLink), '_blank');"
 		skin="{null}"
 		toolTip="help"
 		right="75" y="8" />
