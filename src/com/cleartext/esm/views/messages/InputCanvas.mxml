@@ -13,6 +13,7 @@
 			import com.cleartext.esm.models.ContactModel;
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
+			import com.cleartext.esm.models.SoundAndColorModel;
 			import com.cleartext.esm.models.XMPPModel;
 			import com.cleartext.esm.models.utils.LinkResult;
 			import com.cleartext.esm.models.utils.LinkUitls;
@@ -50,6 +51,9 @@
 			[Autowire]
 			[Bindable]
 			public var database:DatabaseModel;
+			
+			[Autowire]
+			public var soundColor:SoundAndColorModel;
 			
 			private function input_keyDownHandler(event:KeyboardEvent):void
 			{ 	
@@ -167,7 +171,7 @@
 				g.moveTo(0, Constants.TOP_ROW_HEIGHT);
 				g.lineTo(unscaledWidth, Constants.TOP_ROW_HEIGHT);
 				
-				g.lineStyle(1, 0xffffff);
+				g.lineStyle(1, soundColor.inputCanvasBorder);
 				g.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, CORNER_RADIUS, CORNER_RADIUS);
 			}
 			

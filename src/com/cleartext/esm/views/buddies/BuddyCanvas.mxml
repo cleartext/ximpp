@@ -109,14 +109,14 @@
 
 				var m:Matrix = new Matrix();
 				m.createGradientBox(w, h, Math.PI/2, 0, 0);
-				g.beginGradientFill(GradientType.LINEAR, [0x9b9b9b, 0xf3f3f3], [1, 1], [0x00, 0xFF], m);  
+				g.beginGradientFill(GradientType.LINEAR, [soundColor.statusTop, soundColor.statusBottom], [1, 1], [0x00, 0xFF], m);  
 				g.drawRect(0, 0, w, h);
 				
-				g.beginFill(0x909090);
+				g.beginFill(soundColor.statusAccent);
 				g.drawRect(0,0,w,Constants.TOP_ROW_HEIGHT/2);
 				g.endFill();
 				
-				g.lineStyle(1, 0xffffff);
+				g.lineStyle(1, soundColor.statusBorder);
 				g.drawRect(0,0,w,h);
 				
 				g.lineStyle(1, 0xc1c1c1);
@@ -133,7 +133,7 @@
 
 				m = new Matrix();
 				m.createGradientBox(w, h, Math.PI/2, 0, 0);
-				g.beginGradientFill(GradientType.LINEAR, [0xa1a4a7, 0x4f5051], [1, 1], [0x00, 0xFF], m);  
+				g.beginGradientFill(GradientType.LINEAR, [soundColor.filterTop, soundColor.filterBottom], [1, 1], [0x00, 0xFF], m);  
 				g.drawRect(0, 0, w, h);
 				
 				g.beginFill(0x292a2a);

@@ -10,6 +10,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.models.ContactModel;
 	import com.cleartext.esm.models.DatabaseModel;
 	import com.cleartext.esm.models.SettingsModel;
+	import com.cleartext.esm.models.SoundAndColorModel;
 	import com.cleartext.esm.models.XMPPModel;
 	import com.cleartext.esm.models.types.BuddyTypes;
 	import com.cleartext.esm.models.types.ChatStateTypes;
@@ -67,6 +68,9 @@ package com.cleartext.esm.views.messages
 			
 		[Autowire]
 		public var avatarModel:AvatarModel;
+			
+		[Autowire]
+		public var soundColor:SoundAndColorModel;
 			
 		private static const ANIMATION_DURATION:Number = 350;
 
@@ -377,7 +381,7 @@ package com.cleartext.esm.views.messages
 			
 			var g:Graphics = avatarCanvas.graphics;
 			g.clear();
-			g.beginFill(0xffffff);
+			g.beginFill(soundColor.triangleColor);
 			var xVal:Number = AVATAR_SIZE + 2*H_GAP;
 			var yVal:Number = 0;
 

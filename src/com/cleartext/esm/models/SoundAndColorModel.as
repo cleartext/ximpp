@@ -46,7 +46,20 @@ package com.cleartext.esm.models
 		// Colors
 		//-------------------------------
 
-		private static var COLOR_NAMES:Array = ["themeColor", "backgroundColor", "backgroundAccent", "headerColor", "headerAccent"];
+		private static var COLOR_NAMES:Array = [
+			"themeColor", 
+			"backgroundColor", 
+			"backgroundAccent", 
+			"headerColor", 
+			"headerAccent", 
+			"inputCanvasBorder",
+			"statusAccent",
+			"statusTop",
+			"statusBottom",
+			"statusBorder",
+			"filterTop",
+			"filterBottom",
+			"triangleColor"];
 		private static var STRING_VARS:Array = ["supportLink", "helpLink"];
 		
 		/** -----------------------------------------------------------------------------
@@ -66,6 +79,23 @@ package com.cleartext.esm.models
 		public var headerColor:uint = 0x000000;
 		// default 0x3e443f
 		public var headerAccent:uint = 0x3e443f;
+		// default 0xffffff
+		public var inputCanvasBorder:uint = 0xffffff;
+		// default 0x909090
+		public var statusAccent:uint = 0x909090;
+		// default 0x9b9b9b
+		public var statusTop:uint = 0x9b9b9b;
+		// default 0xf3f3f3
+		public var statusBottom:uint = 0xf3f3f3;
+		// default 0xffffff
+		public var statusBorder:uint = 0xffffff;
+		// default 0xa1a4a7
+		public var filterTop:uint = 0xa1a4a7;
+		// default 0x4f5051
+		public var filterBottom:uint = 0x4f5051;
+		// default 0xffffff
+		public var triangleColor:uint = 0xffffff;
+		
 		
 		// default http://getsatisfaction.com/cleartext
 		public var supportLink:String = 'http://getsatisfaction.com/cleartext';
