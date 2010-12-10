@@ -2,9 +2,11 @@ package com.cleartext.esm.models.utils
 {
 	import mx.utils.StringUtil;
 	
+	import org.osmf.layout.RelativeLayoutFacet;
+	
 	public class LinkUitls
 	{
-		public static const protocols:Array = ["http", "https", "ftp"];
+		public static const protocols:Array = ["http://", "https://", "ftp://"];
 		public static const tlds:Array = [
 			"AC","AD","AE","AERO","AF","AG","AI","AL","AM","AN",
 			"AO","AQ","AR","ARPA","AS","ASIA","AT","AU","AW",
@@ -72,11 +74,16 @@ package com.cleartext.esm.models.utils
 		{
 			return '</A></FONT></U>';
 		}
+		
+		// find any valid urls, this regex will probably produce false positives
+		// find at least 1 non-whitespace char that isn't a " (greedy to get 
+		// .com.au and not just .com), then a "." then a valid tld then either 
+		// an end of word, or a "/" followed by any amount of non-whitespace chars 
+		private static const linkRegExp:RegExp = new RegExp('(((' + protocols.join('|') + ')[^\\s"\']+?)|(\\b[^\\s"\'/]+?))\\.(' + tlds.join('|') + ')((/|#)[^\\s]*)?\\b/?',"ig");
 
 		public static function createLinks(plainText:String, searchTerms:Array, hashUrlStart:String=null, hashUrlEnd:String=null, atUrlStart:String=null, atUrlEnd:String=null):String
 		{
 			var startTag:String = getStartTag();
-			
 			var linkText:String = plainText;
 			
 			// remove any existing tags
@@ -85,23 +92,18 @@ package com.cleartext.esm.models.utils
 			// trim whitspace off the ends
 			linkText = StringUtil.trim(linkText);
 
-			// find any valid urls, this regex will probably produce false positives
-			// find at least 1 non-whitespace char that isn't a " (greedy to get 
-			// .com.au and not just .com), then a "." then a valid tld then either 
-			// an end of word, or a "/" followed by any amount of non-whitespace chars 
-			var regex:RegExp = new RegExp('\\b[^\\s"\']+\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b/?',"ig");
 			// $& returns the match from the regex
-			linkText = linkText.replace(regex, startTag + '$&">$&' + endTag);
+			linkText = linkText.replace(linkRegExp, startTag + '$&">$&' + endTag);
 			
 			// if the links created don't have a protocol, then give it an http://
-			regex = new RegExp(startTag + '(?!(' + protocols.join('|') + ')://)', 'ig');
+			var regex:RegExp = new RegExp(startTag + '(?!(' + protocols.join('|') + '))', 'ig');
 			linkText = linkText.replace(regex, startTag + 'http://');
 
 			if(hashUrlStart || hashUrlEnd)
-				linkText = createHashTagLinks(linkText, hashUrlStart, hashUrlEnd);
+				linkText = createSpecialLinks(linkText, hashUrlStart, hashUrlEnd, "#");
 
 			if(atUrlStart || atUrlEnd)
-				linkText = createAtLinks(linkText, atUrlStart, atUrlEnd);
+				linkText = createSpecialLinks(linkText, atUrlStart, atUrlEnd, "@");
 			
 //			if(searchTerms)
 //			{
@@ -123,12 +125,8 @@ package com.cleartext.esm.models.utils
 		
 		public static function findLinks(plainText:String):Array
 		{
-			// look for the start of the string or a space followed by at least 2
-			// now whitespace chars, then a "." then a valid tld then a space or a
-			// "/" followed by any amount of non-whitespace chars, then a space
-			var regex:RegExp = new RegExp('\\b[^\\s]{1,}\\.(' + tlds.join('|') + ')(/[^\\s]*)?\\b/?',"ig");
 			var results:Array = new Array();
-			var temp:Object = regex.exec(plainText);
+			var temp:Object = linkRegExp.exec(plainText);
 			while (temp)
 			{
 				var link:String = temp[0];
@@ -136,7 +134,7 @@ package com.cleartext.esm.models.utils
 				var needsProtocol:Boolean = true;
 				for each(var protocol:String in protocols)
 				{
-					if(link.indexOf(protocol+"://")==0)
+					if(link.indexOf(protocol)==0)
 					{
 						needsProtocol = false;
 						break;
@@ -149,7 +147,7 @@ package com.cleartext.esm.models.utils
 				result.validLink = ((needsProtocol) ? "http://" : "") + link;
 				
 				results.push(result);
-				temp = regex.exec(plainText);
+				temp = linkRegExp.exec(plainText);
 			}
 			return results;
 		}
@@ -165,20 +163,64 @@ package com.cleartext.esm.models.utils
 			return str;
 		}
 		
-		public static function createHashTagLinks(str:String, urlStart:String, urlEnd:String):String
+		public static function createSpecialLinks(str:String, urlStart:String, urlEnd:String, specialChar:String):String
 		{
-			// avoid the # already in font color tags
-			var regExp:RegExp = new RegExp("((?<!<FONT COLOR=\")#|^#)([\\w<>]+?)\\b", "ig");
-			return str.replace(regExp, getStartTag() + urlStart + "$2" + urlEnd + "\">$&" + endTag);
+			var inLinkTag:int = 0;
+			var inHashTag:Boolean = false;
+			var result:String = "";
+			var charArray:Array = str.split("");
+			var len:int = charArray.length;
+			
+			for(var i:int=0; i<len; i++)
+			{
+				var s:String = charArray[i];
+				if(inLinkTag == 0)
+				{
+					if(s == "<" && str.substr(i,17) == '<U><FONT COLOR="#')
+					{
+						inLinkTag++;
+					}
+					else if(s == specialChar)
+					{
+						inHashTag = true;
+						result += getStartTag() + urlStart;
+						var tag:String = "";
+						while(true)
+						{
+							i++;
+							if(i==len)
+							{
+								s="";
+								break;
+							}
+							s = charArray[i];
+							if(!s.match(new RegExp("\\w") || s=="<"))
+							{
+								s="";
+								i--;
+								break;
+							}
+							result += s;
+							tag += s;
+						}
+						result += "\">" + specialChar + tag + endTag;
+					}
+				}
+				else if(s == "<" && str.substr(i,endTag.length) == endTag)
+				{
+					inLinkTag--;
+				}
+				result += s;
+			}			
+			return result;
 		} 
 		
-		public static function createAtLinks(str:String, urlStart:String, urlEnd:String):String
-		{
-			// avoid the # already in font color tags
-			var regExp:RegExp = new RegExp("@(\\w+?)\\b", "ig");
-			return str.replace(regExp, getStartTag() + urlStart + "$1" + urlEnd + "\">$&" + endTag);
-		} 
-		
+//		public static function createAtLinks(str:String, urlStart:String, urlEnd:String):String
+//		{
+//			// avoid the @ already inside any <a>tags
+//			var regExp:RegExp = new RegExp("@(\\w+?)\\b", "ig");
+//			return str.replace(regExp, getStartTag() + urlStart + "$1" + urlEnd + "\">$&" + endTag);
+//		} 
 	}
 }
 

@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="run()">
-<mx:Script>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   creationComplete="run()" height="600" width="600">
+	
+	<s:layout>
+		<s:VerticalLayout>
+			
+		</s:VerticalLayout>
+	</s:layout>
+<fx:Script>
 	<![CDATA[
+		import com.cleartext.esm.models.utils.LinkUitls;
+		
 		import mx.utils.StringUtil;
 		
 		private var tweets:Array = [
@@ -52,6 +63,7 @@
 				
 		private function run():void
 		{
+			handler();
 
 			for each(var tweet:Object in tweets)
 			{
@@ -105,6 +117,19 @@
 				
 			}
 		}
+
+		protected function handler():void
+		{
+			var linkVals:Array = ["http://twitter.com/search?q=%23", "", "http://twitter.com/", ""];
+			var result:String = LinkUitls.createLinks(input.text, [], linkVals[0], linkVals[1], linkVals[2], linkVals[3]);
+			plainConsole.text = result;
+			htmlConsole.htmlText = result;
+		}
+
 	]]>
-</mx:Script>
-</mx:WindowedApplication>
+</fx:Script>
+	
+	<s:TextInput id="input" width="600" height="150" change="handler()" text="Whiteboarding with @google/xmpp using #pidgin ...... http://www.rohanjain.in/blog/whiteboarding-with-xmpp-google-talk/#updates b lad www.hello.com #hll blah"/>
+	<mx:Text id="plainConsole"  width="600" height="150"/>
+	<mx:Text id="htmlConsole"  width="600" height="150"/>
+</s:WindowedApplication>
