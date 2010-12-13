@@ -1,6 +1,7 @@
 package com.cleartext.esm.views.messages
 {
 	import com.cleartext.esm.assets.Constants;
+	import com.cleartext.esm.events.ApplicationEvent;
 	import com.cleartext.esm.events.ChatEvent;
 	import com.cleartext.esm.events.PopUpEvent;
 	import com.cleartext.esm.events.SearchBoxEvent;
@@ -12,6 +13,7 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.models.SettingsModel;
 	import com.cleartext.esm.models.SoundAndColorModel;
 	import com.cleartext.esm.models.XMPPModel;
+	import com.cleartext.esm.models.types.AvatarDisplayTypes;
 	import com.cleartext.esm.models.types.BuddyTypes;
 	import com.cleartext.esm.models.types.ChatStateTypes;
 	import com.cleartext.esm.models.valueObjects.Chat;
@@ -82,7 +84,9 @@ package com.cleartext.esm.views.messages
 		private static const SEARCH_BAR_HEIGHT:Number = 24;
 		private static const SEARCH_BAR_BORDER:Number = 4;
 		private static const SEARCH_BAR_WIDTH:Number = 220;
-		private static const AVATAR_SIZE:Number = Constants.AVATAR_TAB_HEIGHT - TRIANGLE_HEIGHT - SELECTOR_WIDTH;
+		private static const AVATAR_HEIGHT:Number = Constants.AVATAR_TAB_HEIGHT - TRIANGLE_HEIGHT - SELECTOR_WIDTH;
+		
+		private var avatarWidth:Number = AVATAR_HEIGHT;
 		
 		private var avatars:ArrayCollection = new ArrayCollection();
 
@@ -109,8 +113,6 @@ package com.cleartext.esm.views.messages
 			
 			isTypingTimer = new Timer(3000, 2);
 			isTypingTimer.addEventListener(TimerEvent.TIMER, isTimerTypingHandler);
-			
-			addEventListener(FlexEvent.CREATION_COMPLETE, creationCompleteHandler);
 		}
 		
 		[Mediate(event="PopUpEvent.NEW_CHAT_WITH_GROUP")]
@@ -119,10 +121,19 @@ package com.cleartext.esm.views.messages
 			chats.getChat(event.group, true, BuddyTypes.GROUP);
 		}
 		
-		protected function creationCompleteHandler(event:FlexEvent):void
+		[Mediate(event="ApplicationEvent.REFRESH_AVATAR_TABS")]
+		public function refreshAvatarTabs(event:ApplicationEvent):void
 		{
+			avatarWidth = settings.global.showNicknames ? AVATAR_HEIGHT*2 : AVATAR_HEIGHT;
+			for each(var at:AvatarTab in avatars)
+			{
+				at.width = avatarWidth;
+				at.showAvatar = settings.global.showAvatars;
+				at.showNickname = settings.global.showNicknames;
+			}
+			selectChatHandler(null);
 		}
-		
+				
 		public function numAvatars():int
 		{
 			return avatars.length;
@@ -208,11 +219,13 @@ package com.cleartext.esm.views.messages
 		{
 			var chat:Chat = event.chat;
 			var avatar:AvatarTab = new AvatarTab();
+			avatar.showAvatar = settings.global.showAvatars;
+			avatar.showNickname = settings.global.showNicknames;
 			avatar.chat = chat;
 			avatar.avatar = avatarModel.getAvatar(chat.contact.jid);
 			avatar.addEventListener(MouseEvent.CLICK, avatarClickHandler, false, 0, true);
-			avatar.width = AVATAR_SIZE;
-			avatar.height = AVATAR_SIZE;
+			avatar.width = avatarWidth;
+			avatar.height = AVATAR_HEIGHT;
 			avatar.border = false;
 			avatar.toolTip = chat.contact.nickname;
 			avatar.addEventListener(CloseEvent.CLOSE, avatar_close);
@@ -220,7 +233,7 @@ package com.cleartext.esm.views.messages
 			
 			if(event.select)
 			{
-				avatar.move(H_GAP*2+AVATAR_SIZE, SELECTOR_WIDTH + TRIANGLE_HEIGHT);
+				avatar.move(H_GAP*2+avatarWidth, SELECTOR_WIDTH + TRIANGLE_HEIGHT);
 			}
 			else
 			{
@@ -364,12 +377,12 @@ package com.cleartext.esm.views.messages
 					setChatStateTo(chats.selectedChat, ChatStateTypes.ACTIVE);
 			}
 		}
-		
+				
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
-			customScroll.setRange(unscaledWidth, H_GAP + numAvatars() * (H_GAP + AVATAR_SIZE));
+			customScroll.setRange(unscaledWidth, H_GAP + numAvatars() * (H_GAP + avatarWidth));
 			customScroll.setActualSize(unscaledWidth - 216, 12);
 			customScroll.move(200, Constants.TOP_BAR_HEIGHT - 6);
 			
@@ -382,18 +395,18 @@ package com.cleartext.esm.views.messages
 			var g:Graphics = avatarCanvas.graphics;
 			g.clear();
 			g.beginFill(soundColor.triangleColor);
-			var xVal:Number = AVATAR_SIZE + 2*H_GAP;
+			var xVal:Number = avatarWidth + 2*H_GAP;
 			var yVal:Number = 0;
 
 			// draw triangle
-			g.moveTo(xVal + SELECTOR_WIDTH + (AVATAR_SIZE - TRIANGLE_WIDTH)/2, yVal);
-			g.lineTo(xVal + SELECTOR_WIDTH + (AVATAR_SIZE + TRIANGLE_WIDTH)/2, yVal);
-			g.lineTo(xVal + SELECTOR_WIDTH + AVATAR_SIZE/2, TRIANGLE_HEIGHT-2 + yVal);
-			g.lineTo(xVal + SELECTOR_WIDTH + (AVATAR_SIZE - TRIANGLE_WIDTH)/2, yVal);
+			g.moveTo(xVal + SELECTOR_WIDTH + (avatarWidth - TRIANGLE_WIDTH)/2, yVal);
+			g.lineTo(xVal + SELECTOR_WIDTH + (avatarWidth + TRIANGLE_WIDTH)/2, yVal);
+			g.lineTo(xVal + SELECTOR_WIDTH + avatarWidth/2, TRIANGLE_HEIGHT-2 + yVal);
+			g.lineTo(xVal + SELECTOR_WIDTH + (avatarWidth - TRIANGLE_WIDTH)/2, yVal);
 			// draw outer box
-			g.drawRect(xVal, TRIANGLE_HEIGHT + yVal, AVATAR_SIZE + 2*SELECTOR_WIDTH, AVATAR_SIZE + SELECTOR_WIDTH);
+			g.drawRect(xVal, TRIANGLE_HEIGHT + yVal, avatarWidth + 2*SELECTOR_WIDTH, AVATAR_HEIGHT + SELECTOR_WIDTH);
 			// draw inner box
-			g.drawRect(xVal + SELECTOR_WIDTH, TRIANGLE_HEIGHT + SELECTOR_WIDTH + yVal, AVATAR_SIZE, AVATAR_SIZE);
+			g.drawRect(xVal + SELECTOR_WIDTH, TRIANGLE_HEIGHT + SELECTOR_WIDTH + yVal, avatarWidth, AVATAR_HEIGHT);
 			
 			g = graphics;
 			g.clear();
@@ -461,7 +474,7 @@ package com.cleartext.esm.views.messages
 			
 			avatar.selected = (position == 1);
 	
-			var newX:Number = (AVATAR_SIZE + H_GAP)*position + H_GAP;
+			var newX:Number = (avatarWidth + H_GAP)*position + H_GAP;
 
 			if(position == 1)
 			{
@@ -489,7 +502,7 @@ package com.cleartext.esm.views.messages
 		
 		private function scrollChangedHandler(event:Event):void
 		{
-			avatarCanvas.x = -customScroll.value* (numAvatars() * (H_GAP + AVATAR_SIZE) + H_GAP - width);
+			avatarCanvas.x = -customScroll.value* (numAvatars() * (H_GAP + avatarWidth) + H_GAP - width);
 		}
 	}
 }

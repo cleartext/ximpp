@@ -1,11 +1,15 @@
 package com.cleartext.esm.models.valueObjects
 {
+	import com.cleartext.esm.events.ApplicationEvent;
+	import com.cleartext.esm.models.types.AvatarDisplayTypes;
 	import com.cleartext.esm.models.types.BuddySortTypes;
 	
 	import flash.events.EventDispatcher;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	
+	import org.swizframework.Swiz;
 
 	public class GlobalSettings extends EventDispatcher
 	{
@@ -38,6 +42,8 @@ package com.cleartext.esm.models.valueObjects
 		public var autoConnect:Boolean = false;
 		public var playSounds:Boolean = true;
 		public var checkUrls:Boolean = true;
+		public var showAvatars:Boolean = true;
+		public var showNicknames:Boolean = false;
 		
 		public function GlobalSettings()
 		{
@@ -97,9 +103,16 @@ package com.cleartext.esm.models.valueObjects
 				if(xml.checkUrls)
 					checkUrls = xml.checkUrls == "true";
 				
+				if(xml.showAvatars)
+					showAvatars = xml.showAvatars == "true";
+			
+				if(xml.showNicknames)
+					showNicknames = xml.showNicknames == "true";
+				
 				fileStream.close();
 			}
 			save();
+			Swiz.dispatchEvent(new ApplicationEvent(ApplicationEvent.REFRESH_AVATAR_TABS));
 		}
 		
 		public function save():void
@@ -126,6 +139,8 @@ package com.cleartext.esm.models.valueObjects
 					<showOfflineBuddies>{showOfflineBuddies}</showOfflineBuddies>
 					<playSounds>{playSounds}</playSounds>
 					<checkUrls>{checkUrls}</checkUrls>
+					<showAvatars>{showAvatars}</showAvatars>
+					<showNicknames>{showNicknames}</showNicknames>
 				</globalSettings>;
 
 			fileStream.writeUTFBytes(xml.toXMLString());

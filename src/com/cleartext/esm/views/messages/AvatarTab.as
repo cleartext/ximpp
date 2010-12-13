@@ -4,8 +4,8 @@ package com.cleartext.esm.views.messages
 	import com.cleartext.esm.events.AvatarEvent;
 	import com.cleartext.esm.events.HasAvatarEvent;
 	import com.cleartext.esm.models.ContactModel;
-	import com.cleartext.esm.models.types.BuddyTypes;
 	import com.cleartext.esm.models.types.AvatarTypes;
+	import com.cleartext.esm.models.types.BuddyTypes;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
@@ -22,8 +22,10 @@ package com.cleartext.esm.views.messages
 	import flashx.textLayout.formats.Category;
 	
 	import mx.controls.Button;
+	import mx.controls.Text;
 	import mx.core.Container;
 	import mx.core.IInvalidating;
+	import mx.core.UITextField;
 	import mx.effects.Fade;
 	import mx.events.CloseEvent;
 	
@@ -35,10 +37,25 @@ package com.cleartext.esm.views.messages
 		public static const SELECTED_ALPHA:Number = 1.0;
 		public static const OVER_ALPHA:Number = 1.0;
 		public static const OUT_ALPHA:Number = 0.7;
-
+		
 		private var closeButton:Button;
+		private var nickNameText:UITextField;
 		private var dropShaddow:DropShadowFilter = new DropShadowFilter(2);
 		private var unreadMessageBadge:UnreadMessageBadge;
+		
+		private var _showNickname:Boolean = false;
+		public function get showNickname():Boolean 
+		{
+			return _showNickname;
+		}
+		public function set showNickname(value:Boolean):void
+		{
+			if(value != showNickname)
+			{
+				_showNickname = value;
+				invalidateProperties();
+			}
+		}
 		
 		private var over:Boolean = false;
 		
@@ -107,6 +124,17 @@ package com.cleartext.esm.views.messages
 		{
 			super.createChildren();
 			
+			if(!nickNameText)
+			{
+				nickNameText = new UITextField();
+				nickNameText.multiline = true;
+				nickNameText.mouseEnabled = false;
+				nickNameText.visible = showNickname;
+				nickNameText.wordWrap = true;
+				nickNameText.styleName = "blackBold";
+				addChild(nickNameText);
+			}
+			
 			if(!closeButton)
 			{
 				closeButton = new Button();
@@ -118,8 +146,6 @@ package com.cleartext.esm.views.messages
 				closeButton.setStyle("downIcon", Constants.CloseUp);
 				closeButton.width = 14;
 				closeButton.height = 14;
-				closeButton.x = 52;
-				closeButton.y = 19;
 				closeButton.buttonMode = true;
 				addChild(closeButton);
 			}
@@ -134,7 +160,7 @@ package com.cleartext.esm.views.messages
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
-
+			
 			var contact:Contact = (chat) ? chat.contact : null;
 
 			if(contact)
@@ -147,16 +173,24 @@ package com.cleartext.esm.views.messages
 					type = AvatarTypes.CHAT_ROOM;
 				else 
 					type = AvatarTypes.BUDDY;
+				
+				if(unreadMessageBadge)
+				{
+					if(unreadMessageBadge.count != contact.unreadMessages)
+						callLater(invalidateProperties);
+					unreadMessageBadge.count = contact.unreadMessages;
+					unreadMessageBadge.x = width - unreadMessageBadge.width + 5;
+					unreadMessageBadge.y = -unreadMessageBadge.height/2;
+				}
+				
+				if(showNickname)
+				{
+					nickNameText.text = contact.nickname;
+					nickNameText.truncateToFit();
+				}
 			}
 			
-			if(contact && unreadMessageBadge)
-			{
-				if(unreadMessageBadge.count != contact.unreadMessages)
-					callLater(invalidateProperties);
-				unreadMessageBadge.count = contact.unreadMessages;
-				unreadMessageBadge.x = width - unreadMessageBadge.width + 5;
-				unreadMessageBadge.y = -unreadMessageBadge.height/2;
-			}
+			nickNameText.visible = showNickname;
 		}
 		
 		private function closeButtonHandler(event:MouseEvent):void
@@ -195,13 +229,23 @@ package com.cleartext.esm.views.messages
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
 			var g:Graphics = graphics;
+			
+			if(showNickname)
+			{
+				nickNameText.move(3, 3);
+				nickNameText.setActualSize(unscaledWidth-6, unscaledHeight-6);
+				
+				g.beginFill(0xffffff, 0.6);
+				g.drawRect(0, 0, unscaledWidth, unscaledHeight);
+			}
 
 			if(closeButton.visible)
 			{
+				closeButton.move(unscaledWidth+4,19);
 				g.beginFill(0xffffff);
-				g.drawRect(48, 14, 12, 24);
+				g.drawRect(unscaledWidth, 14, 12, 24);
 				g.beginFill(0xffffff);
-				g.drawCircle(60, 26, 12);
+				g.drawCircle(unscaledWidth+12, 26, 12);
 			}
 		}
 	}

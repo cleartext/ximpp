@@ -13,6 +13,7 @@
 	<fx:Script>
 		<![CDATA[
 			import com.adobe.crypto.SHA1;
+			import com.cleartext.esm.events.ApplicationEvent;
 			import com.cleartext.esm.events.PopUpEvent;
 			import com.cleartext.esm.events.UserAccountEvent;
 			import com.cleartext.esm.models.ApplicationModel;
@@ -21,6 +22,7 @@
 			import com.cleartext.esm.models.DatabaseModel;
 			import com.cleartext.esm.models.SettingsModel;
 			import com.cleartext.esm.models.XMPPModel;
+			import com.cleartext.esm.models.types.AvatarDisplayTypes;
 			import com.cleartext.esm.models.valueObjects.Status;
 			import com.cleartext.esm.models.valueObjects.UrlShortener;
 			import com.cleartext.esm.models.valueObjects.UserAccount;
@@ -76,6 +78,20 @@
 				playSoundsCheckBox.selected = settings.global.playSounds;
 				checkUrlsCheckBox.selected = settings.global.checkUrls;
 				
+				if(settings.global.showNicknames && settings.global.showAvatars)
+				{
+					avatarDisplayComboBox.selectedItem = AvatarDisplayTypes.BOTH;
+				}
+				else if(settings.global.showNicknames)
+				{
+					avatarDisplayComboBox.selectedItem = AvatarDisplayTypes.NICKNAME;
+				}
+				else
+				{
+					avatarDisplayComboBox.selectedItem = AvatarDisplayTypes.AVATAR;
+				}
+				
+				
 				// load user account
 				nickname.text = settings.userAccount.nickname;
 				avatarInput.avatar = avatarModel.userAccountAvatar;
@@ -104,6 +120,24 @@
 				settings.global.awayTimeout = awayTimeout.value;
 				settings.global.playSounds = playSoundsCheckBox.selected;
 				settings.global.checkUrls = checkUrlsCheckBox.selected;
+				
+				switch(avatarDisplayComboBox.selectedItem)
+				{
+					case AvatarDisplayTypes.BOTH :
+						settings.global.showAvatars = true;
+						settings.global.showNicknames = true;
+						break;
+					case AvatarDisplayTypes.NICKNAME :
+						settings.global.showAvatars = false;
+						settings.global.showNicknames = true;
+						break;
+					default :
+						settings.global.showAvatars = true;
+						settings.global.showNicknames = false;
+						break;
+				}
+				
+				Swiz.dispatchEvent(new ApplicationEvent(ApplicationEvent.REFRESH_AVATAR_TABS));
 				
 				settings.userAccount.nickname = nickname.text;
 				settings.userAccount.jid = jid.text;
@@ -240,6 +274,8 @@
 			<s:CheckBox y="90" label="Animate message list" id="animateMessageListCheckBox" change="validateForm()"/>
 			<s:CheckBox y="120" label="Play sounds" id="playSoundsCheckBox" change="validateForm()"/>
 			<s:CheckBox y="150" label="Check shortened urls" id="checkUrlsCheckBox" change="validateForm()"/>
+			<s:Label y="184" text="Tab display type:"/>
+			<s:DropDownList x="95" width="95" y="180" id="avatarDisplayComboBox" dataProvider="{AvatarDisplayTypes.TYPES}" change="validateForm()"/>
 			
 			<s:Button label="Check for updates" click="appModel.checkForUpdates(true)" right="0" />
 			

@@ -2,8 +2,8 @@ package com.cleartext.esm.views.common
 {
 	import com.cleartext.esm.assets.Constants;
 	import com.cleartext.esm.events.AvatarEvent;
-	import com.cleartext.esm.models.valueObjects.Avatar;
 	import com.cleartext.esm.models.types.AvatarTypes;
+	import com.cleartext.esm.models.valueObjects.Avatar;
 	import com.cleartext.esm.models.valueObjects.Buddy;
 	import com.cleartext.esm.models.valueObjects.BuddyGroup;
 	import com.cleartext.esm.models.valueObjects.Chat;
@@ -27,6 +27,21 @@ package com.cleartext.esm.views.common
 		}
 		
 		protected var dirty:Boolean = true;
+		
+		private var _showAvatar:Boolean = true;
+		public function get showAvatar():Boolean
+		{
+			return _showAvatar;
+		}
+		public function set showAvatar(value:Boolean):void
+		{
+			if(value != showAvatar)
+			{
+				_showAvatar = value;
+				dirty=true;
+				invalidateDisplayList();
+			}
+		}
 		
 		private var _avatar:Avatar;
 		public function get avatar():Avatar
@@ -199,6 +214,13 @@ package com.cleartext.esm.views.common
 				
 			var g:Graphics = graphics;
 			g.clear();
+			
+			g.beginFill(0xffffff);
+			g.drawRect(0, 0, unscaledWidth, unscaledHeight);
+
+			if(!showAvatar)
+				return;
+			
 			var bmd:BitmapData;
 			if(bitmapData)
 				bmd = bitmapData;
@@ -227,11 +249,9 @@ package com.cleartext.esm.views.common
 			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 
 			var w:Number = bmd.width * scale;
 			var h:Number = bmd.height * scale;
-			var tx:Number = (unscaledWidth - w)/2;
+			var tx:Number = (unscaledHeight - w)/2;
 			var ty:Number = (unscaledHeight - h)/2;
 			
-			g.beginFill(0xffffff);
-			g.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			g.drawRect(tx,ty,w,h);
 			
 			g.beginBitmapFill(bmd, new Matrix(scale, 0, 0, scale, tx, ty), false, true);
