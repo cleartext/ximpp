@@ -53,6 +53,7 @@ package com.cleartext.esm.views.messages
 			if(value != showNickname)
 			{
 				_showNickname = value;
+				smallAvatar = value;
 				invalidateProperties();
 			}
 		}
@@ -232,11 +233,9 @@ package com.cleartext.esm.views.messages
 			
 			if(showNickname)
 			{
-				nickNameText.move(3, 3);
-				nickNameText.setActualSize(unscaledWidth-6, unscaledHeight-6);
-				
-				g.beginFill(0xffffff, 0.6);
-				g.drawRect(0, 0, unscaledWidth, unscaledHeight);
+				var xVal:Number = (showAvatar) ? unscaledHeight/2 + 3 : 3 
+				nickNameText.move(xVal, 2);
+				nickNameText.setActualSize(unscaledWidth-xVal-3, unscaledHeight-4);
 			}
 
 			if(closeButton.visible)

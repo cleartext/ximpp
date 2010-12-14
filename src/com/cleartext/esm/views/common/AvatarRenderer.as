@@ -28,6 +28,21 @@ package com.cleartext.esm.views.common
 		
 		protected var dirty:Boolean = true;
 		
+		private var _smallAvatar:Boolean = false;
+		public function get smallAvatar():Boolean
+		{
+			return _smallAvatar;
+		}
+		public function set smallAvatar(value:Boolean):void
+		{
+			if(value != smallAvatar)
+			{
+				_smallAvatar = value;
+				dirty=true;
+				invalidateDisplayList();
+			}
+		}
+		
 		private var _showAvatar:Boolean = true;
 		public function get showAvatar():Boolean
 		{
@@ -246,14 +261,21 @@ package com.cleartext.esm.views.common
 				}
 			}
 
-			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1); 
+			var scale:Number = Math.min(unscaledWidth/bmd.width, unscaledHeight/bmd.height, 1);
+			
 			var w:Number = bmd.width * scale;
 			var h:Number = bmd.height * scale;
 			var tx:Number = (unscaledHeight - w)/2;
 			var ty:Number = (unscaledHeight - h)/2;
 			
+			if(smallAvatar)
+			{
+				scale /= 2;
+				w /= 2;
+				h /= 2;
+			}
+
 			g.drawRect(tx,ty,w,h);
-			
 			g.beginBitmapFill(bmd, new Matrix(scale, 0, 0, scale, tx, ty), false, true);
 
 			g.drawRect(tx,ty,w,h);

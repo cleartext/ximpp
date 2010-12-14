@@ -95,16 +95,16 @@ package com.cleartext.esm.models.valueObjects
 					autoConnect = xml.autoConnect == "true";
 
 				if(xml.showOfflineBuddies)
-					showOfflineBuddies = xml.showOfflineBuddies == "true";
+					showOfflineBuddies = xml.showOfflineBuddies != "false";
 
 				if(xml.playSounds)
-					playSounds = xml.playSounds == "true";
+					playSounds = xml.playSounds != "false";
 
 				if(xml.checkUrls)
-					checkUrls = xml.checkUrls == "true";
+					checkUrls = xml.checkUrls != "false";
 				
 				if(xml.showAvatars)
-					showAvatars = xml.showAvatars == "true";
+					showAvatars = xml.showAvatars != "false";
 			
 				if(xml.showNicknames)
 					showNicknames = xml.showNicknames == "true";
