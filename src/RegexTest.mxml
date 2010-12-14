@@ -129,7 +129,7 @@
 	]]>
 </fx:Script>
 	
-	<s:TextInput id="input" width="600" height="150" change="handler()" text="Whiteboarding with @google/xmpp using #pidgin ...... http://www.rohanjain.in/blog/whiteboarding-with-xmpp-google-talk/#updates b lad www.hello.com #hll blah"/>
+	<s:TextInput id="input" width="600" height="150" change="handler()" text="Whiteboarding bbc.co.uk abc.com.au/hello @google/xmpp using #pidgin ...... http://www.rohanjain.in/blog/whiteboarding-with-xmpp-google-talk/#updates b lad www.hello.com #hll blah"/>
 	<mx:Text id="plainConsole"  width="600" height="150"/>
 	<mx:Text id="htmlConsole"  width="600" height="150"/>
 </s:WindowedApplication>

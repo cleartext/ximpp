@@ -79,7 +79,7 @@ package com.cleartext.esm.models.utils
 		// find at least 1 non-whitespace char that isn't a " (greedy to get 
 		// .com.au and not just .com), then a "." then a valid tld then either 
 		// an end of word, or a "/" followed by any amount of non-whitespace chars 
-		private static const linkRegExp:RegExp = new RegExp('(((' + protocols.join('|') + ')[^\\s"\']+?)|(\\b[^\\s"\'/]+?))\\.(' + tlds.join('|') + ')((/|#)[^\\s]*)?\\b/?',"ig");
+		private static const linkRegExp:RegExp = new RegExp('(((' + protocols.join('|') + ')[^\\s"\']+)|(\\b[^\\s"\'/]+))\\.(' + tlds.join('|') + ')((/|#)[^\\s]*)?\\b/?',"ig");
 
 		public static function createLinks(plainText:String, searchTerms:Array, hashUrlStart:String=null, hashUrlEnd:String=null, atUrlStart:String=null, atUrlEnd:String=null):String
 		{
