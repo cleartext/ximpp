@@ -181,10 +181,13 @@ package com.cleartext.esm.models
 				!(contact is BuddyGroup))
 				return false;
 			
-			if(searchString != "" && 
-					(contact.nickname.toLowerCase().search(searchString.toLowerCase()) == -1 && 
-						contact.jid.toLowerCase().search(searchString.toLowerCase()) == -1))
-				return false; 
+			var lower:String = searchString.toLowerCase();
+			if(lower != "" && 
+					contact.nickname.toLowerCase().search(lower) == -1 && 
+					contact.jid.toLowerCase().search(lower) == -1 &&
+					(contact.customStatus == null ||
+						contact.customStatus.toLowerCase().search(lower) == -1))
+				return false;
 			
 			if(groupName == OPEN_TABS)
 				return contact.openTab;

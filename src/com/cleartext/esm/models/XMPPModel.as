@@ -263,7 +263,7 @@ package com.cleartext.esm.models
 			gotRosterList = false;
 			sendIq(settings.userAccount.jid,
 					IQTypes.GET,
-					<query xmlns={JABBER_ROSTER_NS}/>,
+					<query xmlns={JABBER_ROSTER_NS} ver='329eg'/>,
 					getRosterHandler);
 
 			// get the vCard stored on the server

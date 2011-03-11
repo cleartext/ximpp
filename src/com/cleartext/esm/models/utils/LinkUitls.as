@@ -88,6 +88,8 @@ package com.cleartext.esm.models.utils
 			
 			// remove any existing tags
 			linkText = LinkUitls.removeALlTags(linkText);
+			
+			linkText = LinkUitls.replaceLineBreaks(linkText);
 
 			// trim whitspace off the ends
 			linkText = StringUtil.trim(linkText);
@@ -161,6 +163,11 @@ package com.cleartext.esm.models.utils
 				str = str.replace(new RegExp("<([A-Z][A-Z0-9]*)\\b[^>]*?>([\\s\\S]*?)</\\1>", "ig"), "$2");
 			}
 			return str;
+		}
+		
+		public static function replaceLineBreaks(str:String):String
+		{
+			return str.replace(new RegExp("\n|\r", "ig"), "<BR />");
 		}
 		
 		public static function createSpecialLinks(str:String, urlStart:String, urlEnd:String, specialChar:String):String

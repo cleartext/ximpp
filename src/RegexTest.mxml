@@ -2,7 +2,7 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   creationComplete="run()" height="600" width="600">
+					   creationComplete="run()" height="600" width="600" xmlns:messages="com.cleartext.esm.views.messages.*">
 	
 	<s:layout>
 		<s:VerticalLayout>
@@ -12,7 +12,9 @@
 <fx:Script>
 	<![CDATA[
 		import com.cleartext.esm.models.utils.LinkUitls;
+		import com.cleartext.esm.models.valueObjects.Message;
 		
+		import mx.core.UITextField;
 		import mx.utils.StringUtil;
 		
 		private var tweets:Array = [
@@ -48,6 +50,7 @@
 			text:"<a href='http://search.twitter.com/search?q=%23ximpp'> # <b>ximpp</b> </a> t <a href='http://search.twitter.com/search?q=%23ximppbb'>#ximppbb</a> t bb#ximppbb t bb#ximppbb t <b>ximpp</b> t ximppbb t bbximpp t bbximppbb t <b>ximpp</b> <b>ximpp</b> <a href=\"http://search.twitter.com/search?q=%23ximpp\" onclick=\"pageTracker._setCustomVar(2, 'result_type', 'recent', 3);pageTracker._trackPageview('/intra/hashtag/#ximpp');\"> # <b>ximpp</b> </a> <a href=\"http://search.twitter.com/search?q=%23ximppbb\" onclick=\"pageTracker._setCustomVar(2, 'result_type', 'recent', 3);pageTracker._trackPageview('/intra/hashtag/#ximppbb');\">#ximppbb</a> bbximpp <b>ximpp</b>"}
 		];
 		
+		private var bodyTextField:UITextField;
 		
 		private var tweetRegExpString:String =
 					"<img src=('|\")" + 		// open img tag with src=" or src='
@@ -124,12 +127,32 @@
 			var result:String = LinkUitls.createLinks(input.text, [], linkVals[0], linkVals[1], linkVals[2], linkVals[3]);
 			plainConsole.text = result;
 			htmlConsole.htmlText = result;
+			
+			bodyTextField.htmlText = result;
 		}
+		
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+			bodyTextField = new UITextField();
+			bodyTextField.autoSize = TextFieldAutoSize.NONE;
+			bodyTextField.ignorePadding = true;
+			bodyTextField.multiline = true;
+			bodyTextField.selectable = true;
+			bodyTextField.type = TextFieldType.DYNAMIC;
+			bodyTextField.wordWrap = true;
+			bodyTextField.width = 600;
+			bodyTextField.height = 150;
+			uic.addChild(bodyTextField);
+		}
+		
 
 	]]>
 </fx:Script>
 	
-	<s:TextInput id="input" width="600" height="150" change="handler()" text="Whiteboarding bbc.co.uk abc.com.au/hello @google/xmpp using #pidgin ...... http://www.rohanjain.in/blog/whiteboarding-with-xmpp-google-talk/#updates b lad www.hello.com #hll blah"/>
+	<s:TextArea id="input" width="600" height="150" change="handler()" text="Whiteboarding bbc.co.uk abc.com.au/hello @google/xmpp using #pidgin ...... http://www.rohanjain.in/blog/whiteboarding-with-xmpp-google-talk/#updates b lad www.hello.com #hll blah"/>
 	<mx:Text id="plainConsole"  width="600" height="150"/>
 	<mx:Text id="htmlConsole"  width="600" height="150"/>
+	<mx:UIComponent id="uic" width="600" height="150" />
 </s:WindowedApplication>

@@ -588,7 +588,7 @@ package com.cleartext.esm.models
 			if(linkVals)
 				newMessage.displayMessage = LinkUitls.createLinks(newMessage.plainMessage, newMessage.searchTerms, linkVals[0], linkVals[1], linkVals[2], linkVals[3]);
 			else if(stanza.html)
-				newMessage.displayMessage = stanza.html;
+				newMessage.displayMessage = LinkUitls.replaceLineBreaks(stanza.html);
 			else
 				newMessage.displayMessage = LinkUitls.createLinks(newMessage.plainMessage, newMessage.searchTerms);
 
