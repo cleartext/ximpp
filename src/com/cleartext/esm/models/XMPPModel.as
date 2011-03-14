@@ -15,6 +15,7 @@ package com.cleartext.esm.models
 	import com.cleartext.esm.models.valueObjects.Contact;
 	import com.cleartext.esm.models.valueObjects.FormField;
 	import com.cleartext.esm.models.valueObjects.FormObject;
+	import com.cleartext.esm.models.valueObjects.GlobalSettings;
 	import com.cleartext.esm.models.valueObjects.Message;
 	import com.cleartext.esm.models.valueObjects.Status;
 	import com.cleartext.esm.models.valueObjects.UserAccount;
@@ -127,7 +128,7 @@ package com.cleartext.esm.models
 		//   VARIABLES
 		//
 		//------------------------------------------------------------------
-		
+
 		[Bindable]
 		public var connected:Boolean = false;
 
@@ -176,12 +177,12 @@ package com.cleartext.esm.models
 			xmpp.addEventListener(XMPPEvent.SECURE, logHandler);
 			xmpp.addEventListener(XMPPEvent.AUTH_SUCCEEDED, logHandler);
 			xmpp.addEventListener(XMPPEvent.SESSION, sessionHandler);
-
+			
 			// fail handlers
 			xmpp.addEventListener(StreamEvent.CONNECT_FAILED, failHandler);
 			xmpp.addEventListener(XMPPEvent.AUTH_FAILED, failHandler);
 			xmpp.addEventListener(StreamEvent.DISCONNECTED, failHandler);
-
+			
 			// event listeners for messages, presance and changes to the roster
 			xmpp.addEventListener(XMPPEvent.MESSAGE, messageHandler);
 			xmpp.addEventListener(XMPPEvent.CHAT_STATE, chatStateHandler);
@@ -189,7 +190,7 @@ package com.cleartext.esm.models
 			xmpp.addEventListener(XMPPEvent.ROSTER_ITEM, rosterListChangeHandler);
 			xmpp.addEventListener(XMPPEvent.MESSAGE_MUC, messageHandler);
 		}
-		
+				
 		//------------------------------------------------------------------
 		//
 		//   CONNECTION / DISCONNECTION HANDLERS
@@ -261,9 +262,15 @@ package com.cleartext.esm.models
 
 			// get the roster list
 			gotRosterList = false;
+			var version:String = '';
+			if(xmpp.supportsRosterVersioning)
+			{
+				version = " ver='" + settings.global.rosterVersion + "'";
+			}
+			
 			sendIq(settings.userAccount.jid,
 					IQTypes.GET,
-					<query xmlns={JABBER_ROSTER_NS}/>,
+					<query xmlns={JABBER_ROSTER_NS}{version}/>,
 					getRosterHandler);
 
 			// get the vCard stored on the server
@@ -519,53 +526,67 @@ package com.cleartext.esm.models
 		{
 			appModel.log("getRosterHandler");
 			
-			var contact:Contact;
-			var buddiesToDelete:Dictionary = new Dictionary();
-			
-			for each(contact in buddies.buddies.source)
-				if(!(contact is ChatRoom) && !(contact is BuddyGroup))
-					buddiesToDelete[contact.jid] = contact;
-
-			for each(var item:XML in stanza.query.jabberRoster::item)
+			if(stanza.query)
 			{
-				var jid:String = item.@jid;
+				var contact:Contact;
+				var buddiesToDelete:Dictionary = new Dictionary();
 				
-				// if we already have the buddy, then we just want to
-				// update the values, otherwise create a new buddy
-				contact = appModel.getContactByJid(jid);
-				if(!contact)
-					contact = new Buddy(jid);
-				
-				var b:Buddy = contact as Buddy;
-				if(b)
+				for each(contact in buddies.buddies.source)
+					if(!(contact is ChatRoom) && !(contact is BuddyGroup))
+						buddiesToDelete[contact.jid] = contact;
+					
+	
+				for each(var item:XML in stanza.query.jabberRoster::item)
 				{
-					var groups:Array = new Array();
-					for each(var group:XML in item.jabberRoster::group)
-						{
-							var gString:String = String(group.text());
-							if(gString != "")
-								groups.push(gString);
-						}
-					b.groups = groups;
-
-					b.subscription = item.@subscription;
-					requests.setSubscription(jid, b.nickname, b.subscription);
+					var jid:String = item.@jid;
+					
+					// if we already have the buddy, then we just want to
+					// update the values, otherwise create a new buddy
+					contact = appModel.getContactByJid(jid);
+					if(!contact)
+						contact = new Buddy(jid);
+					
+					var b:Buddy = contact as Buddy;
+					if(b)
+					{
+						var groups:Array = new Array();
+						for each(var group:XML in item.jabberRoster::group)
+							{
+								var gString:String = String(group.text());
+								if(gString != "")
+									groups.push(gString);
+							}
+						b.groups = groups;
+	
+						b.subscription = item.@subscription;
+						requests.setSubscription(jid, b.nickname, b.subscription);
+					}
+					
+					contact.nickname = item.@name;
+					avatarModel.getAvatar(jid).displayName = item.@name;
+	
+					// flag used to delete buddies that are no longer in
+					// the roster list
+					delete buddiesToDelete[contact.jid];
+					
+					// this adds, saves and adds an event listener to the buddy
+					buddies.addBuddy(contact);
 				}
 				
-				contact.nickname = item.@name;
-				avatarModel.getAvatar(jid).displayName = item.@name;
-
-				// flag used to delete buddies that are no longer in
-				// the roster list
-				delete buddiesToDelete[contact.jid];
-				
-				// this adds, saves and adds an event listener to the buddy
-				buddies.addBuddy(contact);
+				for each(contact in buddiesToDelete)
+					buddies.removeBuddy(contact);
+	
+				if(stanza.query.@ver)
+				{
+					settings.global.rosterVersion = stanza.query.@ver;
+				}
+				else	
+				{
+					settings.global.rosterVersion = "";
+				}
+				settings.global.save();
 			}
 			
-			for each(contact in buddiesToDelete)
-				buddies.removeBuddy(contact);
-
 			gotRosterList = true;
 			
 			// discoveryItems() gives us a list of jids available on the server
@@ -585,6 +606,8 @@ package com.cleartext.esm.models
 		
 		private function rosterListChangeHandler(event:XMPPEvent):void
 		{
+			// get the ver attribute and save it to the global settings
+			
 			// if we haven't already got the roster list, then ignore
 			if(connected && !gotRosterList)
 				return;
@@ -613,6 +636,16 @@ package com.cleartext.esm.models
 			}
 			else
 			{
+				if(event.stanza.hasOwnProperty("version"))
+				{
+					settings.global.rosterVersion = event.stanza["version"];
+				}
+				else
+				{
+					settings.global.rosterVersion = "";
+				}
+				settings.global.save();
+				
 				buddy.groups = event.stanza["groups"];
 				buddy.nickname = event.stanza["name"];
 				buddy.subscription = subscription;

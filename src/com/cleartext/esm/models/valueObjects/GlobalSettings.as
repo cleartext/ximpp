@@ -44,6 +44,7 @@ package com.cleartext.esm.models.valueObjects
 		public var checkUrls:Boolean = true;
 		public var showAvatars:Boolean = true;
 		public var showNicknames:Boolean = false;
+		public var rosterVersion:String = "";
 		
 		public function GlobalSettings()
 		{
@@ -109,6 +110,11 @@ package com.cleartext.esm.models.valueObjects
 				if(xml.showNicknames)
 					showNicknames = xml.showNicknames == "true";
 				
+				if(xml.rosterVersion)
+					rosterVersion = xml.rosterVersion;
+				else
+					rosterVersion = "";
+				
 				fileStream.close();
 			}
 			save();
@@ -141,6 +147,7 @@ package com.cleartext.esm.models.valueObjects
 					<checkUrls>{checkUrls}</checkUrls>
 					<showAvatars>{showAvatars}</showAvatars>
 					<showNicknames>{showNicknames}</showNicknames>
+					<rosterVersion>{rosterVersion}</rosterVersion>
 				</globalSettings>;
 
 			fileStream.writeUTFBytes(xml.toXMLString());

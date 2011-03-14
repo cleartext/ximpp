@@ -39,6 +39,8 @@ package com.seesmic.as3.xmpp
 		private var original_jid:JID;
 		public var plugin:Dictionary = new Dictionary();
 		
+		public var supportsRosterVersioning:Boolean = false;
+		
 		private var reconnect_timer:Timer; 
 		private var reconnect_index:uint = 0;
 		
@@ -238,6 +240,9 @@ package com.seesmic.as3.xmpp
 		private function StreamFeaturesHandler(xml:Stanza):void {
 			trace('got stream features');
 			var xmlobj:XML = xml.getXML();
+			
+			supportsRosterVersioning = MaskMatch(xmlobj, "<features xmlns='http://etherx.jabber.org/streams'><ver xmlns='urn:xmpp:features:rosterver'><optional/></ver></features>");
+			
 			if(use_tls && !(state['authed']) && !(state['encrypted']) && XPathMatch(xmlobj, '{http://etherx.jabber.org/streams}features/{urn:ietf:params:xml:ns:xmpp-tls}starttls')) {
 				addHandler(new XPathHandler("{urn:ietf:params:xml:ns:xmpp-tls}proceed", TLSProceedHandler, true));
 				socket.send("<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls' />");
@@ -412,6 +417,13 @@ package com.seesmic.as3.xmpp
 
 					var jid:JID = new JID(item.@jid);
 					result = roster.updateItem(jid, item.@subscription, item.@name, groups);
+					
+					// add roster version support
+					if(xml.rosterns::query.@ver)
+					{
+						result["version"] = xml.rosterns::query.@ver.toString();
+					}
+					
 					dispatchEvent(new XMPPEvent(XMPPEvent.ROSTER_ITEM, false, false, result));
 				}
 			} else {
