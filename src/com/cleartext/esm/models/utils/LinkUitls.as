@@ -89,8 +89,6 @@ package com.cleartext.esm.models.utils
 			// remove any existing tags
 			linkText = LinkUitls.removeALlTags(linkText);
 			
-			linkText = LinkUitls.replaceLineBreaks(linkText);
-
 			// trim whitspace off the ends
 			linkText = StringUtil.trim(linkText);
 
@@ -121,6 +119,9 @@ package com.cleartext.esm.models.utils
 //				}
 //				trace(linkText, '\n', result);
 //			}
+			
+			// replace line breaks with <br/>
+			linkText = LinkUitls.replaceLineBreaks(linkText);
 
 			return linkText;
 		}
