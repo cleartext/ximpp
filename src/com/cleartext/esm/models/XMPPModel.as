@@ -354,6 +354,8 @@ package com.cleartext.esm.models
 			if(contact is ChatRoom)
 			{
 				message.groupChatSender = event.stanza.from.resource;
+				// DMB 21-04-11
+				database.saveMessage(message);
 			}
 			// otherwise set the buddy's resource, we only save the message
 			// if it isn't from a chatRoom

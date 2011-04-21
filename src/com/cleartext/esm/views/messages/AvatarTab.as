@@ -187,7 +187,7 @@ package com.cleartext.esm.views.messages
 				if(showNickname)
 				{
 					nickNameText.text = contact.nickname;
-					nickNameText.truncateToFit();
+					nickNameText.truncateToFit(null);
 				}
 			}
 			
