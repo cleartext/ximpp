@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   creationComplete="run()" height="600" width="600" xmlns:messages="com.cleartext.esm.views.messages.*">
+	
+	<s:layout>
+		<s:VerticalLayout>
+			
+		</s:VerticalLayout>
+	</s:layout>
+<fx:Script>
+	<![CDATA[
+		import com.cleartext.esm.models.utils.LinkUitls;
+		import com.cleartext.esm.models.valueObjects.Message;
+		
+		import mx.core.UITextField;
+		import mx.utils.StringUtil;
+		
+		private var tweets:Array = [
+			{id:'0',
+			userId:"userid",
+			displayName:"display name", 
+			imgSrc:"http://a3.twimg.com/profile_images/775736319/avatar.png",
+			text:"this is the message",
+			ptext:"this is the message"},
+			{id:'1',
+			userId:"djaybanes",
+			displayName:"a name", 
+			imgSrc:"http://a3.twimg.com/profile_images/775736319/everyone1_normal.png",
+			text:"<a href='http://twitter.com/andysprout'>@andysprout</a> hell",
+			ptext:"@andysprout hell"},
+			{id:'2',
+			userId:"james_s_white", 
+			displayName:"fapestniegd", 
+			imgSrc:"http://a3.twimg.com/profile_images/60702375/jamestux_normal.jpg", 
+			text:"The state of workable <a href='http://search.twitter.com/search?q=%23xmpp' onclick='pageTracker._setCustomVar(2, &apos;result_type&apos;, &apos;recent&apos;, 3);pageTracker._trackPageview(&apos;/intra/hashtag/#xmpp&apos;);'>#<b>xmpp</b></a> clients under <a href='http://search.twitter.com/search?q=%23perl' onclick='pageTracker._setCustomVar(2, &apos;result_type&apos;, &apos;recent&apos;, 3);pageTracker._trackPageview(&apos;/intra/hashtag/#perl&apos;);'>#perl</a> in <a href='http://search.twitter.com/search?q=%23cpan' onclick='pageTracker._setCustomVar(2, &apos;result_type&apos;, &apos;recent&apos;, 3);pageTracker._trackPageview(&apos;/intra/hashtag/#cpan&apos;);'>#cpan</a> is a quagmire. Anyone got working POE code that connects to <a href='http://search.twitter.com/search?q=%23ejabberd' onclick='pageTracker._setCustomVar(2, &apos;result_type&apos;, &apos;recent&apos;, 3);pageTracker._trackPageview(&apos;/intra/hashtag/#ejabberd&apos;);'>#ejabberd</a> over <a href='http://search.twitter.com/search?q=%23SSL' onclick='pageTracker._setCustomVar(2, &apos;result_type&apos;, &apos;recent&apos;, 3);pageTracker._trackPageview(&apos;/intra/hashtag/#SSL&apos;);'>#SSL</a>?",
+			ptext:"The state of workable #<b>xmpp</b> clients under #perl in #cpan is a quagmire. Anyone got working POE code that connects to #ejabberd over #SSL ?"},
+			{id:'3',
+			userId:"alexbrueckel", 
+			displayName:"Alexander Br√ºckel", 
+			imgSrc:"http://a1.twimg.com/profile_images/303333670/logo_unten_transparent_80_normal.png", 
+			ptext:"@zulu34sx Das ICQ-Protokoll ist propriet√§rer Unfug und von AOL verbastelt, <b>XMPP</b> ist das Ma√ü der Dinge.",
+			text:"<a href='http://twitter.com/zulu34sx'>@zulu34sx</a> Das ICQ-Protokoll ist propriet√§rer Unfug und von AOL verbastelt, <b>XMPP</b> ist das Ma√ü der Dinge."},
+			{id:'4',
+			userId:"alexbrueckel", 
+			displayName:"Alexander Br√ºckel", 
+			imgSrc:"http://a1.twimg.com/profile_images/303333670/logo_unten_transparent_80_normal.png", 
+			ptext:"#<b>ximpp</b> t #ximppbb t bb#ximppbb t bb#ximppbb t <b>ximpp</b> t ximppbb t bbximpp t bbximppbb t <b>ximpp</b> <b>ximpp</b> # <b>ximpp</b> #ximppbb bbximpp <b>ximpp</b>",
+			text:"<a href='http://search.twitter.com/search?q=%23ximpp'> # <b>ximpp</b> </a> t <a href='http://search.twitter.com/search?q=%23ximppbb'>#ximppbb</a> t bb#ximppbb t bb#ximppbb t <b>ximpp</b> t ximppbb t bbximpp t bbximppbb t <b>ximpp</b> <b>ximpp</b> <a href=\"http://search.twitter.com/search?q=%23ximpp\" onclick=\"pageTracker._setCustomVar(2, 'result_type', 'recent', 3);pageTracker._trackPageview('/intra/hashtag/#ximpp');\"> # <b>ximpp</b> </a> <a href=\"http://search.twitter.com/search?q=%23ximppbb\" onclick=\"pageTracker._setCustomVar(2, 'result_type', 'recent', 3);pageTracker._trackPageview('/intra/hashtag/#ximppbb');\">#ximppbb</a> bbximpp <b>ximpp</b>"}
+		];
+		
+		private var bodyTextField:UITextField;
+		
+		private var tweetRegExpString:String =
+					"<img src=('|\")" + 		// open img tag with src=" or src='
+					"(.*?)" + 					// image url - result[2]
+					"\\1" +			 			// the closing " or '
+					"[\\s\\S]*?" + 				// a lazy amount of any chars
+					"<a.*?>" + 					// a open a tag with any kind of href 
+					"([\\s\\S]*?)<" + 			// the text within the a tag - the display name - result[3]
+					"[\\s\\S]*?" + 				// a lazy amount of any chars
+					"\\((.*?)\\):" + 			// text within (): - the user id - result[4]
+					"([\\s\\S]*?)" + 			// a lazy amount of any chars - the message - result[5]
+					"</span>";					// the closing span tag
+				
+		private function run():void
+		{
+			handler();
+
+			for each(var tweet:Object in tweets)
+			{
+				// parse
+				
+				var stanza:String = 
+					"<html xmlns='http://jabber.org/protocol/xhtml-im'><body xmlns='http://www.w3.org/1999/xhtml'><span><img src='" +
+					tweet.imgSrc +
+					"' alt='avatar'/> <a href='http://twitter.com/" +
+					tweet.userId +
+					"'>" +
+					tweet.displayName +
+					"</a> (" +
+					tweet.userId +
+					"): " + 
+					tweet.text + 
+					"</span></body></html>";
+
+				stanza = XML(stanza).toXMLString();
+//				stanza = stanza.replace(new RegExp("\\s{1,}", "ig"), " ");
+					
+				var regexp:RegExp = new RegExp(tweetRegExpString, "ig");
+				var testResult:Array = regexp.exec(stanza);
+							
+				var resultText:String = testResult[5];
+				var parsedText:String;
+				
+				while(parsedText != resultText)
+				{
+					parsedText = resultText;
+					resultText = resultText.replace(new RegExp("\\s*<([AC-Z][A-Z0-9]*)\\b[^>]*?>(.*?)</\\1>\\s*", "ig"), " $2 ");
+				}
+
+				resultText = resultText.replace(new RegExp("\\s{1,}", "ig"), " ");
+				resultText = resultText.replace("# <b>", "#<b>");
+				resultText = StringUtil.trim(resultText);
+				
+				var success:Boolean = (
+					testResult && 
+					(tweet.userId == testResult[4]) &&
+					(tweet.displayName == testResult[3]) &&
+					(tweet.imgSrc == testResult[2]) &&
+					(tweet.ptext == resultText));
+					
+				if(!success)
+				{
+					trace("");
+				}
+
+				trace(tweet.id, ((success) ? " : SUCC" : " : FAIL"));
+				
+			}
+		}
+
+		protected function handler():void
+		{
+			var linkVals:Array = ["http://twitter.com/search?q=%23", "", "http://twitter.com/", ""];
+			var result:String = LinkUitls.createLinks(input.text, [], linkVals[0], linkVals[1], linkVals[2], linkVals[3]);
+			plainConsole.text = result;
+			htmlConsole.htmlText = result;
+			
+			bodyTextField.htmlText = result;
+		}
+		
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+			bodyTextField = new UITextField();
+			bodyTextField.autoSize = TextFieldAutoSize.NONE;
+			bodyTextField.ignorePadding = true;
+			bodyTextField.multiline = true;
+			bodyTextField.selectable = true;
+			bodyTextField.type = TextFieldType.DYNAMIC;
+			bodyTextField.wordWrap = true;
+			bodyTextField.width = 600;
+			bodyTextField.height = 150;
+			uic.addChild(bodyTextField);
+		}
+		
+
+	]]>
+</fx:Script>
+	
+	<s:TextArea id="input" width="600" height="150" change="handler()" text="Whiteboarding bbc.co.uk abc.com.au/hello @google/xmpp using #pidgin ...... http://www.rohanjain.in/blog/whiteboarding-with-xmpp-google-talk/#updates b lad www.hello.com #hll blah"/>
+	<mx:Text id="plainConsole"  width="600" height="150"/>
+	<mx:Text id="htmlConsole"  width="600" height="150"/>
+	<mx:UIComponent id="uic" width="600" height="150" />
+</s:WindowedApplication>
