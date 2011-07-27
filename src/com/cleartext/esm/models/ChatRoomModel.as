@@ -58,5 +58,13 @@ package com.cleartext.esm.models
 
 			chatRoom.participants.removeAll();
 		}
+		
+		public function destroy(chatRoom:ChatRoom):void
+		{
+			if(!chatRoom.status.isOffline())
+				xmpp.destroyChatRoom(chatRoom.jid, chatRoom.ourNickname);
+
+			chatRoom.participants.removeAll();
+		}
 	}
 }

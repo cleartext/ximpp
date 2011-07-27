@@ -1114,6 +1114,15 @@ package com.cleartext.esm.models
 		}
 		
 		//-------------------------------
+		// DESTROY CHAT ROOM
+		//-------------------------------
+		
+		public function destroyChatRoom(roomJid:String, nickname:String):void
+		{
+			sendIq(roomJid, IQTypes.SET, <query xmlns={MUC_OWNER_NS}><destroy/></query> );
+		}
+		
+		//-------------------------------
 		// CREATE DEFAULT CHAT ROOM
 		//-------------------------------
 		
