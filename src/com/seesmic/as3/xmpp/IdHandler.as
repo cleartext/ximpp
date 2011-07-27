@@ -28,7 +28,7 @@ package com.seesmic.as3.xmpp
 		}
 		
 		public override function match(xml:XML):Boolean {
-			if(xml.@id.toString() == search) {
+			if(xml.@id.toString() == search && xml.toString().substr(0,3)=="<iq") {
 				return true;
 			}
 			return false;
